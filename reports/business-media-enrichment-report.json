@@ -1,0 +1,2306 @@
+{
+  "generatedAt": "2026-07-18T03:39:04.276Z",
+  "total": 162,
+  "report": [
+    {
+      "id": "29a2af05451c",
+      "name": "Next Level Thrift Store",
+      "address": "1045 19 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5a31d972b821",
+      "name": "Vigi's Hair",
+      "address": "1044 19 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "af19fb9c1ea2",
+      "name": "Bioi",
+      "address": "1226A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6eaa141841dc",
+      "name": "Rain Dog Bar",
+      "address": "1214B 9 Av Se",
+      "website": "https://www.raindogbar.com/",
+      "logo": "/media/businesses/logos/rain-dog-bar-6eaa141841dc-logo.jpg",
+      "hero": "/media/businesses/heroes/rain-dog-bar-6eaa141841dc-hero.jpg",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://www.raindogbar.com/uploads/1/3/1/3/131322640/editor/rdb-logo-wht-rev07b_1.jpg?1585011438",
+      "heroSource": "https://www.raindogbar.com/uploads/1/3/1/3/131322640/editor/rdb-logo-wht-rev07b_1.jpg?1585011438",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "9df18e70bdc2",
+      "name": "Fair's Fair (For Book Lovers)",
+      "address": "#L 907 9 Av Se",
+      "website": "https://fairsfairbooks.com",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "233bf3afee12",
+      "name": "Tuu Shop",
+      "address": "#103 902 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6d69b904c020",
+      "name": "Two Wheel View",
+      "address": "#M 907 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "88699a0736e7",
+      "name": "Sweet Treats Co.",
+      "address": "1109 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "236192258ad8",
+      "name": "Next Page (The)",
+      "address": "1217A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "94a0baf17bed",
+      "name": "Lasa By Cara",
+      "address": "1117 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "16e779e13027",
+      "name": "Faire Living Group",
+      "address": "1226B 9 Av Se",
+      "website": "https://fairsfairbooks.com",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "2412ea4b78e2",
+      "name": "Oxgust Studio",
+      "address": "915 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "d2605e8f6fc3",
+      "name": "Oolong Tea House",
+      "address": "1219A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "687822f20e5a",
+      "name": "Apothecary In Inglewood (The)",
+      "address": "921 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "1716d99864a3",
+      "name": "The Confluence Historic Site & Parkland",
+      "address": "750 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "62d69f5ce2cd",
+      "name": "Lily By Lyla",
+      "address": "1221 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f694ae890130",
+      "name": "Master Of None Studios",
+      "address": "915 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4f84e76c32c7",
+      "name": "Opulence Piercing",
+      "address": "1105 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "45932e0c84d0",
+      "name": "Gallery Underground",
+      "address": "#10 917 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "841028781fc1",
+      "name": "Madison's 12|12",
+      "address": "1212 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "74588358da7f",
+      "name": "Adorn Boutique",
+      "address": "1216A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5bc4c633989f",
+      "name": "Domino's",
+      "address": "1220 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ca50b22119a9",
+      "name": "Curated Home (The)",
+      "address": "1004 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "916108d117d0",
+      "name": "Pronto Pizza",
+      "address": "#2 1139 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "c508b8125dfe",
+      "name": "Stash",
+      "address": "1237 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "aa668db97c13",
+      "name": "Murphy's Mid-Century",
+      "address": "1221B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "2fa2d989f7e9",
+      "name": "Dragon Pearl",
+      "address": "1223A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "46cf2dc3cfe4",
+      "name": "Gravity Espresso And Wine Bar",
+      "address": "909 10 St Se",
+      "website": "https://www.hugedomains.com/domain_profile.cfm?d=gravityespresso.com",
+      "logo": "/media/businesses/logos/gravity-espresso-and-wine-bar-46cf2dc3cfe4-logo.svg",
+      "hero": "/media/businesses/heroes/gravity-espresso-and-wine-bar-46cf2dc3cfe4-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://static.hugedomains.com/images/hdv3-img/hd-header-logo-v3.svg",
+      "heroSource": "https://static.hugedomains.com/images/hdv3-img/og_hugedomains.png",
+      "logoConfidence": 0.8,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "09c9fd233081",
+      "name": "Deane House",
+      "address": "806 9 Av Se",
+      "website": "https://www.deanehouse.com/",
+      "logo": "/media/businesses/logos/deane-house-09c9fd233081-logo.webp",
+      "hero": "/media/businesses/heroes/deane-house-09c9fd233081-hero.webp",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://images.squarespace-cdn.com/content/v1/55807a6ee4b09c35bcf2f411/1549ee03-7bf9-41f5-bf87-16646c6e1dc8/DH-Wordmak%2BSub-Stack-BLK.png",
+      "heroSource": "https://images.squarespace-cdn.com/content/v1/55807a6ee4b09c35bcf2f411/1549ee03-7bf9-41f5-bf87-16646c6e1dc8/DH-Wordmak%2BSub-Stack-BLK.png",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.92
+    },
+    {
+      "id": "35c1f13079a4",
+      "name": "Inglewood Pizza & Pasta",
+      "address": "1225A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e3e6dc5ee309",
+      "name": "Bussin",
+      "address": "1121 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "55392d8d40b5",
+      "name": "Kups",
+      "address": "#108 1020 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4e8f371b021c",
+      "name": "F45 Inglewood",
+      "address": "#130 1020 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b8e8d0fd2d3a",
+      "name": "Sot",
+      "address": "1216C 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a530ce1bb27e",
+      "name": "Marshall Drugs",
+      "address": "1231 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "d19aba1a4eb6",
+      "name": "Limitless Calgary",
+      "address": "1015 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "1d1c8a07d95a",
+      "name": "Hello Vintage Inglewood",
+      "address": "1228A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "771bbaecb1e6",
+      "name": "Linas Italian Piazza",
+      "address": "1023 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "524c489f3b72",
+      "name": "Mowgli's/Ninja Tiger",
+      "address": "1209 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "2aaca500ccf5",
+      "name": "Eden (The)",
+      "address": "1219 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "21744966d801",
+      "name": "Potion Room",
+      "address": "1211 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8aa03ffcf4d9",
+      "name": "Espy",
+      "address": "1009 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "0d0ecc0fa057",
+      "name": "Genuine Design",
+      "address": "1213 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "c1d8eab13593",
+      "name": "Ari Sushi",
+      "address": "1201 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "eede4681c3bf",
+      "name": "Calgary Car Centre / Driving With Carmelo",
+      "address": "1234 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "1fa848cefc45",
+      "name": "Purr",
+      "address": "1227 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a90455765ddf",
+      "name": "Burn Block Social Club",
+      "address": "1217B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "84d5b791561e",
+      "name": "Worn Studio",
+      "address": "915 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "570104f90205",
+      "name": "Lemonceillo Home",
+      "address": "1223B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "37ed1bddcb49",
+      "name": "Junction 9 Wellbeing",
+      "address": "#100 919 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "97fdf6fcf0b3",
+      "name": "Hose & Hound Pub",
+      "address": "1030 9 Av Se",
+      "website": "https://hoseandhound.ca",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "0df04872d129",
+      "name": "Analog",
+      "address": "#1 1139 9 Av Se",
+      "website": "https://www.analogcoffee.ca/",
+      "logo": "/media/businesses/logos/analog-0df04872d129-logo.webp",
+      "hero": "/media/businesses/heroes/analog-0df04872d129-hero.webp",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://images.squarespace-cdn.com/content/v1/61fc5ed864c9091f97da8510/b82ec5d1-9b9d-4233-8f1a-a231a3101a1a/analog_wordmark_rev.png?format=1500w",
+      "heroSource": "https://images.squarespace-cdn.com/content/v1/61fc5ed864c9091f97da8510/b82ec5d1-9b9d-4233-8f1a-a231a3101a1a/analog_wordmark_rev.png",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.92
+    },
+    {
+      "id": "2dd4b6846c10",
+      "name": "Ouijablonde Hair Studio",
+      "address": "915 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a39de405c769",
+      "name": "Recordland",
+      "address": "1208 9 Av Se",
+      "website": "https://recordlandcalgary.com/",
+      "logo": null,
+      "hero": null,
+      "status": "website-found-no-media",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": null,
+      "heroSource": null,
+      "logoConfidence": 0,
+      "heroConfidence": 0
+    },
+    {
+      "id": "a7a9fba12b4b",
+      "name": "Boft Fine Rugs Gallery",
+      "address": "1225B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4574605e3680",
+      "name": "Evi Beauty",
+      "address": "1010 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5089a6babc37",
+      "name": "Mumbai Bites- Progressive Indian Cuisine",
+      "address": "1214C 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "d161032761c5",
+      "name": "Marshall's Rx Centre",
+      "address": "#214 1231 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4bea70511cd8",
+      "name": "4Cats",
+      "address": "1218B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "67083be6ccc2",
+      "name": "Onyx & Ivory Salon",
+      "address": "#116 1020 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5007e41b4194",
+      "name": "Ironwood Stage And Grill",
+      "address": "1229 9 Av Se",
+      "website": "https://ironwoodstage.ca/",
+      "logo": "/media/businesses/logos/ironwood-stage-and-grill-5007e41b4194-logo.jpg",
+      "hero": "/media/businesses/heroes/ironwood-stage-and-grill-5007e41b4194-hero.jpg",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://ironwoodstage.ca/wp-content/uploads/2018/02/unnamed-4-e1523394553472.jpg",
+      "heroSource": "https://ironwoodstage.ca/wp-content/uploads/2018/02/unnamed-4-e1523394553472.jpg",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "797848edd816",
+      "name": "Patisseries Louise",
+      "address": "1002 9 Av Se",
+      "website": "https://patisserielouise.ca",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "manual-domain-seed",
+      "websiteConfidence": 0.9
+    },
+    {
+      "id": "54c3547cc3d7",
+      "name": "Wymbin",
+      "address": "#50 919 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "cab5f9ab3488",
+      "name": "Artesano Galleria",
+      "address": "#B 1215 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "487a3fcc7b5d",
+      "name": "Be Brave",
+      "address": "1018 9 Av Se",
+      "website": "https://bebrave.ca/",
+      "logo": null,
+      "hero": null,
+      "status": "website-found-no-media",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": null,
+      "heroSource": null,
+      "logoConfidence": 0,
+      "heroConfidence": 0
+    },
+    {
+      "id": "f042b4218d69",
+      "name": "Esker Foundation",
+      "address": "#444 1011 9 Av Se",
+      "website": "https://eskerfoundation.art",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "HTTP 403"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "75154b1f16b5",
+      "name": "Brooklyn Dumplings Shop",
+      "address": "1113 9 Av Se",
+      "website": "https://brooklyndumplingshop.com",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "HTTP 403"
+      ],
+      "websiteSource": "manual-domain-seed",
+      "websiteConfidence": 0.9
+    },
+    {
+      "id": "c1beb8d914b3",
+      "name": "Bored Brewing Company (The)",
+      "address": "#200 1212 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e38de7ec7f73",
+      "name": "Smithbilt Hats",
+      "address": "914 11 St Se",
+      "website": "https://smithbilthats.com/",
+      "logo": "/media/businesses/logos/smithbilt-hats-e38de7ec7f73-logo.png",
+      "hero": "/media/businesses/heroes/smithbilt-hats-e38de7ec7f73-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://smithbilthats.com/wp-content/uploads/2023/11/200.png",
+      "heroSource": "https://smithbilthats.com/wp-content/uploads/2023/11/200.png",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.62
+    },
+    {
+      "id": "277cf40085c3",
+      "name": "T2722 Luxury Barista Experience",
+      "address": "1002 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "d01c631dc549",
+      "name": "Leo Boutique",
+      "address": "1006 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "2a4e53351036",
+      "name": "Untitled Esthetics Studio",
+      "address": "#105 917 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8ea5cf5900dd",
+      "name": "Inglewood Oak & Vine",
+      "address": "1139 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "fcc6c0f13afd",
+      "name": "Made By Marcus",
+      "address": "1119 10 Av Se",
+      "website": "https://madebymarcus.ca/",
+      "logo": "/media/businesses/logos/made-by-marcus-fcc6c0f13afd-logo.png",
+      "hero": "/media/businesses/heroes/made-by-marcus-fcc6c0f13afd-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://madebymarcus.ca/cdn/shop/files/GOOOGLEArtboard_17_1281x.png?v=1614313769",
+      "heroSource": "http://madebymarcus.ca/cdn/shop/files/social_share_wide.png?v=1613069203",
+      "logoConfidence": 0.92,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "6091b65fad46",
+      "name": "Doughnut Party",
+      "address": "1125 9 Av Se",
+      "website": "https://www.doughnutparty.ca/",
+      "logo": "/media/businesses/logos/doughnut-party-6091b65fad46-logo.webp",
+      "hero": null,
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://www.doughnutparty.ca/uploads/b/836f4a80-f98c-11e9-a872-1d65561cde30/icon_180x180_ios_OTEzOD.png?width=180",
+      "heroSource": null,
+      "logoConfidence": 0.7,
+      "heroConfidence": 0
+    },
+    {
+      "id": "b2c3851f5ef3",
+      "name": "Respect Eyecare",
+      "address": "#112 1020 9 Av Se",
+      "website": "https://www.respecteyecare.com/",
+      "logo": "/media/businesses/logos/respect-eyecare-b2c3851f5ef3-logo.png",
+      "hero": "/media/businesses/heroes/respect-eyecare-b2c3851f5ef3-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://static.wixstatic.com/media/a3b447_a96b4cdf21c34b638df9cdf657a69261%7Emv2.png/v1/fill/w_180%2Ch_180%2Clg_1%2Cusm_0.66_1.00_0.01/a3b447_a96b4cdf21c34b638df9cdf657a69261%7Emv2.png",
+      "heroSource": "https://static.wixstatic.com/media/a3b447_a96b4cdf21c34b638df9cdf657a69261~mv2.png",
+      "logoConfidence": 0.7,
+      "heroConfidence": 0.92
+    },
+    {
+      "id": "a9233a05bb50",
+      "name": "Peacock Boutique Consignment",
+      "address": "1218 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e670bbb1664a",
+      "name": "North Hill Aesthetics",
+      "address": "#2 1922 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "57e13aa3304f",
+      "name": "Flawless Clinical Aesthetics And Medical Services",
+      "address": "#12 1922 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b8513e84792b",
+      "name": "Cober West",
+      "address": "#200 1601 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a09b61e46e3c",
+      "name": "Blackfoot Diner",
+      "address": "#A 1840 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b77ff12c0cbc",
+      "name": "West Canadian Digital Imaging",
+      "address": "1601 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5ca23bc3bd63",
+      "name": "Theralleve",
+      "address": "#3 1922 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "88f3e13a9794",
+      "name": "Lou's Autobody",
+      "address": "1801 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ac50e17bd637",
+      "name": "Petro Canada Truck Stop",
+      "address": "1840 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b8bc81a1b121",
+      "name": "Jfit + Restore",
+      "address": "#3 1922 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e7334a0455b6",
+      "name": "Hd Motors",
+      "address": "1817 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "fa9f4171431d",
+      "name": "King Eddy Live Music",
+      "address": "438 9 Av Se",
+      "website": "https://kingeddy.ca/",
+      "logo": "/media/businesses/logos/king-eddy-live-music-fa9f4171431d-logo.png",
+      "hero": "/media/businesses/heroes/king-eddy-live-music-fa9f4171431d-hero.jpg",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://kingeddy.ca/wp-content/uploads/2018/06/King_Eddy_H_logo_KO_v2-01.png",
+      "heroSource": "https://kingeddy.ca/wp-content/uploads/2018/05/cropped-KE_Filtered.jpg",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "4c1fe4126426",
+      "name": "Salvation Army (The)",
+      "address": "420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f0fcbbc515c4",
+      "name": "Prep Doctors",
+      "address": "518 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "5c368a88b70e",
+      "name": "11-Eleven Liquor",
+      "address": "1402 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "807072a32dc5",
+      "name": "Delicious From Colombia",
+      "address": "1314B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "cc8c3794c49e",
+      "name": "Theycallme.V",
+      "address": "1530 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6ec656d11313",
+      "name": "Rosso Coffee Roasters Inglewood",
+      "address": "1400 9 Av Se",
+      "website": "https://rossocoffee.com",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "f50eef980e1b",
+      "name": "Minh Chau Vietnamese Restaurant",
+      "address": "1318 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f3be6109ae01",
+      "name": "Collector's Gallery (The)",
+      "address": "1332A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4ff6ccc46bc6",
+      "name": "Monki Breakfast Club & Bistro",
+      "address": "#4 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4b6002b0a66d",
+      "name": "That Old Retro Store",
+      "address": "1314A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e22ed6114477",
+      "name": "Twitchin Threadz & Company",
+      "address": "#2 1335 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b1d63fca1b08",
+      "name": "Tupi Acai Bowls",
+      "address": "1414 9 Av Se",
+      "website": "https://tupi.ca",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "manual-domain-seed",
+      "websiteConfidence": 0.9
+    },
+    {
+      "id": "1af4eb6bb2fd",
+      "name": "Kultura Massage Wellness",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "070d5959d97d",
+      "name": "Boss Tattoos Walk - In Studio",
+      "address": "1331 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "c36b3a13013f",
+      "name": "Wild Soul Body Sugaring",
+      "address": "#109E 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "db2d4b40f860",
+      "name": "Permanent Beauty Boutique Yyc",
+      "address": "#109 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "eada90fe500b",
+      "name": "Foundation Barbershop",
+      "address": "#3 1335 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8e71e576c7ad",
+      "name": "Double L Motors (2008)",
+      "address": "1509 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "77efe6ee9a22",
+      "name": "Nova Skin & Wellness",
+      "address": "1412 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a508aaae5b24",
+      "name": "Pro Line Shooters Ii",
+      "address": "#B 1426 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "1762b7c2d959",
+      "name": "Le Belle Arti",
+      "address": "1435 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8bfa3e36c706",
+      "name": "Rayacom",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6f49344adc5e",
+      "name": "Tail Blazers Inglewood",
+      "address": "#7 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ce59616ff3fd",
+      "name": "Purple Lotus Massage",
+      "address": "1530 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "9a47399c5b8e",
+      "name": "Shoe Closet (The)",
+      "address": "1404 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f380866520e2",
+      "name": "Canela",
+      "address": "1319 9 Av Se",
+      "website": "https://canelabakeshop.com",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "a783f67510af",
+      "name": "Knifewear",
+      "address": "#100A 1316 9 Av Se",
+      "website": "https://knifewear.com/",
+      "logo": "/media/businesses/logos/knifewear-a783f67510af-logo.png",
+      "hero": "/media/businesses/heroes/knifewear-a783f67510af-hero.jpg",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://knifewear.com/cdn/shop/files/logo_gif_410x_84bdea55-a401-46a2-a6e4-87bf7acba9c2.png?v=1673632048&width=500",
+      "heroSource": "http://knifewear.com/cdn/shop/files/social_media_thumbnails_4a2552ca-6873-4d3c-a915-a5af99b92ab1.jpg?v=1605293345",
+      "logoConfidence": 0.92,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "cff5275976cd",
+      "name": "Yyc Laser & Skincare",
+      "address": "#109H 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: HTTP 403"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "872ea242c1fa",
+      "name": "Alberta Boot Company",
+      "address": "1312A 9 Av Se",
+      "website": "https://www.albertaboot.ca/",
+      "logo": "/media/businesses/logos/alberta-boot-company-872ea242c1fa-logo.png",
+      "hero": "/media/businesses/heroes/alberta-boot-company-872ea242c1fa-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://www.albertaboot.ca/cdn/shop/files/Logo_eade7034-21fa-4e6c-ae06-20434548866f.png?crop=center&height=1000&v=1773242740&width=1000",
+      "heroSource": "http://www.albertaboot.ca/cdn/shop/files/social-sharing-image_1200x628_72cab40e-bfb8-4c64-bc33-ea2d322fe74d.png?v=1714692074",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "9257e6fa4ed5",
+      "name": "Teou Studio",
+      "address": "#109D 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: fetch failed"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "76e41ecc93dd",
+      "name": "Not Another Eye Store",
+      "address": "1321 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4c72fe2adf42",
+      "name": "Calgary Local Florist",
+      "address": "1428 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6d5d54955fd5",
+      "name": "Kindred Aesthetics",
+      "address": "#109A 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "7d26fd6de9f4",
+      "name": "Tea Cult (The)",
+      "address": "#23 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "12d77445dc0f",
+      "name": "Man Of Distinction",
+      "address": "1416 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "3df783573f2f",
+      "name": "Change Is Good Cdc",
+      "address": "1317 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "b49cbb8240cc",
+      "name": "Silk Road Spice Merchant (The)",
+      "address": "1419 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "7978ab85f4db",
+      "name": "Spolumbo's Fine Food & Deli",
+      "address": "1308 9 Av Se",
+      "website": "https://www.spolumbos.com/",
+      "logo": "/media/businesses/logos/spolumbo-s-fine-food-deli-7978ab85f4db-logo.png",
+      "hero": "/media/businesses/heroes/spolumbo-s-fine-food-deli-7978ab85f4db-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://www.spolumbos.com/wp-content/uploads/2015/10/logo@2x.png",
+      "heroSource": "https://www.spolumbos.com/wp-content/uploads/2025/03/tony-illustration-2.png",
+      "logoConfidence": 0.9,
+      "heroConfidence": 0.88
+    },
+    {
+      "id": "27762f395b94",
+      "name": "High Line Brewing",
+      "address": "#113 1318 9 Av Se",
+      "website": "https://highlinebrewing.ca",
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "fetch failed"
+      ],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92
+    },
+    {
+      "id": "e2da7a713064",
+      "name": "Imagine Vintage Wear",
+      "address": "1325 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "660cce1585b4",
+      "name": "Elysian Alchemy",
+      "address": "1340 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "fe1f0bae0b79",
+      "name": "Hallmark Auto Body",
+      "address": "1430 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "94ea41bcbdb8",
+      "name": "Eira Laser",
+      "address": "#109I 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8dcd6411ad76",
+      "name": "Notorious Hair Group",
+      "address": "#1 1335 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "56bf137ea1eb",
+      "name": "Ama Jewellery & Watches",
+      "address": "1349 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "0a462a7fdf36",
+      "name": "Vegan Street & The Attic",
+      "address": "1413 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "127a77d78cdc",
+      "name": "Barbie Nail And Massage",
+      "address": "1327B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f0e71e686754",
+      "name": "Tease Hair Studio",
+      "address": "1532 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a3c937706f28",
+      "name": "Coven Body Arts",
+      "address": "1532 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "92e556fab575",
+      "name": "Plant Terrariums & Garden Supplies",
+      "address": "1327 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "baa6a523115f",
+      "name": "Recess",
+      "address": "1333 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "bced601bb20a",
+      "name": "Chantelle Keshaye Permanent Makeup",
+      "address": "#8 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "a814add1ea08",
+      "name": "Radiance Day Spa",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ac2056898e5a",
+      "name": "Sol Electrolysis",
+      "address": "1532 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8e81202c36eb",
+      "name": "Four20 Premium Market",
+      "address": "1309 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "71a3c24d9cc0",
+      "name": "Ami Tea Sub",
+      "address": "1357 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "303651f0e95a",
+      "name": "Lyndsey Haley Massage Therapy",
+      "address": "1530 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "f9da1415aa9d",
+      "name": "Inspire Wellness Massage",
+      "address": "#109A 1526 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "e50b4d6af5b6",
+      "name": "Blooms On 9Th",
+      "address": "#19 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "54960e7da203",
+      "name": "Supervariety",
+      "address": "1327A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "0150a1d87973",
+      "name": "Sakura Eyelash Salon",
+      "address": "1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "6aa8ee6fefbc",
+      "name": "Neo Vape",
+      "address": "#1 1336 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "30fec28bcc20",
+      "name": "Blue Store (The)",
+      "address": "1344 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8f4da35ae374",
+      "name": "Saint And Stellar Tattoo",
+      "address": "1530 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "fb97bea5afc2",
+      "name": "Tibetan Trom",
+      "address": "1325A 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "bdb45997e4f9",
+      "name": "Sacred Horizons Massage",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "94c97df793dd",
+      "name": "Atlantic Auto Sales",
+      "address": "1556 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ffe0781bf7e7",
+      "name": "Dirty Duck",
+      "address": "1336 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "44b81446a20e",
+      "name": "Kent Of Inglewood",
+      "address": "#100B 1316 9 Av Se",
+      "website": "https://www.kentofinglewood.com/",
+      "logo": "/media/businesses/logos/kent-of-inglewood-44b81446a20e-logo.png",
+      "hero": "/media/businesses/heroes/kent-of-inglewood-44b81446a20e-hero.png",
+      "status": "enriched",
+      "notes": [],
+      "websiteSource": "existing-domain",
+      "websiteConfidence": 0.92,
+      "logoSource": "https://www.kentofinglewood.com/cdn/shop/files/kent_of_inglewood_logo_2024_720px_BLUE.png?v=1747857597&width=500",
+      "heroSource": "https://www.kentofinglewood.com/cdn/shop/files/kent_of_inglewood_logo_2024_720px_BLUE.png?v=1747857597",
+      "logoConfidence": 0.92,
+      "heroConfidence": 0.92
+    },
+    {
+      "id": "c21c1143432a",
+      "name": "Norley's Colombian Street Food",
+      "address": "1314B 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "dbea23c30e5b",
+      "name": "Fetish Hair",
+      "address": "#11 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "8b29b7dad567",
+      "name": "Shu Beauty",
+      "address": "#8 1420 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "ae124029d974",
+      "name": "Lashgirlsu",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    },
+    {
+      "id": "4ea033a7b255",
+      "name": "Cyndi Fehr Wellness",
+      "address": "1528 9 Av Se",
+      "website": null,
+      "logo": null,
+      "hero": null,
+      "status": "needs-marketing-help",
+      "notes": [
+        "duckduckgo: This operation was aborted"
+      ],
+      "websiteSource": "not-found",
+      "websiteConfidence": 0
+    }
+  ]
+}
