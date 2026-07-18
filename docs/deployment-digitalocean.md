@@ -29,9 +29,15 @@ systemctl restart stroll-city.service
 nginx -t && systemctl reload nginx
 ```
 
-## DNS
+## DNS and TLS
 
-`stroll.city` and `www.stroll.city` should point to `159.89.125.8`.
+`stroll.city` and `www.stroll.city` point to `159.89.125.8`.
+
+TLS is issued by Let's Encrypt via Certbot:
+
+```bash
+certbot --nginx --cert-name stroll.city -d stroll.city -d www.stroll.city
+```
 
 ## Secrets
 
