@@ -1,5 +1,5 @@
 -- Generated from app/public/data/stroll-data.json
--- Generated at 2026-07-18T00:47:00.639Z
+-- Generated at 2026-07-18T14:47:51.001Z
 begin;
 
 insert into public.cities (slug, name, status, center, strip_bounds, theme)
@@ -68,7 +68,7 @@ on conflict (city_id, slug) do update set
   updated_at = now();
 
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '29a2af05451c', id, 'Next Level Thrift Store', 'shop', 'NL', '1045 19 Av Se', 'Next Level Thrift Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc49/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037086, 51.036027), 4326)::geography
+select '29a2af05451c', id, 'Next Level Thrift Store', 'shop', 'NL', '1045 19 Av Se', 'Next Level Thrift Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/next-level-thrift-store-29a2af05451c-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037086, 51.036027), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -85,7 +85,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5a31d972b821', id, 'Vigi''s Hair', 'services', 'VH', '1044 19 Av Se', 'Vigi''s Hair — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc948/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037202, 51.03637), 4326)::geography
+select '5a31d972b821', id, 'Vigi''s Hair', 'services', 'VH', '1044 19 Av Se', 'Vigi''s Hair — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/vigi-s-hair-5a31d972b821-hero.png', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037202, 51.03637), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -102,7 +102,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'af19fb9c1ea2', id, 'Bioi', 'shop', 'B', '1226A 9 Av Se', 'Bioi — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc730/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035072, 51.041821), 4326)::geography
+select 'af19fb9c1ea2', id, 'Bioi', 'shop', 'B', '1226A 9 Av Se', 'Bioi — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/bioi-af19fb9c1ea2-hero.jpg', 'bioi.co', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035072, 51.041821), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -119,7 +119,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6eaa141841dc', id, 'Rain Dog Bar', 'bar', 'RD', '1214B 9 Av Se', 'Rain Dog Bar — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc321/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03589, 51.042021), 4326)::geography
+select '6eaa141841dc', id, 'Rain Dog Bar', 'bar', 'RD', '1214B 9 Av Se', 'Rain Dog Bar — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/rain-dog-bar-6eaa141841dc-hero.jpg', 'raindogbar.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.03589, 51.042021), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -136,7 +136,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '9df18e70bdc2', id, 'Fair''s Fair (For Book Lovers)', 'shop', 'FF', '#L 907 9 Av Se', 'Beloved sprawling used & rare bookstore.', '10am–6pm', '[["📚","Stacks of used books"],["🔎","Rare finds"],["🛋️","Cozy nooks"]]'::jsonb, 'https://picsum.photos/seed/strollyyc610/520/340', 'fairsfairbooks.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.041176, 51.043048), 4326)::geography
+select '9df18e70bdc2', id, 'Fair''s Fair (For Book Lovers)', 'shop', 'FF', '#L 907 9 Av Se', 'Beloved sprawling used & rare bookstore.', '10am–6pm', '[["📚","Stacks of used books"],["🔎","Rare finds"],["🛋️","Cozy nooks"]]'::jsonb, '/media/businesses/heroes/fair-s-fair-for-book-lovers-9df18e70bdc2-hero.jpg', 'fairsfair.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.041176, 51.043048), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -153,7 +153,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '233bf3afee12', id, 'Tuu Shop', 'shop', 'TS', '#103 902 9 Av Se', 'Tuu Shop — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc437/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.04096, 51.043347), 4326)::geography
+select '233bf3afee12', id, 'Tuu Shop', 'shop', 'TS', '#103 902 9 Av Se', 'Tuu Shop — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/tuu-shop-233bf3afee12-hero.jpg', 'coutukitsch.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.04096, 51.043347), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -170,7 +170,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6d69b904c020', id, 'Two Wheel View', 'shop', 'TW', '#M 907 9 Av Se', 'Two Wheel View — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc435/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.041176, 51.043048), 4326)::geography
+select '6d69b904c020', id, 'Two Wheel View', 'shop', 'TW', '#M 907 9 Av Se', 'Two Wheel View — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/two-wheel-view-6d69b904c020-hero.jpg', 'twowheelview.org', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.041176, 51.043048), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -187,7 +187,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '88699a0736e7', id, 'Sweet Treats Co.', 'restaurant', 'ST', '1109 9 Av Se', 'Sweet Treats Co. — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc931/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037617, 51.042193), 4326)::geography
+select '88699a0736e7', id, 'Sweet Treats Co.', 'restaurant', 'ST', '1109 9 Av Se', 'Sweet Treats Co. — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/sweet-treats-co-88699a0736e7-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037617, 51.042193), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -204,7 +204,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '236192258ad8', id, 'Next Page (The)', 'restaurant', 'NP', '1217A 9 Av Se', 'Next Page (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc187/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
+select '236192258ad8', id, 'Next Page (The)', 'restaurant', 'NP', '1217A 9 Av Se', 'Next Page (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/next-page-the-236192258ad8-hero.jpg', 'nextpageyyc.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -221,7 +221,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '94a0baf17bed', id, 'Lasa By Cara', 'restaurant', 'LB', '1117 9 Av Se', 'Lasa By Cara — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc653/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037465, 51.042154), 4326)::geography
+select '94a0baf17bed', id, 'Lasa By Cara', 'restaurant', 'LB', '1117 9 Av Se', 'Lasa By Cara — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/lasa-by-cara-94a0baf17bed-hero.jpg', 'instagram.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037465, 51.042154), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -238,7 +238,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '16e779e13027', id, 'Faire Living Group', 'shop', 'FL', '1226B 9 Av Se', 'Beloved sprawling used & rare bookstore.', '10am–6pm', '[["📚","Stacks of used books"],["🔎","Rare finds"],["🛋️","Cozy nooks"]]'::jsonb, 'https://picsum.photos/seed/strollyyc782/520/340', 'fairsfairbooks.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035072, 51.041821), 4326)::geography
+select '16e779e13027', id, 'Faire Living Group', 'shop', 'FL', '1226B 9 Av Se', 'Beloved sprawling used & rare bookstore.', '10am–6pm', '[["📚","Stacks of used books"],["🔎","Rare finds"],["🛋️","Cozy nooks"]]'::jsonb, '/media/businesses/heroes/faire-living-group-16e779e13027-hero.jpg', 'faireliving.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035072, 51.041821), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -255,7 +255,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '2412ea4b78e2', id, 'Oxgust Studio', 'services', 'OS', '915 9 Av Se', 'Oxgust Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc190/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
+select '2412ea4b78e2', id, 'Oxgust Studio', 'services', 'OS', '915 9 Av Se', 'Oxgust Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/oxgust-studio-2412ea4b78e2-hero.jpg', 'wornstudioyyc.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -272,7 +272,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'd2605e8f6fc3', id, 'Oolong Tea House', 'cafe', 'OT', '1219A 9 Av Se', 'Oolong Tea House — cafe on 9 Ave SE in Inglewood.', '8am–6pm', '[["☕","Coffee & treats"],["🥐","Fresh baking"],["🪟","Cosy room"]]'::jsonb, 'https://picsum.photos/seed/strollyyc429/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
+select 'd2605e8f6fc3', id, 'Oolong Tea House', 'cafe', 'OT', '1219A 9 Av Se', 'Oolong Tea House — cafe on 9 Ave SE in Inglewood.', '8am–6pm', '[["☕","Coffee & treats"],["🥐","Fresh baking"],["🪟","Cosy room"]]'::jsonb, '/media/businesses/heroes/oolong-tea-house-d2605e8f6fc3-hero.jpg', 'oolongteashop.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -289,7 +289,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '687822f20e5a', id, 'Apothecary In Inglewood (The)', 'restaurant', 'AI', '921 9 Av Se', 'Apothecary In Inglewood (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc541/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040041, 51.042799), 4326)::geography
+select '687822f20e5a', id, 'Apothecary In Inglewood (The)', 'restaurant', 'AI', '921 9 Av Se', 'Apothecary In Inglewood (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/apothecary-in-inglewood-the-687822f20e5a-hero.jpg', 'the-apothecary.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040041, 51.042799), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -306,7 +306,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '1716d99864a3', id, 'The Confluence Historic Site & Parkland', 'restaurant', 'TC', '750 9 Av Se', 'The Confluence Historic Site & Parkland — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc535/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.04449, 51.045031), 4326)::geography
+select '1716d99864a3', id, 'The Confluence Historic Site & Parkland', 'restaurant', 'TC', '750 9 Av Se', 'The Confluence Historic Site & Parkland — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/the-confluence-historic-site-parkland-1716d99864a3-hero.png', 'theconfluence.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.04449, 51.045031), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -323,7 +323,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '62d69f5ce2cd', id, 'Lily By Lyla', 'shop', 'LB', '1221 9 Av Se', 'Lily By Lyla — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc86/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035456, 51.041515), 4326)::geography
+select '62d69f5ce2cd', id, 'Lily By Lyla', 'shop', 'LB', '1221 9 Av Se', 'Lily By Lyla — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/lily-by-lyla-62d69f5ce2cd-hero.png', 'lilybylap.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035456, 51.041515), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -340,7 +340,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f694ae890130', id, 'Master Of None Studios', 'services', 'MO', '915 9 Av Se', 'Master Of None Studios — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc858/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
+select 'f694ae890130', id, 'Master Of None Studios', 'services', 'MO', '915 9 Av Se', 'Master Of None Studios — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/master-of-none-studios-f694ae890130-hero.jpg', 'book.squareup.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -357,7 +357,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4f84e76c32c7', id, 'Opulence Piercing', 'services', 'OP', '1105 9 Av Se', 'Opulence Piercing — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc219/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037715, 51.042216), 4326)::geography
+select '4f84e76c32c7', id, 'Opulence Piercing', 'services', 'OP', '1105 9 Av Se', 'Opulence Piercing — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/opulence-piercing-4f84e76c32c7-hero.jpg', 'opulencepiercing.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037715, 51.042216), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -374,7 +374,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '45932e0c84d0', id, 'Gallery Underground', 'gallery', 'GU', '#10 917 9 Av Se', 'Gallery Underground — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, 'https://picsum.photos/seed/strollyyc443/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040356, 51.042799), 4326)::geography
+select '45932e0c84d0', id, 'Gallery Underground', 'gallery', 'GU', '#10 917 9 Av Se', 'Gallery Underground — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, '/media/businesses/heroes/gallery-underground-45932e0c84d0-hero.jpg', 'galleryundergroundyyc.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040356, 51.042799), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -408,7 +408,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '74588358da7f', id, 'Adorn Boutique', 'shop', 'AB', '1216A 9 Av Se', 'Adorn Boutique — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc518/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035732, 51.042014), 4326)::geography
+select '74588358da7f', id, 'Adorn Boutique', 'shop', 'AB', '1216A 9 Av Se', 'Adorn Boutique — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/adorn-boutique-74588358da7f-hero.jpg', 'adornboutique.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035732, 51.042014), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -425,7 +425,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5bc4c633989f', id, 'Domino''s', 'restaurant', 'D', '1220 9 Av Se', 'Domino''s — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc523/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03541, 51.041948), 4326)::geography
+select '5bc4c633989f', id, 'Domino''s', 'restaurant', 'D', '1220 9 Av Se', 'Domino''s — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/domino-s-5bc4c633989f-hero.jpg', 'pizza.dominos.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.03541, 51.041948), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -442,7 +442,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'ca50b22119a9', id, 'Curated Home (The)', 'shop', 'CH', '1004 9 Av Se', 'Curated Home (The) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc13/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038889, 51.042935), 4326)::geography
+select 'ca50b22119a9', id, 'Curated Home (The)', 'shop', 'CH', '1004 9 Av Se', 'Curated Home (The) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/curated-home-the-ca50b22119a9-hero.jpg', 'thecuratedhome.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038889, 51.042935), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -459,7 +459,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '916108d117d0', id, 'Pronto Pizza', 'restaurant', 'PP', '#2 1139 9 Av Se', 'Pronto Pizza — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc15/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037175, 51.041916), 4326)::geography
+select '916108d117d0', id, 'Pronto Pizza', 'restaurant', 'PP', '#2 1139 9 Av Se', 'Pronto Pizza — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/pronto-pizza-916108d117d0-hero.jpg', 'yycpronto.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037175, 51.041916), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -476,7 +476,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'c508b8125dfe', id, 'Stash', 'shop', 'S', '1237 9 Av Se', 'Stash — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc440/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
+select 'c508b8125dfe', id, 'Stash', 'shop', 'S', '1237 9 Av Se', 'Stash — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/stash-c508b8125dfe-hero.jpg', 'stashlounge.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -493,7 +493,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'aa668db97c13', id, 'Murphy''s Mid-Century', 'shop', 'MM', '1221B 9 Av Se', 'Murphy''s Mid-Century — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc409/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035456, 51.041515), 4326)::geography
+select 'aa668db97c13', id, 'Murphy''s Mid-Century', 'shop', 'MM', '1221B 9 Av Se', 'Murphy''s Mid-Century — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/murphy-s-mid-century-aa668db97c13-hero.jpg', 'murphysmidcentury.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035456, 51.041515), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -510,7 +510,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '2fa2d989f7e9', id, 'Dragon Pearl', 'restaurant', 'DP', '1223A 9 Av Se', 'Dragon Pearl — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc291/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035311, 51.041408), 4326)::geography
+select '2fa2d989f7e9', id, 'Dragon Pearl', 'restaurant', 'DP', '1223A 9 Av Se', 'Dragon Pearl — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/dragon-pearl-2fa2d989f7e9-hero.jpg', 'dragonpearl.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035311, 51.041408), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -527,7 +527,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '46cf2dc3cfe4', id, 'Gravity Espresso And Wine Bar', 'bar', 'GE', '909 10 St Se', 'Espresso & wine bar, a Music Mile staple.', '7am–10pm', '[["☕","Serious espresso"],["🍷","Evening wine"],["🥪","Café lunch"]]'::jsonb, 'https://picsum.photos/seed/strollyyc126/520/340', 'gravityespresso.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038195, 51.042303), 4326)::geography
+select '46cf2dc3cfe4', id, 'Gravity Espresso And Wine Bar', 'bar', 'GE', '909 10 St Se', 'Espresso & wine bar, a Music Mile staple.', '7am–10pm', '[["☕","Serious espresso"],["🍷","Evening wine"],["🥪","Café lunch"]]'::jsonb, '/media/businesses/heroes/gravity-espresso-and-wine-bar-46cf2dc3cfe4-hero.jpg', 'gravitycalgary.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038195, 51.042303), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -544,7 +544,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '09c9fd233081', id, 'Deane House', 'restaurant', 'DH', '806 9 Av Se', 'Historic riverside restaurant in a 1906 home.', '10am–10pm', '[["🏛️","1906 heritage house"],["🍽️","Seasonal menu"],["🌉","By the Bow"]]'::jsonb, 'https://picsum.photos/seed/strollyyc795/520/340', 'deanehouse.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.042039, 51.043787), 4326)::geography
+select '09c9fd233081', id, 'Deane House', 'restaurant', 'DH', '806 9 Av Se', 'Historic riverside restaurant in a 1906 home.', '10am–10pm', '[["🏛️","1906 heritage house"],["🍽️","Seasonal menu"],["🌉","By the Bow"]]'::jsonb, '/media/businesses/heroes/deane-house-09c9fd233081-hero.webp', 'deanehouse.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.042039, 51.043787), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -561,7 +561,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '35c1f13079a4', id, 'Inglewood Pizza & Pasta', 'restaurant', 'IP', '1225A 9 Av Se', 'Inglewood Pizza & Pasta — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc101/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035195, 51.041356), 4326)::geography
+select '35c1f13079a4', id, 'Inglewood Pizza & Pasta', 'restaurant', 'IP', '1225A 9 Av Se', 'Inglewood Pizza & Pasta — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/inglewood-pizza-pasta-35c1f13079a4-hero.jpg', 'inglewoodpizza.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035195, 51.041356), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -578,7 +578,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e3e6dc5ee309', id, 'Bussin', 'restaurant', 'B', '1121 9 Av Se', 'Bussin — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc324/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037387, 51.042136), 4326)::geography
+select 'e3e6dc5ee309', id, 'Bussin', 'restaurant', 'B', '1121 9 Av Se', 'Bussin — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/bussin-e3e6dc5ee309-hero.jpg', 'bussin.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037387, 51.042136), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -595,7 +595,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '55392d8d40b5', id, 'Kups', 'restaurant', 'K', '#108 1020 9 Av Se', 'Kups — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc231/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037981, 51.042706), 4326)::geography
+select '55392d8d40b5', id, 'Kups', 'restaurant', 'K', '#108 1020 9 Av Se', 'Kups — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/kups-55392d8d40b5-hero.jpg', 'urkups.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037981, 51.042706), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -612,7 +612,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4e8f371b021c', id, 'F45 Inglewood', 'services', 'FI', '#130 1020 9 Av Se', 'F45 Inglewood — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc594/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037521, 51.042692), 4326)::geography
+select '4e8f371b021c', id, 'F45 Inglewood', 'services', 'FI', '#130 1020 9 Av Se', 'F45 Inglewood — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/f45-inglewood-4e8f371b021c-hero.jpg', 'f45training.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037521, 51.042692), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -629,7 +629,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'b8e8d0fd2d3a', id, 'Sot', 'restaurant', 'S', '1216C 9 Av Se', 'Sot — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc646/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035732, 51.042014), 4326)::geography
+select 'b8e8d0fd2d3a', id, 'Sot', 'restaurant', 'S', '1216C 9 Av Se', 'Sot — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/sot-b8e8d0fd2d3a-hero.jpg', 'sotyyc.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035732, 51.042014), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -646,7 +646,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a530ce1bb27e', id, 'Marshall Drugs', 'restaurant', 'MD', '1231 9 Av Se', 'Marshall Drugs — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc88/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
+select 'a530ce1bb27e', id, 'Marshall Drugs', 'restaurant', 'MD', '1231 9 Av Se', 'Marshall Drugs — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/marshall-drugs-a530ce1bb27e-hero.png', 'marshalldrugs.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -663,7 +663,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'd19aba1a4eb6', id, 'Limitless Calgary', 'shop', 'LC', '1015 9 Av Se', 'Limitless Calgary — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc625/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038542, 51.042474), 4326)::geography
+select 'd19aba1a4eb6', id, 'Limitless Calgary', 'shop', 'LC', '1015 9 Av Se', 'Limitless Calgary — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/limitless-calgary-d19aba1a4eb6-hero.jpg', 'limitless-calgary.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038542, 51.042474), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -680,7 +680,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '1d1c8a07d95a', id, 'Hello Vintage Inglewood', 'shop', 'HV', '1228A 9 Av Se', 'Hello Vintage Inglewood — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc332/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035049, 51.041697), 4326)::geography
+select '1d1c8a07d95a', id, 'Hello Vintage Inglewood', 'shop', 'HV', '1228A 9 Av Se', 'Hello Vintage Inglewood — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/hello-vintage-inglewood-1d1c8a07d95a-hero.jpg', 'hellovintage.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035049, 51.041697), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -697,7 +697,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '771bbaecb1e6', id, 'Linas Italian Piazza', 'restaurant', 'LI', '1023 9 Av Se', 'Linas Italian Piazza — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc599/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038172, 51.042378), 4326)::geography
+select '771bbaecb1e6', id, 'Linas Italian Piazza', 'restaurant', 'LI', '1023 9 Av Se', 'Linas Italian Piazza — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/linas-italian-piazza-771bbaecb1e6-hero.jpg', 'linasmarket.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038172, 51.042378), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -714,7 +714,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '524c489f3b72', id, 'Mowgli''s/Ninja Tiger', 'restaurant', 'MT', '1209 9 Av Se', 'Mowgli''s/Ninja Tiger — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc383/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.036285, 51.041732), 4326)::geography
+select '524c489f3b72', id, 'Mowgli''s/Ninja Tiger', 'restaurant', 'MT', '1209 9 Av Se', 'Mowgli''s/Ninja Tiger — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/mowgli-s-ninja-tiger-524c489f3b72-hero.jpg', 'ninjatiger.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.036285, 51.041732), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -731,7 +731,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '2aaca500ccf5', id, 'Eden (The)', 'restaurant', 'E', '1219 9 Av Se', 'Eden (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc111/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
+select '2aaca500ccf5', id, 'Eden (The)', 'restaurant', 'E', '1219 9 Av Se', 'Eden (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/eden-the-2aaca500ccf5-hero.jpg', 'edenbistro.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -748,7 +748,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '21744966d801', id, 'Potion Room', 'restaurant', 'PR', '1211 9 Av Se', 'Potion Room — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc96/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.0361, 51.041679), 4326)::geography
+select '21744966d801', id, 'Potion Room', 'restaurant', 'PR', '1211 9 Av Se', 'Potion Room — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/potion-room-21744966d801-hero.png', 'instagram.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.0361, 51.041679), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -765,7 +765,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8aa03ffcf4d9', id, 'Espy', 'shop', 'E', '1009 9 Av Se', 'Espy — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc109/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038963, 51.04258), 4326)::geography
+select '8aa03ffcf4d9', id, 'Espy', 'shop', 'E', '1009 9 Av Se', 'Espy — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/espy-8aa03ffcf4d9-hero.jpg', 'espyexperience.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038963, 51.04258), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -782,7 +782,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '0d0ecc0fa057', id, 'Genuine Design', 'shop', 'GD', '1213 9 Av Se', 'Genuine Design — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc725/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.0361, 51.041679), 4326)::geography
+select '0d0ecc0fa057', id, 'Genuine Design', 'shop', 'GD', '1213 9 Av Se', 'Genuine Design — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/genuine-design-0d0ecc0fa057-hero.jpg', 'genuinedesign.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.0361, 51.041679), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -799,7 +799,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'c1d8eab13593', id, 'Ari Sushi', 'restaurant', 'AS', '1201 9 Av Se', 'Ari Sushi — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc733/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.036462, 51.04178), 4326)::geography
+select 'c1d8eab13593', id, 'Ari Sushi', 'restaurant', 'AS', '1201 9 Av Se', 'Ari Sushi — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/ari-sushi-c1d8eab13593-hero.png', 'arisushi.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.036462, 51.04178), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -816,7 +816,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'eede4681c3bf', id, 'Calgary Car Centre / Driving With Carmelo', 'shop', 'CC', '1234 9 Av Se', 'Calgary Car Centre / Driving With Carmelo — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc292/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034763, 51.04163), 4326)::geography
+select 'eede4681c3bf', id, 'Calgary Car Centre / Driving With Carmelo', 'shop', 'CC', '1234 9 Av Se', 'Calgary Car Centre / Driving With Carmelo — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/calgary-car-centre-driving-with-carmelo-eede4681c3bf-hero.png', 'drivingwithcarmelo.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.034763, 51.04163), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -833,7 +833,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '1fa848cefc45', id, 'Purr', 'shop', 'P', '1227 9 Av Se', 'Purr — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc288/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035088, 51.041292), 4326)::geography
+select '1fa848cefc45', id, 'Purr', 'shop', 'P', '1227 9 Av Se', 'Purr — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/purr-1fa848cefc45-hero.jpg', 'purrclothing.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035088, 51.041292), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -850,7 +850,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a90455765ddf', id, 'Burn Block Social Club', 'bar', 'BB', '1217B 9 Av Se', 'Burn Block Social Club — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc244/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
+select 'a90455765ddf', id, 'Burn Block Social Club', 'bar', 'BB', '1217B 9 Av Se', 'Burn Block Social Club — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/burn-block-social-club-a90455765ddf-hero.jpg', 'burnblocksocial.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -867,7 +867,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '84d5b791561e', id, 'Worn Studio', 'services', 'WS', '915 9 Av Se', 'Worn Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc0/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
+select '84d5b791561e', id, 'Worn Studio', 'services', 'WS', '915 9 Av Se', 'Worn Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/worn-studio-84d5b791561e-hero.jpg', 'wornstudioyyc.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -884,7 +884,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '570104f90205', id, 'Lemonceillo Home', 'shop', 'LH', '1223B 9 Av Se', 'Lemonceillo Home — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc870/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035311, 51.041408), 4326)::geography
+select '570104f90205', id, 'Lemonceillo Home', 'shop', 'LH', '1223B 9 Av Se', 'Lemonceillo Home — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/lemonceillo-home-570104f90205-hero.png', 'lemonceillo.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035311, 51.041408), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -901,7 +901,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '37ed1bddcb49', id, 'Junction 9 Wellbeing', 'services', 'J9', '#100 919 9 Av Se', 'Junction 9 Wellbeing — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc407/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040195, 51.042799), 4326)::geography
+select '37ed1bddcb49', id, 'Junction 9 Wellbeing', 'services', 'J9', '#100 919 9 Av Se', 'Junction 9 Wellbeing — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/junction-9-wellbeing-37ed1bddcb49-hero.jpg', 'junction9.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040195, 51.042799), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -918,7 +918,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '97fdf6fcf0b3', id, 'Hose & Hound Pub', 'bar', 'H', '1030 9 Av Se', 'Pub grub & craft brews in a 1906 fire hall.', '11am–12am', '[["🚒","Historic firehall"],["🍺","24 taps"],["🍔","Late kitchen"]]'::jsonb, 'https://picsum.photos/seed/strollyyc784/520/340', 'hoseandhound.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037176, 51.042654), 4326)::geography
+select '97fdf6fcf0b3', id, 'Hose & Hound Pub', 'bar', 'H', '1030 9 Av Se', 'Pub grub & craft brews in a 1906 fire hall.', '11am–12am', '[["🚒","Historic firehall"],["🍺","24 taps"],["🍔","Late kitchen"]]'::jsonb, '/media/businesses/heroes/hose-hound-pub-97fdf6fcf0b3-hero.jpg', 'thehose.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037176, 51.042654), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -935,7 +935,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '0df04872d129', id, 'Analog', 'restaurant', 'A', '#1 1139 9 Av Se', 'Analog — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc168/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037175, 51.041916), 4326)::geography
+select '0df04872d129', id, 'Analog', 'restaurant', 'A', '#1 1139 9 Av Se', 'Analog — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/analog-0df04872d129-hero.webp', 'analogcoffee.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037175, 51.041916), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -952,7 +952,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '2dd4b6846c10', id, 'Ouijablonde Hair Studio', 'services', 'OH', '915 9 Av Se', 'Ouijablonde Hair Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc150/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
+select '2dd4b6846c10', id, 'Ouijablonde Hair Studio', 'services', 'OH', '915 9 Av Se', 'Ouijablonde Hair Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/ouijablonde-hair-studio-2dd4b6846c10-hero.jpg', 'linktr.ee', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040472, 51.042874), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -969,7 +969,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a39de405c769', id, 'Recordland', 'shop', 'R', '1208 9 Av Se', 'Recordland — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc711/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.0361, 51.0422), 4326)::geography
+select 'a39de405c769', id, 'Recordland', 'shop', 'R', '1208 9 Av Se', 'Recordland — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/recordland-a39de405c769-hero.jpg', 'facebook.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.0361, 51.0422), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -986,7 +986,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a7a9fba12b4b', id, 'Boft Fine Rugs Gallery', 'gallery', 'BF', '1225B 9 Av Se', 'Boft Fine Rugs Gallery — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, 'https://picsum.photos/seed/strollyyc958/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035195, 51.041356), 4326)::geography
+select 'a7a9fba12b4b', id, 'Boft Fine Rugs Gallery', 'gallery', 'BF', '1225B 9 Av Se', 'Boft Fine Rugs Gallery — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, '/media/businesses/heroes/boft-fine-rugs-gallery-a7a9fba12b4b-hero.jpg', 'boftfinerugs.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035195, 51.041356), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1003,7 +1003,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4574605e3680', id, 'Evi Beauty', 'services', 'EB', '1010 9 Av Se', 'Evi Beauty — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc182/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038573, 51.042859), 4326)::geography
+select '4574605e3680', id, 'Evi Beauty', 'services', 'EB', '1010 9 Av Se', 'Evi Beauty — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/evi-beauty-4574605e3680-hero.jpg', 'evibeauty.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038573, 51.042859), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1020,7 +1020,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5089a6babc37', id, 'Mumbai Bites- Progressive Indian Cuisine', 'restaurant', 'MB', '1214C 9 Av Se', 'Mumbai Bites- Progressive Indian Cuisine — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc829/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03589, 51.042021), 4326)::geography
+select '5089a6babc37', id, 'Mumbai Bites- Progressive Indian Cuisine', 'restaurant', 'MB', '1214C 9 Av Se', 'Mumbai Bites- Progressive Indian Cuisine — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/mumbai-bites-progressive-indian-cuisine-5089a6babc37-hero.jpg', 'mumbaibites.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.03589, 51.042021), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1037,7 +1037,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'd161032761c5', id, 'Marshall''s Rx Centre', 'shop', 'MR', '#214 1231 9 Av Se', 'Marshall''s Rx Centre — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc624/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
+select 'd161032761c5', id, 'Marshall''s Rx Centre', 'shop', 'MR', '#214 1231 9 Av Se', 'Marshall''s Rx Centre — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/marshall-s-rx-centre-d161032761c5-hero.png', 'marshalldrugs.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.034759, 51.041201), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1054,7 +1054,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4bea70511cd8', id, '4Cats', 'shop', '4', '1218B 9 Av Se', '4Cats — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc306/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035568, 51.042007), 4326)::geography
+select '4bea70511cd8', id, '4Cats', 'shop', '4', '1218B 9 Av Se', '4Cats — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/4cats-4bea70511cd8-hero.jpg', '4cats.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035568, 51.042007), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1071,7 +1071,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '67083be6ccc2', id, 'Onyx & Ivory Salon', 'services', 'O', '#116 1020 9 Av Se', 'Onyx & Ivory Salon — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc109/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037818, 51.042676), 4326)::geography
+select '67083be6ccc2', id, 'Onyx & Ivory Salon', 'services', 'O', '#116 1020 9 Av Se', 'Onyx & Ivory Salon — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/onyx-ivory-salon-67083be6ccc2-hero.jpg', 'onyxandivory.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037818, 51.042676), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1088,7 +1088,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5007e41b4194', id, 'Ironwood Stage And Grill', 'restaurant', 'IS', '1229 9 Av Se', 'Beloved live-music venue & grill on Music Mile.', 'Shows nightly', '[["🎸","Live roots & folk"],["🍔","Pre-show grill"],["🎶","Music Mile"]]'::jsonb, 'https://picsum.photos/seed/strollyyc147/520/340', 'ironwoodstage.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035005, 51.041206), 4326)::geography
+select '5007e41b4194', id, 'Ironwood Stage And Grill', 'restaurant', 'IS', '1229 9 Av Se', 'Beloved live-music venue & grill on Music Mile.', 'Shows nightly', '[["🎸","Live roots & folk"],["🍔","Pre-show grill"],["🎶","Music Mile"]]'::jsonb, '/media/businesses/heroes/ironwood-stage-and-grill-5007e41b4194-hero.jpg', 'ironwoodstage.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035005, 51.041206), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1105,7 +1105,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '797848edd816', id, 'Patisseries Louise', 'restaurant', 'PL', '1002 9 Av Se', 'Patisseries Louise — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc638/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.039048, 51.042969), 4326)::geography
+select '797848edd816', id, 'Patisseries Louise', 'restaurant', 'PL', '1002 9 Av Se', 'Patisseries Louise — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/patisseries-louise-797848edd816-hero.jpg', 'patisserieslouise.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.039048, 51.042969), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1122,7 +1122,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '54c3547cc3d7', id, 'Wymbin', 'services', 'W', '#50 919 9 Av Se', 'Wymbin — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc744/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040195, 51.042799), 4326)::geography
+select '54c3547cc3d7', id, 'Wymbin', 'services', 'W', '#50 919 9 Av Se', 'Wymbin — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/wymbin-54c3547cc3d7-hero.jpg', 'wymbin.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040195, 51.042799), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1139,7 +1139,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'cab5f9ab3488', id, 'Artesano Galleria', 'gallery', 'AG', '#B 1215 9 Av Se', 'Artesano Galleria — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, 'https://picsum.photos/seed/strollyyc765/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
+select 'cab5f9ab3488', id, 'Artesano Galleria', 'gallery', 'AG', '#B 1215 9 Av Se', 'Artesano Galleria — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, '/media/businesses/heroes/artesano-galleria-cab5f9ab3488-hero.jpg', 'artesanogalleria.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035816, 51.041581), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1156,7 +1156,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '487a3fcc7b5d', id, 'Be Brave', 'shop', 'BB', '1018 9 Av Se', 'Be Brave — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc180/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038269, 51.042773), 4326)::geography
+select '487a3fcc7b5d', id, 'Be Brave', 'shop', 'BB', '1018 9 Av Se', 'Be Brave — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/be-brave-487a3fcc7b5d-hero.jpg', 'bebraveukrainian.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038269, 51.042773), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1173,7 +1173,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f042b4218d69', id, 'Esker Foundation', 'gallery', 'EF', '#444 1011 9 Av Se', 'Free contemporary art gallery in a converted warehouse.', '11–6, closed Mon', '[["🖼️","Rotating exhibitions"],["🆓","Always free"],["🏛️","Rooftop terrace"]]'::jsonb, 'https://picsum.photos/seed/strollyyc742/520/340', 'eskerfoundation.art', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038782, 51.042347), 4326)::geography
+select 'f042b4218d69', id, 'Esker Foundation', 'gallery', 'EF', '#444 1011 9 Av Se', 'Free contemporary art gallery in a converted warehouse.', '11–6, closed Mon', '[["🖼️","Rotating exhibitions"],["🆓","Always free"],["🏛️","Rooftop terrace"]]'::jsonb, '/media/businesses/heroes/esker-foundation-f042b4218d69-hero.jpg', 'eskerfoundation.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038782, 51.042347), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1190,7 +1190,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '75154b1f16b5', id, 'Brooklyn Dumplings Shop', 'restaurant', 'BD', '1113 9 Av Se', 'Brooklyn Dumplings Shop — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc892/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037541, 51.04217), 4326)::geography
+select '75154b1f16b5', id, 'Brooklyn Dumplings Shop', 'restaurant', 'BD', '1113 9 Av Se', 'Brooklyn Dumplings Shop — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/brooklyn-dumplings-shop-75154b1f16b5-hero.jpg', 'brooklyndumplingshop.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037541, 51.04217), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1207,7 +1207,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'c1beb8d914b3', id, 'Bored Brewing Company (The)', 'bar', 'BB', '#200 1212 9 Av Se', 'Bored Brewing Company (The) — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc344/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03591, 51.042165), 4326)::geography
+select 'c1beb8d914b3', id, 'Bored Brewing Company (The)', 'bar', 'BB', '#200 1212 9 Av Se', 'Bored Brewing Company (The) — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/bored-brewing-company-the-c1beb8d914b3-hero.jpg', 'boredbrewing.xyz', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03591, 51.042165), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1224,7 +1224,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e38de7ec7f73', id, 'Smithbilt Hats', 'shop', 'SH', '914 11 St Se', 'Makers of the iconic white Stampede hat since 1919.', '9am–5pm', '[["🤠","Custom felt hats"],["🏭","Working factory"],["⭐","Calgary icon"]]'::jsonb, 'https://picsum.photos/seed/strollyyc790/520/340', 'smithbilthats.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.036581, 51.041345), 4326)::geography
+select 'e38de7ec7f73', id, 'Smithbilt Hats', 'shop', 'SH', '914 11 St Se', 'Makers of the iconic white Stampede hat since 1919.', '9am–5pm', '[["🤠","Custom felt hats"],["🏭","Working factory"],["⭐","Calgary icon"]]'::jsonb, '/media/businesses/heroes/smithbilt-hats-e38de7ec7f73-hero.png', 'smithbilthats.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.036581, 51.041345), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1241,7 +1241,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '277cf40085c3', id, 'T2722 Luxury Barista Experience', 'bar', 'TL', '1002 9 Av Se', 'T2722 Luxury Barista Experience — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc838/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.039048, 51.042969), 4326)::geography
+select '277cf40085c3', id, 'T2722 Luxury Barista Experience', 'bar', 'TL', '1002 9 Av Se', 'T2722 Luxury Barista Experience — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/t2722-luxury-barista-experience-277cf40085c3-hero.jpg', 't2722experience.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.039048, 51.042969), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1258,7 +1258,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'd01c631dc549', id, 'Leo Boutique', 'shop', 'LB', '1006 9 Av Se', 'Leo Boutique — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc844/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.038784, 51.042909), 4326)::geography
+select 'd01c631dc549', id, 'Leo Boutique', 'shop', 'LB', '1006 9 Av Se', 'Leo Boutique — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/leo-boutique-d01c631dc549-hero.jpg', 'leoboutique.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.038784, 51.042909), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1275,7 +1275,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '2a4e53351036', id, 'Untitled Esthetics Studio', 'services', 'UE', '#105 917 9 Av Se', 'Untitled Esthetics Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc34/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.040356, 51.042799), 4326)::geography
+select '2a4e53351036', id, 'Untitled Esthetics Studio', 'services', 'UE', '#105 917 9 Av Se', 'Untitled Esthetics Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/untitled-esthetics-studio-2a4e53351036-hero.jpg', 'untitledesthetics.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.040356, 51.042799), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1292,7 +1292,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8ea5cf5900dd', id, 'Inglewood Oak & Vine', 'shop', 'IO', '1139 9 Av Se', 'Inglewood Oak & Vine — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc471/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037114, 51.04217), 4326)::geography
+select '8ea5cf5900dd', id, 'Inglewood Oak & Vine', 'shop', 'IO', '1139 9 Av Se', 'Inglewood Oak & Vine — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/inglewood-oak-vine-8ea5cf5900dd-hero.jpg', 'oakandvine.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037114, 51.04217), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1309,7 +1309,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'fcc6c0f13afd', id, 'Made By Marcus', 'restaurant', 'MB', '1119 10 Av Se', 'Small-batch ice cream in wild local flavours.', '12–10pm', '[["🍦","Rotating flavours"],["🌾","Honey & haskap"],["🧇","Waffle cones"]]'::jsonb, 'https://picsum.photos/seed/strollyyc531/520/340', 'madebymarcus.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037694, 51.04134), 4326)::geography
+select 'fcc6c0f13afd', id, 'Made By Marcus', 'restaurant', 'MB', '1119 10 Av Se', 'Small-batch ice cream in wild local flavours.', '12–10pm', '[["🍦","Rotating flavours"],["🌾","Honey & haskap"],["🧇","Waffle cones"]]'::jsonb, '/media/businesses/heroes/made-by-marcus-fcc6c0f13afd-hero.png', 'madebymarcus.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037694, 51.04134), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1326,7 +1326,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6091b65fad46', id, 'Doughnut Party', 'restaurant', 'DP', '1125 9 Av Se', 'Doughnut Party — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc928/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037481, 51.042016), 4326)::geography
+select '6091b65fad46', id, 'Doughnut Party', 'restaurant', 'DP', '1125 9 Av Se', 'Doughnut Party — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/doughnut-party-6091b65fad46-hero.jpg', 'doughnutparty.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037481, 51.042016), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1343,7 +1343,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'b2c3851f5ef3', id, 'Respect Eyecare', 'shop', 'RE', '#112 1020 9 Av Se', 'Respect Eyecare — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc602/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.037912, 51.042689), 4326)::geography
+select 'b2c3851f5ef3', id, 'Respect Eyecare', 'shop', 'RE', '#112 1020 9 Av Se', 'Respect Eyecare — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/respect-eyecare-b2c3851f5ef3-hero.png', 'respecteyecare.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.037912, 51.042689), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1360,7 +1360,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a9233a05bb50', id, 'Peacock Boutique Consignment', 'shop', 'PB', '1218 9 Av Se', 'Peacock Boutique Consignment — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc803/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.035691, 51.041916), 4326)::geography
+select 'a9233a05bb50', id, 'Peacock Boutique Consignment', 'shop', 'PB', '1218 9 Av Se', 'Peacock Boutique Consignment — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/peacock-boutique-consignment-a9233a05bb50-hero.jpg', 'peacockboutique.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.035691, 51.041916), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1377,7 +1377,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e670bbb1664a', id, 'North Hill Aesthetics', 'services', 'NH', '#2 1922 9 Av Se', 'North Hill Aesthetics — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc849/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.018757, 51.035216), 4326)::geography
+select 'e670bbb1664a', id, 'North Hill Aesthetics', 'services', 'NH', '#2 1922 9 Av Se', 'North Hill Aesthetics — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/north-hill-aesthetics-e670bbb1664a-hero.jpg', 'flawlessclinical.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.018757, 51.035216), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1394,7 +1394,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '57e13aa3304f', id, 'Flawless Clinical Aesthetics And Medical Services', 'services', 'FC', '#12 1922 9 Av Se', 'Flawless Clinical Aesthetics And Medical Services — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc101/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.018256, 51.035058), 4326)::geography
+select '57e13aa3304f', id, 'Flawless Clinical Aesthetics And Medical Services', 'services', 'FC', '#12 1922 9 Av Se', 'Flawless Clinical Aesthetics And Medical Services — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/flawless-clinical-aesthetics-and-medical-services-57e13aa3304f-hero.jpg', 'flawlessclinical.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.018256, 51.035058), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1428,7 +1428,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a09b61e46e3c', id, 'Blackfoot Diner', 'restaurant', 'BD', '#A 1840 9 Av Se', 'Blackfoot Diner — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc20/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.020299, 51.036468), 4326)::geography
+select 'a09b61e46e3c', id, 'Blackfoot Diner', 'restaurant', 'BD', '#A 1840 9 Av Se', 'Blackfoot Diner — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/blackfoot-diner-a09b61e46e3c-hero.jpg', 'theblackfootdiner.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.020299, 51.036468), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1462,7 +1462,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5ca23bc3bd63', id, 'Theralleve', 'shop', 'T', '#3 1922 9 Av Se', 'Theralleve — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc476/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.018814, 51.035168), 4326)::geography
+select '5ca23bc3bd63', id, 'Theralleve', 'shop', 'T', '#3 1922 9 Av Se', 'Theralleve — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/theralleve-5ca23bc3bd63-hero.jpg', 'theralleve.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.018814, 51.035168), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1479,7 +1479,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '88f3e13a9794', id, 'Lou''s Autobody', 'shop', 'LA', '1801 9 Av Se', 'Lou''s Autobody — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc300/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.021798, 51.035808), 4326)::geography
+select '88f3e13a9794', id, 'Lou''s Autobody', 'shop', 'LA', '1801 9 Av Se', 'Lou''s Autobody — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/lou-s-autobody-88f3e13a9794-hero.jpg', 'csncollision.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.021798, 51.035808), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1496,7 +1496,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'ac50e17bd637', id, 'Petro Canada Truck Stop', 'restaurant', 'PC', '1840 9 Av Se', 'Petro Canada Truck Stop — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc406/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.020299, 51.036468), 4326)::geography
+select 'ac50e17bd637', id, 'Petro Canada Truck Stop', 'restaurant', 'PC', '1840 9 Av Se', 'Petro Canada Truck Stop — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/petro-canada-truck-stop-ac50e17bd637-hero.jpg', 'petro-canada.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.020299, 51.036468), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1513,7 +1513,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'b8bc81a1b121', id, 'Jfit + Restore', 'services', 'J', '#3 1922 9 Av Se', 'Jfit + Restore — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc744/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.018814, 51.035168), 4326)::geography
+select 'b8bc81a1b121', id, 'Jfit + Restore', 'services', 'J', '#3 1922 9 Av Se', 'Jfit + Restore — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/jfit-restore-b8bc81a1b121-hero.jpg', 'jfitrestore.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.018814, 51.035168), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1530,7 +1530,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e7334a0455b6', id, 'Hd Motors', 'shop', 'HM', '1817 9 Av Se', 'Hd Motors — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc60/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.021029, 51.035713), 4326)::geography
+select 'e7334a0455b6', id, 'Hd Motors', 'shop', 'HM', '1817 9 Av Se', 'Hd Motors — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/hd-motors-e7334a0455b6-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.021029, 51.035713), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1547,7 +1547,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'fa9f4171431d', id, 'King Eddy Live Music', 'restaurant', 'KE', '438 9 Av Se', 'King Eddy Live Music — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc65/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.053495, 51.044519), 4326)::geography
+select 'fa9f4171431d', id, 'King Eddy Live Music', 'restaurant', 'KE', '438 9 Av Se', 'King Eddy Live Music — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/king-eddy-live-music-fa9f4171431d-hero.jpg', 'kingeddy.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.053495, 51.044519), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1564,7 +1564,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4c1fe4126426', id, 'Salvation Army (The)', 'services', 'SA', '420 9 Av Se', 'Salvation Army (The) — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc454/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.054307, 51.044628), 4326)::geography
+select '4c1fe4126426', id, 'Salvation Army (The)', 'services', 'SA', '420 9 Av Se', 'Salvation Army (The) — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/salvation-army-the-4c1fe4126426-hero.jpg', 'salvationarmycalgary.org', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.054307, 51.044628), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1581,7 +1581,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f0fcbbc515c4', id, 'Prep Doctors', 'shop', 'PD', '518 9 Av Se', 'Prep Doctors — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc402/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.052187, 51.044565), 4326)::geography
+select 'f0fcbbc515c4', id, 'Prep Doctors', 'shop', 'PD', '518 9 Av Se', 'Prep Doctors — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/prep-doctors-f0fcbbc515c4-hero.jpg', 'prepdoctors.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.052187, 51.044565), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1598,7 +1598,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '5c368a88b70e', id, '11-Eleven Liquor', 'shop', '1L', '1402 9 Av Se', '11-Eleven Liquor — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc80/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031172, 51.040205), 4326)::geography
+select '5c368a88b70e', id, '11-Eleven Liquor', 'shop', '1L', '1402 9 Av Se', '11-Eleven Liquor — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/11-eleven-liquor-5c368a88b70e-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031172, 51.040205), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1615,7 +1615,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '807072a32dc5', id, 'Delicious From Colombia', 'restaurant', 'DF', '1314B 9 Av Se', 'Delicious From Colombia — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc52/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033266, 51.041055), 4326)::geography
+select '807072a32dc5', id, 'Delicious From Colombia', 'restaurant', 'DF', '1314B 9 Av Se', 'Delicious From Colombia — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/delicious-from-colombia-807072a32dc5-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033266, 51.041055), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1649,7 +1649,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6ec656d11313', id, 'Rosso Coffee Roasters Inglewood', 'cafe', 'RC', '1400 9 Av Se', 'Industrial-chic roastery & flagship café.', '7am–6pm', '[["☕","House-roasted"],["🪵","Communal tables"],["🥐","Fresh pastries"]]'::jsonb, 'https://picsum.photos/seed/strollyyc714/520/340', 'rossocoffee.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031278, 51.040253), 4326)::geography
+select '6ec656d11313', id, 'Rosso Coffee Roasters Inglewood', 'cafe', 'RC', '1400 9 Av Se', 'Industrial-chic roastery & flagship café.', '7am–6pm', '[["☕","House-roasted"],["🪵","Communal tables"],["🥐","Fresh pastries"]]'::jsonb, '/media/businesses/heroes/rosso-coffee-roasters-inglewood-6ec656d11313-hero.jpg', 'rossocoffeeroasters.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.031278, 51.040253), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1666,7 +1666,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f50eef980e1b', id, 'Minh Chau Vietnamese Restaurant', 'restaurant', 'MC', '1318 9 Av Se', 'Minh Chau Vietnamese Restaurant — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc656/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033024, 51.0409), 4326)::geography
+select 'f50eef980e1b', id, 'Minh Chau Vietnamese Restaurant', 'restaurant', 'MC', '1318 9 Av Se', 'Minh Chau Vietnamese Restaurant — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/minh-chau-vietnamese-restaurant-f50eef980e1b-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033024, 51.0409), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1683,7 +1683,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f3be6109ae01', id, 'Collector''s Gallery (The)', 'gallery', 'CG', '1332A 9 Av Se', 'Collector''s Gallery (The) — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, 'https://picsum.photos/seed/strollyyc519/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032172, 51.040653), 4326)::geography
+select 'f3be6109ae01', id, 'Collector''s Gallery (The)', 'gallery', 'CG', '1332A 9 Av Se', 'Collector''s Gallery (The) — gallery on 9 Ave SE in Inglewood.', '11am–5pm', '[["🎨","Art & culture"],["🆓","Drop in"],["🖼️","Local makers"]]'::jsonb, '/media/businesses/heroes/collector-s-gallery-the-f3be6109ae01-hero.jpg', 'collectorsgalleryofart.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032172, 51.040653), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1700,7 +1700,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4ff6ccc46bc6', id, 'Monki Breakfast Club & Bistro', 'restaurant', 'MB', '#4 1420 9 Av Se', 'Monki Breakfast Club & Bistro — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc565/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030393, 51.03991), 4326)::geography
+select '4ff6ccc46bc6', id, 'Monki Breakfast Club & Bistro', 'restaurant', 'MB', '#4 1420 9 Av Se', 'Monki Breakfast Club & Bistro — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/monki-breakfast-club-bistro-4ff6ccc46bc6-hero.jpg', 'monkibistro.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030393, 51.03991), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1717,7 +1717,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4b6002b0a66d', id, 'That Old Retro Store', 'shop', 'TO', '1314A 9 Av Se', 'That Old Retro Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc370/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033338, 51.041084), 4326)::geography
+select '4b6002b0a66d', id, 'That Old Retro Store', 'shop', 'TO', '1314A 9 Av Se', 'That Old Retro Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/that-old-retro-store-4b6002b0a66d-hero.jpg', 'thatoldretrostore.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033338, 51.041084), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1734,7 +1734,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e22ed6114477', id, 'Twitchin Threadz & Company', 'shop', 'TT', '#2 1335 9 Av Se', 'Twitchin Threadz & Company — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc939/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032321, 51.040352), 4326)::geography
+select 'e22ed6114477', id, 'Twitchin Threadz & Company', 'shop', 'TT', '#2 1335 9 Av Se', 'Twitchin Threadz & Company — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/twitchin-threadz-company-e22ed6114477-hero.jpg', 'twitchinthreadz.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032321, 51.040352), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1751,7 +1751,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'b1d63fca1b08', id, 'Tupi Acai Bowls', 'restaurant', 'TA', '1414 9 Av Se', 'Tupi Acai Bowls — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc468/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030698, 51.040026), 4326)::geography
+select 'b1d63fca1b08', id, 'Tupi Acai Bowls', 'restaurant', 'TA', '1414 9 Av Se', 'Tupi Acai Bowls — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/tupi-acai-bowls-b1d63fca1b08-hero.jpg', 'tupibowls.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030698, 51.040026), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1768,7 +1768,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '1af4eb6bb2fd', id, 'Kultura Massage Wellness', 'services', 'KM', '1528 9 Av Se', 'Kultura Massage Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc935/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
+select '1af4eb6bb2fd', id, 'Kultura Massage Wellness', 'services', 'KM', '1528 9 Av Se', 'Kultura Massage Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/kultura-massage-wellness-1af4eb6bb2fd-hero.jpg', 'kulturamassage.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1785,7 +1785,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '070d5959d97d', id, 'Boss Tattoos Walk - In Studio', 'services', 'BT', '1331 9 Av Se', 'Boss Tattoos Walk - In Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc918/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032526, 51.040419), 4326)::geography
+select '070d5959d97d', id, 'Boss Tattoos Walk - In Studio', 'services', 'BT', '1331 9 Av Se', 'Boss Tattoos Walk - In Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/boss-tattoos-walk-in-studio-070d5959d97d-hero.jpg', 'bosstattoos.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032526, 51.040419), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1802,7 +1802,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'c36b3a13013f', id, 'Wild Soul Body Sugaring', 'services', 'WS', '#109E 1526 9 Av Se', 'Wild Soul Body Sugaring — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc100/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027171, 51.038692), 4326)::geography
+select 'c36b3a13013f', id, 'Wild Soul Body Sugaring', 'services', 'WS', '#109E 1526 9 Av Se', 'Wild Soul Body Sugaring — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/wild-soul-body-sugaring-c36b3a13013f-hero.jpg', 'wildsoulbodysugaring.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027171, 51.038692), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1819,7 +1819,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'db2d4b40f860', id, 'Permanent Beauty Boutique Yyc', 'services', 'PB', '#109 1526 9 Av Se', 'Permanent Beauty Boutique Yyc — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc388/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027223, 51.038672), 4326)::geography
+select 'db2d4b40f860', id, 'Permanent Beauty Boutique Yyc', 'services', 'PB', '#109 1526 9 Av Se', 'Permanent Beauty Boutique Yyc — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/permanent-beauty-boutique-yyc-db2d4b40f860-hero.jpg', 'permanentbeautyboutiqueyyc.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027223, 51.038672), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1836,7 +1836,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'eada90fe500b', id, 'Foundation Barbershop', 'bar', 'FB', '#3 1335 9 Av Se', 'Foundation Barbershop — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc119/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032395, 51.040383), 4326)::geography
+select 'eada90fe500b', id, 'Foundation Barbershop', 'bar', 'FB', '#3 1335 9 Av Se', 'Foundation Barbershop — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/foundation-barbershop-eada90fe500b-hero.jpg', 'foundationbarbershop.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032395, 51.040383), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1853,7 +1853,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8e71e576c7ad', id, 'Double L Motors (2008)', 'shop', 'DL', '1509 9 Av Se', 'Double L Motors (2008) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc339/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.028407, 51.038682), 4326)::geography
+select '8e71e576c7ad', id, 'Double L Motors (2008)', 'shop', 'DL', '1509 9 Av Se', 'Double L Motors (2008) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/double-l-motors-2008-8e71e576c7ad-hero.jpg', 'doublelmotors.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.028407, 51.038682), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1870,7 +1870,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '77efe6ee9a22', id, 'Nova Skin & Wellness', 'services', 'NS', '1412 9 Av Se', 'Nova Skin & Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc630/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030796, 51.040061), 4326)::geography
+select '77efe6ee9a22', id, 'Nova Skin & Wellness', 'services', 'NS', '1412 9 Av Se', 'Nova Skin & Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/nova-skin-wellness-77efe6ee9a22-hero.jpg', 'novaskinyyc.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030796, 51.040061), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1887,7 +1887,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a508aaae5b24', id, 'Pro Line Shooters Ii', 'services', 'PL', '#B 1426 9 Av Se', 'Pro Line Shooters Ii — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc850/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029862, 51.039704), 4326)::geography
+select 'a508aaae5b24', id, 'Pro Line Shooters Ii', 'services', 'PL', '#B 1426 9 Av Se', 'Pro Line Shooters Ii — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/pro-line-shooters-ii-a508aaae5b24-hero.jpg', 'prolineshooters.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.029862, 51.039704), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1904,7 +1904,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '1762b7c2d959', id, 'Le Belle Arti', 'shop', 'LB', '1435 9 Av Se', 'Le Belle Arti — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc942/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029679, 51.039147), 4326)::geography
+select '1762b7c2d959', id, 'Le Belle Arti', 'shop', 'LB', '1435 9 Av Se', 'Le Belle Arti — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/le-belle-arti-1762b7c2d959-hero.jpg', 'lebellearti.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.029679, 51.039147), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1921,7 +1921,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8bfa3e36c706', id, 'Rayacom', 'shop', 'R', '1528 9 Av Se', 'Rayacom — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc31/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
+select '8bfa3e36c706', id, 'Rayacom', 'shop', 'R', '1528 9 Av Se', 'Rayacom — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/rayacom-8bfa3e36c706-hero.jpg', 'rayacom.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1938,7 +1938,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6f49344adc5e', id, 'Tail Blazers Inglewood', 'shop', 'TB', '#7 1420 9 Av Se', 'Tail Blazers Inglewood — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc437/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.0301, 51.039788), 4326)::geography
+select '6f49344adc5e', id, 'Tail Blazers Inglewood', 'shop', 'TB', '#7 1420 9 Av Se', 'Tail Blazers Inglewood — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/tail-blazers-inglewood-6f49344adc5e-hero.jpg', 'tailblazerspets.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.0301, 51.039788), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1955,7 +1955,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'ce59616ff3fd', id, 'Purple Lotus Massage', 'services', 'PL', '1530 9 Av Se', 'Purple Lotus Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc72/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
+select 'ce59616ff3fd', id, 'Purple Lotus Massage', 'services', 'PL', '1530 9 Av Se', 'Purple Lotus Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/purple-lotus-massage-ce59616ff3fd-hero.jpg', 'purplelotusmassageyyc.clinicsense.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1972,7 +1972,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '9a47399c5b8e', id, 'Shoe Closet (The)', 'shop', 'SC', '1404 9 Av Se', 'Shoe Closet (The) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc275/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031068, 51.040171), 4326)::geography
+select '9a47399c5b8e', id, 'Shoe Closet (The)', 'shop', 'SC', '1404 9 Av Se', 'Shoe Closet (The) — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/shoe-closet-the-9a47399c5b8e-hero.jpg', 'theshoeclosets.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.031068, 51.040171), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -1989,7 +1989,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f380866520e2', id, 'Canela', 'cafe', 'C', '1319 9 Av Se', 'All-vegan bakery & café — sweet & savoury.', '8am–5pm', '[["🥐","Vegan croissants"],["🎂","Cake counter"],["🌱","Plant-based"]]'::jsonb, 'https://picsum.photos/seed/strollyyc139/520/340', 'canelabakeshop.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033301, 51.040621), 4326)::geography
+select 'f380866520e2', id, 'Canela', 'cafe', 'C', '1319 9 Av Se', 'All-vegan bakery & café — sweet & savoury.', '8am–5pm', '[["🥐","Vegan croissants"],["🎂","Cake counter"],["🌱","Plant-based"]]'::jsonb, '/media/businesses/heroes/canela-f380866520e2-hero.jpg', 'canelayyc.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033301, 51.040621), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2006,7 +2006,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a783f67510af', id, 'Knifewear', 'restaurant', 'K', '#100A 1316 9 Av Se', 'Japanese kitchen knives & sharpening experts.', '10am–6pm', '[["🔪","Hand-forged blades"],["🪒","Sharpening bar"],["🇯🇵","Imported steel"]]'::jsonb, 'https://picsum.photos/seed/strollyyc705/520/340', 'knifewear.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033142, 51.041044), 4326)::geography
+select 'a783f67510af', id, 'Knifewear', 'restaurant', 'K', '#100A 1316 9 Av Se', 'Japanese kitchen knives & sharpening experts.', '10am–6pm', '[["🔪","Hand-forged blades"],["🪒","Sharpening bar"],["🇯🇵","Imported steel"]]'::jsonb, '/media/businesses/heroes/knifewear-a783f67510af-hero.jpg', 'knifewear.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033142, 51.041044), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2023,7 +2023,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'cff5275976cd', id, 'Yyc Laser & Skincare', 'services', 'YL', '#109H 1526 9 Av Se', 'Yyc Laser & Skincare — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc323/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027197, 51.038773), 4326)::geography
+select 'cff5275976cd', id, 'Yyc Laser & Skincare', 'services', 'YL', '#109H 1526 9 Av Se', 'Yyc Laser & Skincare — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/yyc-laser-skincare-cff5275976cd-hero.jpg', 'laserandskincare.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027197, 51.038773), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2040,7 +2040,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '872ea242c1fa', id, 'Alberta Boot Company', 'shop', 'AB', '1312A 9 Av Se', 'Alberta''s original western boot maker.', '9am–5:30pm', '[["👢","Handmade cowboy boots"],["🐂","Exotic leathers"],["🧵","Custom fittings"]]'::jsonb, 'https://picsum.photos/seed/strollyyc952/520/340', 'albertaboot.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033508, 51.041062), 4326)::geography
+select '872ea242c1fa', id, 'Alberta Boot Company', 'shop', 'AB', '1312A 9 Av Se', 'Alberta''s original western boot maker.', '9am–5:30pm', '[["👢","Handmade cowboy boots"],["🐂","Exotic leathers"],["🧵","Custom fittings"]]'::jsonb, '/media/businesses/heroes/alberta-boot-company-872ea242c1fa-hero.png', 'albertaboot.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033508, 51.041062), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2057,7 +2057,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '9257e6fa4ed5', id, 'Teou Studio', 'services', 'TS', '#109D 1526 9 Av Se', 'Teou Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc81/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027155, 51.038672), 4326)::geography
+select '9257e6fa4ed5', id, 'Teou Studio', 'services', 'TS', '#109D 1526 9 Av Se', 'Teou Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/teou-studio-9257e6fa4ed5-hero.jpg', 'teoustudio.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027155, 51.038672), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2074,7 +2074,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '76e41ecc93dd', id, 'Not Another Eye Store', 'shop', 'NA', '1321 9 Av Se', 'Not Another Eye Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc504/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033149, 51.040623), 4326)::geography
+select '76e41ecc93dd', id, 'Not Another Eye Store', 'shop', 'NA', '1321 9 Av Se', 'Not Another Eye Store — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/not-another-eye-store-76e41ecc93dd-hero.jpg', 'notanothereyestore.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033149, 51.040623), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2091,7 +2091,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4c72fe2adf42', id, 'Calgary Local Florist', 'restaurant', 'CL', '1428 9 Av Se', 'Calgary Local Florist — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc861/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029862, 51.039704), 4326)::geography
+select '4c72fe2adf42', id, 'Calgary Local Florist', 'restaurant', 'CL', '1428 9 Av Se', 'Calgary Local Florist — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/calgary-local-florist-4c72fe2adf42-hero.jpg', 'calgarylocalflorist.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029862, 51.039704), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2108,7 +2108,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6d5d54955fd5', id, 'Kindred Aesthetics', 'services', 'KA', '#109A 1526 9 Av Se', 'Kindred Aesthetics — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc736/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027259, 51.038647), 4326)::geography
+select '6d5d54955fd5', id, 'Kindred Aesthetics', 'services', 'KA', '#109A 1526 9 Av Se', 'Kindred Aesthetics — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/kindred-aesthetics-6d5d54955fd5-hero.jpg', 'kindredaesthetics.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027259, 51.038647), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2125,7 +2125,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '7d26fd6de9f4', id, 'Tea Cult (The)', 'restaurant', 'TC', '#23 1420 9 Av Se', 'Tea Cult (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc579/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.02988, 51.039884), 4326)::geography
+select '7d26fd6de9f4', id, 'Tea Cult (The)', 'restaurant', 'TC', '#23 1420 9 Av Se', 'Tea Cult (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/tea-cult-the-7d26fd6de9f4-hero.jpg', 'theteacult.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.02988, 51.039884), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2142,7 +2142,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '12d77445dc0f', id, 'Man Of Distinction', 'shop', 'MO', '1416 9 Av Se', 'Man Of Distinction — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc531/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030604, 51.039991), 4326)::geography
+select '12d77445dc0f', id, 'Man Of Distinction', 'shop', 'MO', '1416 9 Av Se', 'Man Of Distinction — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/man-of-distinction-12d77445dc0f-hero.jpg', 'manofdistinction.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030604, 51.039991), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2159,7 +2159,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '3df783573f2f', id, 'Change Is Good Cdc', 'shop', 'CI', '1317 9 Av Se', 'Change Is Good Cdc — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc612/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03349, 51.040644), 4326)::geography
+select '3df783573f2f', id, 'Change Is Good Cdc', 'shop', 'CI', '1317 9 Av Se', 'Change Is Good Cdc — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/change-is-good-cdc-3df783573f2f-hero.jpg', 'changeisgoodyyc.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03349, 51.040644), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2176,7 +2176,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'b49cbb8240cc', id, 'Silk Road Spice Merchant (The)', 'restaurant', 'SR', '1419 9 Av Se', 'Silk Road Spice Merchant (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc601/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030539, 51.039569), 4326)::geography
+select 'b49cbb8240cc', id, 'Silk Road Spice Merchant (The)', 'restaurant', 'SR', '1419 9 Av Se', 'Silk Road Spice Merchant (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/silk-road-spice-merchant-the-b49cbb8240cc-hero.jpg', 'silkroadspices.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030539, 51.039569), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2193,7 +2193,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '7978ab85f4db', id, 'Spolumbo''s Fine Food & Deli', 'restaurant', 'SF', '1308 9 Av Se', 'Bustling Italian deli & famous house sausage.', '9am–4pm', '[["🌭","House sausage"],["🥪","Deli subs"],["👨‍🍳","Ex-Stampeders"]]'::jsonb, 'https://picsum.photos/seed/strollyyc149/520/340', 'spolumbos.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033859, 51.041358), 4326)::geography
+select '7978ab85f4db', id, 'Spolumbo''s Fine Food & Deli', 'restaurant', 'SF', '1308 9 Av Se', 'Bustling Italian deli & famous house sausage.', '9am–4pm', '[["🌭","House sausage"],["🥪","Deli subs"],["👨‍🍳","Ex-Stampeders"]]'::jsonb, '/media/businesses/heroes/spolumbo-s-fine-food-deli-7978ab85f4db-hero.png', 'spolumbos.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033859, 51.041358), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2210,7 +2210,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '27762f395b94', id, 'High Line Brewing', 'bar', 'HL', '#113 1318 9 Av Se', 'Small-batch neighbourhood brewery & taproom.', '12–11pm', '[["🍺","Fresh batches"],["🎯","Taproom games"],["🐕","Dog-friendly"]]'::jsonb, 'https://picsum.photos/seed/strollyyc131/520/340', 'highlinebrewing.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032831, 51.041129), 4326)::geography
+select '27762f395b94', id, 'High Line Brewing', 'bar', 'HL', '#113 1318 9 Av Se', 'Small-batch neighbourhood brewery & taproom.', '12–11pm', '[["🍺","Fresh batches"],["🎯","Taproom games"],["🐕","Dog-friendly"]]'::jsonb, '/media/businesses/heroes/high-line-brewing-27762f395b94-hero.jpg', 'highlinebrewing.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032831, 51.041129), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2227,7 +2227,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e2da7a713064', id, 'Imagine Vintage Wear', 'shop', 'IV', '1325 9 Av Se', 'Imagine Vintage Wear — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc888/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032979, 51.040526), 4326)::geography
+select 'e2da7a713064', id, 'Imagine Vintage Wear', 'shop', 'IV', '1325 9 Av Se', 'Imagine Vintage Wear — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/imagine-vintage-wear-e2da7a713064-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032979, 51.040526), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2244,7 +2244,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '660cce1585b4', id, 'Elysian Alchemy', 'restaurant', 'EA', '1340 9 Av Se', 'Elysian Alchemy — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc426/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03177, 51.040439), 4326)::geography
+select '660cce1585b4', id, 'Elysian Alchemy', 'restaurant', 'EA', '1340 9 Av Se', 'Elysian Alchemy — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/elysian-alchemy-660cce1585b4-hero.jpg', 'elysianalchemy.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.03177, 51.040439), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2261,7 +2261,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'fe1f0bae0b79', id, 'Hallmark Auto Body', 'shop', 'HA', '1430 9 Av Se', 'Hallmark Auto Body — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc371/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029228, 51.039646), 4326)::geography
+select 'fe1f0bae0b79', id, 'Hallmark Auto Body', 'shop', 'HA', '1430 9 Av Se', 'Hallmark Auto Body — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/hallmark-auto-body-fe1f0bae0b79-hero.jpg', 'hallmarkautobody.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.029228, 51.039646), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2278,7 +2278,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '94ea41bcbdb8', id, 'Eira Laser', 'services', 'EL', '#109I 1526 9 Av Se', 'Eira Laser — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc92/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027173, 51.038729), 4326)::geography
+select '94ea41bcbdb8', id, 'Eira Laser', 'services', 'EL', '#109I 1526 9 Av Se', 'Eira Laser — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/eira-laser-94ea41bcbdb8-hero.jpg', 'eiralaser.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027173, 51.038729), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2295,7 +2295,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8dcd6411ad76', id, 'Notorious Hair Group', 'services', 'NH', '#1 1335 9 Av Se', 'Notorious Hair Group — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc81/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032305, 51.040346), 4326)::geography
+select '8dcd6411ad76', id, 'Notorious Hair Group', 'services', 'NH', '#1 1335 9 Av Se', 'Notorious Hair Group — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/notorious-hair-group-8dcd6411ad76-hero.jpg', 'notorioushair.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032305, 51.040346), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2312,7 +2312,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '56bf137ea1eb', id, 'Ama Jewellery & Watches', 'shop', 'AJ', '1349 9 Av Se', 'Ama Jewellery & Watches — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc796/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032095, 51.040232), 4326)::geography
+select '56bf137ea1eb', id, 'Ama Jewellery & Watches', 'shop', 'AJ', '1349 9 Av Se', 'Ama Jewellery & Watches — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/ama-jewellery-watches-56bf137ea1eb-hero.jpg', 'amajewellery.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032095, 51.040232), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2329,7 +2329,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '0a462a7fdf36', id, 'Vegan Street & The Attic', 'restaurant', 'VS', '1413 9 Av Se', 'Vegan Street & The Attic — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc67/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030957, 51.039689), 4326)::geography
+select '0a462a7fdf36', id, 'Vegan Street & The Attic', 'restaurant', 'VS', '1413 9 Av Se', 'Vegan Street & The Attic — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/vegan-street-the-attic-0a462a7fdf36-hero.jpg', 'veganstreet.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030957, 51.039689), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2346,7 +2346,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '127a77d78cdc', id, 'Barbie Nail And Massage', 'bar', 'BN', '1327B 9 Av Se', 'Barbie Nail And Massage — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc594/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032595, 51.040442), 4326)::geography
+select '127a77d78cdc', id, 'Barbie Nail And Massage', 'bar', 'BN', '1327B 9 Av Se', 'Barbie Nail And Massage — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/barbie-nail-and-massage-127a77d78cdc-hero.jpg', 'barbienailsinglewood.ltd', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.032595, 51.040442), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2363,7 +2363,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f0e71e686754', id, 'Tease Hair Studio', 'services', 'TH', '1532 9 Av Se', 'Tease Hair Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc763/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
+select 'f0e71e686754', id, 'Tease Hair Studio', 'services', 'TH', '1532 9 Av Se', 'Tease Hair Studio — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/tease-hair-studio-f0e71e686754-hero.jpg', 'instagram.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2380,7 +2380,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a3c937706f28', id, 'Coven Body Arts', 'services', 'CB', '1532 9 Av Se', 'Coven Body Arts — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc797/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
+select 'a3c937706f28', id, 'Coven Body Arts', 'services', 'CB', '1532 9 Av Se', 'Coven Body Arts — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/coven-body-arts-a3c937706f28-hero.jpg', 'covenbodyarts.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2397,7 +2397,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '92e556fab575', id, 'Plant Terrariums & Garden Supplies', 'shop', 'PT', '1327 9 Av Se', 'Plant Terrariums & Garden Supplies — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc81/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.0329, 51.040387), 4326)::geography
+select '92e556fab575', id, 'Plant Terrariums & Garden Supplies', 'shop', 'PT', '1327 9 Av Se', 'Plant Terrariums & Garden Supplies — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/plant-terrariums-garden-supplies-92e556fab575-hero.jpg', 'plantshop.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.0329, 51.040387), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2414,7 +2414,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'baa6a523115f', id, 'Recess', 'shop', 'R', '1333 9 Av Se', 'Recess — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc477/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032476, 51.040396), 4326)::geography
+select 'baa6a523115f', id, 'Recess', 'shop', 'R', '1333 9 Av Se', 'Recess — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/recess-baa6a523115f-hero.jpg', 'recessshop.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032476, 51.040396), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2431,7 +2431,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'bced601bb20a', id, 'Chantelle Keshaye Permanent Makeup', 'services', 'CK', '#8 1420 9 Av Se', 'Chantelle Keshaye Permanent Makeup — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc519/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030299, 51.039877), 4326)::geography
+select 'bced601bb20a', id, 'Chantelle Keshaye Permanent Makeup', 'services', 'CK', '#8 1420 9 Av Se', 'Chantelle Keshaye Permanent Makeup — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/chantelle-keshaye-permanent-makeup-bced601bb20a-hero.jpg', 'chantellekeshaye.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030299, 51.039877), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2448,7 +2448,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'a814add1ea08', id, 'Radiance Day Spa', 'services', 'RD', '1528 9 Av Se', 'Radiance Day Spa — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc108/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
+select 'a814add1ea08', id, 'Radiance Day Spa', 'services', 'RD', '1528 9 Av Se', 'Radiance Day Spa — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/radiance-day-spa-a814add1ea08-hero.jpg', 'radiancedayspayyc.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2465,7 +2465,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'ac2056898e5a', id, 'Sol Electrolysis', 'services', 'SE', '1532 9 Av Se', 'Sol Electrolysis — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc10/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
+select 'ac2056898e5a', id, 'Sol Electrolysis', 'services', 'SE', '1532 9 Av Se', 'Sol Electrolysis — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/sol-electrolysis-ac2056898e5a-hero.jpg', 'solelectrolysis.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.026808, 51.038561), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2482,7 +2482,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8e81202c36eb', id, 'Four20 Premium Market', 'shop', 'FP', '1309 9 Av Se', 'Four20 Premium Market — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc212/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033875, 51.04079), 4326)::geography
+select '8e81202c36eb', id, 'Four20 Premium Market', 'shop', 'FP', '1309 9 Av Se', 'Four20 Premium Market — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/four20-premium-market-8e81202c36eb-hero.jpg', '420pm.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033875, 51.04079), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2499,7 +2499,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '71a3c24d9cc0', id, 'Ami Tea Sub', 'cafe', 'AT', '1357 9 Av Se', 'Ami Tea Sub — cafe on 9 Ave SE in Inglewood.', '8am–6pm', '[["☕","Coffee & treats"],["🥐","Fresh baking"],["🪟","Cosy room"]]'::jsonb, 'https://picsum.photos/seed/strollyyc16/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031953, 51.04017), 4326)::geography
+select '71a3c24d9cc0', id, 'Ami Tea Sub', 'cafe', 'AT', '1357 9 Av Se', 'Ami Tea Sub — cafe on 9 Ave SE in Inglewood.', '8am–6pm', '[["☕","Coffee & treats"],["🥐","Fresh baking"],["🪟","Cosy room"]]'::jsonb, '/media/businesses/heroes/ami-tea-sub-71a3c24d9cc0-hero.png', 'order.amitea.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.031953, 51.04017), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2516,7 +2516,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '303651f0e95a', id, 'Lyndsey Haley Massage Therapy', 'services', 'LH', '1530 9 Av Se', 'Lyndsey Haley Massage Therapy — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc629/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
+select '303651f0e95a', id, 'Lyndsey Haley Massage Therapy', 'services', 'LH', '1530 9 Av Se', 'Lyndsey Haley Massage Therapy — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/lyndsey-haley-massage-therapy-303651f0e95a-hero.jpg', 'lyndseyhaleyrmt.janeapp.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2533,7 +2533,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'f9da1415aa9d', id, 'Inspire Wellness Massage', 'services', 'IW', '#109A 1526 9 Av Se', 'Inspire Wellness Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc727/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027259, 51.038647), 4326)::geography
+select 'f9da1415aa9d', id, 'Inspire Wellness Massage', 'services', 'IW', '#109A 1526 9 Av Se', 'Inspire Wellness Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/inspire-wellness-massage-f9da1415aa9d-hero.jpg', 'inspirewellnessmassage.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027259, 51.038647), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2550,7 +2550,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'e50b4d6af5b6', id, 'Blooms On 9Th', 'shop', 'BO', '#19 1420 9 Av Se', 'Blooms On 9Th — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc187/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.029916, 51.039847), 4326)::geography
+select 'e50b4d6af5b6', id, 'Blooms On 9Th', 'shop', 'BO', '#19 1420 9 Av Se', 'Blooms On 9Th — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/blooms-on-9th-e50b4d6af5b6-hero.png', 'bloomson9th.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.029916, 51.039847), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2584,7 +2584,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '0150a1d87973', id, 'Sakura Eyelash Salon', 'services', 'SE', '1420 9 Av Se', 'Sakura Eyelash Salon — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc833/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030278, 51.040006), 4326)::geography
+select '0150a1d87973', id, 'Sakura Eyelash Salon', 'services', 'SE', '1420 9 Av Se', 'Sakura Eyelash Salon — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/sakura-eyelash-salon-0150a1d87973-hero.jpg', 'sakura-lashyyc.my.canva.site', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030278, 51.040006), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2601,7 +2601,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '6aa8ee6fefbc', id, 'Neo Vape', 'shop', 'NV', '#1 1336 9 Av Se', 'Neo Vape — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc793/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032014, 51.04056), 4326)::geography
+select '6aa8ee6fefbc', id, 'Neo Vape', 'shop', 'NV', '#1 1336 9 Av Se', 'Neo Vape — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/neo-vape-6aa8ee6fefbc-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032014, 51.04056), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2618,7 +2618,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '30fec28bcc20', id, 'Blue Store (The)', 'restaurant', 'BS', '1344 9 Av Se', 'Blue Store (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc378/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03177, 51.040439), 4326)::geography
+select '30fec28bcc20', id, 'Blue Store (The)', 'restaurant', 'BS', '1344 9 Av Se', 'Blue Store (The) — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/blue-store-the-30fec28bcc20-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.03177, 51.040439), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2635,7 +2635,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8f4da35ae374', id, 'Saint And Stellar Tattoo', 'services', 'SA', '1530 9 Av Se', 'Saint And Stellar Tattoo — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc833/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
+select '8f4da35ae374', id, 'Saint And Stellar Tattoo', 'services', 'SA', '1530 9 Av Se', 'Saint And Stellar Tattoo — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/saint-and-stellar-tattoo-8f4da35ae374-hero.jpg', 'saintandstellar.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.026906, 51.038632), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2652,7 +2652,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'fb97bea5afc2', id, 'Tibetan Trom', 'shop', 'TT', '1325A 9 Av Se', 'Tibetan Trom — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc268/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032979, 51.040526), 4326)::geography
+select 'fb97bea5afc2', id, 'Tibetan Trom', 'shop', 'TT', '1325A 9 Av Se', 'Tibetan Trom — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/tibetan-trom-fb97bea5afc2-hero.jpg', 'tibetantrom.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032979, 51.040526), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2669,7 +2669,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'bdb45997e4f9', id, 'Sacred Horizons Massage', 'services', 'SH', '1528 9 Av Se', 'Sacred Horizons Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc960/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
+select 'bdb45997e4f9', id, 'Sacred Horizons Massage', 'services', 'SH', '1528 9 Av Se', 'Sacred Horizons Massage — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc960/520/340', 'sacredhorizons.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027023, 51.038677), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2686,7 +2686,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '94c97df793dd', id, 'Atlantic Auto Sales', 'shop', 'AA', '1556 9 Av Se', 'Atlantic Auto Sales — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, 'https://picsum.photos/seed/strollyyc812/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.025385, 51.038017), 4326)::geography
+select '94c97df793dd', id, 'Atlantic Auto Sales', 'shop', 'AA', '1556 9 Av Se', 'Atlantic Auto Sales — shop on 9 Ave SE in Inglewood.', '10am–6pm', '[["🛍️","Indie retail"],["✨","Curated goods"],["🎁","Local finds"]]'::jsonb, '/media/businesses/heroes/atlantic-auto-sales-94c97df793dd-hero.png', 'atlanticautosalescalgary.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.025385, 51.038017), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2703,7 +2703,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'ffe0781bf7e7', id, 'Dirty Duck', 'bar', 'DD', '1336 9 Av Se', 'Dirty Duck — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, 'https://picsum.photos/seed/strollyyc506/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032014, 51.04056), 4326)::geography
+select 'ffe0781bf7e7', id, 'Dirty Duck', 'bar', 'DD', '1336 9 Av Se', 'Dirty Duck — bar on 9 Ave SE in Inglewood.', '12pm–12am', '[["🍺","Local pours"],["🎶","Good vibes"],["🍔","Bar bites"]]'::jsonb, '/media/businesses/heroes/dirty-duck-ffe0781bf7e7-hero.jpg', 'dirtyduckpub.ca', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.032014, 51.04056), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2720,7 +2720,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '44b81446a20e', id, 'Kent Of Inglewood', 'services', 'KO', '#100B 1316 9 Av Se', 'Wet-shaving, grooming goods & fine knives.', '10am–6pm', '[["🪒","Straight razors"],["🧴","Grooming kits"],["🎁","Great gifts"]]'::jsonb, 'https://picsum.photos/seed/strollyyc768/520/340', 'kentofinglewood.com', 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033142, 51.041044), 4326)::geography
+select '44b81446a20e', id, 'Kent Of Inglewood', 'services', 'KO', '#100B 1316 9 Av Se', 'Wet-shaving, grooming goods & fine knives.', '10am–6pm', '[["🪒","Straight razors"],["🧴","Grooming kits"],["🎁","Great gifts"]]'::jsonb, '/media/businesses/heroes/kent-of-inglewood-44b81446a20e-hero.png', 'kentofinglewood.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.033142, 51.041044), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2737,7 +2737,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'c21c1143432a', id, 'Norley''s Colombian Street Food', 'restaurant', 'NC', '1314B 9 Av Se', 'Norley''s Colombian Street Food — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, 'https://picsum.photos/seed/strollyyc921/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033266, 51.041055), 4326)::geography
+select 'c21c1143432a', id, 'Norley''s Colombian Street Food', 'restaurant', 'NC', '1314B 9 Av Se', 'Norley''s Colombian Street Food — restaurant on 9 Ave SE in Inglewood.', '11am–10pm', '[["🍴","Local kitchen"],["🪑","Dine-in"],["📍","On the strip"]]'::jsonb, '/media/businesses/heroes/norley-s-colombian-street-food-c21c1143432a-hero.jpg', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.033266, 51.041055), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2754,7 +2754,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select 'dbea23c30e5b', id, 'Fetish Hair', 'services', 'FH', '#11 1420 9 Av Se', 'Fetish Hair — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc78/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030005, 51.039755), 4326)::geography
+select 'dbea23c30e5b', id, 'Fetish Hair', 'services', 'FH', '#11 1420 9 Av Se', 'Fetish Hair — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/fetish-hair-dbea23c30e5b-hero.jpg', 'fetishhair.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030005, 51.039755), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2771,7 +2771,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '8b29b7dad567', id, 'Shu Beauty', 'services', 'SB', '#8 1420 9 Av Se', 'Shu Beauty — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc623/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.030299, 51.039877), 4326)::geography
+select '8b29b7dad567', id, 'Shu Beauty', 'services', 'SB', '#8 1420 9 Av Se', 'Shu Beauty — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/shu-beauty-8b29b7dad567-hero.png', 'shubeauty.ca', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.030299, 51.039877), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,
@@ -2805,7 +2805,7 @@ on conflict (id) do update set
   geom = excluded.geom,
   updated_at = now();
 insert into public.businesses (id, city_id, name, category, mono, address, blurb, hours, highlights, photo_url, suggested_domain, source, needs_review, geom)
-select '4ea033a7b255', id, 'Cyndi Fehr Wellness', 'services', 'CF', '1528 9 Av Se', 'Cyndi Fehr Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, 'https://picsum.photos/seed/strollyyc143/520/340', null, 'City of Calgary business licence', true, st_setsrid(st_makepoint(-114.027119, 51.038586), 4326)::geography
+select '4ea033a7b255', id, 'Cyndi Fehr Wellness', 'services', 'CF', '1528 9 Av Se', 'Cyndi Fehr Wellness — local service on 9 Ave SE in Inglewood.', '9am–6pm', '[["💈","By appointment"],["✨","Local pros"],["📍","On 9 Ave"]]'::jsonb, '/media/businesses/heroes/cyndi-fehr-wellness-4ea033a7b255-hero.jpg', 'cyndifehrwellness.com', 'City of Calgary business licence', false, st_setsrid(st_makepoint(-114.027119, 51.038586), 4326)::geography
 from public.cities where slug = 'calgary'
 on conflict (id) do update set
   name = excluded.name,

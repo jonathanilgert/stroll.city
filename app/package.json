@@ -10,6 +10,7 @@
     "lint": "eslint",
     "export:supabase-seed": "node scripts/export-supabase-seed.mjs",
     "enrich:business-media": "node scripts/enrich-business-media.mjs",
+    "enrich:business-google": "node scripts/enrich-business-google-places.mjs",
     "keys:create": "node scripts/create-api-key.mjs"
   },
   "dependencies": {

@@ -146,11 +146,31 @@ export async function getBusiness(city: string, data: StrollData, slug: string) 
   return result.businesses.find((business) => business.id === slug || slugify(business.name) === slug) ?? null;
 }
 
-async function patchBusiness(city: string, businessId: string, patch: Partial<Business>) {
+export async function patchBusiness(city: string, businessId: string, patch: Partial<Business>) {
   const existing = await readOverlay<Partial<Business> & { id: string }>(city, "businesses");
   const next = new Map(existing.map((row) => [row.id, row]));
   next.set(businessId, { ...(next.get(businessId) ?? { id: businessId }), ...patch, id: businessId });
   await writeOverlay(city, "businesses", [...next.values()]);
+}
+
+export function sanitizeBusinessPatch(payload: Partial<Business>): Partial<Business> {
+  const patch: Partial<Business> = {};
+  if (payload.category !== undefined) patch.category = sanitizeString(payload.category, 80);
+  if (payload.blurb !== undefined) patch.blurb = sanitizeString(payload.blurb, 700);
+  if (payload.hours !== undefined) patch.hours = sanitizeString(payload.hours, 160);
+  if (payload.website !== undefined) patch.website = payload.website ? sanitizeString(payload.website, 240) : null;
+  if (payload.phone !== undefined) patch.phone = payload.phone ? sanitizeString(payload.phone, 80) : null;
+  if (payload.domain !== undefined) patch.domain = payload.domain ? sanitizeString(payload.domain, 120) : null;
+  if (payload.photo !== undefined) patch.photo = sanitizeString(payload.photo, 300);
+  if (payload.logo_url !== undefined) patch.logo_url = sanitizeString(payload.logo_url, 300);
+  if (payload.needsReview !== undefined) patch.needsReview = Boolean(payload.needsReview);
+  if (payload.source !== undefined) patch.source = sanitizeString(payload.source, 180);
+  if (payload.highlights !== undefined && Array.isArray(payload.highlights)) {
+    patch.highlights = payload.highlights
+      .slice(0, 6)
+      .map((item) => [sanitizeString(item?.[0], 12), sanitizeString(item?.[1], 120)] as [string, string]);
+  }
+  return patch;
 }
 
 export async function createBusinessClaim(city: string, data: StrollData, payload: Partial<ClaimPayload>): Promise<BusinessClaim> {
