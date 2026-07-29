@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
-import { cities, themeStyle } from "../cities";
 import styles from "../page.module.css";
 
 type Business = {
@@ -32,7 +31,6 @@ const plans = [
 ] as const;
 
 export default function PortalPage() {
-  const cityTheme = cities.find((city) => city.slug === "calgary")?.theme;
   const [businesses, setBusinesses] = useState<Business[]>([]);
   const [businessId, setBusinessId] = useState("");
   const [plan, setPlan] = useState<(typeof plans)[number]["id"]>("stroll");
@@ -98,7 +96,7 @@ export default function PortalPage() {
   };
 
   return (
-    <main className={styles.portalPage} style={cityTheme ? themeStyle(cityTheme) : undefined}>
+    <main className={styles.portalPage}>
       <section className={styles.portalHeroCard}>
         <Link href="/calgary" className={styles.portalBack}>← Back to Calgary map</Link>
         <p className={styles.eyebrow}>stroll.city business portal · Phase 4</p>

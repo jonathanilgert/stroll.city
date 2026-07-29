@@ -2,13 +2,32 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { GeoJSONSource, LngLatBoundsLike, Map as MapLibreMap, Marker } from "maplibre-gl";
+import maplibregl, { LngLatBoundsLike, Map as MapLibreMap, Marker } from "maplibre-gl";
+import {
+  Bike,
+  Briefcase,
+  CalendarDays,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Compass,
+  ExternalLink,
+  Globe,
+  Landmark,
+  Lightbulb,
+  Minus,
+  Navigation,
+  Plus,
+  Search,
+  ShieldCheck,
+  Waves,
+  X,
+} from "lucide-react";
 import type { CityConfig } from "./cities";
-import { themeStyle } from "./cities";
 import styles from "./page.module.css";
 
 type Category = "restaurant" | "cafe" | "bar" | "shop" | "services" | "gallery";
-type SidebarTab = "explore" | "events";
+type SidebarTab = "explore" | "events" | "saved";
 
 type Business = {
   id: string;
@@ -50,14 +69,12 @@ type EventItem = {
   source: string;
   lon: number;
   lat: number;
-  emoji?: string;
   url?: string;
 };
 
 type Attraction = {
   id: string;
   name: string;
-  emoji: string;
   lon: number;
   lat: number;
   blurb: string;
@@ -81,94 +98,81 @@ type StrollData = {
 };
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
-const ROOFS = ["#c76e55", "#d89a58", "#d7b56d", "#8fb982", "#74a9a5", "#8d9ed2", "#a98ac3", "#c98599", "#b98b62"];
-const CATEGORY_META: Record<Category, { label: string; icon: string }> = {
-  restaurant: { label: "Restaurants", icon: "🍽️" },
-  cafe: { label: "Cafés & sweets", icon: "☕" },
-  bar: { label: "Bars & music", icon: "🍺" },
-  shop: { label: "Shops", icon: "🛍️" },
-  services: { label: "Studios & services", icon: "✨" },
-  gallery: { label: "Arts & galleries", icon: "🎨" },
+
+const CAT_ICON: Record<Category, string> = {
+  restaurant: "M7 3v8a3 3 0 0 0 6 0V3M10 11v10M17 3c-1.2 2-1.6 3.4-1.6 5.2 0 1.3.7 2 1.6 2s1.6-.7 1.6-2C18.6 6.4 18.2 5 17 3Zm0 7.2V21",
+  cafe: "M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm12 1h2.5a2.5 2.5 0 0 1 0 5H16M3 21h14",
+  bar: "M5 4h14l-7 8v7M9 21h6M5 4l7 8",
+  shop: "M4 8h16l-1 12H5L4 8Zm4 0V6a4 4 0 0 1 8 0v2",
+  services: "M12 3v3M12 18v3M4.5 12h3M16.5 12h3M6.7 6.7l2.1 2.1M15.2 15.2l2.1 2.1M17.3 6.7l-2.1 2.1M8.8 15.2l-2.1 2.1",
+  gallery: "M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-2 0-2 2-1.6 3.4-2.2A5 5 0 0 0 21 12a9 9 0 0 0-9-9Zm-3.5 6h0M12 7h0m3.5 2h0",
 };
-const allCategories = Object.keys(CATEGORY_META) as Category[];
+const CAT_LABEL: Record<Category, string> = {
+  restaurant: "Restaurants",
+  cafe: "Cafés & sweets",
+  bar: "Bars & music",
+  shop: "Shops",
+  services: "Studios & services",
+  gallery: "Arts & galleries",
+};
+const CAT_BLURB: Record<Category, string> = {
+  restaurant: "Dining rooms, patios, counters",
+  cafe: "Coffee, bakeries, ice cream",
+  bar: "Taprooms, cocktails, live sets",
+  shop: "Records, books, wine, homeware",
+  services: "Barbers, makers, bookable rooms",
+  gallery: "Galleries, studios, openings",
+};
+const allCategories = Object.keys(CAT_LABEL) as Category[];
 
 function categoryColor(city: CityConfig, category: Category) {
   return city.theme.categories[category] ?? city.theme.primary;
 }
 
-function mapStyle(data: StrollData): maplibregl.StyleSpecification {
-  return {
-    version: 8,
-    sources: {
-      carto: {
-        type: "raster",
-        tiles: [
-          "https://a.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-          "https://b.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-          "https://c.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-        ],
-        tileSize: 256,
-        attribution: "© OpenStreetMap © CARTO",
-      },
-      streets: { type: "geojson", data: data.streets },
-      biz: { type: "geojson", data: data.businessBuildings },
-      bike: { type: "geojson", data: data.bike },
-      pathways: { type: "geojson", data: data.pathways },
-    },
-    layers: [
-      { id: "carto", type: "raster", source: "carto", paint: { "raster-opacity": 0.62, "raster-saturation": -0.32, "raster-contrast": 0.08 } },
-      { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round", visibility: "visible" }, paint: { "line-color": "#43893E", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.78 } },
-      { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round", visibility: "visible" }, paint: { "line-color": "#009ADE", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.82 } },
-      { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#8b7658", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.5, 18, 3.5], "line-opacity": 0.32 } },
-      { id: "biz-shadow", type: "fill", source: "biz", minzoom: 14, paint: { "fill-color": "#5a4a32", "fill-opacity": 0.22, "fill-translate": [4, 6] } },
-      { id: "biz-roof", type: "fill", source: "biz", minzoom: 14, paint: { "fill-color": ["match", ["get", "roof"], 0, ROOFS[0], 1, ROOFS[1], 2, ROOFS[2], 3, ROOFS[3], 4, ROOFS[4], 5, ROOFS[5], 6, ROOFS[6], 7, ROOFS[7], 8, ROOFS[8], ROOFS[0]], "fill-opacity": 0.9 } },
-      { id: "biz-edge", type: "line", source: "biz", minzoom: 14, paint: { "line-color": "#6b563a", "line-blur": 1, "line-width": 2.2, "line-opacity": 0.5 } },
-    ],
-  };
+function CatIcon({ d, size = 16, color = "currentColor", strokeWidth = 1.8 }: { d: string; size?: number; color?: string; strokeWidth?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d={d} />
+    </svg>
+  );
 }
 
-function pointCollection<T extends { lon: number; lat: number }>(items: T[]): GeoJSON.FeatureCollection {
-  return {
-    type: "FeatureCollection",
-    features: items.map((item, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: [item.lon, item.lat] } })),
-  };
+const measureCanvas = typeof document !== "undefined" ? document.createElement("canvas").getContext("2d") : null;
+function chipWidth(name: string, showNames: boolean, isSelected: boolean) {
+  if (!showNames && !isSelected) return 34;
+  if (measureCanvas) measureCanvas.font = '700 12.5px "Plus Jakarta Sans", sans-serif';
+  const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7.2;
+  return 50 + Math.min(132, w);
 }
 
-function treeCollection(trees: [number, number][]): GeoJSON.FeatureCollection {
-  return { type: "FeatureCollection", features: trees.map((coords, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: coords } })) };
+function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
+  const glyphInner = biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
+  const glyph = `<span class="${styles_.glyph}" style="background:${color}">${glyphInner}</span>`;
+  if (compact) return `<div class="${classes}">${glyph}</div>`;
+  return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
+}
+
+function clusterMarkup(styles_: typeof styles, members: Business[], wide: boolean, colors: string[]) {
+  if (wide) {
+    const dots = colors.slice(0, 3).map((c, i) => `<span style="width:12px;height:12px;border-radius:99px;background:${c};border:2px solid #fff;margin-left:${i ? -5 : 0}px"></span>`).join("");
+    return `<div class="${styles_.pin} ${styles_.cluster}"><span style="display:flex;align-items:center">${dots}</span><span class="${styles_.label}">${members.length} places</span></div>`;
+  }
+  return `<div class="${styles_.pin} ${styles_.cluster} ${styles_.compact}"><span class="${styles_.glyph}" style="background:#1C1A17">${members.length}</span></div>`;
 }
 
 function fallbackEvents(data: StrollData): EventItem[] {
   return [
-    {
-      id: "night-market-demo",
-      name: "Inglewood Night Market",
-      venue: "9 Ave SE between 12 & 13 St",
-      starts_at: "2026-07-24T17:00:00-06:00",
-      ends_at: "2026-07-24T22:00:00-06:00",
-      source: "Phase 1 sample",
-      lon: data.center[0] - 0.0028,
-      lat: data.center[1] + 0.0006,
-      emoji: "🏮",
-    },
-    {
-      id: "gallery-walk-demo",
-      name: "Gallery walk + local shops",
-      venue: "Atlantic Ave / 9 Ave SE",
-      starts_at: "2026-07-27T12:00:00-06:00",
-      source: "Phase 1 sample",
-      lon: data.center[0] + 0.0024,
-      lat: data.center[1] + 0.0002,
-      emoji: "🎨",
-    },
+    { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Phase 1 sample", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006 },
+    { id: "gallery-walk-demo", name: "Gallery walk + local shops", venue: "Atlantic Ave / 9 Ave SE", starts_at: "2026-07-27T12:00:00-06:00", source: "Phase 1 sample", lon: data.center[0] + 0.0024, lat: data.center[1] + 0.0002 },
   ];
 }
 
 function fallbackAttractions(data: StrollData): Attraction[] {
   return [
-    { id: "zoo", name: "Calgary Zoo", emoji: "🦁", lon: -114.0307, lat: 51.0457, blurb: "A citywide discovery pin near the Bow River and Inglewood." },
-    { id: "fort-calgary", name: "The Confluence", emoji: "🏛️", lon: -114.0446, lat: 51.0476, blurb: "Historic gathering place and cultural destination." },
-    { id: "riverwalk", name: "RiverWalk", emoji: "🚶", lon: data.center[0] - 0.006, lat: data.center[1] + 0.005, blurb: "A friendly route for strolling into the neighbourhood." },
+    { id: "zoo", name: "Calgary Zoo", lon: -114.0307, lat: 51.0457, blurb: "A citywide discovery pin near the Bow River and Inglewood." },
+    { id: "fort-calgary", name: "The Confluence", lon: -114.0446, lat: 51.0476, blurb: "Historic gathering place and cultural destination." },
+    { id: "riverwalk", name: "RiverWalk", lon: data.center[0] - 0.006, lat: data.center[1] + 0.005, blurb: "A friendly route for strolling into the neighbourhood." },
   ];
 }
 
@@ -183,33 +187,39 @@ function normalize(value: string) {
 export default function StrollCityApp({ city }: { city: CityConfig }) {
   const mapNode = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
-  const markersRef = useRef<{ marker: Marker; el: HTMLButtonElement; business: Business }[]>([]);
+  const pinMarkersRef = useRef<Marker[]>([]);
   const eventMarkersRef = useRef<Marker[]>([]);
-  const attractionMarkersRef = useRef<Marker[]>([]);
+  const featMarkersRef = useRef<{ marker: Marker; attraction: Attraction }[]>([]);
+  const rowElsRef = useRef<Map<string, HTMLElement>>(new Map());
+  const pinElsRef = useRef<Map<string, HTMLElement>>(new Map());
+
   const [data, setData] = useState<StrollData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [active, setActive] = useState<Set<Category>>(new Set(allCategories));
+  const [tab, setTab] = useState<SidebarTab>("explore");
+  const [browseCategory, setBrowseCategory] = useState<Category | null>(null);
+  const [query, setQuery] = useState("");
+  const [sortMode, setSortMode] = useState<"az" | "claimed">("az");
+  const [mapDirty, setMapDirty] = useState(false);
+  const [boundsFilter, setBoundsFilter] = useState<{ w: number; s: number; e: number; n: number } | null>(null);
   const [selected, setSelected] = useState<Business | null>(null);
-  const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
-  const [portalOpen, setPortalOpen] = useState(false);
-  const [hovered, setHovered] = useState<Business | null>(null);
-  const [thumb, setThumb] = useState<{ x: number; y: number } | null>(null);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
+  const [showNames, setShowNames] = useState(true);
+  const [showStrip, setShowStrip] = useState(true);
   const [showBike, setShowBike] = useState(true);
   const [showPathways, setShowPathways] = useState(true);
-  const [showAttractions, setShowAttractions] = useState(true);
-  const [tab, setTab] = useState<SidebarTab>("explore");
-  const [trayOpen, setTrayOpen] = useState(false);
-  const [query, setQuery] = useState("");
+  const [showBeyond, setShowBeyond] = useState(true);
   const [welcome, setWelcome] = useState(false);
-  const [toast, setToast] = useState("Hover a rooftop logo; click to open the mini-app profile without leaving the map.");
+  const [hint, setHint] = useState<string | null>("Hover a rooftop chip to preview it; click to open the profile without leaving the map.");
+  const [, forceTick] = useState(0);
 
   useEffect(() => {
     if (city.status !== "live" || !city.dataPath) return;
     const welcomeTimer = window.setTimeout(() => {
       try {
-        const isSmallScreen = window.matchMedia("(max-width: 920px)").matches;
+        const isSmallScreen = window.matchMedia("(max-width: 860px)").matches;
         const seen = window.localStorage.getItem(`stroll-welcome-${city.slug}`);
         setWelcome(!seen && !isSmallScreen);
+        if (isSmallScreen) setPanelCollapsed(true);
       } catch {
         setWelcome(false);
       }
@@ -247,11 +257,27 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     return c;
   }, [data]);
 
-  const results = useMemo(() => {
-    if (!query.trim()) return [];
+  const isResultsView = query.trim() !== "" || browseCategory !== null || boundsFilter !== null;
+
+  const visibleBusinesses = useMemo(() => {
+    if (!data) return [];
     const needle = normalize(query);
-    return data?.businesses.filter((business) => normalize(`${business.name} ${business.address} ${business.category}`).includes(needle)).slice(0, 8) ?? [];
-  }, [data, query]);
+    let list = data.businesses.filter((b) => {
+      const matchesCategory = browseCategory ? b.category === browseCategory : true;
+      const matchesQuery = needle ? normalize(`${b.name} ${b.address} ${b.category}`).includes(needle) : true;
+      const matchesBounds = boundsFilter ? b.lon >= boundsFilter.w && b.lon <= boundsFilter.e && b.lat >= boundsFilter.s && b.lat <= boundsFilter.n : true;
+      return matchesCategory && matchesQuery && matchesBounds;
+    });
+    list = [...list].sort((a, b) => {
+      if (sortMode === "claimed") {
+        const ca = a.claim_status === "claimed" ? 0 : 1;
+        const cb = b.claim_status === "claimed" ? 0 : 1;
+        if (ca !== cb) return ca - cb;
+      }
+      return a.name.localeCompare(b.name);
+    });
+    return list;
+  }, [data, browseCategory, query, sortMode, boundsFilter]);
 
   const closeWelcome = () => {
     setWelcome(false);
@@ -262,176 +288,262 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
   };
 
-  const closePanels = () => {
+  const openCategory = (key: Category) => {
+    setBrowseCategory(key);
+    setQuery("");
+    setBoundsFilter(null);
+    setMapDirty(false);
+  };
+  const backToBrowse = () => {
+    setBrowseCategory(null);
+    setQuery("");
     setSelected(null);
-    setSelectedAttraction(null);
-    setPortalOpen(false);
+    setBoundsFilter(null);
+    setMapDirty(false);
   };
 
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closePanels();
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
-
-  const openPortal = (business?: Business | null) => {
-    if (business) setSelected(business);
-    setPortalOpen(true);
+  const searchThisArea = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    const b = map.getBounds();
+    setBoundsFilter({ w: b.getWest(), s: b.getSouth(), e: b.getEast(), n: b.getNorth() });
+    setMapDirty(false);
   };
 
   const fitStrip = () => {
-    if (!mapRef.current || !data) return;
-    mapRef.current.fitBounds(data.stripBounds as LngLatBoundsLike, { padding: 78, bearing: -25, duration: 800 });
+    const map = mapRef.current;
+    if (!map || !data) return;
+    setBoundsFilter(null);
+    setMapDirty(false);
+    map.fitBounds(data.stripBounds as LngLatBoundsLike, { padding: 48, bearing: 0, duration: 800 });
+    map.once("moveend", () => { if (map.getZoom() < 16) map.easeTo({ zoom: 16, duration: 300 }); });
   };
-
-  const flyCity = () => mapRef.current?.flyTo({ center: city.center, zoom: 11.2, bearing: 0, duration: 1100 });
+  const flyCity = () => {
+    setBoundsFilter(null);
+    setMapDirty(false);
+    mapRef.current?.flyTo({ center: city.center, zoom: 11.2, bearing: 0, duration: 1100 });
+  };
+  const [extent, setExtent] = useState<"strip" | "city">("strip");
 
   const flyToBusiness = (business: Business) => {
-    setSelectedAttraction(null);
     setSelected(business);
-    setTrayOpen(false);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
-    mapRef.current?.flyTo({ center: [business.lon, business.lat], zoom: Math.max(mapRef.current.getZoom(), 17), duration: 520 });
+    mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
   };
 
-  const openAttraction = (attraction: Attraction) => {
-    setSelected(null);
-    setSelectedAttraction(attraction);
-    setTrayOpen(false);
-    setToast(`${attraction.name}: ${attraction.blurb}`);
-    mapRef.current?.flyTo({ center: [attraction.lon, attraction.lat], zoom: 14.5, duration: 700 });
+  const goFeatured = (attraction: Attraction) => {
+    setHint(`${attraction.name}: ${attraction.blurb}`);
+    mapRef.current?.flyTo({ center: [attraction.lon, attraction.lat], zoom: 15.5, duration: 700 });
   };
 
   const chooseNeighbourhood = (id: string) => {
     const n = data?.neighbourhoods.find((item) => item.id === id);
     if (!n || !mapRef.current) return;
+    setBoundsFilter(null);
+    setMapDirty(false);
     if (n.enabled) {
-      mapRef.current.fitBounds(n.bounds as LngLatBoundsLike, { padding: 80, bearing: n.bearing, duration: 900 });
-      setToast(`${n.name} is ready to stroll.`);
+      mapRef.current.fitBounds(n.bounds as LngLatBoundsLike, { padding: 80, duration: 900 });
+      setHint(`${n.name} is ready to stroll.`);
     } else {
-      mapRef.current.flyTo({ center: n.center, zoom: 13, bearing: n.bearing, duration: 900 });
-      setToast(`${n.name} is marked coming soon — the pipeline can light this up in Phase 2.`);
+      mapRef.current.flyTo({ center: n.center, zoom: 13, duration: 900 });
+      setHint(`${n.name} is marked coming soon — the pipeline can light this up in Phase 2.`);
     }
   };
 
+  const openPortal = (business: Business) => {
+    window.location.href = `/portal?business=${encodeURIComponent(business.id)}`;
+  };
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, []);
+
+  // ---------------- map init ----------------
   useEffect(() => {
     if (!data || !mapNode.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: mapNode.current,
-      style: mapStyle(data),
+      style: {
+        version: 8,
+        sources: {
+          carto: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap © CARTO" },
+          cartoLabels: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"], tileSize: 256 },
+          streets: { type: "geojson", data: data.streets },
+          biz: { type: "geojson", data: data.businessBuildings },
+          bike: { type: "geojson", data: data.bike },
+          pathways: { type: "geojson", data: data.pathways },
+          stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [data.stripBounds[0], data.stripBounds[1]] } } },
+        },
+        layers: [
+          { id: "carto", type: "raster", source: "carto" },
+          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#1C1A17", "line-width": 26, "line-opacity": 0.06 } },
+          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#5C6350", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
+          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#1B5FA8", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
+          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#C7C2B8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.5 } },
+          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#1C1A17", "fill-opacity": 0.06, "fill-translate": [2, 3] } },
+          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#E4E0D6", "fill-opacity": 0.5 } },
+          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#D3CDBF", "line-width": 1, "line-opacity": 0.8 } },
+          { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.85 } },
+        ],
+      },
       center: data.center,
       zoom: 16.25,
-      bearing: -25,
       pitch: 0,
       minZoom: 10,
       maxZoom: 19.5,
       attributionControl: false,
     });
     mapRef.current = map;
-    map.addControl(new maplibregl.NavigationControl({ showCompass: true }), "top-right");
-    map.addControl(new maplibregl.AttributionControl({ customAttribution: "Businesses, trees, bikeways & pathways © City of Calgary Open Data" }), "bottom-right");
+    map.addControl(new maplibregl.AttributionControl({ customAttribution: "Businesses, trees, bikeways & pathways © City of Calgary Open Data" }), "bottom-left");
 
     map.on("load", () => {
-      map.addSource("trees", { type: "geojson", data: treeCollection(data.trees) });
-      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#43893E", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.46, "circle-blur": 0.35 } });
-      map.addSource("events", { type: "geojson", data: pointCollection(events) });
-      map.addLayer({ id: "event-halo", type: "circle", source: "events", paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 10, 8, 16, 18], "circle-color": "#C8102E", "circle-opacity": 0.16 } });
+      map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
+      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#5C6350", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
       fitStrip();
     });
 
-    markersRef.current = data.businesses.map((business) => {
-      const el = document.createElement("button");
-      el.className = styles.marker;
-      el.style.setProperty("--marker-color", categoryColor(city, business.category));
-      el.type = "button";
-      if (business.logo_url) {
-        const img = document.createElement("img");
-        img.src = business.logo_url;
-        img.alt = "";
-        img.className = styles.markerLogo;
-        el.appendChild(img);
-      } else {
-        el.textContent = business.domain ? "★" : business.mono;
-      }
-      el.title = business.name;
-      el.addEventListener("mouseenter", () => setHovered(business));
-      el.addEventListener("mousemove", (event) => setThumb({ x: event.clientX, y: event.clientY }));
-      el.addEventListener("mouseleave", () => {
-        setHovered(null);
-        setThumb(null);
-      });
-      el.addEventListener("click", () => flyToBusiness(business));
-      const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([business.lon, business.lat]).addTo(map);
-      return { marker, el, business };
-    });
-
-    eventMarkersRef.current = events.map((event) => {
-      const el = document.createElement("button");
-      el.className = styles.eventMarker;
-      el.textContent = event.emoji ?? "•";
-      el.title = event.name;
-      el.addEventListener("click", () => {
-        setTab("events");
-        map.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 });
-      });
-      return new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([event.lon, event.lat]).addTo(map);
-    });
-
-    attractionMarkersRef.current = attractions.map((attraction) => {
-      const el = document.createElement("button");
-      el.className = styles.attractionMarker;
-      el.textContent = attraction.emoji;
-      el.title = attraction.name;
-      el.addEventListener("click", () => {
-        setSelected(null);
-        setSelectedAttraction(attraction);
-        setTrayOpen(false);
-        setToast(`${attraction.name}: ${attraction.blurb}`);
-        map.flyTo({ center: [attraction.lon, attraction.lat], zoom: 14.5, duration: 700 });
-      });
-      return new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([attraction.lon, attraction.lat]).addTo(map);
-    });
+    map.on("moveend", () => forceTick((t) => t + 1));
+    map.on("zoomend", () => forceTick((t) => t + 1));
+    map.on("move", (e) => { if (e.originalEvent) setMapDirty(true); });
+    const onResize = () => { map.resize(); forceTick((t) => t + 1); };
+    window.addEventListener("resize", onResize);
 
     return () => {
-      markersRef.current.forEach(({ marker }) => marker.remove());
-      eventMarkersRef.current.forEach((marker) => marker.remove());
-      attractionMarkersRef.current.forEach((marker) => marker.remove());
-      markersRef.current = [];
+      window.removeEventListener("resize", onResize);
+      pinMarkersRef.current.forEach((m) => m.remove());
+      eventMarkersRef.current.forEach((m) => m.remove());
+      featMarkersRef.current.forEach(({ marker }) => marker.remove());
+      pinMarkersRef.current = [];
       eventMarkersRef.current = [];
-      attractionMarkersRef.current = [];
+      featMarkersRef.current = [];
       map.remove();
       mapRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
 
-  useEffect(() => {
-    markersRef.current.forEach(({ el, business }) => el.classList.toggle(styles.hide, !active.has(business.category)));
-  }, [active]);
-
-  useEffect(() => {
-    eventMarkersRef.current.forEach((marker) => marker.getElement().classList.toggle(styles.hide, tab !== "events"));
-    const map = mapRef.current;
-    const source = map?.getSource("events") as GeoJSONSource | undefined;
-    if (source) source.setData(pointCollection(events));
-  }, [events, tab]);
-
-  useEffect(() => {
-    attractionMarkersRef.current.forEach((marker) => marker.getElement().classList.toggle(styles.hide, !showAttractions));
-  }, [showAttractions]);
-
+  // ---------------- layer visibility ----------------
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !map.isStyleLoaded()) return;
     const setVisibility = (layer: string, visible: boolean) => {
       if (map.getLayer(layer)) map.setLayoutProperty(layer, "visibility", visible ? "visible" : "none");
     };
     setVisibility("bike-line", showBike);
     setVisibility("pathways", showPathways);
-  }, [showBike, showPathways]);
+    setVisibility("stripband", showStrip);
+  }, [showBike, showPathways, showStrip, data]);
+
+  // ---------------- event markers ----------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    eventMarkersRef.current.forEach((m) => m.remove());
+    eventMarkersRef.current = [];
+    if (tab !== "events") return;
+    eventMarkersRef.current = events.map((event) => {
+      const el = document.createElement("button");
+      el.className = styles.pin;
+      el.innerHTML = `<span class="${styles.glyph}" style="background:${city.theme.primary}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="3"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span><span class="${styles.label}">${event.name}</span>`;
+      el.title = event.name;
+      el.addEventListener("click", () => {
+        mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 });
+        setHint(`${event.name} · ${event.venue}`);
+      });
+      return new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([event.lon, event.lat]).addTo(map);
+    });
+  }, [events, tab, city.theme.primary]);
+
+  // ---------------- featured (attractions) markers + chrome-avoidance ----------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    featMarkersRef.current.forEach(({ marker }) => marker.remove());
+    featMarkersRef.current = attractions.map((attraction) => {
+      const el = document.createElement("button");
+      el.className = `${styles.pin} ${styles.featPin}`;
+      el.innerHTML = `<span class="${styles.glyph}" style="background:${city.theme.green}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="22" x2="21" y2="22"/><line x1="6" y1="18" x2="6" y2="11"/><line x1="10" y1="18" x2="10" y2="11"/><line x1="14" y1="18" x2="14" y2="11"/><line x1="18" y1="18" x2="18" y2="11"/><polygon points="12 2 21 8 3 8"/></svg></span><span class="${styles.label}">${attraction.name}</span>`;
+      el.title = attraction.name;
+      el.addEventListener("click", () => goFeatured(attraction));
+      return { marker: new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([attraction.lon, attraction.lat]).addTo(map), attraction };
+    });
+  }, [attractions, city.theme.green]);
+
+  useEffect(() => {
+    const wrap = mapNode.current?.parentElement;
+    if (!wrap) return;
+    const pane = wrap.getBoundingClientRect();
+    const chrome = [...wrap.querySelectorAll(`.${styles.cardUi}, .${styles.drawerOpen}, .${styles.edgeTab}`)].map((n) => n.getBoundingClientRect()).map((r) => ({ x1: r.left - pane.left, x2: r.right - pane.left, y1: r.top - pane.top, y2: r.bottom - pane.top }));
+    featMarkersRef.current.forEach(({ marker }) => {
+      const node = marker.getElement();
+      if (!showBeyond) { node.style.display = "none"; return; }
+      const p = marker.getLngLat();
+      const map = mapRef.current;
+      if (!map) return;
+      const projected = map.project(p);
+      const box = { x1: projected.x - 16, x2: projected.x - 16 + (node.offsetWidth || 150), y1: projected.y - 17, y2: projected.y + 19 };
+      const inside = box.x1 > 6 && box.x2 < pane.width - 6 && box.y1 > 6 && box.y2 < pane.height - 6;
+      const clashes = chrome.some((c) => box.x1 < c.x2 + 6 && box.x2 + 6 > c.x1 && box.y1 < c.y2 + 6 && box.y2 + 6 > c.y1);
+      node.style.display = inside && !clashes ? "" : "none";
+    });
+  });
+
+  // ---------------- business pins: collision-avoided placement ----------------
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !data) return;
+    pinMarkersRef.current.forEach((m) => m.remove());
+    pinMarkersRef.current = [];
+    pinElsRef.current.clear();
+
+    const items = visibleBusinesses;
+    const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
+    type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean };
+    const slots: Slot[] = [];
+    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
+    const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
+
+    order.forEach((biz) => {
+      const cp = map.project([biz.lon, biz.lat]);
+      const isSel = biz.id === selected?.id;
+      const wide = rectFor(cp, chipWidth(biz.name, showNames, isSel));
+      if (showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
+      const small = rectFor(cp, 34);
+      if (clears(small)) { slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel }); return; }
+      if (isSel) { slots.push({ ...small, members: [biz], mode: "label", pinned: true }); return; }
+      let best: Slot | null = null, bd = Infinity;
+      slots.forEach((s) => { if (s.pinned) return; const d = (s.cx - cp.x) ** 2 + (s.cy - cp.y) ** 2; if (d < bd) { bd = d; best = s; } });
+      (best ?? slots[0])?.members.push(biz);
+    });
+
+    slots.forEach((s) => {
+      if (s.pinned || s.members.length === 1) {
+        const biz = s.members[0];
+        const compact = s.mode === "glyph" && biz.id !== selected?.id;
+        const el = document.createElement("button");
+        el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
+        el.addEventListener("click", () => flyToBusiness(biz));
+        el.addEventListener("mouseenter", () => { el.querySelector(`.${styles.pin}`)?.classList.add(styles.pinActive); rowElsRef.current.get(biz.id)?.classList.add(styles.rowActive); });
+        el.addEventListener("mouseleave", () => { if (biz.id !== selected?.id) { el.querySelector(`.${styles.pin}`)?.classList.remove(styles.pinActive); rowElsRef.current.get(biz.id)?.classList.remove(styles.rowActive); } });
+        const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([biz.lon, biz.lat]).addTo(map);
+        pinMarkersRef.current.push(marker);
+        pinElsRef.current.set(biz.id, el);
+      } else {
+        const wide = s.x2 - s.x1 >= 104;
+        const colors = [...new Set(s.members.map((m) => categoryColor(city, m.category)))];
+        const el = document.createElement("button");
+        el.innerHTML = clusterMarkup(styles, s.members, wide, colors);
+        el.addEventListener("click", () => mapRef.current?.flyTo({ center: [s.members[0].lon, s.members[0].lat], zoom: Math.min(19, (mapRef.current?.getZoom() ?? 16) + 2), duration: 550 }));
+        const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([s.members[0].lon, s.members[0].lat]).addTo(map);
+        pinMarkersRef.current.push(marker);
+      }
+    });
+  });
 
   useEffect(() => {
     if (!data || typeof window === "undefined") return;
@@ -451,10 +563,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   if (city.status !== "live") {
     return (
-      <main className={styles.comingSoon} style={themeStyle(city.theme)}>
-        <div className={styles.landingPaper} />
-        <StrollArch colors={city.theme.archColors} />
-        <p className={styles.eyebrow}>{city.theme.brandTag}</p>
+      <main className={styles.comingSoon}>
+        <img src="/brand/stroll-logo.png" alt="Stroll City" />
         <h1>{city.name} is next on the stroll.</h1>
         <p>{city.theme.welcomeLine}</p>
         <Link href="/">Back to city picker</Link>
@@ -463,168 +573,261 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   }
 
   return (
-    <main className={styles.shell} style={themeStyle(city.theme)}>
-      <div className={styles.paper} />
-      <div className={styles.grain} />
-      <div ref={mapNode} className={styles.map} />
-
-      <header className={styles.header}>
+    <main className={styles.shell}>
+      <header className={styles.topbar}>
         <button className={styles.brand} onClick={() => setWelcome(true)} aria-label="Open welcome">
-          <StrollArch colors={city.theme.archColors} compact />
-          <span><b>stroll.city</b><small>{city.theme.brandTag}</small></span>
+          <img className={styles.mark} src="/brand/stroll-mark.png" alt="" />
+          <span>
+            <div className={styles.brandName}>STROLL <span>CITY</span></div>
+            <div className={styles.brandSub}>{city.theme.brandTag}</div>
+          </span>
         </button>
-        <select aria-label="Neighbourhood selector" onChange={(e) => chooseNeighbourhood(e.target.value)} defaultValue={city.defaultHood}>
-          {data?.neighbourhoods.map((n) => <option key={n.id} value={n.id}>{n.name}{n.enabled ? "" : " · soon"}</option>)}
-        </select>
-        <div className={styles.searchWrap}>
-          <input aria-label="Search businesses" placeholder="Search cafés, shops, galleries..." value={query} onChange={(e) => setQuery(e.target.value)} />
-          {results.length > 0 && <div className={styles.results}>{results.map((business) => <button key={business.id} onClick={() => { flyToBusiness(business); setQuery(""); }}><span>{business.name}</span><small>{business.address}</small></button>)}</div>}
+        <div className={styles.dividerV} />
+        <label className={`${styles.field} ${styles.picker}`}>
+          <Navigation size={15} />
+          {data?.neighbourhoods.find((n) => n.id === city.defaultHood)?.name ?? city.name}
+          <ChevronDown size={14} color="var(--ink-3)" />
+          <select className={styles.pickerSelect} aria-label="Neighbourhood selector" onChange={(e) => chooseNeighbourhood(e.target.value)} defaultValue={city.defaultHood}>
+            {data?.neighbourhoods.map((n) => <option key={n.id} value={n.id}>{n.name}{n.enabled ? "" : " · soon"}</option>)}
+          </select>
+        </label>
+        <label className={`${styles.field} ${styles.search}`}>
+          <Search size={15} color="var(--ink-3)" />
+          <input aria-label="Search businesses" placeholder="Search cafés, shops, galleries…" value={query} onChange={(e) => { setQuery(e.target.value); setBrowseCategory(null); setBoundsFilter(null); setMapDirty(false); }} />
+        </label>
+        <div className={styles.spacer} />
+        <div className={styles.seg}>
+          <button className={extent === "strip" ? styles.segActive : ""} onClick={() => { setExtent("strip"); fitStrip(); }}>Fit to strip</button>
+          <button className={extent === "city" ? styles.segActive : ""} onClick={() => { setExtent("city"); flyCity(); }}>Whole city</button>
         </div>
-        <button onClick={flyCity}>Whole city</button>
-        <button onClick={fitStrip}>Fit to strip</button>
-        <Link className={styles.claim} href={selected ? `/portal?business=${encodeURIComponent(selected.id)}` : "/portal"}>Claim your business</Link>
+        <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/portal">
+          Claim your business
+          <ChevronRight size={15} />
+        </Link>
       </header>
 
-      <aside className={`${styles.sidebar} ${trayOpen ? styles.sidebarOpen : ""}`}>
-        <div className={styles.tabs} role="tablist" aria-label="Stroll sidebar">
-          <button className={tab === "explore" ? styles.activeTab : ""} onClick={() => setTab("explore")}>Explore</button>
-          <button className={tab === "events" ? styles.activeTab : ""} onClick={() => setTab("events")}>Events</button>
-          <button className={styles.trayClose} onClick={() => setTrayOpen(false)}>Map</button>
-        </div>
+      <div className={styles.mainSplit}>
+        <aside className={`${styles.panel} ${panelCollapsed ? styles.panelCollapsed : ""}`}>
+          <div className={styles.panelHead}>
+            <div className={styles.tabs} role="tablist">
+              <button role="tab" aria-selected={tab === "explore"} className={tab === "explore" ? styles.tabActive : ""} onClick={() => setTab("explore")}>Explore <span className={styles.count}>{data?.businesses.length ?? 0}</span></button>
+              <button role="tab" aria-selected={tab === "events"} className={tab === "events" ? styles.tabActive : ""} onClick={() => setTab("events")}>Events <span className={styles.count}>{events.length}</span></button>
+              <button role="tab" aria-selected={false} disabled title="Coming soon" style={{ opacity: .55, cursor: "default" }}>Saved</button>
+            </div>
+            {tab === "explore" && !isResultsView && (
+              <div>
+                <p className={styles.eyebrow}>{city.name} / Inglewood MVP</p>
+                <p className={styles.h1} style={{ marginBottom: 2 }}>Painted rooftops, real storefronts.</p>
+                <p className={styles.lede}>Real Calgary licence points snapped to real building footprints — browse by category or search the strip.</p>
+              </div>
+            )}
+          </div>
 
-        {tab === "explore" ? (
-          <section>
-            <p className={styles.eyebrow}>{city.name} / Inglewood MVP</p>
-            <h1>Painted rooftops, real storefronts.</h1>
-            <p>Real Calgary licence points snapped to real building footprints, wrapped in the friendlier illustrated Stroll interface.</p>
-            <div className={styles.actions}><button onClick={() => setActive(new Set(allCategories))}>Select all</button><button onClick={() => setActive(new Set())}>Clear all</button></div>
-            <div className={styles.filters}>
+          {tab === "explore" && !isResultsView && (
+            <div className={styles.catList}>
               {allCategories.map((key) => (
-                <button key={key} className={`${styles.filter} ${active.has(key) ? "" : styles.off}`} onClick={() => setActive((prev) => { const next = new Set(prev); if (next.has(key)) next.delete(key); else next.add(key); return next; })}>
-                  <span className={styles.swatch} style={{ background: categoryColor(city, key) }} />
-                  <span>{CATEGORY_META[key].icon} {CATEGORY_META[key].label}</span>
-                  <b>{counts[key] || 0}</b>
+                <button key={key} className={styles.catCard} onClick={() => openCategory(key)}>
+                  <span className={styles.ccTile} style={{ background: `${categoryColor(city, key)}18`, color: categoryColor(city, key) }}>
+                    <CatIcon d={CAT_ICON[key]} size={21} color={categoryColor(city, key)} strokeWidth={1.9} />
+                  </span>
+                  <span className={styles.ccBody}>
+                    <span className={styles.ccName}>{CAT_LABEL[key]}</span>
+                    <span className={styles.ccMeta}>{CAT_BLURB[key]}</span>
+                  </span>
+                  <span className={styles.ccN}>{counts[key] || 0}</span>
+                  <ChevronRight size={16} className={styles.ccChev} />
+                </button>
+              ))}
+              <div className={styles.catSep}><span>Featured places</span><span className={styles.catSepRule} /></div>
+              {attractions.map((attraction) => (
+                <button key={attraction.id} className={styles.feat} onClick={() => goFeatured(attraction)}>
+                  <span className={styles.featTile}><Landmark size={19} /></span>
+                  <span className={styles.featBody}>
+                    <span className={styles.featName}>{attraction.name}</span>
+                    <span className={styles.featDesc}>{attraction.blurb}</span>
+                  </span>
                 </button>
               ))}
             </div>
-            <div className={styles.layerToggles}>
-              <b>Getting around</b>
-              <label><input type="checkbox" checked={showPathways} onChange={(e) => setShowPathways(e.target.checked)} /> River pathways</label>
-              <label><input type="checkbox" checked={showBike} onChange={(e) => setShowBike(e.target.checked)} /> Bikeways</label>
-              <label><input type="checkbox" checked={showAttractions} onChange={(e) => setShowAttractions(e.target.checked)} /> Beyond the strip</label>
-            </div>
-            {showAttractions && <div className={styles.attractionList}>{attractions.map((attraction) => <button key={attraction.id} onClick={() => openAttraction(attraction)}><span>{attraction.emoji}</span><b>{attraction.name}</b><small>{attraction.blurb}</small></button>)}</div>}
-            <div className={styles.note}><b>Open data note:</b> Phase 2 keeps geometry/licences from City of Calgary open data, with curation placeholders until the claim portal goes live.</div>
-          </section>
-        ) : (
-          <section>
-            <p className={styles.eyebrow}>Happening today-ish</p>
-            <h1>Events without leaving the map.</h1>
-            <p>Phase 1 includes the Events tab UI and map pins. Phase 3 will wire the live agent API and event sources.</p>
-            <div className={styles.eventList}>{events.map((event) => <button key={event.id} onClick={() => mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 })}><b>{formatDate(event.starts_at)}</b><span>{event.emoji ?? "📍"} {event.name}</span><small>{event.venue} · {event.source}</small></button>)}</div>
-          </section>
-        )}
-      </aside>
+          )}
 
-      <div className={styles.mobileBar}>
-        <button onClick={() => { setTab("explore"); setTrayOpen(true); }}>Filters</button>
-        <button onClick={() => { setTab("events"); setTrayOpen(true); }}>Events</button>
-        <button onClick={fitStrip}>Re-centre</button>
+          {tab === "explore" && isResultsView && (
+            <>
+              <div className={styles.resultsHead}>
+                <button className={styles.back} onClick={backToBrowse} title="All categories"><ChevronLeft size={16} /></button>
+                {browseCategory ? (
+                  <>
+                    <span className={styles.rhTile} style={{ background: `${categoryColor(city, browseCategory)}18`, color: categoryColor(city, browseCategory) }}><CatIcon d={CAT_ICON[browseCategory]} size={16} color={categoryColor(city, browseCategory)} /></span>
+                    <span className={styles.rhText}><b>{CAT_LABEL[browseCategory]}</b><span>{visibleBusinesses.length} places</span></span>
+                  </>
+                ) : query.trim() !== "" ? (
+                  <>
+                    <span className={styles.rhTile} style={{ background: "var(--surface-2)" }}><Search size={15} color="var(--ink-2)" /></span>
+                    <span className={styles.rhText}><b>Search results</b><span>{visibleBusinesses.length} places</span></span>
+                  </>
+                ) : (
+                  <>
+                    <span className={styles.rhTile} style={{ background: "var(--surface-2)" }}><Compass size={15} color="var(--ink-2)" /></span>
+                    <span className={styles.rhText}><b>This area</b><span>{visibleBusinesses.length} places</span></span>
+                  </>
+                )}
+                <button className={styles.linkBtn} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>{sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={12} /></button>
+              </div>
+              <div className={styles.list}>
+                {visibleBusinesses.length === 0 && <div className={styles.empty}><b>Nothing here yet</b>Turn a category back on, or clear the search.</div>}
+                {visibleBusinesses.map((biz) => (
+                  <button
+                    key={biz.id}
+                    ref={(el) => { if (el) rowElsRef.current.set(biz.id, el); else rowElsRef.current.delete(biz.id); }}
+                    className={`${styles.row} ${selected?.id === biz.id ? styles.rowActive : ""}`}
+                    onClick={() => flyToBusiness(biz)}
+                    onMouseEnter={() => pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.add(styles.pinActive)}
+                    onMouseLeave={() => { if (biz.id !== selected?.id) pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.remove(styles.pinActive); }}
+                  >
+                    <div className={styles.thumb}><img src={biz.photo} alt="" /></div>
+                    <div className={styles.rowBody}>
+                      <div className={styles.rowName}>{biz.name}</div>
+                      <div className={styles.rowMeta}>
+                        <span className={styles.catLabel} style={{ color: categoryColor(city, biz.category) }}><span className={styles.dot} />{CAT_LABEL[biz.category]}</span>
+                        {biz.claim_status === "claimed" && <><span className={styles.dotSep} /><span className={styles.tag} style={{ color: "var(--violet)" }}>Claimed</span></>}
+                      </div>
+                      <div className={styles.rowMeta}><span style={{ color: "var(--ink-3)" }}>{biz.address}</span></div>
+                      <div className={styles.rowTags}>{biz.highlights.slice(0, 3).map(([, text]) => <span key={text} className={styles.tag}>{text}</span>)}</div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {tab === "events" && (
+            <div className={styles.list} style={{ padding: "12px 16px" }}>
+              {events.map((event) => (
+                <button key={event.id} className={styles.row} onClick={() => mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 })}>
+                  <div className={styles.thumb} style={{ display: "grid", placeItems: "center", color: "var(--ink-3)" }}><CalendarDays size={22} /></div>
+                  <div className={styles.rowBody}>
+                    <div className={styles.rowName}>{event.name}</div>
+                    <div className={styles.rowMeta}>{formatDate(event.starts_at)} · {event.venue}</div>
+                    <div className={styles.rowMeta} style={{ color: "var(--ink-3)" }}>{event.source}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className={styles.panelFoot}>
+            <ShieldCheck size={14} style={{ flex: "0 0 auto", marginTop: 1 }} />
+            <span><b>Open data note:</b> geometry and licences come from City of Calgary open data. Curation placeholders stay until the claim portal goes live.</span>
+          </div>
+        </aside>
+
+        <div className={styles.mapWrap}>
+          <div ref={mapNode} className={styles.map} />
+
+          <button className={`${styles.edgeTab} ${styles.edgeTabLeft}`} onClick={() => setPanelCollapsed((c) => !c)} title={panelCollapsed ? "Show list" : "Hide list"}>
+            {panelCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
+          </button>
+
+          {mapDirty && (
+            <button className={styles.searchArea} onClick={searchThisArea}>
+              <Search size={14} /> Search this area
+            </button>
+          )}
+
+          <div className={`${styles.mapUi} ${styles.mapUiTr}`}>
+            <div className={`${styles.cardUi} ${styles.layers}`}>
+              <div className={styles.layersTitle}>Map layers</div>
+              <button className={`${styles.switchRow} ${showNames ? styles.switchOn : ""}`} onClick={() => setShowNames((v) => !v)}><span className={styles.switchLbl}>Names on map</span><span className={styles.switch} /></button>
+              <button className={`${styles.switchRow} ${showStrip ? styles.switchOn : ""}`} onClick={() => setShowStrip((v) => !v)}><span className={styles.switchLbl}>Highlight the strip</span><span className={styles.switch} /></button>
+              <button className={`${styles.switchRow} ${showBike ? styles.switchOn : ""}`} onClick={() => setShowBike((v) => !v)}><Bike size={14} /><span className={styles.switchLbl}>Bikeways</span><span className={styles.switch} /></button>
+              <button className={`${styles.switchRow} ${showPathways ? styles.switchOn : ""}`} onClick={() => setShowPathways((v) => !v)}><Waves size={14} /><span className={styles.switchLbl}>River pathways</span><span className={styles.switch} /></button>
+              <button className={`${styles.switchRow} ${showBeyond ? styles.switchOn : ""}`} onClick={() => setShowBeyond((v) => !v)}><span className={styles.switchLbl}>Beyond the strip</span><span className={styles.switch} /></button>
+            </div>
+          </div>
+
+          <div className={`${styles.mapUi} ${styles.mapUiBr}`}>
+            <div className={`${styles.cardUi} ${styles.zoomer}`}>
+              <button onClick={() => mapRef.current?.zoomIn()} title="Zoom in"><Plus size={16} /></button>
+              <div className={styles.zoomerSep} />
+              <button onClick={() => mapRef.current?.zoomOut()} title="Zoom out"><Minus size={16} /></button>
+            </div>
+            <button className={`${styles.cardUi} ${styles.iconBtn}`} onClick={fitStrip} title="Re-centre"><Compass size={17} /></button>
+          </div>
+
+          {hint && (
+            <div className={`${styles.cardUi} ${styles.hint}`}>
+              <Lightbulb size={16} color="var(--violet)" style={{ flex: "0 0 auto" }} />
+              <span className={styles.txt}><b>Stroll hint</b>&nbsp;{hint}</span>
+              <button onClick={() => setHint(null)}>Got it</button>
+            </div>
+          )}
+
+          {!data && !error && <div className={styles.loading}>Painting rooftops…</div>}
+          {error && <div className={styles.loading}>Could not load Stroll data: {error}</div>}
+
+          <div className={`${styles.drawer} ${selected ? styles.drawerOpen : ""}`}>
+            <button className={`${styles.edgeTab} ${styles.edgeTabRight}`} onClick={() => setSelected(null)} title="Close"><ChevronRight size={15} /></button>
+            {selected && (
+              <div className={styles.drawerScroll}>
+                <div className={styles.hero}>
+                  <img src={selected.photo} alt="" />
+                  <button className={styles.heroClose} onClick={() => setSelected(null)}><X size={15} /></button>
+                  <div className={styles.glyphLg} style={{ background: categoryColor(city, selected.category) }}>
+                    {selected.logo_url ? <img src={selected.logo_url} alt="" /> : selected.mono}
+                  </div>
+                </div>
+                <div className={styles.dBody}>
+                  <div>
+                    <div className={styles.dTitle}>{selected.name}</div>
+                    <div className={styles.dSub}>
+                      <span className={styles.pill} style={{ color: categoryColor(city, selected.category), borderColor: `${categoryColor(city, selected.category)}33`, background: `${categoryColor(city, selected.category)}12` }}>
+                        <CatIcon d={CAT_ICON[selected.category]} size={12} color={categoryColor(city, selected.category)} /> {CAT_LABEL[selected.category]}
+                      </span>
+                      {selected.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}><ShieldCheck size={12} /> Claimed</span>}
+                    </div>
+                  </div>
+                  <div className={styles.dActions}>
+                    <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selected.lat},${selected.lon}`, "_blank", "noopener,noreferrer")}>
+                      <Navigation size={15} /> Directions
+                    </button>
+                    <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => selected.website ? window.open(selected.website!, "_blank", "noopener,noreferrer") : setHint("No official website found yet — added to the marketing-help spreadsheet.")}>
+                      <Globe size={16} />
+                    </button>
+                    <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
+                      <ExternalLink size={16} />
+                    </button>
+                  </div>
+                  <p className={styles.blurb}>{selected.blurb}</p>
+                  <div className={styles.kv}>
+                    <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{selected.address}, Calgary AB</span></div>
+                    <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{selected.hours}</span></div>
+                    <div className={styles.kvRow}><span className={styles.k}>Source</span><span className={`${styles.v} ${styles.mono}`} style={{ fontWeight: 500, fontSize: 11.5, color: "var(--ink-2)" }}>{selected.source}</span></div>
+                  </div>
+                  <div>
+                    <div className={styles.sectTitle} style={{ marginBottom: 8 }}>Good for</div>
+                    <div className={styles.rowTags}>{selected.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
+                  </div>
+                  <button className={styles.claimCard} onClick={() => openPortal(selected)}>
+                    <Briefcase size={20} color="var(--violet)" style={{ flex: "0 0 auto" }} />
+                    <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      {!data && !error && <div className={styles.loading}>Painting rooftops…</div>}
-      {error && <div className={styles.loading}>Could not load Stroll data: {error}</div>}
+      {selected && <button aria-label="Close" onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, zIndex: 690, border: 0, background: "transparent", cursor: "default", display: window.innerWidth <= 860 ? "block" : "none" }} />}
 
-      {hovered && thumb && <div className={styles.thumb} style={{ left: thumb.x + 18, top: thumb.y + 18 }}><img src={hovered.photo} alt="" /><span className={styles.thumbTag} style={{ background: categoryColor(city, hovered.category) }}>click to open ›</span><b>{hovered.name}</b><small>{hovered.blurb}</small></div>}
-
-      {(selected || selectedAttraction || portalOpen) && <button className={styles.scrim} aria-label="Close panels" onClick={closePanels} />}
-      <aside className={`${styles.panel} ${selected ? styles.open : ""}`}>
-        {selected && <>
-          <button className={styles.close} onClick={() => setSelected(null)}>× keep strolling</button>
-          <img className={styles.hero} src={selected.photo} alt="" />
-          <span className={styles.cat} style={{ background: categoryColor(city, selected.category) }}>{CATEGORY_META[selected.category].label}</span>
-          <h2>{selected.name}</h2>
-          <p className={styles.addr}>{selected.address}</p>
-          <p>{selected.blurb}</p>
-          <div className={styles.hours}>Open now-ish: <b>{selected.hours}</b></div>
-          <div className={styles.highlights}>{selected.highlights.map(([icon, text]) => <div key={`${icon}-${text}`}><span>{icon}</span>{text}</div>)}</div>
-          <div className={styles.findIt}><b>Find it on the map</b><span>{selected.logo_url ? "Verified logo marker and profile media were enriched from the business website." : "Logo pinned to the nearest verified building footprint from Calgary open data."}</span></div>
-          <div className={styles.panelActions}>
-            {selected.website ? <button onClick={() => window.open(selected.website!, "_blank", "noopener,noreferrer")}>Website</button> : <button onClick={() => setToast("No official website found yet — added to the marketing-help spreadsheet.")}>No website yet</button>}
-            <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selected.lat},${selected.lon}`, "_blank", "noopener,noreferrer")}>Directions</button>
-            <button onClick={() => setToast("Reviews become a curated/claimed-business feature after the portal is live.")}>Reviews</button>
-          </div>
-          <button className={styles.claimRow} onClick={() => openPortal(selected)}>Is this your business? Claim this page</button>
-          {selected.website && <p className={styles.domain}>Official website: <a href={selected.website} target="_blank" rel="noreferrer">{selected.domain ?? selected.website}</a></p>}
-          {!selected.logo_url && <p className={styles.domain}>Logo still needed — included in the marketing-help spreadsheet.</p>}
-          <p className={styles.review}>Source: {selected.source}. {selected.needsReview ? "Auto-enriched media is marked for review until the business claims/approves it." : "Business website and media enrichment complete."}</p>
-        </>}
-      </aside>
-
-      <aside className={`${styles.panel} ${styles.attractionPanel} ${selectedAttraction ? styles.open : ""}`}>
-        {selectedAttraction && <>
-          <button className={styles.close} onClick={() => setSelectedAttraction(null)}>× back to map</button>
-          <div className={styles.attractionHero}><span>{selectedAttraction.emoji}</span></div>
-          <span className={styles.cat} style={{ background: city.theme.sky }}>Beyond the strip</span>
-          <h2>{selectedAttraction.name}</h2>
-          <p>{selectedAttraction.blurb}</p>
-          <div className={styles.findIt}><b>Citywide discovery layer</b><span>Phase 2 shows attractions as separate map pins so Stroll can grow beyond one retail strip.</span></div>
-          <div className={styles.panelActions}><button onClick={() => mapRef.current?.flyTo({ center: [selectedAttraction.lon, selectedAttraction.lat], zoom: 15.5, duration: 650 })}>Zoom here</button><button onClick={() => setToast("Phase 3 can enrich this with Google Places photos, hours, ratings, and ticket/event feeds.")}>Future data</button></div>
-        </>}
-      </aside>
-
-      {portalOpen && <PortalModal city={city} business={selected} onClose={() => setPortalOpen(false)} />}
-
-      {welcome && <WelcomeOverlay city={city} onClose={closeWelcome} />}
-      {toast && <div className={styles.toast}><b>Stroll hint</b><span>{toast}</span><button onClick={() => setToast("")}>Got it</button></div>}
+      {welcome && (
+        <section className={styles.welcome} aria-label="Welcome to Stroll">
+          <img src="/brand/stroll-logo.png" alt="stroll.city" />
+          <p className={styles.eyebrow}>{city.theme.brandTag}</p>
+          <p>{city.theme.welcomeLine}</p>
+          <button onClick={closeWelcome}>Start strolling →</button>
+        </section>
+      )}
     </main>
-  );
-}
-
-function PortalModal({ city, business, onClose }: { city: CityConfig; business: Business | null; onClose: () => void }) {
-  const plans = [
-    ["Free", "$0", "Verified pin, name, category, address, and monogram marker."],
-    ["Stroll", "$29/mo", "Logo marker, photo gallery, curated profile, hours, highlights, and links."],
-    ["Stroll+", "$59/mo", "Everything in Stroll plus event/promos, featured placement, and analytics."],
-  ];
-  return (
-    <section className={styles.portalModal} role="dialog" aria-modal="true" aria-label="Claim your business">
-      <button className={styles.close} onClick={onClose}>× close</button>
-      <p className={styles.eyebrow}>{city.name} business portal preview</p>
-      <h2>{business ? `Claim ${business.name}` : "Claim your Stroll page"}</h2>
-      <p className={styles.portalLead}>Phase 2 turns the CTA into a real product flow preview: verify your licence, claim the rooftop marker, pick a plan, and later connect Stripe/Supabase in the portal phase.</p>
-      <ol className={styles.claimSteps}>
-        <li><b>1</b><span>Find your business from the verified Calgary licence data.</span></li>
-        <li><b>2</b><span>Confirm address/building footprint and ownership details.</span></li>
-        <li><b>3</b><span>Upload logo, photos, hours, links, and highlights.</span></li>
-        <li><b>4</b><span>Choose Free, Stroll, or Stroll+ and publish after review.</span></li>
-      </ol>
-      <div className={styles.planGrid}>{plans.map(([name, price, desc]) => <article key={name}><b>{name}</b><strong>{price}</strong><span>{desc}</span></article>)}</div>
-      <button className={styles.claimRow} onClick={onClose}>Got it — keep strolling</button>
-    </section>
-  );
-}
-
-function WelcomeOverlay({ city, onClose }: { city: CityConfig; onClose: () => void }) {
-  return (
-    <section className={styles.welcome} aria-label="Welcome to Stroll">
-      <div className={styles.cloudOne} />
-      <div className={styles.cloudTwo} />
-      <StrollArch colors={city.theme.archColors} />
-      <p className={styles.eyebrow}>{city.theme.brandTag}</p>
-      <h1>stroll.city</h1>
-      <p>{city.theme.welcomeLine}</p>
-      <button onClick={onClose}>Start strolling →</button>
-    </section>
-  );
-}
-
-function StrollArch({ colors, compact = false }: { colors: string[]; compact?: boolean }) {
-  return (
-    <svg className={compact ? styles.archMini : styles.arch} viewBox="0 0 120 68" role="img" aria-label="Stroll arch logo">
-      <path d="M16 60C16 35.7 35.7 16 60 16s44 19.7 44 44" fill="none" stroke={colors[0]} strokeWidth="12" strokeLinecap="round" />
-      <path d="M32 60c0-15.5 12.5-28 28-28s28 12.5 28 28" fill="none" stroke={colors[1]} strokeWidth="12" strokeLinecap="round" />
-      <path d="M48 60c0-6.6 5.4-12 12-12s12 5.4 12 12" fill="none" stroke={colors[2]} strokeWidth="12" strokeLinecap="round" />
-    </svg>
   );
 }

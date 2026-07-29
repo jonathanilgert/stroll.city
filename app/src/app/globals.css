@@ -1,15 +1,42 @@
 :root {
-  --paper: #efe4cd;
-  --ink: #26282c;
-  --ink-soft: #5f6670;
-  --line: #dccdb2;
-  --panel: #fbf6ec;
-  --shadow: 0 10px 30px rgba(74, 63, 40, 0.18);
+  --bg: #EFEBE4;
+  --surface: #FFFFFF;
+  --surface-2: #FAF8F4;
+  --line: #E8E3DA;
+  --line-strong: #D8D1C6;
+  --ink: #1C1A17;
+  --ink-2: #55504A;
+  --ink-3: #6F6A61;
+  --violet: #1B5FA8;
+  --violet-hover: #154C88;
+  --violet-soft: #EBF2F9;
+  --violet-line: #CBDDEE;
+  --accent-glow: rgba(27, 95, 168, .32);
+  --olive: #5C6350;
+  --olive-soft: #F0F1EB;
+  --olive-line: #DCE0D3;
+  --c-eat: #8A5F44;
+  --c-cafe: #7E6B3C;
+  --c-bar: #6E5570;
+  --c-shop: #3E6B63;
+  --c-studio: #5C6870;
+  --c-art: #8A5F76;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+  --sh-1: 0 1px 2px rgba(28, 26, 23, .06);
+  --sh-2: 0 2px 8px rgba(28, 26, 23, .08), 0 1px 2px rgba(28, 26, 23, .04);
+  --sh-3: 0 12px 32px rgba(28, 26, 23, .16), 0 2px 6px rgba(28, 26, 23, .07);
 }
 
-* { box-sizing: border-box; padding: 0; margin: 0; }
-html, body { width: 100%; min-height: 100%; }
-body { color: var(--ink); background: var(--paper); font-family: var(--font-public-sans), system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
-button, select, input { font: inherit; }
-a { color: inherit; }
-.maplibregl-canvas { filter: sepia(.28) saturate(1.2) contrast(1.02) brightness(1.02); }
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-display), 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
+a { color: var(--violet); text-decoration: none; }
+a:hover { color: var(--violet-hover); }
+input, select { font: inherit; color: inherit; }
+.maplibregl-ctrl-attrib { font-size: 10px !important; background: rgba(255,255,255,.82) !important; color: var(--ink-3) !important; }
+.maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
+.maplibregl-canvas { filter: saturate(.9) contrast(.98) brightness(1.03); }
