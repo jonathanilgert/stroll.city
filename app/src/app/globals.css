@@ -1,42 +1,60 @@
 :root {
-  --bg: #EFEBE4;
-  --surface: #FFFFFF;
-  --surface-2: #FAF8F4;
-  --line: #E8E3DA;
-  --line-strong: #D8D1C6;
-  --ink: #1C1A17;
-  --ink-2: #55504A;
-  --ink-3: #6F6A61;
-  --violet: #1B5FA8;
-  --violet-hover: #154C88;
-  --violet-soft: #EBF2F9;
-  --violet-line: #CBDDEE;
-  --accent-glow: rgba(27, 95, 168, .32);
+  --surface: #fff;
+  --surface-2: #F7FAF8;
+  --mint: #EAF1EE;
+  --mint-2: #DCE8E3;
+  --line: #E8EDEA;
+  --line-strong: #D6DEDA;
+  --ink: #14181A;
+  --ink-2: #5A6462;
+  --ink-3: #6E7775;
+  --black: #101413;
+  --amber: #EFA22A;
+  --amber-soft: #FDF3E2;
+  --amber-line: #F6DCB0;
+  --brand-blue: #DBECFB;
+  --brand-blue-soft: #F0F8FE;
+  --brand-blue-hover: #C3E0F6;
+  --app-bg: linear-gradient(150deg, #AED4F0 0%, #C9E4F8 46%, #DBECFB 100%);
   --olive: #5C6350;
-  --olive-soft: #F0F1EB;
-  --olive-line: #DCE0D3;
-  --c-eat: #8A5F44;
-  --c-cafe: #7E6B3C;
-  --c-bar: #6E5570;
-  --c-shop: #3E6B63;
-  --c-studio: #5C6870;
-  --c-art: #8A5F76;
-  --r-sm: 8px;
-  --r-md: 10px;
-  --r-lg: 14px;
-  --r-xl: 18px;
-  --sh-1: 0 1px 2px rgba(28, 26, 23, .06);
-  --sh-2: 0 2px 8px rgba(28, 26, 23, .08), 0 1px 2px rgba(28, 26, 23, .04);
-  --sh-3: 0 12px 32px rgba(28, 26, 23, .16), 0 2px 6px rgba(28, 26, 23, .07);
+  --olive-soft: #F0F2EC;
+  --olive-line: #DDE2D5;
+  --c-eat: #B4703F;
+  --c-cafe: #9A8236;
+  --c-bar: #7E5F86;
+  --c-shop: #3E7A6C;
+  --c-studio: #5A707E;
+  --c-art: #A0607C;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 18px;
+  --r-xl: 22px;
+  --r-2xl: 28px;
+  --sh-1: 0 1px 2px rgba(20, 24, 26, .05);
+  --sh-2: 0 4px 14px rgba(20, 24, 26, .07), 0 1px 3px rgba(20, 24, 26, .04);
+  --sh-3: 0 18px 44px rgba(20, 24, 26, .14), 0 3px 8px rgba(20, 24, 26, .07);
+  --sh-shell: 0 40px 90px rgba(28, 52, 50, .28), 0 8px 24px rgba(28, 52, 50, .14);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--ink); font-family: var(--font-display), 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 14px; -webkit-font-smoothing: antialiased; }
+body {
+  padding: 22px;
+  background: var(--app-bg);
+  color: var(--ink);
+  font-family: var(--font-display), 'Outfit', system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
-a { color: var(--violet); text-decoration: none; }
-a:hover { color: var(--violet-hover); }
+a { color: var(--ink); text-decoration: none; }
+a:hover { color: var(--olive); }
 input, select { font: inherit; color: inherit; }
-.maplibregl-ctrl-attrib { font-size: 10px !important; background: rgba(255,255,255,.82) !important; color: var(--ink-3) !important; }
+.mono { font-family: var(--font-mono), monospace; }
+.num { font-weight: 200; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.lbl { font-size: 10.5px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.maplibregl-ctrl-attrib { font-size: 9.5px !important; background: rgba(255,255,255,.8) !important; color: var(--ink-3) !important; }
 .maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
-.maplibregl-canvas { filter: saturate(.9) contrast(.98) brightness(1.03); }
+.maplibregl-canvas { filter: saturate(.92) brightness(1.04) contrast(.97); }
