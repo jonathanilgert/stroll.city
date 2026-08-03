@@ -122,7 +122,27 @@ jobs:
           set -euo pipefail
           ssh -i ~/.ssh/stroll_city_deploy -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" \
             "test \"\$(readlink -f /var/www/stroll.city/current)\" = \"/var/www/stroll.city/releases/${RELEASE_ID}\""
-          curl --fail --silent --show-error --location --max-time 20 https://stroll.city/ >/tmp/stroll-home.html
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --location --max-time 20 https://stroll.city/ >/tmp/stroll-home.html; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Production home page did not become ready in time" >&2
+              exit 1
+            fi
+            sleep 2
+          done
           grep -qi 'stroll' /tmp/stroll-home.html
-          curl --fail --silent --show-error --location --max-time 20 https://stroll.city/api/v1/calgary/businesses >/tmp/stroll-businesses.json
-          grep -q 'businesses' /tmp/stroll-businesses.json
+
+          for attempt in {1..30}; do
+            if curl --fail --silent --show-error --location --max-time 20 https://stroll.city/api/v1/calgary/businesses >/tmp/stroll-businesses.json; then
+              break
+            fi
+            if [ "$attempt" -eq 30 ]; then
+              echo "Production businesses API did not become ready in time" >&2
+              exit 1
+            fi
+            sleep 2
+          done
+          grep -q '"ok":true' /tmp/stroll-businesses.json
+          grep -q '"data"' /tmp/stroll-businesses.json
