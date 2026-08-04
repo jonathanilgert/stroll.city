@@ -97,6 +97,10 @@ jobs:
           mkdir -p "${SHARED_DIR}/.stroll"
           ln -s "${SHARED_DIR}/.stroll" .stroll
 
+          # Re-running a deploy for the same SHA can leave a partial node_modules
+          # behind because the upload intentionally excludes dependencies.
+          # Start dependency/build artifacts clean so npm ci is deterministic.
+          rm -rf node_modules .next
           npm ci
           npm run build
 
