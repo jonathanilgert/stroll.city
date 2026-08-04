@@ -26,7 +26,7 @@ import {
 import type { CityConfig } from "./cities";
 import styles from "./page.module.css";
 
-type Category = "restaurant" | "cafe" | "bar" | "shop" | "services" | "gallery";
+export type Category = "restaurant" | "cafe" | "bar" | "shop" | "services" | "gallery";
 type SidebarTab = "explore" | "events" | "saved";
 
 type Business = {
@@ -100,7 +100,7 @@ type StrollData = {
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const MIN_STRIP_ZOOM = 15.5;
 
-const CAT_ICON: Record<Category, string> = {
+export const CAT_ICON: Record<Category, string> = {
   restaurant: "M7 3v8a3 3 0 0 0 6 0V3M10 11v10M17 3c-1.2 2-1.6 3.4-1.6 5.2 0 1.3.7 2 1.6 2s1.6-.7 1.6-2C18.6 6.4 18.2 5 17 3Zm0 7.2V21",
   cafe: "M4 8h12v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5V8Zm12 1h2.5a2.5 2.5 0 0 1 0 5H16M3 21h14",
   bar: "M5 4h14l-7 8v7M9 21h6M5 4l7 8",
@@ -108,7 +108,7 @@ const CAT_ICON: Record<Category, string> = {
   services: "M12 3v3M12 18v3M4.5 12h3M16.5 12h3M6.7 6.7l2.1 2.1M15.2 15.2l2.1 2.1M17.3 6.7l-2.1 2.1M8.8 15.2l-2.1 2.1",
   gallery: "M12 3a9 9 0 1 0 0 18c1.4 0 2-.9 2-2 0-2 2-1.6 3.4-2.2A5 5 0 0 0 21 12a9 9 0 0 0-9-9Zm-3.5 6h0M12 7h0m3.5 2h0",
 };
-const CAT_LABEL: Record<Category, string> = {
+export const CAT_LABEL: Record<Category, string> = {
   restaurant: "Restaurants",
   cafe: "Cafés & sweets",
   bar: "Bars & music",
@@ -126,17 +126,17 @@ const CAT_BLURB: Record<Category, string> = {
 };
 const allCategories = Object.keys(CAT_LABEL) as Category[];
 
-function categoryColor(city: CityConfig, category: Category) {
+export function categoryColor(city: CityConfig, category: Category) {
   return city.theme.categories[category] ?? city.theme.primary;
 }
 
-function wash(hex: string, a = 26, b = 10) {
+export function wash(hex: string, a = 26, b = 10) {
   const av = a.toString(16).padStart(2, "0");
   const bv = b.toString(16).padStart(2, "0");
   return `linear-gradient(145deg, ${hex}${av}, ${hex}${bv})`;
 }
 
-function CatIcon({ d, size = 16, color = "currentColor", strokeWidth = 1.7 }: { d: string; size?: number; color?: string; strokeWidth?: number }) {
+export function CatIcon({ d, size = 16, color = "currentColor", strokeWidth = 1.7 }: { d: string; size?: number; color?: string; strokeWidth?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
       <path d={d} />
@@ -145,8 +145,8 @@ function CatIcon({ d, size = 16, color = "currentColor", strokeWidth = 1.7 }: { 
 }
 
 /* ---------------- rail icons (ported verbatim from the design file) ---------------- */
-function IconExplore() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 11 12 4l8.5 7" /><path d="M5.5 10v9.5h13V10" /><path d="M10 19.5V14h4v5.5" /></svg>; }
-function IconAdd() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>; }
+export function IconExplore() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 11 12 4l8.5 7" /><path d="M5.5 10v9.5h13V10" /><path d="M10 19.5V14h4v5.5" /></svg>; }
+export function IconAdd() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>; }
 function IconEvents() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M8 3.5v3M16 3.5v3M3.5 10h17" /></svg>; }
 function IconSaved() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 4h11v16.5l-5.5-3.9-5.5 3.9V4Z" /></svg>; }
 function IconOpenData() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3" /><path d="M4.5 6v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6" /><path d="M4.5 12v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6" /></svg>; }
