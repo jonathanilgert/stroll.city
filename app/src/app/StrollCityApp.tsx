@@ -262,6 +262,25 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [stageSnug, setStageSnug] = useState(false);
   const [stageShort, setStageShort] = useState(false);
   const [, forceTick] = useState(0);
+  const [mobileLayout, setMobileLayout] = useState(false);
+  const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => new Set(allCategories));
+  const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
+  const sheetRef = useRef<HTMLDivElement | null>(null);
+  const tabsRef = useRef<HTMLDivElement | null>(null);
+  const mobileTopRef = useRef<HTMLDivElement | null>(null);
+  const locateRef = useRef<HTMLButtonElement | null>(null);
+  const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
+  const sheetHeightRef = useRef(132);
+
+  /* ---------------- mobile/desktop layout switch (live, not a one-time check) ---------------- */
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(max-width: 860px)");
+    const update = () => setMobileLayout(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     if (city.status !== "live" || !city.dataPath) return;
@@ -314,7 +333,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!data) return [];
     const needle = normalize(query);
     let list = data.businesses.filter((b) => {
-      const matchesCategory = browseCategory ? b.category === browseCategory : true;
+      /* mobile browses via multi-select chips; desktop drills into one category at a time */
+      const matchesCategory = mobileLayout ? activeCategories.has(b.category) : browseCategory ? b.category === browseCategory : true;
       const matchesQuery = needle ? normalize(`${b.name} ${b.address} ${b.category}`).includes(needle) : true;
       return matchesCategory && matchesQuery;
     });
@@ -327,7 +347,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       return a.name.localeCompare(b.name);
     });
     return list;
-  }, [data, browseCategory, query, sortMode]);
+  }, [data, browseCategory, query, sortMode, mobileLayout, activeCategories]);
 
   const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
   const openNowCount = useMemo(() => {
@@ -346,11 +366,29 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const openCategory = (key: Category) => { setBrowseCategory(key); setQuery(""); };
   const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setSelected(null); };
+  const toggleActiveCategory = (key: Category) => {
+    setActiveCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key); else next.add(key);
+      if (selected && !next.has(selected.category)) setSelected(null);
+      return next;
+    });
+  };
+  const closeSelected = () => {
+    setSelected(null);
+    if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
+  };
 
   /* ---------------- padding-aware fit, matching the design's fitPad()/fitStrip() ---------------- */
   const computePadding = () => {
     const wrap = mapWrapRef.current;
     const w = wrap?.clientWidth ?? 800, h = wrap?.clientHeight ?? 600;
+    if (mobileLayout) {
+      const topbarH = tab === "explore" ? (mobileTopRef.current?.offsetHeight ?? 108) : 0;
+      const top = Math.min(topbarH + 16, Math.round(h * 0.32));
+      const bottom = Math.min(h - 120, sheetHeightRef.current + 18);
+      return { top, bottom, left: 18, right: 18 };
+    }
     const right = Math.min(selected ? 430 : 215, Math.round(w * (selected ? 0.44 : 0.26)));
     const left = Math.min(44, Math.round(w * 0.06));
     const toolbarH = toolbarRef.current?.offsetHeight ?? 42;
@@ -372,11 +410,68 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const flyCity = () => mapRef.current?.flyTo({ center: city.center, zoom: 11.2, duration: 900 });
 
+  /* ---------------- mobile bottom sheet: peek/half/full stops, dragged imperatively ---------------- */
+  const computeSheetStops = () => {
+    const vh = window.innerHeight;
+    const tabH = tabsRef.current?.offsetHeight || 60;
+    const avail = Math.max(240, vh - tabH);
+    return {
+      peek: Math.min(150, Math.round(avail * 0.26)),
+      half: Math.round(avail * 0.56),
+      full: Math.round(avail - 56),
+    };
+  };
+  const applySheetHeight = (px: number, animate: boolean) => {
+    const el = sheetRef.current;
+    if (!el) return;
+    el.style.transition = animate ? "" : "none";
+    el.style.height = `${px}px`;
+    sheetHeightRef.current = px;
+    if (locateRef.current) locateRef.current.style.bottom = `${px + 14}px`;
+    window.setTimeout(() => { fitStrip(true); forceTick((t) => t + 1); }, animate ? 340 : 0);
+  };
+  const snapSheet = (stop: "peek" | "half" | "full") => {
+    setSheetStop(stop);
+    applySheetHeight(sheetStopsRef.current[stop], true);
+  };
+  const sheetDragRef = useRef<{ startY: number; startH: number; moved: number; pointerId: number } | null>(null);
+  const onSheetGrabPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    sheetDragRef.current = { startY: event.clientY, startH: sheetHeightRef.current, moved: 0, pointerId: event.pointerId };
+    event.currentTarget.setPointerCapture(event.pointerId);
+    if (sheetRef.current) sheetRef.current.style.transition = "none";
+  };
+  const onSheetGrabPointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+    const drag = sheetDragRef.current;
+    if (!drag) return;
+    const dy = drag.startY - event.clientY;
+    drag.moved = Math.max(drag.moved, Math.abs(dy));
+    const stops = sheetStopsRef.current;
+    const h = Math.max(stops.peek - 50, Math.min(stops.full + 30, drag.startH + dy));
+    if (sheetRef.current) sheetRef.current.style.height = `${h}px`;
+    if (locateRef.current) locateRef.current.style.bottom = `${h + 14}px`;
+    sheetHeightRef.current = h;
+  };
+  const onSheetGrabPointerUp = () => {
+    const drag = sheetDragRef.current;
+    if (!drag) return;
+    const stops = sheetStopsRef.current;
+    const order: Array<"peek" | "half" | "full"> = ["peek", "half", "full"];
+    if (drag.moved < 6) {
+      const i = order.indexOf(sheetStop);
+      snapSheet(order[(i + 1) % order.length]);
+    } else {
+      const nearest = order.reduce((a, b) => Math.abs(stops[b] - sheetHeightRef.current) < Math.abs(stops[a] - sheetHeightRef.current) ? b : a);
+      snapSheet(nearest);
+    }
+    sheetDragRef.current = null;
+  };
+
   const flyToBusiness = (business: Business) => {
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
     mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
+    if (mobileLayout && sheetStop === "peek") snapSheet("half");
   };
   const goFeatured = (attraction: Attraction) => {
     setHint(`${attraction.name}: ${attraction.blurb}`);
@@ -400,6 +495,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  /* ---------------- mobile sheet: (re)compute stops on layout changes, keep the sheet's real height in sync ---------------- */
+  useEffect(() => {
+    if (!mobileLayout) return;
+    const sync = () => {
+      sheetStopsRef.current = computeSheetStops();
+      applySheetHeight(sheetStopsRef.current[sheetStop], false);
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileLayout, data]);
 
   /* ---------------- responsive stage sync (ResizeObserver, mirrors syncStage()) ---------------- */
   useEffect(() => {
@@ -557,7 +665,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean; chrome?: boolean };
     const slots: Slot[] = [];
     if (pane) {
-      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}`);
+      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
       chromeEls.forEach((n) => {
         const el = n as HTMLElement;
         if (!el.offsetWidth || getComputedStyle(el).display === "none") return;
@@ -582,7 +690,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
       const wide = rectFor(cp, chipWidth(biz.name, isSel));
-      if (showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
+      if (!mobileLayout && showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
       const small = rectFor(cp, 32);
       if (clears(small)) { slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel }); return; }
       if (isSel) { slots.push({ ...small, members: [biz], mode: "label", pinned: true }); return; }
@@ -600,11 +708,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       if (s.chrome || !s.members.length) return;
       if (s.pinned || s.members.length === 1) {
         const biz = s.members[0];
-        const compact = s.mode === "glyph" && biz.id !== selected?.id;
+        const compact = mobileLayout ? true : s.mode === "glyph" && biz.id !== selected?.id;
         const el = document.createElement("button");
         el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
         el.addEventListener("click", () => flyToBusiness(biz));
         el.addEventListener("mouseenter", () => {
+          if (mobileLayout) return;
           const pinEl = el.querySelector(`.${styles.pin}`);
           if (pinEl?.classList.contains(styles.compact)) { pinEl.classList.remove(styles.compact); (el as HTMLElement).dataset.wasCompact = "true"; }
           rowElsRef.current.get(biz.id)?.classList.add(styles.rowActive);
@@ -647,6 +756,86 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const enabledNeighbourhood = data?.neighbourhoods.find((n) => n.enabled);
 
+  /* shared between the desktop drawer and the mobile bottom sheet's detail state */
+  const renderDetail = (biz: Business) => (
+    <>
+      <div className={styles.hero}>
+        <img src={biz.photo} alt="" />
+        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category) }}>
+          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : <CatIcon d={CAT_ICON[biz.category]} size={24} color="#fff" strokeWidth={1.7} />}
+        </div>
+      </div>
+      <div className={styles.dBody}>
+        <div>
+          <div className={styles.dTitle}>{biz.name}</div>
+          <div className={styles.dSub}>
+            <span className={styles.pill} style={{ color: categoryColor(city, biz.category), borderColor: `${categoryColor(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}10` }}>
+              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryColor(city, biz.category)} /> {CAT_LABEL[biz.category]}
+            </span>
+            {(() => { const open = isOpenNow(biz.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
+            {biz.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
+          </div>
+        </div>
+        <div className={styles.dActions}>
+          <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lon}`, "_blank", "noopener,noreferrer")}>
+            <Navigation size={15} /> Directions
+          </button>
+          <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => biz.website ? window.open(biz.website!, "_blank", "noopener,noreferrer") : setHint("No official website found yet — added to the marketing-help spreadsheet.")}>
+            <Globe size={16} />
+          </button>
+          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
+            <ExternalLink size={16} />
+          </button>
+        </div>
+        <p className={styles.blurb}>{biz.blurb}</p>
+        <div className={styles.kv}>
+          <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
+          <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
+          <div className={styles.kvRow}><span className={styles.k}>Source</span><span className={`${styles.v} ${styles.mono}`} style={{ fontSize: 11.5, color: "var(--ink-2)" }}>{biz.source}</span></div>
+        </div>
+        <div>
+          <div className={styles.lbl} style={{ marginBottom: 8 }}>Good for</div>
+          <div className={styles.rowTags}>{biz.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
+        </div>
+        <button className={styles.claimcard} onClick={() => openPortal(biz)}>
+          <Briefcase size={20} color="var(--amber)" style={{ flex: "0 0 auto" }} />
+          <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
+        </button>
+      </div>
+    </>
+  );
+
+  /* shared between the desktop results list and the mobile sheet's list state */
+  const renderBusinessRow = (biz: Business) => {
+    const open = isOpenNow(biz.hours, nowMinutes);
+    return (
+      <button
+        key={biz.id}
+        ref={(el) => { if (el) rowElsRef.current.set(biz.id, el); else rowElsRef.current.delete(biz.id); }}
+        className={`${styles.row} ${selected?.id === biz.id ? styles.rowActive : ""}`}
+        onClick={() => flyToBusiness(biz)}
+        onMouseEnter={() => pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.add(styles.pinActive)}
+        onMouseLeave={() => { if (biz.id !== selected?.id) pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.remove(styles.pinActive); }}
+      >
+        <div className={styles.thumb}><img src={biz.photo} alt="" /></div>
+        <div className={styles.rowBody}>
+          <div className={styles.rowName}>{biz.name}</div>
+          <div className={styles.rowMeta}>
+            <span className={styles.catLabel} style={{ color: categoryColor(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
+            {biz.claim_status === "claimed" && <><span className={styles.dotsep} /><span className={styles.claimedBadge}>Claimed</span></>}
+          </div>
+          <div className={styles.rowMeta}>
+            {open === true && <span className={styles.openBadge}>Open now</span>}
+            {open === false && <span className={styles.closedBadge}>Closed</span>}
+            <span className={styles.dotsep} /><span style={{ color: "var(--ink-3)" }}>{biz.address}</span>
+          </div>
+          <div className={styles.rowTags}>{biz.highlights.slice(0, 3).map(([, text]) => <span key={text} className={styles.tag}>{text}</span>)}</div>
+        </div>
+      </button>
+    );
+  };
+
   if (city.status !== "live") {
     return (
       <main className={styles.comingSoon}>
@@ -660,6 +849,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   return (
     <main className={styles.shell}>
+      {!mobileLayout && (
       <nav className={styles.rail}>
         <img className={styles.railLogo} src="/brand/stroll-mark.png" alt="Stroll City" />
         <button className={`${styles.railBtn} ${tab === "explore" ? styles.railOn : ""}`} title="Explore" onClick={() => { setTab("explore"); backToBrowse(); }}><IconExplore /></button>
@@ -668,7 +858,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <button className={styles.railBtn} title="Saved (coming soon)" onClick={() => setHint("Saved lists are coming in a later phase.")}><IconSaved /></button>
         <button className={`${styles.railBtn} ${styles.railSpacer}`} title="Open data note" onClick={() => setHint("Geometry and licences come from City of Calgary open data.")}><IconOpenData /></button>
       </nav>
+      )}
 
+      {!mobileLayout && (
       <aside className={`${styles.panel} ${panelCollapsed ? styles.panelCollapsed : ""} ${isResultsView ? styles.results : ""}`}>
         <div className={styles.panelInner}>
           <div className={styles.panelHead}>
@@ -762,34 +954,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               </div>
               <div className={styles.list}>
                 {visibleBusinesses.length === 0 && <div className={styles.empty}><b>Nothing here yet</b>Go back to the categories, or clear the search.</div>}
-                {visibleBusinesses.map((biz) => {
-                  const open = isOpenNow(biz.hours, nowMinutes);
-                  return (
-                    <button
-                      key={biz.id}
-                      ref={(el) => { if (el) rowElsRef.current.set(biz.id, el); else rowElsRef.current.delete(biz.id); }}
-                      className={`${styles.row} ${selected?.id === biz.id ? styles.rowActive : ""}`}
-                      onClick={() => flyToBusiness(biz)}
-                      onMouseEnter={() => pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.add(styles.pinActive)}
-                      onMouseLeave={() => { if (biz.id !== selected?.id) pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.remove(styles.pinActive); }}
-                    >
-                      <div className={styles.thumb}><img src={biz.photo} alt="" /></div>
-                      <div className={styles.rowBody}>
-                        <div className={styles.rowName}>{biz.name}</div>
-                        <div className={styles.rowMeta}>
-                          <span className={styles.catLabel} style={{ color: categoryColor(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
-                          {biz.claim_status === "claimed" && <><span className={styles.dotsep} /><span className={styles.claimedBadge}>Claimed</span></>}
-                        </div>
-                        <div className={styles.rowMeta}>
-                          {open === true && <span className={styles.openBadge}>Open now</span>}
-                          {open === false && <span className={styles.closedBadge}>Closed</span>}
-                          <span className={styles.dotsep} /><span style={{ color: "var(--ink-3)" }}>{biz.address}</span>
-                        </div>
-                        <div className={styles.rowTags}>{biz.highlights.slice(0, 3).map(([, text]) => <span key={text} className={styles.tag}>{text}</span>)}</div>
-                      </div>
-                    </button>
-                  );
-                })}
+                {visibleBusinesses.map((biz) => renderBusinessRow(biz))}
               </div>
             </>
           )}
@@ -815,11 +980,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           </div>
         </div>
       </aside>
+      )}
 
-      <div ref={stageRef} className={`${styles.stage} ${stageTight ? styles.tight : ""} ${stageSnug ? styles.snug : ""} ${stageShort ? styles.short : ""}`}>
+      <div ref={stageRef} className={`${styles.stage} ${stageTight ? styles.tight : ""} ${stageSnug ? styles.snug : ""} ${stageShort ? styles.short : ""} ${mobileLayout ? styles.mStage : ""}`}>
         <div ref={mapWrapRef} className={styles.mapWrap}>
           <div ref={mapNode} className={styles.map} />
 
+          {!mobileLayout && (
+          <>
           <div ref={toolbarRef} className={styles.toolbar}>
             <label className={`${styles.field} ${styles.search} ${styles.glass}`}>
               <Search size={15} color="var(--ink-3)" />
@@ -875,65 +1043,119 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={`${styles.edgeTab} ${styles.edgeTabLeft}`} onClick={() => setPanelCollapsed((c) => !c)} title={panelCollapsed ? "Show list" : "Hide list"}>
             {panelCollapsed ? <ChevronRight size={15} /> : <ChevronLeft size={15} />}
           </button>
+          </>
+          )}
+
+          {mobileLayout && tab === "explore" && (
+            <div ref={mobileTopRef} className={styles.mTop}>
+              <label className={`${styles.mSearch} ${styles.glass}`}>
+                <Search size={15} color="var(--ink-3)" />
+                <input aria-label="Search businesses" placeholder="Search cafés, shops, galleries…" value={query} onChange={(e) => setQuery(e.target.value)} />
+              </label>
+              <div className={styles.mChipRow}>
+                {allCategories.map((key) => (
+                  <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
+                    <i style={{ background: categoryColor(city, key) }} />{CAT_LABEL[key]}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {mobileLayout && (
+            <button
+              ref={locateRef}
+              className={styles.mLocate}
+              onClick={() => fitStrip(true)}
+              title="Re-centre"
+            >
+              <Compass size={19} />
+            </button>
+          )}
 
           {!data && !error && <div className={styles.hint}>Painting rooftops…</div>}
           {error && <div className={styles.hint}>Could not load Stroll data: {error}</div>}
         </div>
 
-        <div className={`${styles.drawer} ${selected ? styles.drawerOpen : ""}`}>
-          <button className={`${styles.edgeTab} ${styles.edgeTabRight}`} onClick={() => setSelected(null)} title="Close"><ChevronRight size={15} /></button>
-          {selected && (
-            <div className={styles.drawerScroll}>
-              <div className={styles.hero}>
-                <img src={selected.photo} alt="" />
-                <button className={styles.heroClose} onClick={() => setSelected(null)}><X size={15} /></button>
-                <div className={styles.glyphLg} style={{ background: categoryColor(city, selected.category) }}>
-                  {selected.logo_url ? <img src={selected.logo_url} alt="" /> : <CatIcon d={CAT_ICON[selected.category]} size={24} color="#fff" strokeWidth={1.7} />}
-                </div>
-              </div>
-              <div className={styles.dBody}>
-                <div>
-                  <div className={styles.dTitle}>{selected.name}</div>
-                  <div className={styles.dSub}>
-                    <span className={styles.pill} style={{ color: categoryColor(city, selected.category), borderColor: `${categoryColor(city, selected.category)}33`, background: `${categoryColor(city, selected.category)}10` }}>
-                      <CatIcon d={CAT_ICON[selected.category]} size={12} color={categoryColor(city, selected.category)} /> {CAT_LABEL[selected.category]}
-                    </span>
-                    {(() => { const open = isOpenNow(selected.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
-                    {selected.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
-                  </div>
-                </div>
-                <div className={styles.dActions}>
-                  <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${selected.lat},${selected.lon}`, "_blank", "noopener,noreferrer")}>
-                    <Navigation size={15} /> Directions
-                  </button>
-                  <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => selected.website ? window.open(selected.website!, "_blank", "noopener,noreferrer") : setHint("No official website found yet — added to the marketing-help spreadsheet.")}>
-                    <Globe size={16} />
-                  </button>
-                  <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
-                    <ExternalLink size={16} />
-                  </button>
-                </div>
-                <p className={styles.blurb}>{selected.blurb}</p>
-                <div className={styles.kv}>
-                  <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{selected.address}, Calgary AB</span></div>
-                  <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{selected.hours}</span></div>
-                  <div className={styles.kvRow}><span className={styles.k}>Source</span><span className={`${styles.v} ${styles.mono}`} style={{ fontSize: 11.5, color: "var(--ink-2)" }}>{selected.source}</span></div>
-                </div>
-                <div>
-                  <div className={styles.lbl} style={{ marginBottom: 8 }}>Good for</div>
-                  <div className={styles.rowTags}>{selected.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
-                </div>
-                <button className={styles.claimcard} onClick={() => openPortal(selected)}>
-                  <Briefcase size={20} color="var(--amber)" style={{ flex: "0 0 auto" }} />
-                  <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        {!mobileLayout && (
+          <div className={`${styles.drawer} ${selected ? styles.drawerOpen : ""}`}>
+            <button className={`${styles.edgeTab} ${styles.edgeTabRight}`} onClick={closeSelected} title="Close"><ChevronRight size={15} /></button>
+            {selected && <div className={styles.drawerScroll}>{renderDetail(selected)}</div>}
+          </div>
+        )}
       </div>
 
-      {selected && <button aria-label="Close" onClick={() => setSelected(null)} style={{ position: "fixed", inset: 0, zIndex: 690, border: 0, background: "transparent", cursor: "default", display: typeof window !== "undefined" && window.innerWidth <= 860 ? "block" : "none" }} />}
+      {mobileLayout && (
+        <div ref={sheetRef} className={styles.mSheet}>
+          <button
+            className={styles.mGrab}
+            onPointerDown={onSheetGrabPointerDown}
+            onPointerMove={onSheetGrabPointerMove}
+            onPointerUp={onSheetGrabPointerUp}
+            onPointerCancel={onSheetGrabPointerUp}
+            title="Drag to resize"
+          >
+            <i />
+          </button>
+
+          <div className={styles.mSheetHead}>
+            {selected ? (
+              <>
+                <button className={styles.back} onClick={closeSelected} title="Back"><ChevronLeft size={16} /></button>
+                <span className={styles.mSheetTitle}>All places</span>
+              </>
+            ) : tab === "events" ? (
+              <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
+            ) : (
+              <>
+                <span className={styles.mSheetTitle}>{visibleBusinesses.length} place{visibleBusinesses.length === 1 ? "" : "s"}</span>
+                <button className={styles.mSort} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>
+                  {sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={11} />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className={styles.mSheetBody}>
+            {selected ? (
+              renderDetail(selected)
+            ) : tab === "events" ? (
+              events.map((event) => (
+                <button key={event.id} className={styles.row} onClick={() => { mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 }); if (sheetStop !== "peek") snapSheet("peek"); }}>
+                  <div className={styles.thumb} style={{ display: "grid", placeItems: "center", color: "var(--ink-3)" }}><CalendarDays size={22} /></div>
+                  <div className={styles.rowBody}>
+                    <div className={styles.rowName}>{event.name}</div>
+                    <div className={styles.rowMeta}>{formatDate(event.starts_at)} · {event.venue}</div>
+                    <div className={styles.rowMeta} style={{ color: "var(--ink-3)" }}>{event.source}</div>
+                  </div>
+                </button>
+              ))
+            ) : (
+              <>
+                {visibleBusinesses.length === 0 && <div className={styles.empty}><b>Nothing here yet</b>Turn a category back on, or clear the search.</div>}
+                {visibleBusinesses.map((biz) => renderBusinessRow(biz))}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {mobileLayout && (
+        <nav ref={tabsRef} className={styles.mTabs}>
+          <button className={tab === "explore" ? styles.mTabOn : ""} onClick={() => { setTab("explore"); closeSelected(); }}>
+            <IconExplore />Explore
+          </button>
+          <button className={tab === "events" ? styles.mTabOn : ""} onClick={() => { setTab("events"); closeSelected(); }}>
+            <IconEvents />Events
+          </button>
+          <button title="Coming soon" onClick={() => setHint("Saved lists are coming in a later phase.")}>
+            <IconSaved />Saved
+          </button>
+          <Link href="/portal">
+            <IconAdd />Claim
+          </Link>
+        </nav>
+      )}
 
       {welcome && (
         <section className={styles.welcome} aria-label="Welcome to Stroll">
