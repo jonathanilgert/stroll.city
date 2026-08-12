@@ -11,14 +11,15 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
-  ExternalLink,
   Globe,
   Landmark,
   Layers,
   Minus,
   Navigation,
+  Phone,
   Plus,
   Search,
+  Share2,
   ShieldCheck,
   Waves,
   X,
@@ -99,6 +100,13 @@ type StrollData = {
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const MIN_STRIP_ZOOM = 15.5;
+/* How far, in screen px, a crowded place may reach to join a cluster. Wide enough to cover any chip
+   that could physically overlap it, tight enough that a cluster always sits on top of its members. */
+const CLUSTER_RADIUS = 120;
+/* Gap two compact pins need before they read as two separate, tappable things. Sized off the
+   diagonal, not the axis: 64px apart on a slant is still ~45px in x and y, clear of the 32×36 chip
+   rects plus their gutters. Undershooting here just means you have to tap the cluster twice. */
+const PIN_SEPARATION = 64;
 
 export const CAT_ICON: Record<Category, string> = {
   restaurant: "M7 3v8a3 3 0 0 0 6 0V3M10 11v10M17 3c-1.2 2-1.6 3.4-1.6 5.2 0 1.3.7 2 1.6 2s1.6-.7 1.6-2C18.6 6.4 18.2 5 17 3Zm0 7.2V21",
@@ -273,6 +281,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [mobileLayout, setMobileLayout] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => new Set(allCategories));
   const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
+  /* Members of a cluster chip that no amount of zoom can pull apart, offered as a pickable list. */
+  const [clusterPick, setClusterPick] = useState<{ members: Business[]; x: number; y: number } | null>(null);
+  const cardsRef = useRef<HTMLDivElement | null>(null);
+  const cardScrollTimer = useRef(0);
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const mobileTopRef = useRef<HTMLDivElement | null>(null);
@@ -404,6 +416,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const closeSelected = () => {
     setSelected(null);
+    setClusterPick(null);
     if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
   };
 
@@ -444,7 +457,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const tabH = tabsRef.current?.offsetHeight || 60;
     const avail = Math.max(240, vh - tabH);
     return {
-      peek: Math.min(150, Math.round(avail * 0.26)),
+      /* Peek has to fit a whole place card, not half a list row — a sliver of a row is unreadable. */
+      peek: Math.min(198, Math.round(avail * 0.32)),
       half: Math.round(avail * 0.56),
       full: Math.round(avail - 56),
     };
@@ -456,21 +470,25 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     el.style.height = `${px}px`;
     sheetHeightRef.current = px;
     if (locateRef.current) locateRef.current.style.bottom = `${px + 14}px`;
-    window.setTimeout(() => { fitStrip(true); forceTick((t) => t + 1); }, animate ? 340 : 0);
+    /* Only re-place the pins around the sheet's new footprint. Re-fitting the camera here used to
+       throw you back to the whole strip every time you dragged the sheet or tapped a pin. */
+    window.setTimeout(() => forceTick((t) => t + 1), animate ? 320 : 0);
   };
   const snapSheet = (stop: "peek" | "half" | "full") => {
     setSheetStop(stop);
     applySheetHeight(sheetStopsRef.current[stop], true);
   };
   const sheetDragRef = useRef<{ startY: number; startH: number; moved: number; pointerId: number } | null>(null);
-  const onSheetGrabPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const onSheetGrabPointerDown = (event: React.PointerEvent<HTMLElement>) => {
+    /* The handle strip spans the header, so a tap on the sort/back control must not start a drag. */
+    if ((event.target as HTMLElement).closest("button, a")) return;
     /* Reaching for the sheet means you are done typing — get the keyboard out of the way. */
     searchRef.current?.blur();
     sheetDragRef.current = { startY: event.clientY, startH: sheetHeightRef.current, moved: 0, pointerId: event.pointerId };
     event.currentTarget.setPointerCapture(event.pointerId);
     if (sheetRef.current) sheetRef.current.style.transition = "none";
   };
-  const onSheetGrabPointerMove = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const onSheetGrabPointerMove = (event: React.PointerEvent<HTMLElement>) => {
     const drag = sheetDragRef.current;
     if (!drag) return;
     const dy = drag.startY - event.clientY;
@@ -496,13 +514,63 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     sheetDragRef.current = null;
   };
 
-  const flyToBusiness = (business: Business) => {
+  /* `expand` separates "you tapped a pin" (stay on the map, just highlight the card) from
+     "you tapped a card or a list row" (you asked for the profile, so raise the sheet). */
+  const flyToBusiness = (business: Business, expand = false) => {
     searchRef.current?.blur();
+    setClusterPick(null);
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
     mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
+    if (mobileLayout && expand && sheetStop === "peek") snapSheet("half");
+  };
+  /* ----------------
+     Tapping a cluster used to just zoom +2 and hope. Places that share a building never separate, so
+     the chip stayed at "3 places" all the way to max zoom with nothing to click. Now we work out the
+     zoom that would actually pull the tightest pair apart; if no legal zoom can, we list them instead.
+     ---------------- */
+  const openCluster = (members: Business[], at: { x: number; y: number }) => {
+    const map = mapRef.current;
+    if (!map) return;
+    const pts = members.map((m) => map.project([m.lon, m.lat]));
+    let tightest = Infinity;
+    for (let i = 0; i < pts.length; i++) {
+      for (let j = i + 1; j < pts.length; j++) {
+        tightest = Math.min(tightest, Math.hypot(pts[i].x - pts[j].x, pts[i].y - pts[j].y));
+      }
+    }
+    const zoom = map.getZoom();
+    const maxZoom = map.getMaxZoom();
+    /* Screen distance doubles per zoom level, so this is the level where `tightest` reaches PIN_SEPARATION. */
+    const needed = tightest > 0.5 ? zoom + Math.log2(PIN_SEPARATION / tightest) : Infinity;
+    if (needed <= maxZoom && zoom < maxZoom - 0.05) {
+      setClusterPick(null);
+      const lon = members.reduce((sum, m) => sum + m.lon, 0) / members.length;
+      const lat = members.reduce((sum, m) => sum + m.lat, 0) / members.length;
+      map.flyTo({ center: [lon, lat], zoom: Math.min(maxZoom, Math.max(needed, zoom + 0.8)), duration: 550 });
+      return;
+    }
+    /* Clamped here rather than at render time: the picker must stay inside the map pane, and this is
+       the only moment we legitimately know its size. */
+    const wrap = mapWrapRef.current;
+    setClusterPick({
+      members,
+      x: Math.max(12, Math.min(at.x - 138, (wrap?.clientWidth ?? 900) - 288)),
+      y: Math.max(12, Math.min(at.y + 26, (wrap?.clientHeight ?? 600) - 268)),
+    });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
+  };
+
+  const shareBusiness = async (business: Business) => {
+    const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const url = `${window.location.origin}${window.location.pathname}?biz=${slug}`;
+    try {
+      if (navigator.share) await navigator.share({ title: business.name, text: `${business.name} — ${business.address}`, url });
+      else { await navigator.clipboard.writeText(url); setHint("Link copied."); }
+    } catch {
+      /* The user dismissed the share sheet, or the browser blocked the clipboard. Neither is an error worth shouting about. */
+    }
   };
   const goFeatured = (attraction: Attraction) => {
     setHint(`${attraction.name}: ${attraction.blurb}`);
@@ -556,6 +624,42 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (sheetStop === "peek") snapSheet("half");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, mobileLayout]);
+
+  /* At the peek stop the sheet is a swipeable card deck, the way a phone map wants to behave.
+     Half and full are the list (or the profile, once you have picked something). */
+  const peekCards = mobileLayout && sheetStop === "peek" && tab === "explore" && !clusterPick;
+
+  /* Tapping a pin has to bring its card into view, or the deck and the map disagree about what you picked. */
+  useEffect(() => {
+    if (!peekCards || !selected) return;
+    const wrap = cardsRef.current;
+    const card = wrap?.querySelector<HTMLElement>(`[data-biz="${CSS.escape(selected.id)}"]`);
+    if (!wrap || !card) return;
+    const delta = card.getBoundingClientRect().left - wrap.getBoundingClientRect().left - 14;
+    if (Math.abs(delta) > 4) wrap.scrollBy({ left: delta, behavior: "smooth" });
+  }, [selected, peekCards]);
+
+  /* Swiping the deck moves the map with it. Debounced so we act on where the swipe lands, not every frame. */
+  const onCardsScroll = () => {
+    const wrap = cardsRef.current;
+    if (!wrap) return;
+    window.clearTimeout(cardScrollTimer.current);
+    cardScrollTimer.current = window.setTimeout(() => {
+      const edge = wrap.getBoundingClientRect().left + 14;
+      let bestId: string | null = null;
+      let bd = Infinity;
+      Array.from(wrap.children).forEach((node) => {
+        const el = node as HTMLElement;
+        if (!el.dataset.biz) return;
+        const d = Math.abs(el.getBoundingClientRect().left - edge);
+        if (d < bd) { bd = d; bestId = el.dataset.biz; }
+      });
+      const biz = visibleBusinesses.find((b) => b.id === bestId);
+      if (!biz || biz.id === selected?.id) return;
+      setSelected(biz);
+      mapRef.current?.panTo([biz.lon, biz.lat], { duration: 380 });
+    }, 130);
+  };
 
   /* ---------------- mobile sheet: (re)compute stops on layout changes, keep the sheet's real height in sync ---------------- */
   useEffect(() => {
@@ -633,6 +737,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       fitStrip(false);
     });
 
+    /* The picker is anchored to a chip's screen position, so it is stale the moment the camera moves. */
+    map.on("movestart", () => setClusterPick(null));
     map.on("moveend", () => forceTick((t) => t + 1));
     map.on("zoomend", () => forceTick((t) => t + 1));
     const onResize = () => { map.resize(); forceTick((t) => t + 1); };
@@ -726,7 +832,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean; chrome?: boolean };
     const slots: Slot[] = [];
     if (pane) {
-      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
+      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}, .${styles.pickCard}`);
       chromeEls.forEach((n) => {
         const el = n as HTMLElement;
         if (!el.offsetWidth || getComputedStyle(el).display === "none") return;
@@ -755,13 +861,18 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const small = rectFor(cp, 32);
       if (clears(small)) { slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel }); return; }
       if (isSel) { slots.push({ ...small, members: [biz], mode: "label", pinned: true }); return; }
+      /* Absorb into the chip that is actually crowding this one. Without the radius cap a place
+         could be swept into a cluster on the far side of the screen, which is how "3 places" ended
+         up floating in empty space with nothing under it. */
       let best: Slot | null = null;
-      let bd = Infinity;
+      let bd = CLUSTER_RADIUS ** 2;
       for (const s of slots) {
         if (s.pinned || s.chrome) continue;
         const d = (s.cx - cp.x) ** 2 + (s.cy - cp.y) ** 2;
         if (d < bd) { bd = d; best = s; }
       }
+      /* Nothing near enough means only the UI chrome is in the way — leave it off the map rather
+         than claim it belongs to a distant cluster. It is still one tap away in the list. */
       if (best !== null) { (best as Slot).members.push(biz); }
     });
 
@@ -792,7 +903,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const colors = [...new Set(s.members.map((m) => categoryColor(city, m.category)))];
         const el = document.createElement("button");
         el.innerHTML = clusterMarkup(styles, s.members, wide, colors);
-        el.addEventListener("click", () => mapRef.current?.flyTo({ center: [s.members[0].lon, s.members[0].lat], zoom: Math.min(19, (mapRef.current?.getZoom() ?? 16) + 2), duration: 550 }));
+        el.addEventListener("click", () => openCluster(s.members, { x: s.cx, y: s.cy }));
         const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([s.members[0].lon, s.members[0].lat]).addTo(map);
         pinMarkersRef.current.push(marker);
       }
@@ -842,11 +953,17 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lon}`, "_blank", "noopener,noreferrer")}>
             <Navigation size={15} /> Directions
           </button>
+          {/* Only offered when we hold a real number — a dead Call button is worse than no Call button. */}
+          {biz.phone && (
+            <a className={`${styles.btn} ${styles.btnGhost}`} title={`Call ${biz.phone}`} href={`tel:${biz.phone.replace(/[^\d+]/g, "")}`}>
+              <Phone size={16} />
+            </a>
+          )}
+          <button className={`${styles.btn} ${styles.btnGhost}`} title="Share" onClick={() => shareBusiness(biz)}>
+            <Share2 size={16} />
+          </button>
           <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => biz.website ? window.open(biz.website!, "_blank", "noopener,noreferrer") : setHint("No official website found yet — added to the marketing-help spreadsheet.")}>
             <Globe size={16} />
-          </button>
-          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
-            <ExternalLink size={16} />
           </button>
         </div>
         <p className={styles.blurb}>{biz.blurb}</p>
@@ -867,6 +984,46 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     </>
   );
 
+  /* the peek-stop deck: one card per visible place, swiped horizontally, kept in step with the map */
+  const renderPlaceCard = (biz: Business) => {
+    const open = isOpenNow(biz.hours, nowMinutes);
+    return (
+      <button
+        key={biz.id}
+        data-biz={biz.id}
+        className={`${styles.mCard} ${selected?.id === biz.id ? styles.mCardOn : ""}`}
+        onClick={() => flyToBusiness(biz, true)}
+      >
+        <span className={styles.mCardImg}><img src={biz.photo} alt="" /></span>
+        <span className={styles.mCardBody}>
+          <span className={styles.mCardName}>{biz.name}</span>
+          <span className={styles.mCardMeta}>
+            <span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />
+            {CAT_LABEL[biz.category]}
+            {open === true && <><span className={styles.dotsep} /><span className={styles.openBadge}>Open now</span></>}
+            {open === false && <><span className={styles.dotsep} /><span className={styles.closedBadge}>Closed</span></>}
+          </span>
+          <span className={styles.mCardAddr}>{biz.address}</span>
+          <span className={styles.mCardGo}><Navigation size={12} /> Open profile</span>
+        </span>
+      </button>
+    );
+  };
+
+  /* the cluster picker: the escape hatch for places stacked so tightly that zoom cannot separate them */
+  const renderPickRow = (biz: Business) => (
+    <button key={biz.id} className={styles.pickRow} onClick={() => flyToBusiness(biz, true)}>
+      <span className={styles.pickDot} style={{ background: categoryColor(city, biz.category) }}>
+        <CatIcon d={CAT_ICON[biz.category]} size={13} color="#fff" />
+      </span>
+      <span className={styles.pickBody}>
+        <span className={styles.pickName}>{biz.name}</span>
+        <span className={styles.pickMeta}>{biz.address}</span>
+      </span>
+      <ChevronRight size={14} color="var(--ink-3)" />
+    </button>
+  );
+
   /* shared between the desktop results list and the mobile sheet's list state */
   const renderBusinessRow = (biz: Business) => {
     const open = isOpenNow(biz.hours, nowMinutes);
@@ -875,7 +1032,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         key={biz.id}
         ref={(el) => { if (el) rowElsRef.current.set(biz.id, el); else rowElsRef.current.delete(biz.id); }}
         className={`${styles.row} ${selected?.id === biz.id ? styles.rowActive : ""}`}
-        onClick={() => flyToBusiness(biz)}
+        onClick={() => flyToBusiness(biz, true)}
         onMouseEnter={() => pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.add(styles.pinActive)}
         onMouseLeave={() => { if (biz.id !== selected?.id) pinElsRef.current.get(biz.id)?.querySelector(`.${styles.pin}`)?.classList.remove(styles.pinActive); }}
       >
@@ -1094,6 +1251,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <button className={`${styles.cardUi} ${styles.iconBtn}`} onClick={() => fitStrip(true)} title="Re-centre"><Compass size={17} /></button>
           </div>
 
+          {clusterPick && (
+            <div
+              className={styles.pickCard}
+              style={{ left: clusterPick.x, top: clusterPick.y }}
+            >
+              <div className={styles.pickHead}>
+                <span>{clusterPick.members.length} places right here</span>
+                <button aria-label="Close" onClick={() => setClusterPick(null)}><X size={14} /></button>
+              </div>
+              {clusterPick.members.map((biz) => renderPickRow(biz))}
+            </div>
+          )}
+
           {hint && (
             <div className={`${styles.cardUi} ${styles.hint}`}>
               <span><b>Stroll hint</b>&nbsp;{hint}</span>
@@ -1178,19 +1348,23 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           /* Lifted clear of the keyboard, and capped so the raised sheet cannot run off the top of what is still visible. */
           style={keyboardLift > 0 ? { bottom: keyboardLift, maxHeight: Math.max(180, viewportHeight - 92) } : undefined}
         >
-          <button
-            className={styles.mGrab}
+          {/* The whole strip above the content drags — a 4px bar is not a thumb-sized target on its own. */}
+          <div
+            className={styles.mHandleZone}
             onPointerDown={onSheetGrabPointerDown}
             onPointerMove={onSheetGrabPointerMove}
             onPointerUp={onSheetGrabPointerUp}
             onPointerCancel={onSheetGrabPointerUp}
-            title="Drag to resize"
           >
-            <i />
-          </button>
+          <div className={styles.mGrab} aria-hidden><i /></div>
 
           <div className={styles.mSheetHead}>
-            {selected ? (
+            {clusterPick ? (
+              <>
+                <button className={styles.back} onClick={() => setClusterPick(null)} title="Back"><ChevronLeft size={16} /></button>
+                <span className={styles.mSheetTitle}>{clusterPick.members.length} places right here</span>
+              </>
+            ) : selected && !peekCards ? (
               <>
                 <button className={styles.back} onClick={closeSelected} title="Back"><ChevronLeft size={16} /></button>
                 <span className={styles.mSheetTitle}>All places</span>
@@ -1206,9 +1380,26 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               </>
             )}
           </div>
+          </div>
 
+          {peekCards ? (
+            <div ref={cardsRef} className={styles.mCards} onScroll={onCardsScroll}>
+              {visibleBusinesses.map((biz) => renderPlaceCard(biz))}
+              {visibleBusinesses.length === 0 && (
+                <div className={styles.mCardsEmpty}>
+                  {hiddenByCategories > 0
+                    ? `${hiddenByCategories} match${hiddenByCategories === 1 ? "" : "es"} are hidden by your category chips.`
+                    : query.trim()
+                      ? `No matches for “${query.trim()}”. Try a shorter word, or search by street.`
+                      : "Turn a category back on to see places."}
+                </div>
+              )}
+            </div>
+          ) : (
           <div className={styles.mSheetBody}>
-            {selected ? (
+            {clusterPick ? (
+              clusterPick.members.map((biz) => renderPickRow(biz))
+            ) : selected ? (
               renderDetail(selected)
             ) : tab === "events" ? (
               events.map((event) => (
@@ -1244,6 +1435,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               </>
             )}
           </div>
+          )}
         </div>
       )}
 

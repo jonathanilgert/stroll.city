@@ -234,7 +234,8 @@
 .dSub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); margin-top: 7px; flex-wrap: wrap; }
 .pill { display: inline-flex; align-items: center; gap: 6px; height: 25px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); }
 .pillClaimed { background: var(--amber-soft); border-color: var(--amber-line); color: #8A5A11; }
-.dActions { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; }
+/* Auto-flow so the row still balances when a place has no phone number and Call is dropped. */
+.dActions { display: grid; grid-auto-flow: column; grid-template-columns: 1fr; grid-auto-columns: auto; gap: 8px; }
 .dActions .btn { height: 40px; }
 .blurb { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 0; }
 .kv { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
@@ -274,10 +275,12 @@
 .mSheet { position: absolute; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 540; height: 132px; background: var(--surface);
   border-radius: 22px 22px 0 0; box-shadow: 0 -10px 34px rgba(20,24,26,.16); display: flex; flex-direction: column; overflow: hidden;
   transition: height .28s cubic-bezier(.22,.8,.24,1), bottom .2s ease; }
-/* Generous hit area — the visible bar is 4px tall, which is nowhere near a thumb-sized target. */
-.mGrab { flex: 0 0 auto; padding: 14px 0 8px; display: grid; place-items: center; touch-action: none; }
+/* Generous hit area — the visible bar is 4px tall, which is nowhere near a thumb-sized target,
+   so the header row above the content drags too. */
+.mHandleZone { flex: 0 0 auto; touch-action: none; }
+.mHandleZone:active .mGrab i { background: var(--ink-3); }
+.mGrab { padding: 10px 0 6px; display: grid; place-items: center; }
 .mGrab i { width: 40px; height: 4px; border-radius: 99px; background: var(--mint-2); display: block; }
-.mGrab:active i { background: var(--ink-3); }
 .mSheetHead { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 4px 16px 10px; }
 .mSheetTitle { flex: 1; min-width: 0; font-size: 15px; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mSort { flex: 0 0 auto; height: 30px; padding: 0 11px; border-radius: 999px; background: var(--surface-2); font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 5px; }
@@ -285,6 +288,40 @@
 .mSheetBody::-webkit-scrollbar { width: 0; }
 .mSheetBody .hero { margin: 2px 4px 14px; }
 .mSheetBody .dBody { padding: 0 4px 4px; }
+
+/* Peek stop: a swipeable deck instead of half a list row. Each card is a whole place at a glance. */
+.mCards { flex: 1; min-height: 0; display: flex; align-items: stretch; gap: 10px; padding: 0 14px 14px;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; scroll-padding-left: 14px;
+  overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.mCards::-webkit-scrollbar { height: 0; }
+.mCard { flex: 0 0 auto; width: min(76vw, 292px); scroll-snap-align: start; display: flex; gap: 11px; text-align: left;
+  padding: 8px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); box-shadow: var(--sh-1);
+  transition: border-color .16s, box-shadow .16s; }
+.mCardOn { border-color: var(--black); box-shadow: var(--sh-2); }
+.mCardImg { width: 88px; flex: 0 0 88px; border-radius: 13px; overflow: hidden; background: var(--mint); }
+.mCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mCardBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; padding: 3px 2px 2px 0; }
+.mCardName { font-size: 14.5px; font-weight: 500; letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mCardMeta { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--ink-2); white-space: nowrap; overflow: hidden; }
+.mCardAddr { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mCardGo { margin-top: auto; align-self: flex-start; display: inline-flex; align-items: center; gap: 5px;
+  height: 26px; padding: 0 10px; border-radius: 999px; background: var(--mint); font-size: 11.5px; color: var(--ink); }
+.mCardsEmpty { flex: 1; display: grid; place-items: center; padding: 0 18px; text-align: center; font-size: 12.5px; color: var(--ink-3); }
+
+/* Cluster picker: what a "3 places" chip opens when no zoom level can pull its members apart. */
+.pickCard { position: absolute; z-index: 545; width: 276px; max-height: 256px; overflow-y: auto; padding: 4px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-xl); box-shadow: var(--sh-3); }
+.pickCard::-webkit-scrollbar { width: 0; }
+.pickHead { display: flex; align-items: center; gap: 8px; padding: 8px 6px 6px 12px; font-size: 12px; color: var(--ink-3); }
+.pickHead span { flex: 1; min-width: 0; }
+.pickHead button { width: 26px; height: 26px; flex: 0 0 26px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-3); }
+.pickHead button:hover { background: var(--mint); color: var(--ink); }
+.pickRow { width: 100%; display: flex; align-items: center; gap: 11px; padding: 8px 10px; border-radius: 13px; text-align: left; }
+.pickRow:hover { background: var(--mint); }
+.pickDot { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 999px; display: grid; place-items: center; }
+.pickBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.pickName { font-size: 13.5px; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pickMeta { font-size: 11px; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .mTabs { position: absolute; left: 0; right: 0; bottom: 0; height: calc(60px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
   z-index: 560; display: grid; grid-template-columns: repeat(4, 1fr);
