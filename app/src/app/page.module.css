@@ -81,6 +81,9 @@
 .claimedBadge { font-size: 10.5px; font-weight: 500; color: #8A5A11; }
 .empty { padding: 40px 20px; text-align: center; color: var(--ink-3); font-size: 12.5px; }
 .empty b { display: block; color: var(--ink); font-size: 14.5px; font-weight: 500; margin-bottom: 4px; }
+.emptyAction { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; margin-top: 14px; border-radius: 999px;
+  background: var(--mint); color: var(--ink); font-size: 13px; font-weight: 500; }
+.emptyAction:active { background: var(--mint-2); }
 .panelFoot { border-top: 1px solid var(--line); padding: 12px 20px; font-size: 11px; color: var(--ink-3); line-height: 1.45; display: flex; gap: 8px; align-items: flex-start; }
 
 /* ---------- insights (neighbourhood card) ---------- */
@@ -249,9 +252,13 @@
 .mStage .mapWrap { border-radius: var(--r-xl); }
 
 .mTop { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 520; display: flex; flex-direction: column; gap: 8px; }
-.mSearch { display: flex; align-items: center; gap: 9px; height: 44px; padding: 0 15px; color: var(--ink-2); }
-.mSearch input { border: 0; outline: 0; background: none; font: inherit; color: var(--ink); width: 100%; }
-.mSearch input::placeholder { color: var(--ink-3); }
+.mSearch { display: flex; align-items: center; gap: 9px; height: 50px; padding: 0 6px 0 15px; color: var(--ink-2); }
+/* 16px is load-bearing: iOS Safari zooms the whole page when you focus an input smaller than this. */
+.mSearch input { border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); width: 100%; min-width: 0; }
+.mSearch input::placeholder { color: var(--ink-3); font-size: 14.5px; }
+.mSearch input::-webkit-search-cancel-button { display: none; }
+.mSearchClear { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-3); }
+.mSearchClear:active { background: var(--mint); color: var(--ink); }
 .mChipRow { display: flex; gap: 7px; overflow-x: auto; padding: 1px 2px 4px; }
 .mChipRow::-webkit-scrollbar { height: 0; }
 .mChip { flex: 0 0 auto; height: 32px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px;
@@ -264,10 +271,13 @@
   background: rgba(255,255,255,.95); backdrop-filter: blur(12px); box-shadow: var(--sh-2); display: grid; place-items: center; color: var(--ink-2); }
 .mLocate:active { background: var(--mint); }
 
-.mSheet { position: absolute; left: 0; right: 0; bottom: 60px; z-index: 540; height: 132px; background: var(--surface);
-  border-radius: 22px 22px 0 0; box-shadow: 0 -10px 34px rgba(20,24,26,.16); display: flex; flex-direction: column; overflow: hidden; }
-.mGrab { flex: 0 0 auto; padding: 9px 0 4px; display: grid; place-items: center; }
+.mSheet { position: absolute; left: 0; right: 0; bottom: calc(60px + env(safe-area-inset-bottom)); z-index: 540; height: 132px; background: var(--surface);
+  border-radius: 22px 22px 0 0; box-shadow: 0 -10px 34px rgba(20,24,26,.16); display: flex; flex-direction: column; overflow: hidden;
+  transition: height .28s cubic-bezier(.22,.8,.24,1), bottom .2s ease; }
+/* Generous hit area — the visible bar is 4px tall, which is nowhere near a thumb-sized target. */
+.mGrab { flex: 0 0 auto; padding: 14px 0 8px; display: grid; place-items: center; touch-action: none; }
 .mGrab i { width: 40px; height: 4px; border-radius: 99px; background: var(--mint-2); display: block; }
+.mGrab:active i { background: var(--ink-3); }
 .mSheetHead { flex: 0 0 auto; display: flex; align-items: center; gap: 10px; padding: 4px 16px 10px; }
 .mSheetTitle { flex: 1; min-width: 0; font-size: 15px; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mSort { flex: 0 0 auto; height: 30px; padding: 0 11px; border-radius: 999px; background: var(--surface-2); font-size: 12px; color: var(--ink-2); display: inline-flex; align-items: center; gap: 5px; }
@@ -276,7 +286,8 @@
 .mSheetBody .hero { margin: 2px 4px 14px; }
 .mSheetBody .dBody { padding: 0 4px 4px; }
 
-.mTabs { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; z-index: 560; display: grid; grid-template-columns: repeat(4, 1fr);
+.mTabs { position: absolute; left: 0; right: 0; bottom: 0; height: calc(60px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+  z-index: 560; display: grid; grid-template-columns: repeat(4, 1fr);
   background: rgba(255,255,255,.94); backdrop-filter: blur(16px) saturate(180%); border-top: 1px solid var(--line); }
 .mTabs button, .mTabs a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
   font-size: 10.5px; letter-spacing: .01em; color: var(--ink-3); text-decoration: none; }
