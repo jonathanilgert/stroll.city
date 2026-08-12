@@ -219,6 +219,14 @@ function formatDate(value: string) {
 function normalize(value: string) {
   return value.toLowerCase().trim();
 }
+/* Search folds accents so "cafe" finds "Café" — typing é on a phone keyboard is a long-press most people won't do. */
+function foldForSearch(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+/* Every term has to appear somewhere, in any order, so "cafe 124" finds "Café on 124 Street". */
+function searchTerms(query: string) {
+  return foldForSearch(query).split(/\s+/).filter(Boolean);
+}
 function streetOnly(name: string) {
   const parts = name.split("/");
   return parts[parts.length - 1].trim();
@@ -271,6 +279,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const locateRef = useRef<HTMLButtonElement | null>(null);
   const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
   const sheetHeightRef = useRef(132);
+  const searchRef = useRef<HTMLInputElement | null>(null);
+  const [keyboardInset, setKeyboardInset] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState(0);
 
   /* ---------------- mobile/desktop layout switch (live, not a one-time check) ---------------- */
   useEffect(() => {
@@ -329,16 +340,31 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const isResultsView = query.trim() !== "" || browseCategory !== null;
 
-  const visibleBusinesses = useMemo(() => {
+  const queryMatches = useMemo(() => {
     if (!data) return [];
-    const needle = normalize(query);
-    let list = data.businesses.filter((b) => {
-      /* mobile browses via multi-select chips; desktop drills into one category at a time */
-      const matchesCategory = mobileLayout ? activeCategories.has(b.category) : browseCategory ? b.category === browseCategory : true;
-      const matchesQuery = needle ? normalize(`${b.name} ${b.address} ${b.category}`).includes(needle) : true;
-      return matchesCategory && matchesQuery;
+    const terms = searchTerms(query);
+    if (!terms.length) return data.businesses;
+    return data.businesses.filter((b) => {
+      const haystack = foldForSearch(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]}`);
+      return terms.every((term) => haystack.includes(term));
     });
-    list = [...list].sort((a, b) => {
+  }, [data, query]);
+
+  const visibleBusinesses = useMemo(() => {
+    const terms = searchTerms(query);
+    /* mobile browses via multi-select chips; desktop drills into one category at a time */
+    const list = queryMatches.filter((b) => (mobileLayout ? activeCategories.has(b.category) : browseCategory ? b.category === browseCategory : true));
+    /* While searching, rank by how well the name matches — an exact prefix hit should not sit below an address hit. */
+    const rank = (b: Business) => {
+      if (!terms.length) return 0;
+      const name = foldForSearch(b.name);
+      if (terms.every((term) => name.startsWith(term))) return 0;
+      if (terms.every((term) => name.includes(term))) return 1;
+      return 2;
+    };
+    return [...list].sort((a, b) => {
+      const ra = rank(a), rb = rank(b);
+      if (ra !== rb) return ra - rb;
       if (sortMode === "claimed") {
         const ca = a.claim_status === "claimed" ? 0 : 1;
         const cb = b.claim_status === "claimed" ? 0 : 1;
@@ -346,8 +372,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return a.name.localeCompare(b.name);
     });
-    return list;
-  }, [data, browseCategory, query, sortMode, mobileLayout, activeCategories]);
+  }, [queryMatches, browseCategory, query, sortMode, mobileLayout, activeCategories]);
+
+  /* Distinguishes "nothing matches your text" from "your chips are hiding the matches", which need different fixes. */
+  const hiddenByCategories = queryMatches.length - visibleBusinesses.length;
 
   const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
   const openNowCount = useMemo(() => {
@@ -436,6 +464,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const sheetDragRef = useRef<{ startY: number; startH: number; moved: number; pointerId: number } | null>(null);
   const onSheetGrabPointerDown = (event: React.PointerEvent<HTMLButtonElement>) => {
+    /* Reaching for the sheet means you are done typing — get the keyboard out of the way. */
+    searchRef.current?.blur();
     sheetDragRef.current = { startY: event.clientY, startH: sheetHeightRef.current, moved: 0, pointerId: event.pointerId };
     event.currentTarget.setPointerCapture(event.pointerId);
     if (sheetRef.current) sheetRef.current.style.transition = "none";
@@ -467,6 +497,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
 
   const flyToBusiness = (business: Business) => {
+    searchRef.current?.blur();
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
@@ -495,6 +526,36 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
+
+  /* ----------------
+     On-screen keyboard: without this the keyboard covers the sheet, so you type a query and cannot see a single result.
+     visualViewport shrinks when the keyboard opens; we lift the sheet by that much and drop the tab bar out of the way.
+     ---------------- */
+  useEffect(() => {
+    if (!mobileLayout || typeof window === "undefined") return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const sync = () => {
+      const covered = window.innerHeight - vv.height - vv.offsetTop;
+      /* Small deltas are just the URL bar collapsing, not a keyboard. */
+      setKeyboardInset(covered > 120 ? Math.round(covered) : 0);
+      setViewportHeight(Math.round(vv.height));
+    };
+    sync();
+    vv.addEventListener("resize", sync);
+    vv.addEventListener("scroll", sync);
+    return () => { vv.removeEventListener("resize", sync); vv.removeEventListener("scroll", sync); };
+  }, [mobileLayout]);
+
+  /* Derived, not stored, so a stale inset can never survive a switch back to the desktop layout. */
+  const keyboardLift = mobileLayout ? keyboardInset : 0;
+
+  /* Typing should reveal what you matched without making you drag the sheet up first. */
+  useEffect(() => {
+    if (!mobileLayout || !query.trim()) return;
+    if (sheetStop === "peek") snapSheet("half");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, mobileLayout]);
 
   /* ---------------- mobile sheet: (re)compute stops on layout changes, keep the sheet's real height in sync ---------------- */
   useEffect(() => {
@@ -1049,16 +1110,41 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           {mobileLayout && tab === "explore" && (
             <div ref={mobileTopRef} className={styles.mTop}>
               <label className={`${styles.mSearch} ${styles.glass}`}>
-                <Search size={15} color="var(--ink-3)" />
-                <input aria-label="Search businesses" placeholder="Search cafés, shops, galleries…" value={query} onChange={(e) => setQuery(e.target.value)} />
-              </label>
-              <div className={styles.mChipRow}>
-                {allCategories.map((key) => (
-                  <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
-                    <i style={{ background: categoryColor(city, key) }} />{CAT_LABEL[key]}
+                <Search size={16} color="var(--ink-3)" />
+                <input
+                  ref={searchRef}
+                  aria-label="Search businesses"
+                  placeholder="Search cafés, shops, galleries…"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  /* type=search gives the phone keyboard a Search key; the rest stops iOS autocapitalising business names. */
+                  type="search"
+                  enterKeyHint="search"
+                  autoCapitalize="off"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); searchRef.current?.blur(); } }}
+                />
+                {query && (
+                  <button
+                    className={styles.mSearchClear}
+                    aria-label="Clear search"
+                    onClick={(e) => { e.preventDefault(); setQuery(""); searchRef.current?.focus(); }}
+                  >
+                    <X size={15} />
                   </button>
-                ))}
-              </div>
+                )}
+              </label>
+              {/* The chip row is noise once you are typing, and it costs the results list a row of height. */}
+              {!query.trim() && (
+                <div className={styles.mChipRow}>
+                  {allCategories.map((key) => (
+                    <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
+                      <i style={{ background: categoryColor(city, key) }} />{CAT_LABEL[key]}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -1086,7 +1172,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       </div>
 
       {mobileLayout && (
-        <div ref={sheetRef} className={styles.mSheet}>
+        <div
+          ref={sheetRef}
+          className={styles.mSheet}
+          /* Lifted clear of the keyboard, and capped so the raised sheet cannot run off the top of what is still visible. */
+          style={keyboardLift > 0 ? { bottom: keyboardLift, maxHeight: Math.max(180, viewportHeight - 92) } : undefined}
+        >
           <button
             className={styles.mGrab}
             onPointerDown={onSheetGrabPointerDown}
@@ -1132,7 +1223,23 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               ))
             ) : (
               <>
-                {visibleBusinesses.length === 0 && <div className={styles.empty}><b>Nothing here yet</b>Turn a category back on, or clear the search.</div>}
+                {visibleBusinesses.length === 0 && (
+                  hiddenByCategories > 0 ? (
+                    <div className={styles.empty}>
+                      <b>{hiddenByCategories} match{hiddenByCategories === 1 ? "" : "es"} hidden</b>
+                      Your category filters are hiding every result for “{query.trim()}”.
+                      <button className={styles.emptyAction} onClick={() => setActiveCategories(new Set(allCategories))}>Show all categories</button>
+                    </div>
+                  ) : query.trim() ? (
+                    <div className={styles.empty}>
+                      <b>No matches for “{query.trim()}”</b>
+                      Try a shorter word, or search by street instead.
+                      <button className={styles.emptyAction} onClick={() => { setQuery(""); searchRef.current?.focus(); }}>Clear search</button>
+                    </div>
+                  ) : (
+                    <div className={styles.empty}><b>Nothing here yet</b>Turn a category back on to see places.</div>
+                  )
+                )}
                 {visibleBusinesses.map((biz) => renderBusinessRow(biz))}
               </>
             )}
@@ -1140,7 +1247,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         </div>
       )}
 
-      {mobileLayout && (
+      {/* The tab bar would otherwise sit on top of the keyboard, stealing a row from the results. */}
+      {mobileLayout && keyboardLift === 0 && (
         <nav ref={tabsRef} className={styles.mTabs}>
           <button className={tab === "explore" ? styles.mTabOn : ""} onClick={() => { setTab("explore"); closeSelected(); }}>
             <IconExplore />Explore
