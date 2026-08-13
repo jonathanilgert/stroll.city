@@ -249,10 +249,12 @@
 .claimcard b { display: block; color: var(--ink); font-size: 13px; font-weight: 500; margin-bottom: 2px; }
 
 /* ---------- mobile map: top bar, bottom sheet, tab bar ---------- */
-.mStage { padding: 10px 10px 0; }
-.mStage .mapWrap { border-radius: var(--r-xl); }
+/* Edge to edge: no stage padding, no rounded map, so the map is the whole screen. */
+.mStage { padding: 0; }
+.mStage .mapWrap { border-radius: 0; box-shadow: none; }
 
-.mTop { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 520; display: flex; flex-direction: column; gap: 8px; }
+/* The bar now sits against the top of the screen, so it clears the notch itself. */
+.mTop { position: absolute; top: calc(10px + env(safe-area-inset-top)); left: 10px; right: 10px; z-index: 520; display: flex; flex-direction: column; gap: 8px; }
 .mSearch { display: flex; align-items: center; gap: 9px; height: 50px; padding: 0 6px 0 15px; color: var(--ink-2); }
 /* 16px is load-bearing: iOS Safari zooms the whole page when you focus an input smaller than this. */
 .mSearch input { border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); width: 100%; min-width: 0; }
@@ -686,5 +688,7 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 /* ---------- responsive shell ---------- */
 /* below 860px, mobileLayout swaps rail/panel/drawer out for the mobile top bar, sheet, and tab bar (see above) */
 @media (max-width: 860px) {
-  .shell { height: calc(100vh - 20px); border-radius: var(--r-xl); }
+  /* Fixed to the viewport so the map fills the screen — this is what escapes the body's
+     22px padding and its blue gradient without touching the landing page or portal. */
+  .shell { position: fixed; inset: 0; height: auto; border-radius: 0; box-shadow: none; }
 }
