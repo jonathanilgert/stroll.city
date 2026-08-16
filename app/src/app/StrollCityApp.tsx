@@ -187,9 +187,11 @@ function edmontonMinutesNow() {
 
 /* raw markup for vanilla-DOM markers */
 function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
-  const glyphInner = biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const isStroll = biz.plan_tier === "stroll" || biz.plan_tier === "stroll_plus";
+  const glyphInner = isStroll && biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const fill = isStroll && biz.logo_url ? "#fff" : "#dce8e3";
   const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
-  const glyph = `<span class="${styles_.glyph}" style="background:${color}">${glyphInner}</span>`;
+  const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14181a;border-color:${color}">${glyphInner}</span>`;
   if (compact) return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
@@ -621,7 +623,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       zoom: 16.25,
       pitch: 0,
       minZoom: 10,
-      maxZoom: 19.5,
+      maxZoom: 21,
       attributionControl: false,
     });
     mapRef.current = map;
@@ -736,6 +738,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
 
     const items = visibleBusinesses;
+    const zoom = map.getZoom();
+    const forceEveryMarker = zoom >= 19.75;
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
     const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
@@ -750,6 +754,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
+      if (forceEveryMarker) {
+        slots.push({ ...rectFor(cp, 22), members: [biz], mode: "glyph", pinned: isSel });
+        return;
+      }
       const wide = rectFor(cp, chipWidth(biz.name, isSel));
       if (!mobileLayout && showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
       const small = rectFor(cp, 32);
@@ -824,7 +832,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <img src={biz.photo} alt="" />
         <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category) }}>
-          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : <CatIcon d={CAT_ICON[biz.category]} size={24} color="#fff" strokeWidth={1.7} />}
+          {biz.plan_tier === "stroll" && biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
       </div>
       <div className={styles.dBody}>
@@ -842,9 +850,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${biz.lat},${biz.lon}`, "_blank", "noopener,noreferrer")}>
             <Navigation size={15} /> Directions
           </button>
-          <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => biz.website ? window.open(biz.website!, "_blank", "noopener,noreferrer") : setHint("No official website found yet — added to the marketing-help spreadsheet.")}>
-            <Globe size={16} />
-          </button>
+          {biz.website && (
+            <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
+              <Globe size={16} />
+            </button>
+          )}
           <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
             <ExternalLink size={16} />
           </button>

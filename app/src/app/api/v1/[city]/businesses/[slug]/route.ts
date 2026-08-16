@@ -1,5 +1,5 @@
 import { requireScope } from "../../../_lib/auth";
-import { envelope, error, getBusiness, loadCityData, patchBusiness, sanitizeBusinessPatch } from "../../../_lib/data";
+import { envelope, error, getBusiness, loadCityData, patchBusiness, publicBusiness, sanitizeBusinessPatch } from "../../../_lib/data";
 
 type Context = { params: Promise<{ city: string; slug: string }> };
 
@@ -10,7 +10,7 @@ export async function GET(_request: Request, context: Context) {
 
   const business = await getBusiness(city, data, slug);
   if (!business) return error(404, "Business not found");
-  return envelope(city, business, business.logo_url || business.claim_status === "pending" ? "runtime-overlay" : "static-json");
+  return envelope(city, publicBusiness(business), business.logo_url || business.claim_status === "pending" ? "runtime-overlay" : "static-json");
 }
 
 export async function PATCH(request: Request, context: Context) {

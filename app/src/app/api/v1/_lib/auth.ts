@@ -6,6 +6,7 @@ export type ApiScope =
   | "attractions:write"
   | "businesses:write"
   | "businesses:read"
+  | "hunt:write"
   | "layers:write"
   | "admin";
 

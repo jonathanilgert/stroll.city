@@ -1,4 +1,4 @@
-import { envelope, error, listBusinesses, loadCityData } from "../../_lib/data";
+import { envelope, error, listBusinesses, loadCityData, publicBusiness } from "../../_lib/data";
 
 type Context = { params: Promise<{ city: string }> };
 
@@ -9,5 +9,5 @@ export async function GET(request: Request, context: Context) {
 
   const url = new URL(request.url);
   const result = await listBusinesses(city, data, url.searchParams.get("cat"), url.searchParams.get("q"));
-  return envelope(city, result.businesses, result.source, result.businesses.length);
+  return envelope(city, result.businesses.map(publicBusiness), result.source, result.businesses.length);
 }

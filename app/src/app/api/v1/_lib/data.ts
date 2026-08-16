@@ -21,6 +21,20 @@ export type Business = {
   needsReview: boolean;
   claim_status?: "unclaimed" | "pending" | "claimed" | "rejected";
   plan_tier?: "free" | "stroll" | "stroll_plus";
+  sub_category?: string;
+  walk_up?: boolean;
+  age_restricted?: boolean;
+  avg_dwell_min?: number;
+  last_verified_at?: string;
+  verified_by_staff?: boolean;
+  confidence?: "owner_confirmed" | "website" | "licence";
+  offers_finisher_item?: boolean;
+  finisher_item?: string;
+  finisher_cap_weekly?: number;
+  finisher_days?: string[];
+  donates_to_basket?: boolean;
+  basket_item?: string;
+  notes?: string;
 };
 
 export type StrollEvent = {
@@ -68,6 +82,83 @@ export type BusinessClaim = ClaimPayload & {
   created_at: string;
 };
 
+export type BusinessEdit = {
+  id: string;
+  business_id: string;
+  field: string;
+  old_value?: string;
+  new_value?: string;
+  actor_type: "owner" | "staff" | "public" | "scraper";
+  actor_id?: string;
+  source?: string;
+  source_url?: string;
+  status: "applied" | "suggested" | "rejected" | "reverted";
+  created_at: string;
+  reviewed_at?: string;
+  reverted_at?: string;
+};
+
+export type ClaimCode = {
+  id: string;
+  business_id: string;
+  code: string;
+  issued_by?: string;
+  issued_at: string;
+  expires_at: string;
+  used_at?: string | null;
+};
+
+export type BiaEvidence = {
+  id: string;
+  city: string;
+  bia: string;
+  category: string;
+  claim: string;
+  metric_value?: number;
+  metric_unit?: string;
+  supporting_query?: string;
+  source?: string;
+  observed_on: string;
+  auto_generated: boolean;
+  created_at: string;
+};
+
+export type HuntStop = {
+  id: string;
+  business_id: string;
+  business_slug: string;
+  name: string;
+  riddle: string;
+  clue_1: string;
+  clue_2: string;
+  clue_3: string;
+  challenge: string;
+  difficulty: string;
+  age_restricted: boolean;
+  variant: number;
+  status: "draft" | "live" | "retired";
+  authored_by?: string;
+  updated_at?: string;
+};
+
+export type Hunt = {
+  id: string;
+  city: string;
+  neighbourhood: string;
+  slug: string;
+  name: string;
+  blurb: string;
+  stop_ids: string[];
+  mode: "friendly" | "full" | "race";
+  audience: "family" | "adult";
+  est_minutes: number;
+  distance_m: number;
+  difficulty: string;
+  status: "draft" | "live" | "retired";
+  created_at: string;
+  updated_at: string;
+};
+
 export type StrollData = {
   generatedAt: string;
   center: [number, number];
@@ -81,6 +172,8 @@ export type StrollData = {
   neighbourhoods: Array<{ id: string; name: string; center: [number, number]; bounds: [[number, number], [number, number]]; bearing: number; enabled: boolean }>;
   events?: StrollEvent[];
   attractions?: Attraction[];
+  huntStops?: HuntStop[];
+  hunts?: Hunt[];
   stats?: Record<string, unknown>;
 };
 
@@ -109,7 +202,7 @@ export async function loadCityData(city: string): Promise<StrollData | null> {
   return JSON.parse(raw) as StrollData;
 }
 
-async function readOverlay<T>(city: string, kind: "events" | "attractions" | "businesses" | "claims"): Promise<T[]> {
+async function readOverlay<T>(city: string, kind: "events" | "attractions" | "businesses" | "claims" | "business_edits" | "claim_codes" | "bia_evidence"): Promise<T[]> {
   try {
     const raw = await fs.readFile(path.join(runtimeRoot, city, `${kind}.json`), "utf8");
     const parsed = JSON.parse(raw) as T[];
@@ -119,7 +212,7 @@ async function readOverlay<T>(city: string, kind: "events" | "attractions" | "bu
   }
 }
 
-async function writeOverlay<T extends { id: string }>(city: string, kind: "events" | "attractions" | "businesses" | "claims", rows: T[]) {
+async function writeOverlay<T extends { id: string }>(city: string, kind: "events" | "attractions" | "businesses" | "claims" | "business_edits" | "claim_codes" | "bia_evidence", rows: T[]) {
   const dir = path.join(runtimeRoot, city);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, `${kind}.json`), `${JSON.stringify(rows, null, 2)}\n`);
@@ -139,6 +232,15 @@ export async function listBusinesses(city: string, data: StrollData, category?: 
     businesses = businesses.filter((business) => `${business.name} ${business.address} ${business.category}`.toLowerCase().includes(needle));
   }
   return { businesses, source: overlay.length ? "runtime-overlay" as const : "static-json" as const };
+}
+
+export function publicBusiness<T extends Business>(business: T): T {
+  if (business.plan_tier === "stroll" || business.plan_tier === "stroll_plus") return business;
+  const rest = { ...business } as Partial<T>;
+  delete rest.website;
+  delete rest.domain;
+  delete rest.phone;
+  return rest as T;
 }
 
 export async function getBusiness(city: string, data: StrollData, slug: string) {
@@ -163,6 +265,22 @@ export function sanitizeBusinessPatch(payload: Partial<Business>): Partial<Busin
   if (payload.domain !== undefined) patch.domain = payload.domain ? sanitizeString(payload.domain, 120) : null;
   if (payload.photo !== undefined) patch.photo = sanitizeString(payload.photo, 300);
   if (payload.logo_url !== undefined) patch.logo_url = sanitizeString(payload.logo_url, 300);
+  if (payload.plan_tier !== undefined && ["free", "stroll", "stroll_plus"].includes(String(payload.plan_tier))) patch.plan_tier = payload.plan_tier;
+  if (payload.claim_status !== undefined && ["unclaimed", "pending", "claimed", "rejected"].includes(String(payload.claim_status))) patch.claim_status = payload.claim_status;
+  if (payload.sub_category !== undefined) patch.sub_category = sanitizeString(payload.sub_category, 120);
+  if (payload.walk_up !== undefined) patch.walk_up = Boolean(payload.walk_up);
+  if (payload.age_restricted !== undefined) patch.age_restricted = Boolean(payload.age_restricted);
+  if (payload.avg_dwell_min !== undefined) patch.avg_dwell_min = Math.max(1, Math.min(180, Number(payload.avg_dwell_min) || 12));
+  if (payload.last_verified_at !== undefined) patch.last_verified_at = sanitizeString(payload.last_verified_at, 80);
+  if (payload.verified_by_staff !== undefined) patch.verified_by_staff = Boolean(payload.verified_by_staff);
+  if (payload.confidence !== undefined && ["owner_confirmed", "website", "licence"].includes(String(payload.confidence))) patch.confidence = payload.confidence;
+  if (payload.offers_finisher_item !== undefined) patch.offers_finisher_item = Boolean(payload.offers_finisher_item);
+  if (payload.finisher_item !== undefined) patch.finisher_item = sanitizeString(payload.finisher_item, 160);
+  if (payload.finisher_cap_weekly !== undefined) patch.finisher_cap_weekly = Math.max(0, Math.min(200, Number(payload.finisher_cap_weekly) || 10));
+  if (payload.finisher_days !== undefined && Array.isArray(payload.finisher_days)) patch.finisher_days = payload.finisher_days.slice(0, 7).map((day) => sanitizeString(day, 16));
+  if (payload.donates_to_basket !== undefined) patch.donates_to_basket = Boolean(payload.donates_to_basket);
+  if (payload.basket_item !== undefined) patch.basket_item = sanitizeString(payload.basket_item, 180);
+  if (payload.notes !== undefined) patch.notes = sanitizeString(payload.notes, 1000);
   if (payload.needsReview !== undefined) patch.needsReview = Boolean(payload.needsReview);
   if (payload.source !== undefined) patch.source = sanitizeString(payload.source, 180);
   if (payload.highlights !== undefined && Array.isArray(payload.highlights)) {
@@ -171,6 +289,100 @@ export function sanitizeBusinessPatch(payload: Partial<Business>): Partial<Busin
       .map((item) => [sanitizeString(item?.[0], 12), sanitizeString(item?.[1], 120)] as [string, string]);
   }
   return patch;
+}
+
+export async function recordBusinessEdits(city: string, business: Business, patch: Partial<Business>, actorId = "staff-admin") {
+  const now = new Date().toISOString();
+  const rows = await readOverlay<BusinessEdit>(city, "business_edits");
+  const edits = Object.entries(patch)
+    .filter(([field]) => field !== "source")
+    .map(([field, value]) => ({
+      id: `edit_${Date.now()}_${slugify(`${business.id}-${field}-${Math.random().toString(36).slice(2, 7)}`)}`,
+      business_id: business.id,
+      field,
+      old_value: JSON.stringify((business as unknown as Record<string, unknown>)[field] ?? null),
+      new_value: JSON.stringify(value ?? null),
+      actor_type: "staff" as const,
+      actor_id: actorId,
+      source: "admin-app",
+      status: "applied" as const,
+      created_at: now,
+    }));
+  if (edits.length) await writeOverlay(city, "business_edits", [...edits, ...rows]);
+  return edits;
+}
+
+export async function staffPatchBusiness(city: string, data: StrollData, businessId: string, patch: Partial<Business>, actorId = "staff-admin") {
+  const business = await getBusiness(city, data, businessId);
+  if (!business) throw new Error("Business not found");
+  await recordBusinessEdits(city, business, patch, actorId);
+  await patchBusiness(city, business.id, {
+    ...patch,
+    source: patch.source ?? `${business.source} · staff admin edit`,
+    needsReview: patch.needsReview ?? false,
+  });
+  return getBusiness(city, data, business.id);
+}
+
+export async function verifyBusinessInPerson(city: string, data: StrollData, businessId: string, actorId = "staff-admin") {
+  return staffPatchBusiness(city, data, businessId, {
+    verified_by_staff: true,
+    last_verified_at: new Date().toISOString(),
+    confidence: "owner_confirmed",
+    claim_status: "claimed",
+  }, actorId);
+}
+
+export async function listBusinessEdits(city: string, businessId?: string | null) {
+  const edits = await readOverlay<BusinessEdit>(city, "business_edits");
+  return businessId ? edits.filter((edit) => edit.business_id === businessId) : edits;
+}
+
+export async function generateClaimCode(city: string, businessId: string, actorId = "staff-admin") {
+  const codes = await readOverlay<ClaimCode>(city, "claim_codes");
+  const issued = new Date();
+  const expires = new Date(issued.getTime() + 14 * 24 * 60 * 60 * 1000);
+  let code = "";
+  do {
+    code = Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 8).toUpperCase().padEnd(6, "7");
+  } while (codes.some((row) => row.code === code));
+  const claimCode: ClaimCode = {
+    id: `claim_code_${Date.now()}_${slugify(businessId).slice(0, 24)}`,
+    business_id: sanitizeString(businessId, 120),
+    code,
+    issued_by: actorId,
+    issued_at: issued.toISOString(),
+    expires_at: expires.toISOString(),
+    used_at: null,
+  };
+  await writeOverlay(city, "claim_codes", [claimCode, ...codes]);
+  return claimCode;
+}
+
+export async function listClaimCodes(city: string, businessId?: string | null) {
+  const codes = await readOverlay<ClaimCode>(city, "claim_codes");
+  return businessId ? codes.filter((code) => code.business_id === businessId) : codes;
+}
+
+export async function addBiaEvidence(city: string, payload: Partial<BiaEvidence>) {
+  const rows = await readOverlay<BiaEvidence>(city, "bia_evidence");
+  const now = new Date().toISOString();
+  const evidence: BiaEvidence = {
+    id: `bia_${Date.now()}_${slugify(payload.category ?? "note").slice(0, 24)}`,
+    city,
+    bia: sanitizeString(payload.bia ?? "Inglewood BIA", 120),
+    category: sanitizeString(payload.category ?? "staff-note", 120),
+    claim: sanitizeString(payload.claim ?? "", 1000),
+    metric_value: payload.metric_value === undefined ? undefined : Number(payload.metric_value),
+    metric_unit: payload.metric_unit ? sanitizeString(payload.metric_unit, 40) : undefined,
+    supporting_query: payload.supporting_query ? sanitizeString(payload.supporting_query, 240) : undefined,
+    source: payload.source ? sanitizeString(payload.source, 180) : "admin-app",
+    observed_on: sanitizeString(payload.observed_on ?? now.slice(0, 10), 20),
+    auto_generated: Boolean(payload.auto_generated),
+    created_at: now,
+  };
+  await writeOverlay(city, "bia_evidence", [evidence, ...rows]);
+  return evidence;
 }
 
 export async function createBusinessClaim(city: string, data: StrollData, payload: Partial<ClaimPayload>): Promise<BusinessClaim> {
@@ -284,6 +496,18 @@ export async function deleteEvent(city: string, data: StrollData, id: string) {
   const next = existing.events.filter((event) => event.id !== id);
   await writeOverlay(city, "events", next);
   return existing.events.length !== next.length;
+}
+
+export function listHunts(data: StrollData) {
+  const stopsById = new Map((data.huntStops ?? []).map((stop) => [stop.id, stop]));
+  return (data.hunts ?? []).filter((hunt) => hunt.status === "live").map((hunt) => ({
+    ...hunt,
+    stops: hunt.stop_ids.map((id) => stopsById.get(id)).filter(Boolean),
+  }));
+}
+
+export function getHunt(data: StrollData, slug: string) {
+  return listHunts(data).find((hunt) => hunt.slug === slug || hunt.id === slug) ?? null;
 }
 
 export async function listAttractions(city: string, data: StrollData) {

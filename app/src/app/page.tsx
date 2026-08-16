@@ -1,391 +1,123 @@
-"use client";
-
 import Link from "next/link";
-import maplibregl from "maplibre-gl";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { getCity } from "./cities";
-import { CAT_LABEL, CatIcon, categoryColor, type Category } from "./StrollCityApp";
 import styles from "./page.module.css";
 
-const city = getCity("calgary")!;
-
-type Business = {
-  id: string;
-  name: string;
-  address: string;
-  category: Category;
-  mono: string;
-  lon: number;
-  lat: number;
-  blurb?: string;
-  logo_url?: string;
-  claim_status?: "unclaimed" | "pending" | "claimed" | "rejected";
-};
-
-const CATEGORY_ORDER: Category[] = ["restaurant", "cafe", "bar", "shop", "services", "gallery"];
-
-const LANDING_PLANS = [
-  {
-    id: "free",
-    name: "Free",
-    price: "$0",
-    suffix: "",
-    hot: false,
-    copy: "Verified pin, name/category/address, and monogram marker.",
-    feats: ["Verified rooftop pin", "Name, category, address", "Monogram marker"],
-    cta: "Claim for free",
-  },
-  {
-    id: "stroll",
-    name: "Stroll",
-    price: "$29",
-    suffix: "/mo",
-    hot: true,
-    copy: "Logo marker, photo gallery, curated profile, hours, links, and highlights.",
-    feats: ["Everything in Free", "Logo marker and photo gallery", "Hours, links and highlights you control"],
-    cta: "Choose Stroll",
-  },
-  {
-    id: "stroll_plus",
-    name: "Stroll+",
-    price: "$59",
-    suffix: "/mo",
-    hot: false,
-    copy: "Everything in Stroll plus promos/events, featured placement, and analytics.",
-    feats: ["Everything in Stroll", "Promos and events on the map", "Featured placement and analytics"],
-    cta: "Choose Stroll+",
-  },
+const huntProducts = [
+  ["Friendly Mode", "Free, always", "4 stops · no clock · different every time"],
+  ["Full Hunt", "$20/team", "6–9 stops · Stroll Time · first one free"],
+  ["Loop Race", "$99", "Up to 4 teams · live leaderboard"],
+  ["Private events", "$199+", "Birthdays, corporate teams, schools and youth groups"],
 ] as const;
 
-const HOW_STEPS = [
-  { title: "Find your listing", copy: "Search Calgary’s licence data by name or address. Pick your record and the address and category come with it." },
-  { title: "Confirm you can speak for it", copy: "Your name, role and work email. Add a proof note if it helps us match you — a business-domain address verifies fastest." },
-  { title: "Pick a plan and publish", copy: "Start free, or add a logo marker and gallery. Confirm the email we send and your pin goes verified on the Calgary map." },
-];
+const filters = ["Coffee", "Vintage", "Books", "Records", "Bakery", "Gifts", "Gallery", "Pub"];
 
 export default function LandingPage() {
-  const [businesses, setBusinesses] = useState<Business[]>([]);
-  const [active, setActive] = useState<Set<Category>>(new Set(CATEGORY_ORDER));
-  const [selected, setSelected] = useState<Business | null>(null);
-
-  const mapNode = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<maplibregl.Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
-
-  useEffect(() => {
-    fetch("/api/v1/calgary/businesses")
-      .then((response) => response.json())
-      .then((json) => setBusinesses(Array.isArray(json.data) ? json.data : []))
-      .catch(() => {});
-  }, []);
-
-  const totalCount = businesses.length;
-  const claimedCount = businesses.filter((b) => b.claim_status === "claimed" || b.claim_status === "pending").length;
-  const unclaimedCount = totalCount - claimedCount;
-
-  const showcase = useMemo(() => {
-    const perCategory: Business[] = [];
-    CATEGORY_ORDER.forEach((cat) => {
-      // Spread picks along the strip (by longitude) instead of taking the first N in a row,
-      // so the decorative preview doesn't cluster several pins on top of each other.
-      const inCat = businesses.filter((b) => b.category === cat).sort((a, b) => a.lon - b.lon);
-      const pick = inCat.length <= 2 ? inCat : [inCat[0], inCat[Math.floor(inCat.length / 2)], inCat[inCat.length - 1]];
-      perCategory.push(...pick);
-    });
-    return perCategory;
-  }, [businesses]);
-
-  const visible = showcase.filter((b) => active.has(b.category));
-
-  /* ---------------- showcase mini map ---------------- */
-  useEffect(() => {
-    if (!mapNode.current || mapRef.current) return;
-    const map = new maplibregl.Map({
-      container: mapNode.current,
-      style: {
-        version: 8,
-        sources: {
-          carto: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap © CARTO" },
-          cartoLabels: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"], tileSize: 256 },
-        },
-        layers: [
-          { id: "carto", type: "raster", source: "carto" },
-          { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
-        ],
-      },
-      center: city.center,
-      zoom: 14.6,
-      attributionControl: false,
-      interactive: false,
-    });
-    mapRef.current = map;
-    return () => { map.remove(); mapRef.current = null; };
-  }, []);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !showcase.length) return;
-    const bounds = new maplibregl.LngLatBounds();
-    showcase.forEach((b) => bounds.extend([b.lon, b.lat]));
-    map.fitBounds(bounds, { padding: { top: 40, bottom: 60, left: 30, right: 30 }, animate: false, maxZoom: 16.5 });
-  }, [showcase]);
-
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map) return;
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
-    const placed: maplibregl.Point[] = [];
-    visible.forEach((b) => {
-      const on = selected?.id === b.id;
-      const point = map.project([b.lon, b.lat]);
-      if (!on && placed.some((p) => Math.hypot(p.x - point.x, p.y - point.y) < 26)) return;
-      placed.push(point);
-      const el = document.createElement("div");
-      el.className = `${styles.landPin} ${styles.landCompact} ${on ? styles.landPinOn : ""}`;
-      el.innerHTML = `<span class="${styles.landGlyph}" style="background:${categoryColor(city, b.category)}">${b.mono}</span>`;
-      el.onclick = () => setSelected(b);
-      markersRef.current.push(new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([b.lon, b.lat]).addTo(map));
-    });
-  }, [visible, selected]);
-
-  const toggleCategory = (cat: Category) => {
-    setActive((prev) => {
-      const next = new Set(prev);
-      if (next.has(cat)) next.delete(cat); else next.add(cat);
-      if (selected && !next.has(selected.category)) setSelected(null);
-      return next;
-    });
-  };
-
   return (
     <main className={styles.landing}>
       <nav className={styles.landNav}>
         <div className={styles.landNavIn}>
-          <a className={styles.landBrand} href="#top">
+          <Link className={styles.landBrand} href="/">
             <img src="/brand/stroll-mark.png" alt="" />
             <span className={styles.landBrandName}>STROLL <span>CITY</span></span>
-          </a>
+          </Link>
           <div className={styles.landNavLinks}>
-            <a href="#map">The map</a>
-            <a href="#owners">For owners</a>
-            <a href="#how">How it works</a>
-            <a href="#plans">Plans</a>
+            <a href="#hunt">Scavenger hunts</a>
+            <a href="#filter">Filters</a>
+            <Link href="/business">For businesses →</Link>
           </div>
           <span className={styles.landSp} />
-          <Link className={`${styles.btn} ${styles.btnLine} ${styles.btnSm} ${styles.landNavSecondary}`} href="/calgary">Open Calgary</Link>
-          <Link className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} href="/portal">Claim your business</Link>
+          <Link className={`${styles.btn} ${styles.btnLine} ${styles.btnSm} ${styles.landNavSecondary}`} href="/business">For businesses</Link>
+          <Link className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} href="/calgary">Explore the Calgary map</Link>
         </div>
       </nav>
 
       <div className={styles.landWrap} id="top">
-        <header className={styles.landHero} id="map">
+        <header className={styles.landHero}>
           <div className={styles.landHeroCard}>
             <div className={styles.landHeroGrid}>
               <div className={styles.landHeroCopy}>
-                <span className={styles.landEyebrow}><i /> Live in Calgary · Inglewood</span>
+                <span className={styles.landEyebrow}><i /> Calgary · Inglewood first</span>
                 <h1 className={styles.landH1}>The city map that<br />looks like the <em>walk</em>.</h1>
-                <p className={styles.landHeroSub}>Painted rooftops on real streets, real licence data underneath. Stroll shows what’s actually on the block — then hands the pin to the people who run it.</p>
+                <p className={styles.landHeroSub}>stroll.city maps walkable shopping streets the way people actually experience them: every business on its real building, a filter for whatever you feel like, and scavenger hunts that get you through the door.</p>
                 <div className={styles.landHeroCta}>
-                  <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/calgary">
-                    Explore the Calgary map
-                    <CatIcon d="M5 12h13m-7-7 7 7-7 7" size={16} strokeWidth={1.8} color="#fff" />
-                  </Link>
-                  <Link className={`${styles.btn} ${styles.btnGhost}`} href="/portal">Claim your business</Link>
+                  <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/calgary">Explore the Calgary map →</Link>
+                  <Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary/hunt">Start a scavenger hunt</Link>
                 </div>
                 <div className={styles.landTrust}>
-                  <span><b>{totalCount || "—"}</b> Inglewood storefronts mapped</span>
+                  <span><b>140+</b> Inglewood businesses mapped</span>
                   <span className={styles.landTrustSep} />
-                  <span><b>City of Calgary</b> open licence data</span>
+                  <span><b>112</b> riddles written</span>
                   <span className={styles.landTrustSep} />
-                  <span>Free tier, always</span>
+                  <span>No account to browse</span>
                 </div>
               </div>
 
-              <div className={styles.landShowcase}>
+              <Link className={styles.landShowcase} href="/calgary" aria-label="Open the interactive Calgary map">
                 <div className={styles.landScBar}>
                   <span className={styles.landScDots}><i /><i /><i /></span>
-                  <span className={styles.landScUrl}>
-                    <CatIcon d="M5 11h14v9H5zm3.5 0V8a3.5 3.5 0 0 1 7 0v3" size={11} strokeWidth={1.8} />
-                    stroll.city/calgary
-                  </span>
+                  <span className={styles.landScUrl}>stroll.city/calgary</span>
                 </div>
                 <div className={styles.landScMap}>
-                  <div ref={mapNode} className={styles.minimap} />
-                  <div className={styles.landChips}>
-                    {CATEGORY_ORDER.map((cat) => (
-                      <button
-                        key={cat}
-                        type="button"
-                        className={styles.landChip}
-                        aria-pressed={active.has(cat)}
-                        onClick={() => toggleCategory(cat)}
-                      >
-                        <i style={{ background: categoryColor(city, cat) }} />{CAT_LABEL[cat]}
-                      </button>
-                    ))}
+                  <div className={styles.heroStaticMap} aria-hidden="true">
+                    <span className={`${styles.heroRoad} ${styles.heroRoadMain}`} />
+                    <span className={`${styles.heroRoad} ${styles.heroRoadRiver}`} />
+                    <span className={`${styles.heroBlock} ${styles.heroBlockA}`}>FF</span>
+                    <span className={`${styles.heroBlock} ${styles.heroBlockB}`}>R</span>
+                    <span className={`${styles.heroBlock} ${styles.heroBlockC}`}>AB</span>
+                    <span className={`${styles.heroBlock} ${styles.heroBlockD}`}>K</span>
+                    <span className={`${styles.heroBlock} ${styles.heroBlockE}`}>DP</span>
+                    <span className={`${styles.heroBlock} ${styles.heroBlockF}`}>N</span>
                   </div>
-                  <div className={`${styles.landScCard} ${selected ? styles.landScCardOn : ""}`}>
-                    {selected && (
-                      <>
-                        <div className={styles.landScCardTitle}>{selected.name}</div>
-                        <div className={styles.landScCardMeta}>
-                          <span className={styles.dot} style={{ background: categoryColor(city, selected.category) }} />
-                          {CAT_LABEL[selected.category]}
-                        </div>
-                        <div className={styles.landScCardDesc}>{selected.blurb?.trim() || `${CAT_LABEL[selected.category]} on ${selected.address}`}</div>
-                        <div className={styles.landScCardAddr}>{selected.address}</div>
-                      </>
-                    )}
-                  </div>
-                  <span className={styles.landScHint}>Tap a rooftop</span>
+                  <span className={styles.landScHint}>Open the interactive map →</span>
                 </div>
-              </div>
+              </Link>
             </div>
           </div>
         </header>
 
-        <div className={styles.landStats}>
-          <div className={styles.landStat}><div className={styles.landStatV}>{totalCount || "—"}</div><div className={styles.landStatK}>Inglewood storefronts mapped</div></div>
-          <div className={`${styles.landStat} ${styles.landStatAccent}`}><div className={styles.landStatV}>{claimedCount}</div><div className={styles.landStatK}>Listings already claimed by owners</div></div>
-          <div className={styles.landStat}><div className={styles.landStatV}>100%</div><div className={styles.landStatK}>Real building footprints, City of Calgary open data</div></div>
-          <div className={styles.landStat}><div className={styles.landStatV}>1</div><div className={styles.landStatK}>City live today — Edmonton queued next</div></div>
-        </div>
-
-        <section className={styles.landBlk} id="owners">
+        <section className={styles.landBlk} id="hunt">
           <div className={styles.landSecHead}>
             <div className={styles.landSecHeadL}>
-              <span className={styles.lbl}>Two sides of one map</span>
-              <h2 className={styles.landH2}>Useful to walk with.<br />Worth owning a pin on.</h2>
+              <span className={styles.lbl}>The scavenger hunt</span>
+              <h2 className={styles.landH2}>Riddles that make people walk into shops, not past them.</h2>
             </div>
-            <p>Most directories serve advertisers first and visitors second. Stroll keeps the map honest — and still gives owners a reason to show up.</p>
-          </div>
-          <div className={styles.landDuo}>
-            <div className={styles.landBigCard}>
-              <span className={styles.landBcIc}>
-                <CatIcon d="M4 18c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3M4 12c2.5 0 2.5-3 5-3s2.5 3 5 3 2.5-3 5-3M12 3.5v2" size={22} strokeWidth={1.6} color="#15558F" />
-              </span>
-              <div>
-                <span className={styles.lbl}>For people out walking</span>
-                <h3 className={styles.landH3}>Everything on the block, nothing invented</h3>
-                <p className={styles.landCardP}>Browse by what you’re in the mood for, not by who paid. Every pin traces back to a real licence at a real address.</p>
-              </div>
-              <div className={styles.landTicks}>
-                <div className={styles.landTick}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="#15558F" />Six categories, hours and highlights at a glance</div>
-                <div className={styles.landTick}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="#15558F" />Rooftop markers snapped to building footprints</div>
-                <div className={styles.landTick}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="#15558F" />Profiles open beside the map — you never lose your place</div>
-              </div>
-            </div>
-
-            <div className={`${styles.landBigCard} ${styles.landBigCardDark}`}>
-              <span className={`${styles.landBcIc} ${styles.landBcIcDark}`}>
-                <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={22} strokeWidth={1.6} color="#fff" />
-              </span>
-              <div>
-                <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>For owners</span>
-                <h3 className={styles.landH3} style={{ color: "#fff" }}>Your pin, your words, two minutes to claim</h3>
-                <p className={styles.landCardP} style={{ color: "rgba(255,255,255,.68)" }}>Search your licence record, confirm you can speak for the business, and take the marker. The free tier keeps you visible for nothing.</p>
-              </div>
-              <div className={styles.landTicks}>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Verified badge, logo marker and a curated profile</div>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Publish hours, photos, links, promos and events yourself</div>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Nothing publishes until you confirm by email</div>
-              </div>
-              <Link className={`${styles.btn} ${styles.btnClaim}`} href="/portal" style={{ alignSelf: "flex-start" }}>
-                Start a claim
-                <CatIcon d="M5 12h13m-7-7 7 7-7 7" size={16} strokeWidth={1.8} />
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className={styles.landBlk} id="how">
-          <div className={styles.landSecHead}>
-            <div className={styles.landSecHeadL}>
-              <span className={styles.lbl}>Claiming, end to end</span>
-              <h2 className={styles.landH2}>Three steps, no forms<br />you’ve filled before.</h2>
-            </div>
-            <p>The licence register already knows your address and category. We start from that, so you only tell us the part it can’t.</p>
-          </div>
-          <div className={styles.landSteps}>
-            {HOW_STEPS.map((step, i) => (
-              <div className={styles.landStepCard} key={step.title}>
-                <span className={styles.landStepN}>{i + 1}</span>
-                <h3 className={styles.landH3}>{step.title}</h3>
-                <p className={styles.landCardP}>{step.copy}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section className={styles.landBlk} id="plans">
-          <div className={styles.landSecHead}>
-            <div className={styles.landSecHeadL}>
-              <span className={styles.lbl}>Plans</span>
-              <h2 className={styles.landH2}>Free keeps you on the map.<br />Paid makes it yours.</h2>
-            </div>
-            <p>Test mode while Phase 4 runs — no card is collected. Paid plans move to Stripe Checkout with Phase 5.</p>
+            <p>Teams solve a riddle, walk to the answer, take a private proof photo at the door, then stamp the next stop onto a punch card. At the finish, it becomes a shareable postcard.</p>
           </div>
           <div className={styles.landPlans}>
-            {LANDING_PLANS.map((plan) => (
-              <div className={`${styles.landPlan} ${plan.hot ? styles.landPlanHot : ""}`} key={plan.id}>
-                <div className={styles.landPlanTop}>
-                  <span className={styles.landPlanName}>{plan.name}</span>
-                  {plan.hot && <span className={styles.landHotpill}>Most claimed</span>}
-                </div>
-                <div className={styles.landPrice}>{plan.price}{plan.suffix && <small>{plan.suffix}</small>}</div>
-                <p className={styles.landPlanCopy}>{plan.copy}</p>
-                <div className={styles.landFeat}>
-                  {plan.feats.map((feat) => (
-                    <div key={feat}><CatIcon d="m5 13 4.5 4.5L19 7" size={16} strokeWidth={2} color={plan.hot ? "var(--amber)" : "#15558F"} />{feat}</div>
-                  ))}
-                </div>
-                <Link className={`${styles.btn} ${plan.hot ? styles.btnClaim : styles.btnLine}`} href="/portal">{plan.cta}</Link>
+            {huntProducts.map(([name, price, copy]) => (
+              <div className={styles.landPlan} key={name}>
+                <div className={styles.landPlanTop}><span className={styles.landPlanName}>{name}</span></div>
+                <div className={styles.landPrice}>{price}</div>
+                <p className={styles.landPlanCopy}>{copy}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+        <section className={styles.landBlk} id="filter">
+          <div className={styles.landSecHead}>
+            <div className={styles.landSecHeadL}>
+              <span className={styles.lbl}>Curate your own experience</span>
+              <h2 className={styles.landH2}>Filter the street by mood.</h2>
+            </div>
+            <p>No route generator. No account. Pick what you’re in the mood for, watch everything else fade back, and decide where to stroll.</p>
+          </div>
+          <div className={styles.landChips} style={{ position: "static", overflow: "visible", flexWrap: "wrap" }}>
+            {filters.map((filter) => <span className={styles.landChip} key={filter}><i />{filter}</span>)}
           </div>
         </section>
 
         <section className={styles.landCta}>
           <span className={styles.landRing} /><span className={styles.landRing2} />
           <div style={{ position: "relative", zIndex: 2 }}>
-            <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Inglewood first, more to come</span>
-            <h2 className={styles.landH2} style={{ color: "#fff", marginTop: 14 }}>Take the pin above your door.</h2>
-            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Two minutes, no card, nothing published until you say so. {unclaimedCount || "Several"} Inglewood storefronts are still unclaimed.</p>
+            <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Start with the map</span>
+            <h2 className={styles.landH2} style={{ color: "#fff", marginTop: 14 }}>Inglewood is ready to walk.</h2>
+            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Open the Calgary map, pick a filter, or start with the free Friendly Mode hunt when it goes live.</p>
           </div>
           <div className={styles.landCtaActions}>
-            <Link className={`${styles.btn} ${styles.btnClaim}`} href="/portal">
-              Claim your business
-              <CatIcon d="M5 12h13m-7-7 7 7-7 7" size={16} strokeWidth={1.8} />
-            </Link>
-            <Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary">See the map first</Link>
+            <Link className={`${styles.btn} ${styles.btnClaim}`} href="/calgary">Explore Calgary</Link>
+            <Link className={`${styles.btn} ${styles.btnGhost}`} href="/business">I own a business</Link>
           </div>
         </section>
-
-        <footer className={styles.landFooter}>
-          <div className={styles.landFootIn}>
-            <div className={styles.landFootCol} style={{ minWidth: 200 }}>
-              <a className={styles.landBrand} href="#top" style={{ marginBottom: 6 }}>
-                <img src="/brand/stroll-mark.png" alt="" />
-                <span className={styles.landBrandName}>STROLL <span>CITY</span></span>
-              </a>
-              <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>Friendlier city maps.<br />Calgary · Blue Sky City</span>
-            </div>
-            <div className={styles.landFootCol}>
-              <span className={styles.lbl}>Explore</span>
-              <Link href="/calgary">Calgary map</Link>
-              <a href="#owners">For owners</a>
-              <a href="#plans">Plans</a>
-            </div>
-            <div className={styles.landFootCol}>
-              <span className={styles.lbl}>Business</span>
-              <Link href="/portal">Claim a listing</Link>
-              <a href="#plans">Plans &amp; logo</a>
-              <a href="#how">How claiming works</a>
-            </div>
-            <p className={styles.landFootNote}>Geometry and licences come from City of Calgary open data. Basemap © OpenStreetMap contributors © CARTO. Phase 4 runtime, test mode.</p>
-          </div>
-        </footer>
       </div>
     </main>
   );

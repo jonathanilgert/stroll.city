@@ -199,7 +199,8 @@
   background: rgba(255,255,255,.97); border-radius: 999px; box-shadow: 0 3px 10px rgba(20,24,26,.16); white-space: nowrap;
   transition: transform .16s ease, box-shadow .16s ease; transform-origin: center bottom; cursor: pointer; }
 .pin:hover { transform: scale(1.06); box-shadow: var(--sh-3); z-index: 600; }
-.glyph { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 999px; display: grid; place-items: center; font-size: 10.5px; font-weight: 500; color: #fff; overflow: hidden; }
+.glyph { width: 28px; height: 28px; flex: 0 0 28px; border-radius: 999px; display: grid; place-items: center; font-size: 10.5px; font-weight: 600; color: var(--ink);
+  overflow: hidden; border: 2.5px solid currentColor; }
 .glyph img { width: 100%; height: 100%; object-fit: cover; border-radius: 999px; }
 .label { font-size: 12.5px; font-weight: 400; letter-spacing: -.01em; color: var(--ink); max-width: 132px; overflow: hidden; text-overflow: ellipsis; }
 .compact { padding: 0; width: 30px; height: 30px; background: none; box-shadow: none; }
@@ -363,7 +364,9 @@
 
 /* hero showcase (decorative preview of the real map) */
 .landShowcase { background: var(--surface); border-radius: var(--r-2xl) var(--r-2xl) 0 0; box-shadow: var(--sh-3);
-  overflow: hidden; margin-bottom: -1px; display: flex; flex-direction: column; height: 404px; }
+  overflow: hidden; margin-bottom: -1px; display: flex; flex-direction: column; height: 404px; text-decoration: none; color: inherit; cursor: pointer;
+  transition: transform .18s ease, box-shadow .18s ease; }
+.landShowcase:hover { transform: translateY(-3px); box-shadow: 0 22px 70px -32px rgba(20,24,26,.42); }
 .landScBar { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px solid var(--line); flex: 0 0 auto; }
 .landScDots { display: flex; gap: 5px; margin-right: 6px; }
 .landScDots i { width: 9px; height: 9px; border-radius: 999px; background: var(--mint-2); display: block; }
@@ -393,6 +396,17 @@
 .landScCardAddr { font-size: 11.5px; color: var(--ink-3); margin-top: 9px; }
 .landScHint { position: absolute; right: 14px; bottom: 14px; z-index: 15; font-size: 11.5px; color: var(--ink-2);
   background: rgba(255,255,255,.94); border-radius: 999px; padding: 7px 13px; box-shadow: var(--sh-1); }
+.heroStaticMap { position: absolute; inset: 0; overflow: hidden; background: linear-gradient(160deg, #eaf1ee 0%, #f7faf8 55%, #dbecfb 100%); }
+.heroRoad { position: absolute; display: block; border-radius: 999px; background: rgba(20,24,26,.09); box-shadow: 0 0 0 10px rgba(255,255,255,.4); }
+.heroRoadMain { width: 86%; height: 38px; left: 7%; top: 48%; transform: rotate(-8deg); }
+.heroRoadRiver { width: 72%; height: 18px; right: -10%; top: 22%; transform: rotate(-14deg); background: rgba(21,85,143,.16); }
+.heroBlock { position: absolute; z-index: 3; width: 42px; height: 42px; border-radius: 15px; display: grid; place-items: center; background: #fff; border: 2.5px solid var(--c-shop); color: var(--ink); font-family: var(--font-mono); font-size: 12px; font-weight: 600; box-shadow: 0 8px 22px rgba(20,24,26,.16); }
+.heroBlockA { left: 13%; top: 53%; transform: rotate(-8deg); border-color: var(--c-shop); }
+.heroBlockB { left: 29%; top: 47%; transform: rotate(-6deg); border-color: var(--c-bar); }
+.heroBlockC { left: 46%; top: 43%; transform: rotate(-8deg); border-color: var(--c-shop); }
+.heroBlockD { left: 62%; top: 37%; transform: rotate(-7deg); border-color: var(--c-shop); }
+.heroBlockE { left: 38%; top: 61%; transform: rotate(-8deg); border-color: var(--c-cafe); }
+.heroBlockF { left: 72%; top: 55%; transform: rotate(-8deg); border-color: var(--c-eat); }
 
 /* stats */
 .landStats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin-top: 22px; }
