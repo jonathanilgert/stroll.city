@@ -11,7 +11,7 @@ export default function RaceSetupPage() {
   const [raceName, setRaceName] = useState("Inglewood Scavenger Hunt Race");
   const code = useMemo(() => {
     const seed = `${hostName || "host"}-${raceName || "race"}`.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 5);
-    return `LOOP-${seed || "RACE"}`;
+    return `RACE-${seed || "TEAM"}`;
   }, [hostName, raceName]);
   const total = teams * 20;
 

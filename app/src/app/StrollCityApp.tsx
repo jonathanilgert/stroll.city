@@ -126,6 +126,22 @@ const CAT_BLURB: Record<Category, string> = {
 };
 const allCategories = Object.keys(CAT_LABEL) as Category[];
 
+function categoriesFromUrl() {
+  if (typeof window === "undefined") return new Set(allCategories);
+  const raw = new URLSearchParams(window.location.search).get("cat");
+  if (!raw) return new Set(allCategories);
+  const requested = raw.split(",").filter((value): value is Category => allCategories.includes(value as Category));
+  return new Set(requested);
+}
+function replaceCategoryUrl(categories: Set<Category>) {
+  if (typeof window === "undefined") return;
+  const params = new URLSearchParams(window.location.search);
+  if (categories.size === allCategories.length) params.delete("cat");
+  else params.set("cat", allCategories.filter((cat) => categories.has(cat)).join(","));
+  const qs = params.toString();
+  window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
+}
+
 export function categoryColor(city: CityConfig, category: Category) {
   return city.theme.categories[category] ?? city.theme.primary;
 }
@@ -195,13 +211,6 @@ function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact
   if (compact) return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
-function clusterMarkup(styles_: typeof styles, members: Business[], wide: boolean, colors: string[]) {
-  if (wide) {
-    const dots = colors.slice(0, 3).map((c, i) => `<span style="width:13px;height:13px;border-radius:99px;background:${c};border:2px solid #fff;margin-left:${i ? -5 : 0}px"></span>`).join("");
-    return `<div class="${styles_.pin} ${styles_.cluster}"><span style="display:flex;align-items:center;padding-left:7px">${dots}</span><span class="${styles_.label}">${members.length} places</span></div>`;
-  }
-  return `<div class="${styles_.pin} ${styles_.cluster} ${styles_.compact}"><span class="${styles_.glyph}" style="background:#14181A">${members.length}</span></div>`;
-}
 function fallbackEvents(data: StrollData): EventItem[] {
   return [
     { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Stroll event", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006 },
@@ -265,6 +274,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showBike, setShowBike] = useState(true);
   const [showPathways, setShowPathways] = useState(true);
   const [showBeyond, setShowBeyond] = useState(true);
+  const [showEvents, setShowEvents] = useState(true);
+  const [showOpenNow, setShowOpenNow] = useState(true);
+  const [showTrees, setShowTrees] = useState(true);
   const [neighbourhoodSaved, setNeighbourhoodSaved] = useState(true);
   const [welcome, setWelcome] = useState(false);
   const [hint, setHint] = useState<string | null>("Hover a chip to preview it; click to open the profile without leaving the map.");
@@ -275,7 +287,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [stageShort, setStageShort] = useState(false);
   const [, forceTick] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
-  const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => new Set(allCategories));
+  const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => categoriesFromUrl());
   const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
@@ -354,10 +366,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     });
   }, [data, query]);
 
+  const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
+  const openNowCount = useMemo(() => {
+    if (!data) return 0;
+    return data.businesses.filter((b) => isOpenNow(b.hours, nowMinutes)).length;
+  }, [data, nowMinutes]);
+
   const visibleBusinesses = useMemo(() => {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
-    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true));
+    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)));
     /* While searching, rank by how well the name matches — an exact prefix hit should not sit below an address hit. */
     const rank = (b: Business) => {
       if (!terms.length) return 0;
@@ -376,16 +394,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [queryMatches, browseCategory, query, sortMode, mobileLayout, activeCategories]);
+  }, [queryMatches, browseCategory, query, sortMode, activeCategories, showOpenNow, nowMinutes]);
 
   /* Distinguishes "nothing matches your text" from "your chips are hiding the matches", which need different fixes. */
   const hiddenByCategories = queryMatches.length - visibleBusinesses.length;
-
-  const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
-  const openNowCount = useMemo(() => {
-    if (!data) return 0;
-    return data.businesses.filter((b) => isOpenNow(b.hours, nowMinutes)).length;
-  }, [data, nowMinutes]);
 
   const closeWelcome = () => {
     setWelcome(false);
@@ -398,10 +410,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const openCategory = (key: Category) => { setBrowseCategory(key); setQuery(""); };
   const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setSelected(null); };
+  const setCategories = (next: Set<Category>) => {
+    setActiveCategories(next);
+    replaceCategoryUrl(next);
+    if (selected && !next.has(selected.category)) setSelected(null);
+  };
   const toggleActiveCategory = (key: Category) => {
     setActiveCategories((prev) => {
       const next = new Set(prev);
       if (next.has(key)) next.delete(key); else next.add(key);
+      replaceCategoryUrl(next);
       if (selected && !next.has(selected.category)) setSelected(null);
       return next;
     });
@@ -685,14 +703,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setVisibility("bike-line", showBike);
     setVisibility("pathways", showPathways);
     setVisibility("stripband", showStrip);
-  }, [showBike, showPathways, showStrip, data]);
+    setVisibility("trees", showTrees);
+  }, [showBike, showPathways, showStrip, showTrees, data]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
     eventMarkersRef.current.forEach((m) => m.remove());
     eventMarkersRef.current = [];
-    if (tab !== "events") return;
+    if (tab !== "events" || !showEvents) return;
     eventMarkersRef.current = events.map((event) => {
       const el = document.createElement("button");
       el.className = styles.pin;
@@ -701,7 +720,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       el.addEventListener("click", () => { mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 }); setHint(`${event.name} · ${event.venue}`); });
       return new maplibregl.Marker({ element: el, anchor: "bottom" }).setLngLat([event.lon, event.lat]).addTo(map);
     });
-  }, [events, tab, city.theme.primary]);
+  }, [events, tab, showEvents, city.theme.primary]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -917,8 +936,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     return (
       <main className={styles.comingSoon}>
         <img src="/brand/stroll-logo.png" alt="Stroll City" />
-        <h1>{city.name} is next on the stroll.</h1>
-        <p>{city.theme.welcomeLine}</p>
+        <h1>{city.name} is not open yet.</h1>
+        <p>Choose Calgary to use the live stroll.city map.</p>
         <Link href="/">Back to city picker</Link>
       </main>
     );
@@ -985,8 +1004,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               </div>
 
               <div className={styles.catControls}>
-                <button className={styles.catControl} onClick={() => setActiveCategories(new Set(allCategories))}>All</button>
-                <button className={styles.catControl} onClick={() => { setActiveCategories(new Set()); setSelected(null); }}>None</button>
+                <button className={styles.catControl} onClick={() => setCategories(new Set(allCategories))}>All</button>
+                <button className={styles.catControl} onClick={() => setCategories(new Set())}>None</button>
               </div>
               <div className={styles.catlist}>
                 {allCategories.map((key) => {
@@ -1004,6 +1023,25 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     <span className={`${styles.ccN} ${styles.num}`}>{counts[key] || 0}</span>
                   </button>
                 );})}
+                <div className={styles.catSep}><span className={styles.lbl}>Map layers</span><span className={styles.catSepRule} /></div>
+                <button className={`${styles.catcard} ${showEvents ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowEvents((v) => !v)} aria-pressed={showEvents}>
+                  <span className={styles.catCheck} style={showEvents ? { background: city.theme.primary } : undefined}>{showEvents ? "✓" : ""}</span>
+                  <span className={styles.ccTile}><CalendarDays size={20} /></span>
+                  <span className={styles.ccBody}><span className={styles.ccName}>Events</span><span className={styles.ccMeta}>Show event markers on the map</span></span>
+                  <span className={`${styles.ccN} ${styles.num}`}>{events.length}</span>
+                </button>
+                <button className={`${styles.catcard} ${showOpenNow ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowOpenNow((v) => !v)} aria-pressed={showOpenNow}>
+                  <span className={styles.catCheck} style={showOpenNow ? { background: city.theme.green } : undefined}>{showOpenNow ? "✓" : ""}</span>
+                  <span className={styles.ccTile}><CatIcon d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 7.5V12l3 2" size={20} /></span>
+                  <span className={styles.ccBody}><span className={styles.ccName}>Open now</span><span className={styles.ccMeta}>Include places currently marked open</span></span>
+                  <span className={`${styles.ccN} ${styles.num}`}>{openNowCount}</span>
+                </button>
+                <button className={`${styles.catcard} ${showTrees ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowTrees((v) => !v)} aria-pressed={showTrees}>
+                  <span className={styles.catCheck} style={showTrees ? { background: "#5C6350" } : undefined}>{showTrees ? "✓" : ""}</span>
+                  <span className={styles.ccTile}><CatIcon d="M12 2c-4 4-4 10 0 20 4-10 4-16 0-20Z" size={20} /></span>
+                  <span className={styles.ccBody}><span className={styles.ccName}>Trees</span><span className={styles.ccMeta}>Show the street canopy layer</span></span>
+                  <span className={`${styles.ccN} ${styles.num}`}>{data?.trees.length ?? 0}</span>
+                </button>
                 <div className={styles.catSep}><span className={styles.lbl}>Featured places</span><span className={styles.catSepRule} /></div>
                 {attractions.map((attraction) => (
                   <button key={attraction.id} className={styles.feat} onClick={() => goFeatured(attraction)}>
@@ -1252,7 +1290,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     <div className={styles.empty}>
                       <b>{hiddenByCategories} match{hiddenByCategories === 1 ? "" : "es"} hidden</b>
                       Your category filters are hiding every result for “{query.trim()}”.
-                      <button className={styles.emptyAction} onClick={() => setActiveCategories(new Set(allCategories))}>Show all categories</button>
+                      <button className={styles.emptyAction} onClick={() => setCategories(new Set(allCategories))}>Show all categories</button>
                     </div>
                   ) : query.trim() ? (
                     <div className={styles.empty}>

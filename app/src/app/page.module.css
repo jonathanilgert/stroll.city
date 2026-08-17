@@ -210,9 +210,6 @@
 .pinActive { background: var(--black); box-shadow: 0 0 0 8px rgba(239,162,42,.18), 0 10px 26px rgba(20,24,26,.3); transform: scale(1.06); }
 .pinActive .label { color: #fff; }
 .pinActive .glyph { background: var(--amber) !important; color: var(--black); }
-.cluster { padding: 3px 13px 3px 3px; gap: 9px; }
-.cluster .label { color: var(--ink-2); }
-.cluster:hover .label { color: var(--ink); }
 
 /* ---------- drawer ---------- */
 .drawer { position: absolute; top: 20px; right: 20px; bottom: 20px; width: 376px; z-index: 700; background: var(--surface);
@@ -295,7 +292,7 @@
 .mTabs svg { width: 20px; height: 20px; }
 .mTabOn { color: var(--ink) !important; }
 
-/* ---------- welcome / coming soon ---------- */
+/* ---------- welcome overlay ---------- */
 .welcome { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; align-content: center; gap: 20px; padding: 24px; text-align: center;
   background: var(--app-bg); color: var(--ink); overflow: hidden; }
 .welcome img { width: min(300px, 55vw); height: auto; }
@@ -537,6 +534,13 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .claimFieldErr .errMsg { display: block; }
 .helper { font-size: 11.5px; color: var(--ink-3); line-height: 1.45; }
 .optional { color: var(--ink-3); }
+
+.optionGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.optionCard { border: 1px solid var(--line); border-radius: var(--r-xl); padding: 16px; background: var(--surface-2); display: flex; flex-direction: column; gap: 12px; }
+.switchLine { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; color: var(--ink); }
+.switchLine input { width: 18px; height: 18px; accent-color: var(--black); }
+.optionFields { display: flex; flex-direction: column; gap: 10px; padding-top: 4px; }
+@media (max-width: 720px) { .optionGrid { grid-template-columns: minmax(0, 1fr); } }
 
 .searchWrap { position: relative; display: flex; flex-direction: column; gap: 6px; }
 .searchResults { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0; max-height: 286px; overflow-y: auto;

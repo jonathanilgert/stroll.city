@@ -338,21 +338,21 @@ export default function LandingPage() {
         <section className={styles.landBlk} id="switches">
           <div className={styles.landSecHead}>
             <div className={styles.landSecHeadL}>
-              <span className={styles.lbl}>Two switches</span>
-              <h2 className={styles.landH2}>Two things Stroll members can turn on.</h2>
+              <span className={styles.lbl}>Optional extras</span>
+              <h2 className={styles.landH2}>Two things you can switch on, if you want to.</h2>
             </div>
-            <p>Both are optional, both are off until you choose them, and you can change your mind whenever you like.</p>
+            <p>Neither is required. Both start off, and both are yours to change or pause whenever you like.</p>
           </div>
           <div className={styles.landDuo}>
             <div className={styles.landBigCard}>
-              <span className={styles.lbl}>Toggle A</span>
-              <h3 className={styles.landH3}>Give hunt finishers something small</h3>
-              <p className={styles.landCardP}>Pick something you&apos;re happy to hand a team that finishes a hunt at your door — a coffee, a cookie, a sticker, ten percent off. Set a weekly cap so it never runs away from you. Switch this on and you become a candidate for the final stop.</p>
+              <span className={styles.lbl}>Put my shop in the pool</span>
+              <h3 className={styles.landH3}>Be the final stop</h3>
+              <p className={styles.landCardP}>Every hunt ends somewhere. Switch this on and your shop goes into the pool for the final stop — the one where a team finishes, celebrates, and takes the photo that becomes their postcard. Offer something free, something with a purchase, or a discount, then set a weekly cap so it can never run away from you.</p>
             </div>
             <div className={styles.landBigCard}>
-              <span className={styles.lbl}>Toggle B</span>
-              <h3 className={styles.landH3}>Donate to the Inglewood Basket</h3>
-              <p className={styles.landCardP}>Ten shops each put one item into a basket worth around $250, and we draw a winner every month. Every entry is somebody looking at the list of who donated. You choose the item and which month you&apos;re in.</p>
+              <span className={styles.lbl}>Add me to a basket</span>
+              <h3 className={styles.landH3}>Join the Inglewood Basket</h3>
+              <p className={styles.landCardP}>Ten shops each put one item into a basket, and we draw one winner a month. Your part is a single item off your own shelf — a candle, a book, a bag of beans, a gift card. Ten of those together come to around $250, which is what makes the basket worth entering. You choose the item and which months you&apos;re in.</p>
             </div>
           </div>
         </section>
@@ -360,7 +360,7 @@ export default function LandingPage() {
         <section className={styles.landCta}>
           <span className={styles.landRing} /><span className={styles.landRing2} />
           <div style={{ position: "relative", zIndex: 2 }}>
-            <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Inglewood first, more to come</span>
+            <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Inglewood businesses</span>
             <h2 className={styles.landH2} style={{ color: "#fff", marginTop: 14 }}>Take the pin above your door.</h2>
             <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Two minutes, no card, nothing published until you say so. Inglewood businesses can claim a verified pin and decide what publishes.</p>
           </div>

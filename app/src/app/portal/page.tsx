@@ -65,6 +65,16 @@ export default function PortalPage() {
   const [logoDataUrl, setLogoDataUrl] = useState<string | undefined>();
   const [logoName, setLogoName] = useState<string | undefined>();
   const [dragOver, setDragOver] = useState(false);
+  const [finisherOn, setFinisherOn] = useState(false);
+  const [finisherOfferType, setFinisherOfferType] = useState("Something with a purchase");
+  const [finisherOffer, setFinisherOffer] = useState("Pastry with any coffee");
+  const [finisherCap, setFinisherCap] = useState(10);
+  const [finisherNote, setFinisherNote] = useState("");
+  const [basketOn, setBasketOn] = useState(false);
+  const [basketItem, setBasketItem] = useState("");
+  const [basketValue, setBasketValue] = useState("");
+  const [basketMonths, setBasketMonths] = useState("");
+  const [basketNote, setBasketNote] = useState("");
 
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -224,6 +234,8 @@ export default function PortalPage() {
           plan_tier: plan,
           logo_data_url: PLANS.find((p) => p.id === plan)?.logo ? logoDataUrl : undefined,
           logo_name: logoName,
+          finisher_offer: plan === "stroll" ? { enabled: finisherOn, type: finisherOfferType, offer: finisherOffer, weekly_cap: finisherCap, note: finisherNote } : undefined,
+          basket: plan === "stroll" ? { enabled: basketOn, item: basketItem, approximate_value: basketValue, months: basketMonths, note: basketNote } : undefined,
         }),
       });
       const json = await response.json();
@@ -251,6 +263,16 @@ export default function PortalPage() {
     setPlan("stroll");
     setLogoDataUrl(undefined);
     setLogoName(undefined);
+    setFinisherOn(false);
+    setFinisherOfferType("Something with a purchase");
+    setFinisherOffer("Pastry with any coffee");
+    setFinisherCap(10);
+    setFinisherNote("");
+    setBasketOn(false);
+    setBasketItem("");
+    setBasketValue("");
+    setBasketMonths("");
+    setBasketNote("");
     setResult(null);
     setMessage(null);
   };
@@ -481,9 +503,39 @@ export default function PortalPage() {
                 </div>
 
                 {plan === "stroll" && (
-                  <div className={`${styles.callout} ${styles.calloutAmber}`}>
-                    <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={17} color="var(--amber)" strokeWidth={1.7} />
-                    <span><b>Two optional switches:</b> add a finisher item with a weekly cap, or donate an item to the monthly Inglewood Basket. Both start off and can be changed any time.</span>
+                  <div className={styles.optionGrid}>
+                    <div className={styles.optionCard}>
+                      <label className={styles.switchLine}>
+                        <input type="checkbox" checked={finisherOn} onChange={(e) => setFinisherOn(e.target.checked)} />
+                        <span>Put my shop in the pool</span>
+                      </label>
+                      <h3 className={styles.landH3}>Be the final stop</h3>
+                      <p className={styles.landCardP}>Every hunt ends somewhere. Switch this on and your shop goes into the pool for the final stop. Offer finishers something small, set a weekly cap, and pause it any time.</p>
+                      {finisherOn && (
+                        <div className={styles.optionFields}>
+                          <div className={styles.claimField}><label>Offer type</label><div className={styles.ctl}><select value={finisherOfferType} onChange={(e) => setFinisherOfferType(e.target.value)}><option>Something free</option><option>Something with a purchase</option><option>A discount</option></select></div></div>
+                          <div className={styles.claimField}><label>The offer</label><div className={styles.ctl}><input value={finisherOffer} onChange={(e) => setFinisherOffer(e.target.value)} placeholder="Pastry with any coffee" /></div></div>
+                          <div className={styles.claimField}><label>Weekly cap</label><div className={styles.ctl}><input type="number" min={1} value={finisherCap} onChange={(e) => setFinisherCap(Math.max(1, Number(e.target.value) || 10))} /></div></div>
+                          <div className={styles.claimField}><label>Optional note to the team</label><textarea className={styles.ctl} value={finisherNote} onChange={(e) => setFinisherNote(e.target.value)} /></div>
+                        </div>
+                      )}
+                    </div>
+                    <div className={styles.optionCard}>
+                      <label className={styles.switchLine}>
+                        <input type="checkbox" checked={basketOn} onChange={(e) => setBasketOn(e.target.checked)} />
+                        <span>Add me to a basket</span>
+                      </label>
+                      <h3 className={styles.landH3}>Join the Inglewood Basket</h3>
+                      <p className={styles.landCardP}>Ten shops each put one item into a basket, and we draw one winner a month. Your part is a single item off your own shelf; the basket total is what makes the prize worth entering.</p>
+                      {basketOn && (
+                        <div className={styles.optionFields}>
+                          <div className={styles.claimField}><label>Item description</label><div className={styles.ctl}><input value={basketItem} onChange={(e) => setBasketItem(e.target.value)} placeholder="Bag of beans, candle, book, gift card" /></div></div>
+                          <div className={styles.claimField}><label>Approximate value of your item</label><div className={styles.ctl}><input value={basketValue} onChange={(e) => setBasketValue(e.target.value)} placeholder="$25" /></div></div>
+                          <div className={styles.claimField}><label>Month(s)</label><div className={styles.ctl}><input value={basketMonths} onChange={(e) => setBasketMonths(e.target.value)} placeholder="September, October" /></div></div>
+                          <div className={styles.claimField}><label>Optional note</label><textarea className={styles.ctl} value={basketNote} onChange={(e) => setBasketNote(e.target.value)} /></div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
 
