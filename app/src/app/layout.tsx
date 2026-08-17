@@ -9,6 +9,11 @@ const plexMono = IBM_Plex_Mono({ variable: "--font-mono", subsets: ["latin"], we
 export const metadata: Metadata = {
   title: "Stroll — friendlier city maps",
   description: "Illustrated local discovery maps with real streets, rooftops, and business mini-apps.",
+  icons: {
+    icon: [{ url: "/brand/stroll-mark.png", type: "image/png" }],
+    shortcut: ["/brand/stroll-mark.png"],
+    apple: [{ url: "/brand/stroll-mark.png", type: "image/png" }],
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

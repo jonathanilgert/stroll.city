@@ -8,7 +8,7 @@ import styles from "../../../../page.module.css";
 export default function RaceSetupPage() {
   const [teams, setTeams] = useState(2);
   const [hostName, setHostName] = useState("");
-  const [raceName, setRaceName] = useState("Inglewood Loop Race");
+  const [raceName, setRaceName] = useState("Inglewood Scavenger Hunt Race");
   const code = useMemo(() => {
     const seed = `${hostName || "host"}-${raceName || "race"}`.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 5);
     return `LOOP-${seed || "RACE"}`;
@@ -31,9 +31,9 @@ export default function RaceSetupPage() {
           <div className={styles.landHeroCard}>
             <div className={styles.landHeroGrid}>
               <div className={styles.landHeroCopy}>
-                <span className={styles.landEyebrow}><i /> Loop Race</span>
-                <h1 className={styles.landH1}>Race the loop, from different doors.</h1>
-                <p className={styles.landHeroSub}>Choose a team count, share one link, and every team gets a rotated start with the same $20/team price as a Full Hunt. The host pays once for everyone.</p>
+                <span className={styles.landEyebrow}><i /> Scavenger Hunt Race</span>
+                <h1 className={styles.landH1}>Race the scavenger hunt, from different doors.</h1>
+                <p className={styles.landHeroSub}>Choose a team count, share one link, and every team gets a rotated start around the loop with the same $20/team price as a Full Scavenger Hunt. The host pays once for everyone.</p>
               </div>
               <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
                 <span className={styles.lbl}>Set up race</span>
@@ -50,7 +50,7 @@ export default function RaceSetupPage() {
                     <span className={styles.helper}>Self-serve supports 2–8 teams. For more than 8, book an event.</span>
                   </div>
                   <div className={styles.callout}><span className={styles.racePrice}>{teams} teams × $20 = ${total}</span></div>
-                  <div className={styles.callout}><b>First-hunt credit applies to Full Hunts, not race bookings.</b></div>
+                  <div className={styles.callout}><b>First-hunt credit applies to Full Scavenger Hunts, not race bookings.</b></div>
                   <div className={styles.review}>
                     <div className={styles.revRow}><span className={styles.revKey}>Code</span><span className={styles.revVal}>{code}</span></div>
                     <div className={styles.revRow}><span className={styles.revKey}>Share link</span><span className={styles.revVal}>stroll.city/race/{code.toLowerCase()}</span></div>

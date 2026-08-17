@@ -6,8 +6,8 @@ import styles from "../page.module.css";
 
 const products = [
   ["friendly", "Friendly Mode", "Free", "4 stops, unlimited replays, randomized"],
-  ["full", "Full Hunt", "$20 / team", "6–9 stops, Stroll Time. First full hunt free per email"],
-  ["race", "Loop Race", "$20/team", "2–8 teams self-serve, one host payment, shared join code"],
+  ["full", "Full Scavenger Hunt", "$20 / team", "6–9 stops, Stroll Time. First full scavenger hunt free per email"],
+  ["race", "Scavenger Hunt Race", "$20/team", "2–8 teams self-serve, one host payment, shared join code"],
   ["private", "Private Event", "From $99", "Birthdays, staff days out, class trips and youth groups"],
   ["corporate", "Corporate", "$499", "Up to 10 teams, custom riddles, branded postcards, facilitation"],
   ["school", "School / youth non-profit", "$99", "Up to 8 teams, history route"],

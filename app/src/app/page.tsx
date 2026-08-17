@@ -11,20 +11,20 @@ const huntProducts = [
     label: "Start a free Friendly Mode hunt",
   },
   {
-    name: "Full Hunt",
+    name: "Full Scavenger Hunt",
     price: "$20/team",
     copy: "6–9 stops · timed with Stroll Time · your first one's free",
     button: "Start a hunt →",
     href: "/calgary/hunt?type=full",
-    label: "Start a Full Hunt",
+    label: "Start a Full Scavenger Hunt",
   },
   {
-    name: "Loop Race",
+    name: "Scavenger Hunt Race",
     price: "$20/team · 2 teams and up",
     copy: "Rotated starts, live leaderboard, one link to share",
     button: "Set up a race →",
     href: "/calgary/hunt/race/new",
-    label: "Set up a Loop Race",
+    label: "Set up a Scavenger Hunt Race",
   },
   {
     name: "Event bookings",
@@ -86,14 +86,7 @@ export default function LandingPage() {
                 </div>
                 <div className={styles.landScMap}>
                   <div className={styles.heroStaticMap} aria-hidden="true">
-                    <span className={`${styles.heroRoad} ${styles.heroRoadMain}`} />
-                    <span className={`${styles.heroRoad} ${styles.heroRoadRiver}`} />
-                    <span className={`${styles.heroBlock} ${styles.heroBlockA}`}>FF</span>
-                    <span className={`${styles.heroBlock} ${styles.heroBlockB}`}>R</span>
-                    <span className={`${styles.heroBlock} ${styles.heroBlockC}`}>AB</span>
-                    <span className={`${styles.heroBlock} ${styles.heroBlockD}`}>K</span>
-                    <span className={`${styles.heroBlock} ${styles.heroBlockE}`}>DP</span>
-                    <span className={`${styles.heroBlock} ${styles.heroBlockF}`}>N</span>
+                    <img src="/brand/stroll-main-map.jpg" alt="" />
                   </div>
                   <span className={styles.landScHint}>Open the interactive map →</span>
                 </div>

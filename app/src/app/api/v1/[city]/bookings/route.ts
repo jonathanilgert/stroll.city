@@ -2,8 +2,8 @@ import { envelope, error } from "../../_lib/data";
 
 const products: Record<string, { label: string; price: number; teams: number; stripePriceEnv?: string }> = {
   friendly: { label: "Friendly Mode", price: 0, teams: 1 },
-  full: { label: "Full Hunt", price: 20, teams: 1 },
-  race: { label: "Loop Race", price: 99, teams: 4 },
+  full: { label: "Full Scavenger Hunt", price: 20, teams: 1 },
+  race: { label: "Scavenger Hunt Race", price: 99, teams: 4 },
   private: { label: "Private Event", price: 199, teams: 6 },
   corporate: { label: "Corporate", price: 499, teams: 10 },
   school: { label: "School / youth non-profit", price: 99, teams: 8 },
