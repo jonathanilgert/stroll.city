@@ -204,8 +204,8 @@ function clusterMarkup(styles_: typeof styles, members: Business[], wide: boolea
 }
 function fallbackEvents(data: StrollData): EventItem[] {
   return [
-    { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Phase 1 sample", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006 },
-    { id: "gallery-walk-demo", name: "Gallery walk + local shops", venue: "Atlantic Ave / 9 Ave SE", starts_at: "2026-07-27T12:00:00-06:00", source: "Phase 1 sample", lon: data.center[0] + 0.0024, lat: data.center[1] + 0.0002 },
+    { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Stroll event", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006 },
+    { id: "gallery-walk-demo", name: "Gallery walk + local shops", venue: "Atlantic Ave / 9 Ave SE", starts_at: "2026-07-27T12:00:00-06:00", source: "Stroll event", lon: data.center[0] + 0.0024, lat: data.center[1] + 0.0002 },
   ];
 }
 function fallbackAttractions(data: StrollData): Attraction[] {
@@ -257,6 +257,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [query, setQuery] = useState("");
   const [sortMode, setSortMode] = useState<"az" | "claimed">("az");
   const [selected, setSelected] = useState<Business | null>(null);
+  const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
+  const [showInfo, setShowInfo] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [showNames, setShowNames] = useState(true);
   const [showStrip, setShowStrip] = useState(true);
@@ -355,7 +357,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const visibleBusinesses = useMemo(() => {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
-    const list = queryMatches.filter((b) => (mobileLayout ? activeCategories.has(b.category) : browseCategory ? b.category === browseCategory : true));
+    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true));
     /* While searching, rank by how well the name matches — an exact prefix hit should not sit below an address hit. */
     const rank = (b: Business) => {
       if (!terms.length) return 0;
@@ -406,6 +408,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const closeSelected = () => {
     setSelected(null);
+    setSelectedAttraction(null);
     if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
   };
 
@@ -500,6 +503,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const flyToBusiness = (business: Business) => {
     searchRef.current?.blur();
+    setSelectedAttraction(null);
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
@@ -507,7 +511,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
   };
   const goFeatured = (attraction: Attraction) => {
-    setHint(`${attraction.name}: ${attraction.blurb}`);
+    setSelected(null);
+    setSelectedAttraction(attraction);
+    setHint(null);
     mapRef.current?.flyTo({ center: [attraction.lon, attraction.lat], zoom: 15.5, duration: 700 });
   };
   const chooseNeighbourhood = (id: string) => {
@@ -518,7 +524,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       setHint(`${n.name} is ready to stroll.`);
     } else {
       mapRef.current.flyTo({ center: n.center, zoom: 13, duration: 900 });
-      setHint(`${n.name} is marked coming soon — the pipeline can light this up in Phase 2.`);
+      setHint(`${n.name} will be added to stroll.city after Inglewood.`);
     }
   };
   const openPortal = (business: Business) => { window.location.href = `/portal?business=${encodeURIComponent(business.id)}`; };
@@ -754,23 +760,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
-      if (forceEveryMarker) {
-        slots.push({ ...rectFor(cp, 22), members: [biz], mode: "glyph", pinned: isSel });
-        return;
-      }
       const wide = rectFor(cp, chipWidth(biz.name, isSel));
       if (!mobileLayout && showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
       const small = rectFor(cp, 32);
-      if (clears(small)) { slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel }); return; }
-      if (isSel) { slots.push({ ...small, members: [biz], mode: "label", pinned: true }); return; }
-      let best: Slot | null = null;
-      let bd = Infinity;
-      for (const s of slots) {
-        if (s.pinned || s.chrome) continue;
-        const d = (s.cx - cp.x) ** 2 + (s.cy - cp.y) ** 2;
-        if (d < bd) { bd = d; best = s; }
-      }
-      if (best !== null) { (best as Slot).members.push(biz); }
+      slots.push({ ...small, members: [biz], mode: isSel ? "label" : "glyph", pinned: isSel });
     });
 
     slots.forEach((s) => {
@@ -795,14 +788,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([biz.lon, biz.lat]).addTo(map);
         pinMarkersRef.current.push(marker);
         pinElsRef.current.set(biz.id, el);
-      } else {
-        const wide = s.x2 - s.x1 >= 104;
-        const colors = [...new Set(s.members.map((m) => categoryColor(city, m.category)))];
-        const el = document.createElement("button");
-        el.innerHTML = clusterMarkup(styles, s.members, wide, colors);
-        el.addEventListener("click", () => mapRef.current?.flyTo({ center: [s.members[0].lon, s.members[0].lat], zoom: Math.min(19, (mapRef.current?.getZoom() ?? 16) + 2), duration: 550 }));
-        const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([s.members[0].lon, s.members[0].lat]).addTo(map);
-        pinMarkersRef.current.push(marker);
       }
     });
   });
@@ -855,7 +840,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <Globe size={16} />
             </button>
           )}
-          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Saved lists are coming in a later phase.")}>
+          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Save places to a walking list from the profile panel.")}>
             <ExternalLink size={16} />
           </button>
         </div>
@@ -873,6 +858,27 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <Briefcase size={20} color="var(--amber)" style={{ flex: "0 0 auto" }} />
           <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
         </button>
+      </div>
+    </>
+  );
+
+  const renderAttractionDetail = (attraction: Attraction) => (
+    <>
+      <div className={styles.hero}>
+        {attraction.photo_url ? <img src={attraction.photo_url} alt="" /> : null}
+        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <div className={styles.glyphLg} style={{ background: city.theme.green }}><Landmark size={24} /></div>
+      </div>
+      <div className={styles.dBody}>
+        <div>
+          <div className={styles.dTitle}>{attraction.name}</div>
+          <div className={styles.dSub}><span className={styles.pill}>Featured</span><span>Landmark</span></div>
+        </div>
+        <p className={styles.blurb}>{attraction.blurb}</p>
+        <div className={styles.kv}>
+          <div className={styles.kvRow}><span className={styles.k}>Place</span><span className={styles.v}>{attraction.name}</span></div>
+          <div className={styles.kvRow}><span className={styles.k}>Area</span><span className={styles.v}>Calgary AB</span></div>
+        </div>
       </div>
     </>
   );
@@ -926,7 +932,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <button className={`${styles.railBtn} ${tab === "explore" ? styles.railOn : ""}`} title="Explore" onClick={() => { setTab("explore"); backToBrowse(); }}><IconExplore /></button>
         <Link className={`${styles.railBtn} ${styles.railGhost}`} title="Add a place" href="/portal"><IconAdd /></Link>
         <button className={`${styles.railBtn} ${tab === "events" ? styles.railOn : ""}`} title="Events" onClick={() => setTab("events")}><IconEvents /></button>
-        <button className={styles.railBtn} title="Saved (coming soon)" onClick={() => setHint("Saved lists are coming in a later phase.")}><IconSaved /></button>
+        <button className={styles.railBtn} title="Saved" onClick={() => setHint("Save places to a walking list from the profile panel.")}><IconSaved /></button>
         <button className={`${styles.railBtn} ${styles.railSpacer}`} title="Open data note" onClick={() => setHint("Geometry and licences come from City of Calgary open data.")}><IconOpenData /></button>
       </nav>
       )}
@@ -944,7 +950,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div className={styles.tabs} role="tablist">
               <button role="tab" aria-selected={tab === "explore"} className={tab === "explore" ? styles.tabActive : ""} onClick={() => setTab("explore")}>Explore <span className={styles.count}>{data?.businesses.length ?? 0}</span></button>
               <button role="tab" aria-selected={tab === "events"} className={tab === "events" ? styles.tabActive : ""} onClick={() => setTab("events")}>Events <span className={styles.count}>{events.length}</span></button>
-              <button role="tab" aria-selected={false} disabled title="Coming soon" style={{ opacity: .55, cursor: "default" }}>Saved</button>
+              <button role="tab" aria-selected={false} disabled title="Saved places" style={{ opacity: .55, cursor: "default" }}>Saved</button>
             </div>
           </div>
 
@@ -978,9 +984,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 </div>
               </div>
 
+              <div className={styles.catControls}>
+                <button className={styles.catControl} onClick={() => setActiveCategories(new Set(allCategories))}>All</button>
+                <button className={styles.catControl} onClick={() => { setActiveCategories(new Set()); setSelected(null); }}>None</button>
+              </div>
               <div className={styles.catlist}>
-                {allCategories.map((key) => (
-                  <button key={key} className={styles.catcard} onClick={() => openCategory(key)}>
+                {allCategories.map((key) => {
+                  const on = activeCategories.has(key);
+                  return (
+                  <button key={key} className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`} onClick={() => toggleActiveCategory(key)} aria-pressed={on}>
+                    <span className={styles.catCheck} style={on ? { background: categoryColor(city, key) } : undefined}>{on ? "✓" : ""}</span>
                     <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryColor(city, key) }}>
                       <CatIcon d={CAT_ICON[key]} size={20} color={categoryColor(city, key)} />
                     </span>
@@ -989,9 +1002,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                       <span className={styles.ccMeta}>{CAT_BLURB[key]}</span>
                     </span>
                     <span className={`${styles.ccN} ${styles.num}`}>{counts[key] || 0}</span>
-                    <ChevronRight size={16} className={styles.ccChev} />
                   </button>
-                ))}
+                );})}
                 <div className={styles.catSep}><span className={styles.lbl}>Featured places</span><span className={styles.catSepRule} /></div>
                 {attractions.map((attraction) => (
                   <button key={attraction.id} className={styles.feat} onClick={() => goFeatured(attraction)}>
@@ -1045,10 +1057,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             </div>
           )}
 
-          <div className={styles.panelFoot}>
-            <ShieldCheck size={13} style={{ flex: "0 0 auto", marginTop: 1 }} />
-            <span>Geometry and licences come from City of Calgary open data. Curation placeholders stay until the claim portal goes live.</span>
-          </div>
+
         </div>
       </aside>
       )}
@@ -1102,6 +1111,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <button onClick={() => mapRef.current?.zoomOut()} title="Zoom out"><Minus size={16} /></button>
             </div>
             <button className={`${styles.cardUi} ${styles.iconBtn}`} onClick={() => fitStrip(true)} title="Re-centre"><Compass size={17} /></button>
+            <button className={`${styles.cardUi} ${styles.infoButton}`} onClick={() => setShowInfo((v) => !v)} title="Open data attribution">ⓘ</button>
+            {showInfo && <div className={`${styles.cardUi} ${styles.infoNote}`}>Building footprints and business licences: City of Calgary open data. Basemap © OpenStreetMap contributors, © CARTO.</div>}
           </div>
 
           {hint && (
@@ -1174,9 +1185,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         </div>
 
         {!mobileLayout && (
-          <div className={`${styles.drawer} ${selected ? styles.drawerOpen : ""}`}>
+          <div className={`${styles.drawer} ${selected || selectedAttraction ? styles.drawerOpen : ""}`}>
             <button className={`${styles.edgeTab} ${styles.edgeTabRight}`} onClick={closeSelected} title="Close"><ChevronRight size={15} /></button>
             {selected && <div className={styles.drawerScroll}>{renderDetail(selected)}</div>}
+            {selectedAttraction && <div className={styles.drawerScroll}>{renderAttractionDetail(selectedAttraction)}</div>}
           </div>
         )}
       </div>
@@ -1220,6 +1232,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.mSheetBody}>
             {selected ? (
               renderDetail(selected)
+            ) : selectedAttraction ? (
+              renderAttractionDetail(selectedAttraction)
             ) : tab === "events" ? (
               events.map((event) => (
                 <button key={event.id} className={styles.row} onClick={() => { mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 }); if (sheetStop !== "peek") snapSheet("peek"); }}>
@@ -1266,7 +1280,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={tab === "events" ? styles.mTabOn : ""} onClick={() => { setTab("events"); closeSelected(); }}>
             <IconEvents />Events
           </button>
-          <button title="Coming soon" onClick={() => setHint("Saved lists are coming in a later phase.")}>
+          <button title="Saved places" onClick={() => setHint("Save places to a walking list from the profile panel.")}>
             <IconSaved />Saved
           </button>
           <Link href="/portal">

@@ -69,7 +69,7 @@ export const cities: CityConfig[] = [
   {
     slug: "edmonton",
     name: "Edmonton",
-    tagline: "River City · coming soon",
+    tagline: "River City · next",
     status: "soon",
     defaultHood: "whyte",
     center: [-113.4938, 53.5461],

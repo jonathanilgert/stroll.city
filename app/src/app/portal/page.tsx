@@ -18,7 +18,7 @@ type Business = {
   lon: number;
   lat: number;
   logo_url?: string;
-  plan_tier?: "free" | "stroll" | "stroll_plus";
+  plan_tier?: "free" | "stroll";
   claim_status?: "unclaimed" | "pending" | "claimed" | "rejected";
 };
 
@@ -32,9 +32,8 @@ type ClaimResult = {
 };
 
 const PLANS = [
-  { id: "free", name: "Free", price: "$0", suffix: "", tag: null, copy: "Verified pin, name/category/address, and monogram marker.", logo: false, gallery: false, promos: false },
-  { id: "stroll", name: "Stroll", price: "$29", suffix: "/mo", tag: "Most claimed", copy: "Logo marker, photo gallery, curated profile, hours, links, and highlights.", logo: true, gallery: true, promos: false },
-  { id: "stroll_plus", name: "Stroll+", price: "$59", suffix: "/mo", tag: null, copy: "Everything in Stroll plus promos/events, featured placement, and analytics.", logo: true, gallery: true, promos: true },
+  { id: "free", name: "Free", price: "$0", suffix: "", tag: null, copy: "Verified pin, name, category, address, monogram marker and hunt eligibility.", logo: false, gallery: false, promos: false },
+  { id: "stroll", name: "Stroll", price: "$29", suffix: "/mo", tag: "Most claimed", copy: "Logo marker, gallery, full profile, deals, events, analytics, finisher item and Basket options.", logo: true, gallery: true, promos: true },
 ] as const;
 type PlanId = (typeof PLANS)[number]["id"];
 
@@ -270,10 +269,6 @@ export default function PortalPage() {
       <div className={styles.portalMain}>
         <section className={styles.formCol}>
           <div className={styles.fHead}>
-            <div className={styles.claimEyebrow}>
-              <span className={styles.testBadge}>Test mode</span>
-              <span>stroll.city business portal · Phase 4</span>
-            </div>
             {!done ? (
               <>
                 <h1 className={styles.claimTitle}>{picked ? `Claim your rooftop marker at ${picked.address}.` : "Claim your rooftop marker in Inglewood."}</h1>
@@ -296,7 +291,7 @@ export default function PortalPage() {
             ) : (
               <>
                 <h1 className={styles.claimTitle}>You’re one click from a verified pin.</h1>
-                <p className={styles.claimSub}>We keep the record in test mode until you confirm by email.</p>
+                <p className={styles.claimSub}>We keep the record private until you confirm by email.</p>
               </>
             )}
           </div>
@@ -378,7 +373,7 @@ export default function PortalPage() {
               <div className={styles.pane}>
                 <div>
                   <h2 className={styles.paneH2}>Confirm you can speak for this business</h2>
-                  <p className={styles.paneHint}>A person, not a company, claims a listing. We check your details before the pin goes live.</p>
+                  <p className={styles.paneHint}>A person, not a company, claims a listing. We check your details before the pin changes on the map.</p>
                 </div>
 
                 <div className={styles.grid2}>
@@ -407,7 +402,7 @@ export default function PortalPage() {
                 </div>
 
                 <div className={styles.claimField}>
-                  <label htmlFor="proof">Proof note <span className={styles.optional}>— optional</span></label>
+                  <label htmlFor="proof">Anything that helps us match you to this business <span className={styles.optional}>— optional</span></label>
                   <textarea id="proof" className={styles.ctl} value={proofNote} onChange={(e) => setProofNote(e.target.value)} placeholder="Anything that helps us match you to the business — a business phone, licence number, or a link to a staff page." />
                 </div>
 
@@ -485,10 +480,12 @@ export default function PortalPage() {
                   </div>
                 </div>
 
-                <div className={`${styles.callout} ${styles.calloutAmber}`}>
-                  <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={17} color="var(--amber)" strokeWidth={1.7} />
-                  <span><b>Test mode.</b> No card is charged and no payment details are collected. Paid plans move to Stripe Checkout when Phase 5 ships.</span>
-                </div>
+                {plan === "stroll" && (
+                  <div className={`${styles.callout} ${styles.calloutAmber}`}>
+                    <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={17} color="var(--amber)" strokeWidth={1.7} />
+                    <span><b>Two optional switches:</b> add a finisher item with a weekly cap, or donate an item to the monthly Inglewood Basket. Both start off and can be changed any time.</span>
+                  </div>
+                )}
 
                 {message && <p className={styles.portalMessage}>{message}</p>}
               </div>
@@ -534,7 +531,7 @@ export default function PortalPage() {
             <span className={styles.spacer} />
             {!done ? (
               <button type="button" className={`${styles.btn} ${styles.btnPrimary}`} disabled={!stepValid(step) || submitting} onClick={goNext}>
-                {step < 3 ? <>Continue <CatIcon d="M5 12h13m-7-7 7 7-7 7" size={15} strokeWidth={1.8} color="#fff" /></> : submitting ? "Submitting…" : <>Submit test-mode claim <CatIcon d="m5 13 4.5 4.5L19 7" size={15} strokeWidth={1.8} color="#fff" /></>}
+                {step < 3 ? <>Continue <CatIcon d="M5 12h13m-7-7 7 7-7 7" size={15} strokeWidth={1.8} color="#fff" /></> : submitting ? "Submitting…" : <>Claim my listing <CatIcon d="m5 13 4.5 4.5L19 7" size={15} strokeWidth={1.8} color="#fff" /></>}
               </button>
             ) : (
               <>
@@ -569,7 +566,7 @@ export default function PortalPage() {
                   <LockRow on text="Verified pin, name, category, address" />
                   <LockRow on={activePlan.logo && !!logoDataUrl} text={activePlan.logo ? `Logo marker${logoDataUrl ? "" : " — drop a logo below"}` : "Logo marker"} />
                   <LockRow on={activePlan.gallery} text="Photos, hours, links, highlights" />
-                  <LockRow on={activePlan.promos} text="Promos, events, featured placement" />
+                  <LockRow on={activePlan.promos} text="Deals, events, analytics" />
                 </div>
                 {claimantName && <div className={styles.managedBy}>Managed by {claimantName}{role ? ` · ${role}` : ""}</div>}
               </div>

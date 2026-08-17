@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { CatIcon } from "../../StrollCityApp";
 import styles from "../../page.module.css";
 
@@ -38,7 +38,7 @@ const cluePenalty = [0, 120, 300, 600];
 const productCopy = {
   friendly: "4 stops · no clock · different every time",
   full: "6–9 stops · Stroll Time, clues and a postcard finish",
-  race: "Rotated starts · live local leaderboard · destinations hidden",
+  race: "Rotated starts · live local leaderboard · $20/team",
 };
 
 function rotate<T>(rows: T[], offset: number) {
@@ -48,7 +48,12 @@ function rotate<T>(rows: T[], offset: number) {
 }
 
 export default function HuntApp({ cityName, hunts, stops }: { cityName: string; hunts: Hunt[]; stops: HuntStopLite[] }) {
-  const [selectedSlug, setSelectedSlug] = useState(hunts[0]?.slug ?? "friendly-mode");
+  const [selectedSlug, setSelectedSlug] = useState(() => {
+    if (typeof window === "undefined") return hunts[0]?.slug ?? "friendly-mode";
+    const type = new URLSearchParams(window.location.search).get("type");
+    return hunts.find((item) => item.mode === type)?.slug ?? hunts[0]?.slug ?? "friendly-mode";
+  });
+  const teamInputRef = useRef<HTMLInputElement>(null);
   const [teamName, setTeamName] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState<number>(0);
@@ -60,6 +65,13 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   });
 
   const hunt = hunts.find((item) => item.slug === selectedSlug) ?? hunts[0];
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get("type");
+    if (hunts.some((item) => item.mode === type)) window.setTimeout(() => teamInputRef.current?.focus(), 60);
+  }, [hunts]);
+
   useEffect(() => {
     if (!startedAt) return;
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -116,11 +128,11 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
         <header className={styles.landHero}>
           <div className={styles.landHeroCard}><div className={styles.landHeroGrid}>
             <div className={styles.landHeroCopy}>
-              <span className={styles.landEyebrow}><i /> {cityName} scavenger hunt · beta</span>
+              <span className={styles.landEyebrow}><i /> {cityName} scavenger hunt</span>
               <h1 className={styles.landH1}>Solve the street,<br />one doorway at a time.</h1>
               <p className={styles.landHeroSub}>Riddles reveal the next shop only after your team solves the current one. Proof photos stay private; the finish creates a shareable postcard.</p>
               <div className={styles.grid2}>
-                <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
+                <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
                 <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setProgress({}); }}>
                   {hunts.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
                 </select></div></div>
@@ -129,7 +141,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
             </div>
             <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
               <span className={styles.lbl}>Products</span>
-              <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$99" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
+              <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$20/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
             </div>
           </div></div>
         </header>
@@ -144,12 +156,12 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{[active.clue_1, active.clue_2, active.clue_3].slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={clue}><b>Clue {index + 1}</b> {clue}</div>)}</div>
                 <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Proof photo challenge:</b> {active.challenge}</span></div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue (+ penalty)</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved / stamp card</button></div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue (+ penalty)</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
               </>}
             </div>
             <div className={styles.landBigCard}>
               <span className={styles.lbl}>Punch card</span>
-              <div className={styles.landStats} style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>{huntStops.map((stop, index) => <div className={styles.landStat} key={stop.id}><div className={styles.landStatV}>{progress[stop.id]?.state === "solved" ? "✓" : index + 1}</div><div className={styles.landStatK}>{progress[stop.id]?.state === "solved" ? "Stamped" : "Open"}</div></div>)}</div>
+              <div className={styles.landStats} style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>{huntStops.map((stop, index) => <div className={styles.landStat} key={stop.id}><div className={styles.landStatV}>{progress[stop.id]?.state === "solved" ? "✓" : index + 1}</div><div className={styles.landStatK}>{progress[stop.id]?.state === "solved" ? "Marked off" : "Open"}</div></div>)}</div>
               <p className={styles.landCardP}>Stroll Time: {Math.floor(strollSeconds / 60)}m {strollSeconds % 60}s · clue penalty {Math.floor(penalties / 60)}m</p>
               {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops in {Math.floor(strollSeconds / 60)} minutes. Share this finish screen to enter the Inglewood Basket draw.</div>}
               {leaderboard.length > 0 && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}

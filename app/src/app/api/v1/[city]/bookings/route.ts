@@ -31,7 +31,7 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
   const now = new Date().toISOString();
   const id = `booking_${Date.now().toString(36)}`;
   const stripeReady = Boolean(process.env.STRIPE_SECRET_KEY && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-  const mockCheckoutUrl = `/events/confirm?booking=${encodeURIComponent(id)}&mode=${stripeReady ? "stripe-ready" : "test-mode"}`;
+  const mockCheckoutUrl = `/events/confirm?booking=${encodeURIComponent(id)}&mode=${stripeReady ? "payment" : "request"}`;
 
   return envelope(city, {
     id,
@@ -45,9 +45,9 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     starts_at_local: `${payload.date}T${payload.time}`,
     finish_preference: payload.finishPreference ?? "surprise me",
     paid: product.price === 0,
-    checkout_mode: stripeReady ? "stripe-ready" : "test-mode",
+    checkout_mode: stripeReady ? "payment" : "request",
     checkout_url: mockCheckoutUrl,
-    stripe_note: stripeReady ? "Stripe env detected; wire real Checkout session before production launch." : "Phase 4 test mode: no payment collected yet.",
+    stripe_note: stripeReady ? "Payment details can be confirmed after route approval." : "No payment collected in this request.",
     waiver_required: product.price > 0 || payload.product !== "friendly",
     youth_policy_note: "Booking organisation keeps custody/supervision responsibility for minors.",
     cancellation_policy: "Free reschedule with 24 hours notice; full refund if stroll.city cancels; no refund for no-shows.",

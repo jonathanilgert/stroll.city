@@ -2,10 +2,38 @@ import Link from "next/link";
 import styles from "./page.module.css";
 
 const huntProducts = [
-  ["Friendly Mode", "Free, always", "4 stops · no clock · different every time"],
-  ["Full Hunt", "$20/team", "6–9 stops · Stroll Time · first one free"],
-  ["Loop Race", "$99", "Up to 4 teams · live leaderboard"],
-  ["Private events", "$199+", "Birthdays, corporate teams, schools and youth groups"],
+  {
+    name: "Friendly Mode",
+    price: "Free, always",
+    copy: "4 stops · no clock · a different four every time",
+    button: "Start now →",
+    href: "/calgary/hunt?type=friendly",
+    label: "Start a free Friendly Mode hunt",
+  },
+  {
+    name: "Full Hunt",
+    price: "$20/team",
+    copy: "6–9 stops · timed with Stroll Time · your first one's free",
+    button: "Start a hunt →",
+    href: "/calgary/hunt?type=full",
+    label: "Start a Full Hunt",
+  },
+  {
+    name: "Loop Race",
+    price: "$20/team · 2 teams and up",
+    copy: "Rotated starts, live leaderboard, one link to share",
+    button: "Set up a race →",
+    href: "/calgary/hunt/race/new",
+    label: "Set up a Loop Race",
+  },
+  {
+    name: "Event bookings",
+    price: "From $99",
+    copy: "Book the street for a birthday, a staff day out, a class trip or a youth group",
+    button: "Book an event →",
+    href: "/events",
+    label: "Book a Stroll event",
+  },
 ] as const;
 
 const filters = ["Coffee", "Vintage", "Books", "Records", "Bakery", "Gifts", "Gallery", "Pub"];
@@ -17,7 +45,7 @@ export default function LandingPage() {
         <div className={styles.landNavIn}>
           <Link className={styles.landBrand} href="/">
             <img src="/brand/stroll-mark.png" alt="" />
-            <span className={styles.landBrandName}>STROLL <span>CITY</span></span>
+            <span className={styles.landBrandName}>Stroll <span>city</span></span>
           </Link>
           <div className={styles.landNavLinks}>
             <a href="#hunt">Scavenger hunts</a>
@@ -42,12 +70,12 @@ export default function LandingPage() {
                   <Link className={`${styles.btn} ${styles.btnPrimary}`} href="/calgary">Explore the Calgary map →</Link>
                   <Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary/hunt">Start a scavenger hunt</Link>
                 </div>
-                <div className={styles.landTrust}>
-                  <span><b>140+</b> Inglewood businesses mapped</span>
+                <div className={`${styles.landTrust} ${styles.landTrustClaims}`}>
+                  <span>Every business on its real building</span>
                   <span className={styles.landTrustSep} />
-                  <span><b>112</b> riddles written</span>
+                  <span>Free to browse</span>
                   <span className={styles.landTrustSep} />
-                  <span>No account to browse</span>
+                  <span>No account, no app</span>
                 </div>
               </div>
 
@@ -78,17 +106,18 @@ export default function LandingPage() {
           <div className={styles.landSecHead}>
             <div className={styles.landSecHeadL}>
               <span className={styles.lbl}>The scavenger hunt</span>
-              <h2 className={styles.landH2}>Riddles that make people walk into shops, not past them.</h2>
+              <h2 className={styles.landH2}>A riddle. A doorway. Then the next riddle.</h2>
             </div>
-            <p>Teams solve a riddle, walk to the answer, take a private proof photo at the door, then stamp the next stop onto a punch card. At the finish, it becomes a shareable postcard.</p>
+            <p>Your team gets a riddle. Work out which shop it points at, walk there, take a photo at the door — and the next riddle unlocks. The punch card fills itself in on screen. Nothing to print, nothing to carry, no one to track down. At the finish, your photos become a postcard.</p>
           </div>
           <div className={styles.landPlans}>
-            {huntProducts.map(([name, price, copy]) => (
-              <div className={styles.landPlan} key={name}>
-                <div className={styles.landPlanTop}><span className={styles.landPlanName}>{name}</span></div>
-                <div className={styles.landPrice}>{price}</div>
-                <p className={styles.landPlanCopy}>{copy}</p>
-              </div>
+            {huntProducts.map((product) => (
+              <Link className={`${styles.landPlan} ${styles.landPlanLink}`} key={product.name} href={product.href} aria-label={product.label}>
+                <div className={styles.landPlanTop}><span className={styles.landPlanName}>{product.name}</span></div>
+                <div className={styles.landPrice}>{product.price}</div>
+                <p className={styles.landPlanCopy}>{product.copy}</p>
+                <span className={styles.landPlanButton}>{product.button}</span>
+              </Link>
             ))}
           </div>
         </section>
@@ -111,10 +140,11 @@ export default function LandingPage() {
           <div style={{ position: "relative", zIndex: 2 }}>
             <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Start with the map</span>
             <h2 className={styles.landH2} style={{ color: "#fff", marginTop: 14 }}>Inglewood is ready to walk.</h2>
-            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Open the Calgary map, pick a filter, or start with the free Friendly Mode hunt when it goes live.</p>
+            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Open the Calgary map, pick a filter, or start the free Friendly Mode hunt right now. No account, no card, no app.</p>
           </div>
           <div className={styles.landCtaActions}>
             <Link className={`${styles.btn} ${styles.btnClaim}`} href="/calgary">Explore Calgary</Link>
+            <Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary/hunt?type=friendly">Start a free hunt</Link>
             <Link className={`${styles.btn} ${styles.btnGhost}`} href="/business">I own a business</Link>
           </div>
         </section>

@@ -429,7 +429,7 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
     plan_tier: tier,
     claim_status: "pending",
     needsReview: false,
-    source: `${business.source} · Phase 4 portal claim pending`,
+    source: `${business.source} · claim pending`,
   });
 
   return claim;
@@ -437,8 +437,8 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
 
 export function fallbackEvents(data: StrollData): StrollEvent[] {
   return data.events?.length ? data.events : [
-    { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Phase 3 sample", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006, emoji: "🏮" },
-    { id: "gallery-walk-demo", name: "Gallery walk + local shops", venue: "Atlantic Ave / 9 Ave SE", starts_at: "2026-07-27T12:00:00-06:00", source: "Phase 3 sample", lon: data.center[0] + 0.0024, lat: data.center[1] + 0.0002, emoji: "🎨" },
+    { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Stroll event", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006, emoji: "🏮" },
+    { id: "gallery-walk-demo", name: "Gallery walk + local shops", venue: "Atlantic Ave / 9 Ave SE", starts_at: "2026-07-27T12:00:00-06:00", source: "Stroll event", lon: data.center[0] + 0.0024, lat: data.center[1] + 0.0002, emoji: "🎨" },
   ];
 }
 

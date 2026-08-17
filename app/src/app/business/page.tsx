@@ -31,8 +31,8 @@ const LANDING_PLANS = [
     price: "$0",
     suffix: "",
     hot: false,
-    copy: "Verified pin, name/category/address, and monogram marker.",
-    feats: ["Verified rooftop pin", "Name, category, address", "Monogram marker"],
+    copy: "Stay on the map, correctly.",
+    feats: ["Verified pin on your real building, not a dot on the street", "Name, category and address — corrected by you", "Monogram marker", "Eligible to be a scavenger hunt stop", "Your own riddle, if you'd like one written"],
     cta: "Claim for free",
   },
   {
@@ -41,8 +41,8 @@ const LANDING_PLANS = [
     price: "$29",
     suffix: "/mo",
     hot: true,
-    copy: "Logo marker, photo gallery, curated profile, hours, links, and highlights.",
-    feats: ["Everything in Free", "Logo marker and photo gallery", "Hours, links and highlights you control"],
+    copy: "Everything in Free, plus the parts you control.",
+    feats: ["Your logo as the map marker", "Photo gallery", "A full profile with hours, phone, website, socials and description", "Highlights", "Deals and promos you publish yourself", "Events posted straight onto the Calgary map", "Offer a finisher item", "Donate to the Inglewood Basket", "Five free hunt codes a month", "Your numbers: door visits, profile opens, filters, deals claimed and redeemed", "Edit anything, any time"],
     cta: "Choose Stroll",
   },
 ] as const;
@@ -70,8 +70,7 @@ export default function LandingPage() {
   }, []);
 
   const totalCount = businesses.length;
-  const claimedCount = businesses.filter((b) => b.claim_status === "claimed" || b.claim_status === "pending").length;
-  const unclaimedCount = totalCount - claimedCount;
+
 
   const showcase = useMemo(() => {
     const perCategory: Business[] = [];
@@ -154,7 +153,7 @@ export default function LandingPage() {
         <div className={styles.landNavIn}>
           <a className={styles.landBrand} href="#top">
             <img src="/brand/stroll-mark.png" alt="" />
-            <span className={styles.landBrandName}>STROLL <span>CITY</span></span>
+            <span className={styles.landBrandName}>Stroll <span>city</span></span>
           </a>
           <div className={styles.landNavLinks}>
             <Link href="/">For strollers →</Link>
@@ -234,11 +233,10 @@ export default function LandingPage() {
           </div>
         </header>
 
-        <div className={styles.landStats}>
-          <div className={styles.landStat}><div className={styles.landStatV}>{totalCount || "—"}</div><div className={styles.landStatK}>Inglewood storefronts mapped</div></div>
-          <div className={`${styles.landStat} ${styles.landStatAccent}`}><div className={styles.landStatV}>{claimedCount}</div><div className={styles.landStatK}>Listings already claimed by owners</div></div>
-          <div className={styles.landStat}><div className={styles.landStatV}>100%</div><div className={styles.landStatK}>Real building footprints, City of Calgary open data</div></div>
-          <div className={styles.landStat}><div className={styles.landStatV}>1</div><div className={styles.landStatK}>City live today — Edmonton queued next</div></div>
+        <div className={`${styles.landStats} ${styles.landStatsThree}`}>
+          <div className={styles.landStat}><div className={styles.landStatV}>9 Ave SE</div><div className={styles.landStatK}>The whole strip, end to end</div></div>
+          <div className={`${styles.landStat} ${styles.landStatAccent}`}><div className={styles.landStatV}>100%</div><div className={styles.landStatK}>Real building footprints, not dropped pins</div></div>
+          <div className={styles.landStat}><div className={styles.landStatV}>Free</div><div className={styles.landStatK}>For Inglewood businesses until 31 March 2027</div></div>
         </div>
 
         <section className={styles.landBlk} id="owners">
@@ -313,9 +311,9 @@ export default function LandingPage() {
               <span className={styles.lbl}>Plans</span>
               <h2 className={styles.landH2}>Free keeps you on the map.<br />Paid makes it yours.</h2>
             </div>
-            <p>Test mode while Phase 4 runs — no card is collected. Paid plans move to Stripe Checkout with Phase 5.</p>
+            <p>Free for Inglewood businesses until 31 March 2027. No card needed to start, and nothing publishes until you say so.</p>
           </div>
-          <div className={styles.landPlans}>
+          <div className={`${styles.landPlans} ${styles.landPlansTwo}`}>
             {LANDING_PLANS.map((plan) => (
               <div className={`${styles.landPlan} ${plan.hot ? styles.landPlanHot : ""}`} key={plan.id}>
                 <div className={styles.landPlanTop}>
@@ -335,12 +333,36 @@ export default function LandingPage() {
           </div>
         </section>
 
+
+
+        <section className={styles.landBlk} id="switches">
+          <div className={styles.landSecHead}>
+            <div className={styles.landSecHeadL}>
+              <span className={styles.lbl}>Two switches</span>
+              <h2 className={styles.landH2}>Two things Stroll members can turn on.</h2>
+            </div>
+            <p>Both are optional, both are off until you choose them, and you can change your mind whenever you like.</p>
+          </div>
+          <div className={styles.landDuo}>
+            <div className={styles.landBigCard}>
+              <span className={styles.lbl}>Toggle A</span>
+              <h3 className={styles.landH3}>Give hunt finishers something small</h3>
+              <p className={styles.landCardP}>Pick something you&apos;re happy to hand a team that finishes a hunt at your door — a coffee, a cookie, a sticker, ten percent off. Set a weekly cap so it never runs away from you. Switch this on and you become a candidate for the final stop.</p>
+            </div>
+            <div className={styles.landBigCard}>
+              <span className={styles.lbl}>Toggle B</span>
+              <h3 className={styles.landH3}>Donate to the Inglewood Basket</h3>
+              <p className={styles.landCardP}>Ten shops each put one item into a basket worth around $250, and we draw a winner every month. Every entry is somebody looking at the list of who donated. You choose the item and which month you&apos;re in.</p>
+            </div>
+          </div>
+        </section>
+
         <section className={styles.landCta}>
           <span className={styles.landRing} /><span className={styles.landRing2} />
           <div style={{ position: "relative", zIndex: 2 }}>
             <span className={styles.lbl} style={{ color: "rgba(255,255,255,.5)" }}>Inglewood first, more to come</span>
             <h2 className={styles.landH2} style={{ color: "#fff", marginTop: 14 }}>Take the pin above your door.</h2>
-            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Two minutes, no card, nothing published until you say so. {unclaimedCount || "Several"} Inglewood storefronts are still unclaimed.</p>
+            <p style={{ color: "rgba(255,255,255,.66)", maxWidth: "44ch", marginTop: 16, fontSize: 16 }}>Two minutes, no card, nothing published until you say so. Inglewood businesses can claim a verified pin and decide what publishes.</p>
           </div>
           <div className={styles.landCtaActions}>
             <Link className={`${styles.btn} ${styles.btnClaim}`} href="/portal">
@@ -356,7 +378,7 @@ export default function LandingPage() {
             <div className={styles.landFootCol} style={{ minWidth: 200 }}>
               <a className={styles.landBrand} href="#top" style={{ marginBottom: 6 }}>
                 <img src="/brand/stroll-mark.png" alt="" />
-                <span className={styles.landBrandName}>STROLL <span>CITY</span></span>
+                <span className={styles.landBrandName}>Stroll <span>city</span></span>
               </a>
               <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>Friendlier city maps.<br />Calgary · Blue Sky City</span>
             </div>
@@ -372,7 +394,7 @@ export default function LandingPage() {
               <a href="#plans">Plans &amp; logo</a>
               <a href="#how">How claiming works</a>
             </div>
-            <p className={styles.landFootNote}>Geometry and licences come from City of Calgary open data. Basemap © OpenStreetMap contributors © CARTO. Phase 4 runtime, test mode.</p>
+            <p className={styles.landFootNote}>Basemap © OpenStreetMap contributors © CARTO.</p>
           </div>
         </footer>
       </div>

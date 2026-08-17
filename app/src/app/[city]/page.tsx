@@ -12,7 +12,8 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
   if (!city) return {};
   return {
     title: `Stroll ${city.name} — stroll.city`,
-    description: `${city.name} local discovery map for stroll.city.`,
+    description: `${city.name} local discovery map for stroll.city — real Inglewood storefronts, filters, events and scavenger hunts.`,
+    openGraph: { title: `Stroll ${city.name} — stroll.city`, description: `${city.name} local discovery map for walkable shopping streets.`, images: ["/brand/stroll-logo.png"] },
   };
 }
 
