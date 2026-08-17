@@ -10,9 +10,12 @@ export const metadata: Metadata = {
   title: "Stroll — friendlier city maps",
   description: "Illustrated local discovery maps with real streets, rooftops, and business mini-apps.",
   icons: {
-    icon: [{ url: "/brand/stroll-mark.png", type: "image/png" }],
-    shortcut: ["/brand/stroll-mark.png"],
-    apple: [{ url: "/brand/stroll-mark.png", type: "image/png" }],
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/brand/stroll-mark.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: ["/favicon.ico"],
+    apple: [{ url: "/brand/stroll-mark.png", type: "image/png", sizes: "512x512" }],
   },
 };
 

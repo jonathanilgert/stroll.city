@@ -105,7 +105,7 @@ data.hunts = [
     city: 'calgary',
     neighbourhood: 'inglewood',
     slug: 'loop-race',
-    name: 'Loop Race',
+    name: 'Scavenger Hunt Race',
     blurb: 'Same stops, rotated starts, live leaderboard. Destinations stay hidden while racing.',
     stop_ids: huntStops.filter((stop) => stop.status !== 'retired').slice(0, 18).map((stop) => stop.id),
     mode: 'race',

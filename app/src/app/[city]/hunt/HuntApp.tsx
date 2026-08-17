@@ -41,6 +41,55 @@ const productCopy = {
   race: "Rotated starts · live local leaderboard · $20/team",
 };
 
+const stampSwatches = [
+  ["#3e7a6c", "#2b5a50"],
+  ["#b4703f", "#7d4b28"],
+  ["#9a8236", "#6b5a22"],
+  ["#7e5f86", "#543d5b"],
+  ["#5a707e", "#3a4c57"],
+  ["#a0607c", "#6f3f55"],
+  ["#15558f", "#8fb9dc"],
+  ["#5c6350", "#aab198"],
+  ["#efa22a", "#b4703f"],
+];
+
+function hash32(input: string) {
+  let hash = 2166136261 >>> 0;
+  for (let i = 0; i < input.length; i += 1) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return hash >>> 0;
+}
+
+function mulberry32(seed: number) {
+  return function next() {
+    seed |= 0;
+    seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function tiltFor(session: string, index: number) {
+  const rand = mulberry32(hash32(`${session}:${index}`));
+  return {
+    rot: rand() * 14 - 7,
+    dx: rand() * 7 - 3.5,
+    dy: rand() * 7 - 3.5,
+    pm: rand() * 50 - 25,
+  };
+}
+
+function fmt(seconds: number) {
+  const safe = Math.max(0, Math.floor(seconds));
+  const h = Math.floor(safe / 3600);
+  const m = Math.floor((safe % 3600) / 60);
+  const s = safe % 60;
+  return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+}
+
 function rotate<T>(rows: T[], offset: number) {
   if (!rows.length) return rows;
   const n = offset % rows.length;
@@ -91,6 +140,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const penalties = huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0], 0);
   const elapsed = startedAt && now ? Math.floor((now - startedAt) / 1000) : 0;
   const strollSeconds = elapsed + penalties;
+  const sessionKey = `${hunt?.id ?? "hunt"}-${teamName || "guest"}`;
+  const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
 
   const start = () => {
     const started = Date.now();
@@ -161,8 +212,55 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
             </div>
             <div className={styles.landBigCard}>
               <span className={styles.lbl}>Punch card</span>
-              <div className={styles.landStats} style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>{huntStops.map((stop, index) => <div className={styles.landStat} key={stop.id}><div className={styles.landStatV}>{progress[stop.id]?.state === "solved" ? "✓" : index + 1}</div><div className={styles.landStatK}>{progress[stop.id]?.state === "solved" ? "Marked off" : "Open"}</div></div>)}</div>
-              <p className={styles.landCardP}>Stroll Time: {Math.floor(strollSeconds / 60)}m {strollSeconds % 60}s · clue penalty {Math.floor(penalties / 60)}m</p>
+              <div className={`${styles.cardstock} ${styles.punchcard}`}>
+                <div className={styles.punchStub}>
+                  <span className={styles.punchMark}><CatIcon d="M11.6 21l1.7-5.6-2.6-2.2.9-4.4-3.1 1.5-1.2 3M13.3 8.8l2.6 2.3 3.1.6M10.7 13.2 7.9 21" size={14} strokeWidth={1.7} color="#5c6350" /></span>
+                  <span className={styles.punchVert}>{hunt?.name ?? "Stroll hunt"}</span>
+                  <span className={styles.punchSerial}>No. {String(hash32(sessionKey) % 100000).padStart(5, "0")}</span>
+                </div>
+                <div className={styles.punchBody}>
+                  <div className={styles.punchTop}>
+                    <div>
+                      <h3 className={styles.punchTitle}>{hunt?.name ?? "Stroll hunt"}</h3>
+                      <p className={styles.punchMeta}>{cityName} · {huntStops.length || (hunt?.mode === "friendly" ? 4 : 6)} stops</p>
+                    </div>
+                    <div className={styles.punchClock}>
+                      <span>{fmt(elapsed)}</span>{penalties > 0 && <span className={styles.punchPenalty}> (+{Math.round(penalties / 60)})</span>}
+                      <small>Stroll Time {fmt(strollSeconds)}</small>
+                    </div>
+                  </div>
+                  <div className={styles.punchSlots}>
+                    {huntStops.map((stop, index) => {
+                      const solved = progress[stop.id]?.state === "solved";
+                      const next = startedAt && index === current && !solved;
+                      const tilt = tiltFor(sessionKey, index);
+                      const [a, b] = stampSwatches[index % stampSwatches.length];
+                      return (
+                        <div className={`${styles.punchSlot} ${next ? styles.punchSlotNext : ""}`} key={stop.id}>
+                          <div className={styles.punchWell}><span>{index + 1}</span></div>
+                          {solved && (
+                            <div className={styles.punchStamp} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)` }}>
+                              <div className={styles.punchStampPaper}>
+                                <div className={styles.punchStampPhoto} style={{ background: `linear-gradient(150deg, ${a}, ${b})` }}>
+                                  <span>{stop.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>
+                                </div>
+                                <span className={styles.punchDenom}>{String(index + 1).padStart(2, "0")}</span>
+                              </div>
+                              <div className={styles.punchPostmark} style={{ transform: `rotate(${tilt.pm.toFixed(1)}deg)` }}>
+                                <span>Inglewood</span><b>{datePostmark}</b><span>YYC</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className={styles.punchFoot}>
+                    <span>{solvedCount} of {huntStops.length || (hunt?.mode === "friendly" ? 4 : 6)} solved</span>
+                    <span>Photos stay private · #StrollInglewood</span>
+                  </div>
+                </div>
+              </div>
               {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops in {Math.floor(strollSeconds / 60)} minutes. Share this finish screen to enter the Inglewood Basket draw.</div>}
               {leaderboard.length > 0 && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}
             </div>
