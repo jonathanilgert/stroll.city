@@ -116,7 +116,7 @@ export const CAT_LABEL: Record<Category, string> = {
   services: "Studios & services",
   gallery: "Arts & galleries",
 };
-const CAT_BLURB: Record<Category, string> = {
+export const CAT_BLURB: Record<Category, string> = {
   restaurant: "Dining rooms, patios, counters",
   cafe: "Coffee, bakeries, ice cream",
   bar: "Taprooms, cocktails, live sets",
@@ -124,7 +124,7 @@ const CAT_BLURB: Record<Category, string> = {
   services: "Barbers, makers, bookable rooms",
   gallery: "Galleries, studios, openings",
 };
-const allCategories = Object.keys(CAT_LABEL) as Category[];
+export const allCategories = Object.keys(CAT_LABEL) as Category[];
 
 function categoriesFromUrl() {
   if (typeof window === "undefined") return new Set(allCategories);

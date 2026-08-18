@@ -18,7 +18,7 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     paid: false,
     amount_cad: Math.min(8, Math.max(2, Number(payload.team_count ?? 2))) * 20,
     checkout_mode: process.env.STRIPE_SECRET_KEY ? "payment" : "request",
-    rotation: hunt.stop_ids.slice(0, 6).map((stopId, index) => ({ team_slot: index + 1, start_index: index, stop_id: stopId })),
+    rotation: hunt.stop_ids.slice(0, 8).map((stopId, index) => ({ team_slot: index + 1, start_index: index, stop_id: stopId })),
     analytics_event: "race_created",
     created_at: new Date().toISOString(),
   }, "runtime-overlay");

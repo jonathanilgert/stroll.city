@@ -37,8 +37,8 @@ type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?
 const cluePenalty = [0, 120, 300, 600];
 const productCopy = {
   friendly: "4 stops · no clock · different every time",
-  full: "6–9 stops · Stroll Time, clues and a postcard finish",
-  race: "Rotated starts · live local leaderboard · $20/team",
+  full: "8 stops · no clock · postcard finish",
+  race: "8 stops · rotated starts · live leaderboard",
 };
 
 const stampSwatches = [
@@ -132,14 +132,15 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
     const raw = hunt.stop_ids.map((id) => stopsById.get(id)).filter(Boolean) as HuntStopLite[];
     const sessionOffset = teamName ? [...teamName].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) : 0;
     const rotated = hunt.mode === "race" ? rotate(raw, sessionOffset) : raw;
-    return rotated.slice(0, hunt.mode === "friendly" ? 4 : hunt.mode === "race" ? 6 : 8);
+    return rotated.slice(0, hunt.mode === "friendly" ? 4 : 8);
   }, [hunt, stopsById, teamName]);
   const active = huntStops[current];
   const solvedCount = huntStops.filter((stop) => progress[stop.id]?.state === "solved").length;
   const finished = huntStops.length > 0 && solvedCount === huntStops.length;
-  const penalties = huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0], 0);
+  const isRace = hunt?.mode === "race";
+  const penalties = isRace ? huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0], 0) : 0;
   const elapsed = startedAt && now ? Math.floor((now - startedAt) / 1000) : 0;
-  const strollSeconds = elapsed + penalties;
+  const strollSeconds = isRace ? elapsed + penalties : elapsed;
   const sessionKey = `${hunt?.id ?? "hunt"}-${teamName || "guest"}`;
   const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
 
@@ -201,13 +202,13 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
           <div className={styles.landSecHead}><div className={styles.landSecHeadL}><span className={styles.lbl}>Play</span><h2 className={styles.landH2}>{hunt?.name ?? "Hunt"}</h2></div><p>{hunt?.blurb}</p></div>
           <div className={styles.landDuo}>
             <div className={styles.landBigCard}>
-              {!startedAt || !active ? <p className={styles.landCardP}>Start the hunt to draw your stops. Race mode rotates the same loop so teams start apart and no destination is named while the race is running.</p> : <>
+              {!startedAt || !active ? <p className={styles.landCardP}>Start the hunt to draw your stops. Loop Race rotates the same 8-stop route so teams start apart and no destination is named while the race is running.</p> : <>
                 <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
                 <h3 className={styles.landH3}>{hunt?.mode === "race" ? "Mystery stop" : active.name}</h3>
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{[active.clue_1, active.clue_2, active.clue_3].slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={clue}><b>Clue {index + 1}</b> {clue}</div>)}</div>
                 <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Proof photo challenge:</b> {active.challenge}</span></div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue (+ penalty)</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue{isRace ? " (+ penalty)" : ""}</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
               </>}
             </div>
             <div className={styles.landBigCard}>
@@ -222,12 +223,12 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   <div className={styles.punchTop}>
                     <div>
                       <h3 className={styles.punchTitle}>{hunt?.name ?? "Stroll hunt"}</h3>
-                      <p className={styles.punchMeta}>{cityName} · {huntStops.length || (hunt?.mode === "friendly" ? 4 : 6)} stops</p>
+                      <p className={styles.punchMeta}>{cityName} · {huntStops.length || (hunt?.mode === "friendly" ? 4 : 8)} stops</p>
                     </div>
-                    <div className={styles.punchClock}>
+                    {isRace && <div className={styles.punchClock}>
                       <span>{fmt(elapsed)}</span>{penalties > 0 && <span className={styles.punchPenalty}> (+{Math.round(penalties / 60)})</span>}
                       <small>Stroll Time {fmt(strollSeconds)}</small>
-                    </div>
+                    </div>}
                   </div>
                   <div className={styles.punchSlots}>
                     {huntStops.map((stop, index) => {
@@ -256,13 +257,29 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                     })}
                   </div>
                   <div className={styles.punchFoot}>
-                    <span>{solvedCount} of {huntStops.length || (hunt?.mode === "friendly" ? 4 : 6)} solved</span>
+                    <span>{solvedCount} of {huntStops.length || (hunt?.mode === "friendly" ? 4 : 8)} solved</span>
                     <span>Photos stay private · #StrollInglewood</span>
                   </div>
                 </div>
               </div>
-              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops in {Math.floor(strollSeconds / 60)} minutes. Share this finish screen to enter the Inglewood Basket draw.</div>}
-              {leaderboard.length > 0 && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}
+              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops. Your finish also opens Inglewood Basket entry, with the CASL consent kept separate and optional.</div>}
+              {finished && (
+                <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
+                  <div className={styles.postcardStampBlock}>YYC</div>
+                  <span className={styles.lbl}>Greetings from</span>
+                  <h3>Inglewood</h3>
+                  <div className={`${styles.postcardCollage} ${huntStops.length === 4 ? styles.postcardCollage4 : styles.postcardCollage8}`}>
+                    {huntStops.map((stop, index) => {
+                      const tilt = tiltFor(sessionKey, index + 20);
+                      const [a, b] = stampSwatches[index % stampSwatches.length];
+                      return <span key={stop.id} className={styles.postcardMiniStamp} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)`, background: `linear-gradient(150deg, ${a}, ${b})` }}>{String(index + 1).padStart(2, "0")}</span>;
+                    })}
+                  </div>
+                  <div className={styles.postcardHeroFigure}><small>{isRace ? "STROLL TIME" : "INGLEWOOD"}</small><b>{isRace ? fmt(strollSeconds) : `${huntStops.length} STOPS`}</b></div>
+                  <div className={styles.postcardTag}>@stroll_city<br /><b>#StrollInglewood</b></div>
+                </div>
+              )}
+              {leaderboard.length > 0 && isRace && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}
             </div>
           </div>
         </section>
