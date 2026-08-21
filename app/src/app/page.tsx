@@ -3,8 +3,8 @@
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { getCity } from "./cities";
-import type { Category } from "./StrollCityApp";
+import { getCity, isLightHex } from "./cities";
+import { categoryColor, type Category } from "./StrollCityApp";
 import styles from "./landing.module.css";
 
 const city = getCity("calgary")!;
@@ -22,17 +22,18 @@ type Business = {
   claim_status?: "unclaimed" | "pending" | "claimed" | "rejected";
 };
 
-/* The six moods, drawn from the brand board's accent set (the map app keeps its own
-   earthier palette). Chips pick dark or light ink per colour, so the lighter brand
-   tones — gold, green, pink — stay legible without being muddied down. */
-const MOODS: { id: Category; label: string; color: string }[] = [
-  { id: "shop", label: "Shops", color: "#0B47E8" },        // cobalt — the brand blue
-  { id: "restaurant", label: "Restaurants", color: "#F58AB4" }, // pink — the markets blob
-  { id: "services", label: "Studios", color: "#57C07A" },  // spring green — "bike routes"
-  { id: "cafe", label: "Cafés", color: "#F5C93F" },        // gold — the sunburst
-  { id: "bar", label: "Bars", color: "#8468E0" },          // lavender — "hikes"
-  { id: "gallery", label: "Arts", color: "#1573C6" },      // azure — "coffee spots"
-];
+/* Six moods with shorter labels than the map app's, but the same colours — they come
+   from the city theme (cities.ts), so the landing and the map can't drift apart. */
+const MOODS: { id: Category; label: string; color: string }[] = (
+  [
+    { id: "shop", label: "Shops" },
+    { id: "restaurant", label: "Restaurants" },
+    { id: "services", label: "Studios" },
+    { id: "cafe", label: "Cafés" },
+    { id: "bar", label: "Bars" },
+    { id: "gallery", label: "Arts" },
+  ] as const
+).map((mood) => ({ ...mood, color: categoryColor(city, mood.id) }));
 const MOOD_COLOR = Object.fromEntries(MOODS.map((m) => [m.id, m.color])) as Record<Category, string>;
 const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Record<Category, string>;
 
@@ -136,15 +137,6 @@ function Tick({ color }: { color: string }) {
       <path d="M4 8.4 6.4 10.8 12 5" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
-}
-
-/* Relative luminance — decides whether a lit mood chip takes dark or light ink. */
-function isLight(hex: string) {
-  const channel = [1, 3, 5].map((i) => {
-    const s = parseInt(hex.slice(i, i + 2), 16) / 255;
-    return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-  });
-  return 0.2126 * channel[0] + 0.7152 * channel[1] + 0.0722 * channel[2] > 0.4;
 }
 
 export default function LandingPage() {
@@ -325,7 +317,7 @@ export default function LandingPage() {
               <div className={styles.chips}>
                 {MOODS.map((mood) => {
                   const on = active.has(mood.id);
-                  const dark = isLight(mood.color);
+                  const dark = isLightHex(mood.color);
                   return (
                     <button
                       key={mood.id}

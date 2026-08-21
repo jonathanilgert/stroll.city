@@ -18,17 +18,35 @@ import {
   Navigation,
   Phone,
   Plus,
+  Route,
   Search,
   Share2,
+  Sparkles,
   ShieldCheck,
   Waves,
   X,
 } from "lucide-react";
-import type { CityConfig } from "./cities";
+import { inkOn, type CityConfig } from "./cities";
 import styles from "./page.module.css";
 
 export type Category = "restaurant" | "cafe" | "bar" | "shop" | "services" | "gallery";
-type SidebarTab = "explore" | "events" | "saved";
+type SidebarTab = "explore" | "events" | "saved" | "hunt";
+
+/* ---------------- scavenger hunt ----------------
+   Friendly Mode: four real storefronts, west to east, one clue at a time. Everything in
+   the clue is pulled from the licence record and the business's own highlights — we do
+   not invent detail about a real shop. Progress lives in localStorage, so closing the
+   tab mid-walk does not lose the punch card. */
+const HUNT_LENGTH = 4;
+const huntKey = (slug: string) => `stroll-hunt-${slug}`;
+const CAT_ONE: Record<Category, string> = {
+  restaurant: "restaurant",
+  cafe: "café",
+  bar: "bar",
+  shop: "shop",
+  services: "studio or service",
+  gallery: "gallery",
+};
 
 type Business = {
   id: string;
@@ -134,8 +152,19 @@ const CAT_BLURB: Record<Category, string> = {
 };
 const allCategories = Object.keys(CAT_LABEL) as Category[];
 
+/** Fill tone — pin and tile backgrounds, legend dots. */
 export function categoryColor(city: CityConfig, category: Category) {
   return city.theme.categories[category] ?? city.theme.primary;
+}
+
+/** Text/stroke tone — the same hue dark enough to read on a light surface. */
+export function categoryInk(city: CityConfig, category: Category) {
+  return city.theme.categoryInks[category] ?? categoryColor(city, category);
+}
+
+/** Ink to place on top of the category's fill. */
+export function onCategory(city: CityConfig, category: Category) {
+  return inkOn(categoryColor(city, category));
 }
 
 export function wash(hex: string, a = 26, b = 10) {
@@ -156,7 +185,6 @@ export function CatIcon({ d, size = 16, color = "currentColor", strokeWidth = 1.
 export function IconExplore() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 11 12 4l8.5 7" /><path d="M5.5 10v9.5h13V10" /><path d="M10 19.5V14h4v5.5" /></svg>; }
 export function IconAdd() { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>; }
 function IconEvents() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="3" /><path d="M8 3.5v3M16 3.5v3M3.5 10h17" /></svg>; }
-function IconSaved() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 4h11v16.5l-5.5-3.9-5.5 3.9V4Z" /></svg>; }
 function IconOpenData() { return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><ellipse cx="12" cy="6" rx="7.5" ry="3" /><path d="M4.5 6v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6" /><path d="M4.5 12v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6" /></svg>; }
 function IconHeart({ filled = false }: { filled?: boolean }) { return <svg width="15" height="15" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.7"><path d="M12 20s-7.5-4.6-7.5-9.6A4.4 4.4 0 0 1 12 7.4a4.4 4.4 0 0 1 7.5 3c0 5-7.5 9.6-7.5 9.6Z" /></svg>; }
 
@@ -197,7 +225,8 @@ function edmontonMinutesNow() {
 function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
   const glyphInner = biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
   const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
-  const glyph = `<span class="${styles_.glyph}" style="background:${color}">${glyphInner}</span>`;
+  // Pale fills (gold, pink, green) need dark initials; cobalt and lavender need white.
+  const glyph = `<span class="${styles_.glyph}" style="background:${color};color:${inkOn(color)}">${glyphInner}</span>`;
   if (compact) return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
@@ -206,7 +235,7 @@ function clusterMarkup(styles_: typeof styles, members: Business[], wide: boolea
     const dots = colors.slice(0, 3).map((c, i) => `<span style="width:13px;height:13px;border-radius:99px;background:${c};border:2px solid #fff;margin-left:${i ? -5 : 0}px"></span>`).join("");
     return `<div class="${styles_.pin} ${styles_.cluster}"><span style="display:flex;align-items:center;padding-left:7px">${dots}</span><span class="${styles_.label}">${members.length} places</span></div>`;
   }
-  return `<div class="${styles_.pin} ${styles_.cluster} ${styles_.compact}"><span class="${styles_.glyph}" style="background:#14181A">${members.length}</span></div>`;
+  return `<div class="${styles_.pin} ${styles_.cluster} ${styles_.compact}"><span class="${styles_.glyph}" style="background:#14161A">${members.length}</span></div>`;
 }
 function fallbackEvents(data: StrollData): EventItem[] {
   return [
@@ -241,6 +270,190 @@ function streetOnly(name: string) {
 }
 function areaOnly(name: string) {
   return name.split("/")[0].trim();
+}
+
+/* "1045 19 Av Se" → "19 Ave SE". The street number is the answer, so the clue withholds it —
+   including the unit and the letter suffixes the licence data carries ("#109D 1526", "1218B"). */
+function streetOfAddress(address: string) {
+  const street = address
+    .replace(/^\s*(?:#|unit|suite|ste\.?|bay)\s*[\w-]+\s*,?\s*/i, "")
+    .replace(/^\s*\d+[A-Za-z]?\s*-\s*/, "")
+    .replace(/^\s*\d+[A-Za-z]?\s+(?=\S)/, "")
+    .trim();
+  return (street || address)
+    .replace(/\bAv\b/gi, "Ave")
+    .replace(/\b(SE|SW|NE|NW)\b/gi, (m) => m.toUpperCase());
+}
+
+/* Four stops spread west to east, each from a different mood where the strip allows it —
+   a hunt that doubles back on the same block is a worse walk. */
+function buildHunt(businesses: Business[]) {
+  const pool = businesses.filter((b) => b.name && b.address).sort((a, b) => a.lon - b.lon);
+  if (pool.length < HUNT_LENGTH) return [];
+  const bucketSize = Math.floor(pool.length / HUNT_LENGTH);
+  const used = new Set<Category>();
+  const picks: Business[] = [];
+  for (let i = 0; i < HUNT_LENGTH; i += 1) {
+    const bucket = pool.slice(i * bucketSize, i === HUNT_LENGTH - 1 ? pool.length : (i + 1) * bucketSize);
+    const fresh = bucket.filter((b) => !used.has(b.category));
+    const from = fresh.length ? fresh : bucket;
+    const pick = from[Math.floor(Math.random() * from.length)];
+    if (!pick || picks.some((p) => p.id === pick.id)) continue;
+    used.add(pick.category);
+    picks.push(pick);
+  }
+  return picks.map((b) => b.id);
+}
+
+/* The hunt panel, shared by the desktop sidebar and the mobile sheet. A real component
+   rather than a render helper on the app: it is the one piece of the sidebar with its own
+   state machine (empty → walking → complete), and props keep that boundary honest. */
+function HuntPanel({
+  stops, done, revealed, ready, onStart, onPunch, onReset, onReveal, onOpen,
+}: {
+  stops: Business[];
+  done: number;
+  revealed: Set<string>;
+  ready: boolean;
+  onStart: () => void;
+  onPunch: () => void;
+  onReset: () => void;
+  onReveal: (stop: Business) => void;
+  onOpen: (stop: Business) => void;
+}) {
+  if (!stops.length) {
+    return (
+      <div className={styles.huntWrap}>
+        <div className={styles.huntCard}>
+          <span className={styles.huntEyebrow}>Friendly Mode · free</span>
+          <h3 className={styles.huntH}>Four doors. Four clues. One walk.</h3>
+          <p className={styles.huntP}>
+            We pick four real storefronts along the strip, west to east, and hand you one clue at a time.
+            Work out which place it points at, walk there, and punch the stop at the door.
+          </p>
+          <div className={styles.huntPips} aria-hidden>
+            {Array.from({ length: HUNT_LENGTH }, (_, i) => <span key={i} className={styles.huntPip} />)}
+          </div>
+          <button className={styles.huntBtn} onClick={onStart} disabled={!ready}>
+            Start a hunt <ChevronRight size={15} />
+          </button>
+          <p className={styles.huntNote}>
+            No account, no card. Every clue is built from the licence record and the shop&rsquo;s own highlights.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (done >= stops.length) {
+    return (
+      <div className={styles.huntWrap}>
+        <div className={styles.huntCard}>
+          <span className={styles.huntEyebrow}>Hunt complete</span>
+          <h3 className={styles.huntH}>Four doors, four punches.</h3>
+          <p className={styles.huntP}>Here is the walk you just did — a postcard of the block.</p>
+          <div className={styles.huntGrid}>
+            {stops.map((stop) => (
+              <figure key={stop.id} className={styles.huntShot}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- static export, as everywhere else here */}
+                <img src={stop.photo} alt="" />
+                <figcaption className={styles.huntShotCap}>{stop.name}</figcaption>
+              </figure>
+            ))}
+          </div>
+          <button className={styles.huntBtn} onClick={onStart}>
+            Start a new hunt <ChevronRight size={15} />
+          </button>
+        </div>
+        <div className={styles.huntList}>
+          {stops.map((stop, i) => (
+            <button key={stop.id} className={`${styles.huntRow} ${styles.huntRowDone}`} onClick={() => onOpen(stop)}>
+              <span className={styles.huntRowN}>{i + 1}</span>
+              <span className={styles.huntRowName}>{stop.name}</span>
+              <ChevronRight size={14} color="var(--ink-3)" />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const stop = stops[done];
+  const solved = revealed.has(stop.id);
+  const highlights = (stop.highlights ?? []).slice(0, 2).map(([, label]) => label.toLowerCase());
+  return (
+    <div className={styles.huntWrap}>
+      <div className={styles.huntCard}>
+        <div className={styles.huntHead}>
+          <span className={styles.huntStep}>Stop {done + 1} of {stops.length}</span>
+          <span className={styles.huntCount}>{stops.length - done} to go</span>
+        </div>
+        <div className={styles.huntPips} aria-hidden>
+          {stops.map((s, i) => (
+            <span key={s.id} className={`${styles.huntPip} ${i < done ? styles.huntPipOn : i === done ? styles.huntPipNow : ""}`} />
+          ))}
+        </div>
+
+        <div className={styles.huntClue}>
+          <p className={styles.huntClueText}>
+            Find the {CAT_ONE[stop.category]} on {streetOfAddress(stop.address)}
+            {highlights.length ? <> known for {highlights.join(" and ")}</> : null}.
+          </p>
+          <div className={styles.huntFacts}>
+            <span className={styles.huntFact}>
+              <Sparkles size={13} />
+              <span>Initials on the door: <b className={styles.huntInitials}>{stop.mono.split("").join(" ")}</b></span>
+            </span>
+            {stop.hours && (
+              <span className={styles.huntFact}>
+                <CatIcon d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 7.5V12l3 2" size={13} />
+                <span>Open {stop.hours}</span>
+              </span>
+            )}
+            <span className={styles.huntFact}>
+              <CatIcon d={CAT_ICON[stop.category]} size={13} />
+              <span>{CAT_LABEL[stop.category]}</span>
+            </span>
+          </div>
+          {solved && (
+            <div className={styles.huntReveal}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static export, as everywhere else here */}
+              <span className={styles.huntRevealShot}><img src={stop.photo} alt="" /></span>
+              <span className={styles.huntRevealBody}>
+                <span className={styles.huntRevealName}>{stop.name}</span>
+                <span className={styles.huntRevealAddr}>{stop.address}</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        <div className={styles.huntActions}>
+          <button className={`${styles.huntBtn} ${styles.huntBtnGhost}`} onClick={() => onReveal(stop)}>
+            {solved ? "Show me again" : "Give up — show me"}
+          </button>
+          <button className={styles.huntBtn} onClick={onPunch}>
+            I&rsquo;m at the door <ChevronRight size={15} />
+          </button>
+        </div>
+        <p className={styles.huntNote}>
+          Punching is on the honour system for now — photo check-in arrives with the next phase.
+        </p>
+      </div>
+
+      {done > 0 && (
+        <div className={styles.huntList}>
+          {stops.slice(0, done).map((punched, i) => (
+            <button key={punched.id} className={`${styles.huntRow} ${styles.huntRowDone}`} onClick={() => onOpen(punched)}>
+              <span className={styles.huntRowN}>{i + 1}</span>
+              <span className={styles.huntRowName}>{punched.name}</span>
+              <ChevronRight size={14} color="var(--ink-3)" />
+            </button>
+          ))}
+        </div>
+      )}
+      <button className={styles.huntReset} onClick={onReset}>Start over</button>
+    </div>
+  );
 }
 
 export default function StrollCityApp({ city }: { city: CityConfig }) {
@@ -283,6 +496,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
   /* Members of a cluster chip that no amount of zoom can pull apart, offered as a pickable list. */
   const [clusterPick, setClusterPick] = useState<{ members: Business[]; x: number; y: number } | null>(null);
+  /* Scavenger hunt: the ids of the four stops, how many are punched, and which are solved. */
+  const [huntIds, setHuntIds] = useState<string[]>([]);
+  const [huntDone, setHuntDone] = useState(0);
+  const [huntRevealed, setHuntRevealed] = useState<Set<string>>(() => new Set());
   const cardsRef = useRef<HTMLDivElement | null>(null);
   const cardScrollTimer = useRef(0);
   const sheetRef = useRef<HTMLDivElement | null>(null);
@@ -525,6 +742,70 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
     if (mobileLayout && expand && sheetStop === "peek") snapSheet("half");
   };
+
+  /* ---------------- scavenger hunt ---------------- */
+  const businessById = useMemo(() => new Map((data?.businesses ?? []).map((b) => [b.id, b])), [data]);
+  const huntStops = useMemo(
+    () => huntIds.map((id) => businessById.get(id)).filter(Boolean) as Business[],
+    [huntIds, businessById],
+  );
+  const huntComplete = huntStops.length > 0 && huntDone >= huntStops.length;
+  const huntCurrent = huntComplete ? null : huntStops[huntDone] ?? null;
+
+  /* Restore a walk in progress. Stops are re-checked against the data — a listing can go
+     away between sessions, and half a punch card is worse than a fresh one. */
+  useEffect(() => {
+    if (!data) return;
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = window.localStorage.getItem(huntKey(city.slug));
+        if (!raw) return;
+        const saved = JSON.parse(raw) as { ids?: unknown; done?: unknown };
+        const ids = Array.isArray(saved.ids) ? saved.ids.filter((id): id is string => typeof id === "string") : [];
+        if (ids.length !== HUNT_LENGTH || !ids.every((id) => data.businesses.some((b) => b.id === id))) {
+          window.localStorage.removeItem(huntKey(city.slug));
+          return;
+        }
+        setHuntIds(ids);
+        setHuntDone(Math.min(Number(saved.done) || 0, ids.length));
+      } catch {
+        /* a corrupt entry just means no hunt in progress */
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [data, city.slug]);
+
+  useEffect(() => {
+    if (!huntIds.length) return;
+    try {
+      window.localStorage.setItem(huntKey(city.slug), JSON.stringify({ ids: huntIds, done: huntDone }));
+    } catch {
+      /* private mode — the hunt still works, it just won't survive a reload */
+    }
+  }, [huntIds, huntDone, city.slug]);
+
+  const startHunt = () => {
+    const ids = buildHunt(data?.businesses ?? []);
+    if (ids.length < HUNT_LENGTH) { setHint("Not enough places mapped here for a hunt yet."); return; }
+    setHuntIds(ids);
+    setHuntDone(0);
+    setHuntRevealed(new Set());
+    setTab("hunt");
+  };
+  const punchHuntStop = () => {
+    if (!huntCurrent) return;
+    setHuntDone((n) => Math.min(n + 1, huntStops.length));
+  };
+  const resetHunt = () => {
+    setHuntIds([]);
+    setHuntDone(0);
+    setHuntRevealed(new Set());
+    try { window.localStorage.removeItem(huntKey(city.slug)); } catch { /* nothing to clear */ }
+  };
+  const revealHuntStop = (stop: Business) => {
+    setHuntRevealed((prev) => new Set(prev).add(stop.id));
+    flyToBusiness(stop, true);
+  };
   /* ----------------
      Tapping a cluster used to just zoom +2 and hope. Places that share a building never separate, so
      the chip stayed at "3 places" all the way to max zoom with nothing to click. Now we work out the
@@ -711,13 +992,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         },
         layers: [
           { id: "carto", type: "raster", source: "carto" },
-          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14181A", "line-width": 26, "line-opacity": 0.08 } },
-          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#5C6350", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
-          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#5A707E", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
-          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#D6DEDA", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
-          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14181A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
-          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#F7FAF8", "fill-opacity": 0.6 } },
-          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#DCE8E3", "line-width": 1, "line-opacity": 0.85 } },
+          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
+          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
+          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
+          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#E2E4E8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
+          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
+          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
+          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
           { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
         ],
       },
@@ -733,7 +1014,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
     map.on("load", () => {
       map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
-      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#5C6350", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
+      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#57C07A", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
       fitStrip(false);
     });
 
@@ -935,15 +1216,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <img src={biz.photo} alt="" />
         <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category) }}>
-          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : <CatIcon d={CAT_ICON[biz.category]} size={24} color="#fff" strokeWidth={1.7} />}
+          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : <CatIcon d={CAT_ICON[biz.category]} size={24} color={onCategory(city, biz.category)} strokeWidth={1.7} />}
         </div>
       </div>
       <div className={styles.dBody}>
         <div>
           <div className={styles.dTitle}>{biz.name}</div>
           <div className={styles.dSub}>
-            <span className={styles.pill} style={{ color: categoryColor(city, biz.category), borderColor: `${categoryColor(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}10` }}>
-              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryColor(city, biz.category)} /> {CAT_LABEL[biz.category]}
+            <span className={styles.pill} style={{ color: categoryInk(city, biz.category), borderColor: `${categoryInk(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}1A` }}>
+              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryInk(city, biz.category)} /> {CAT_LABEL[biz.category]}
             </span>
             {(() => { const open = isOpenNow(biz.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
             {biz.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
@@ -977,7 +1258,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.rowTags}>{biz.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
         </div>
         <button className={styles.claimcard} onClick={() => openPortal(biz)}>
-          <Briefcase size={20} color="var(--amber)" style={{ flex: "0 0 auto" }} />
+          <Briefcase size={20} color="var(--accent-ink)" style={{ flex: "0 0 auto" }} />
           <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
         </button>
       </div>
@@ -1014,7 +1295,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const renderPickRow = (biz: Business) => (
     <button key={biz.id} className={styles.pickRow} onClick={() => flyToBusiness(biz, true)}>
       <span className={styles.pickDot} style={{ background: categoryColor(city, biz.category) }}>
-        <CatIcon d={CAT_ICON[biz.category]} size={13} color="#fff" />
+        <CatIcon d={CAT_ICON[biz.category]} size={13} color={onCategory(city, biz.category)} />
       </span>
       <span className={styles.pickBody}>
         <span className={styles.pickName}>{biz.name}</span>
@@ -1023,6 +1304,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       <ChevronRight size={14} color="var(--ink-3)" />
     </button>
   );
+
 
   /* shared between the desktop results list and the mobile sheet's list state */
   const renderBusinessRow = (biz: Business) => {
@@ -1040,7 +1322,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <div className={styles.rowBody}>
           <div className={styles.rowName}>{biz.name}</div>
           <div className={styles.rowMeta}>
-            <span className={styles.catLabel} style={{ color: categoryColor(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
+            <span className={styles.catLabel} style={{ color: categoryInk(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
             {biz.claim_status === "claimed" && <><span className={styles.dotsep} /><span className={styles.claimedBadge}>Claimed</span></>}
           </div>
           <div className={styles.rowMeta}>
@@ -1073,7 +1355,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <button className={`${styles.railBtn} ${tab === "explore" ? styles.railOn : ""}`} title="Explore" onClick={() => { setTab("explore"); backToBrowse(); }}><IconExplore /></button>
         <Link className={`${styles.railBtn} ${styles.railGhost}`} title="Add a place" href="/portal"><IconAdd /></Link>
         <button className={`${styles.railBtn} ${tab === "events" ? styles.railOn : ""}`} title="Events" onClick={() => setTab("events")}><IconEvents /></button>
-        <button className={styles.railBtn} title="Saved (coming soon)" onClick={() => setHint("Saved lists are coming in a later phase.")}><IconSaved /></button>
+        <button className={`${styles.railBtn} ${tab === "hunt" ? styles.railOn : ""}`} title="Scavenger hunt" onClick={() => setTab("hunt")}><Route size={18} /></button>
         <button className={`${styles.railBtn} ${styles.railSpacer}`} title="Open data note" onClick={() => setHint("Geometry and licences come from City of Calgary open data.")}><IconOpenData /></button>
       </nav>
       )}
@@ -1091,6 +1373,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div className={styles.tabs} role="tablist">
               <button role="tab" aria-selected={tab === "explore"} className={tab === "explore" ? styles.tabActive : ""} onClick={() => setTab("explore")}>Explore <span className={styles.count}>{data?.businesses.length ?? 0}</span></button>
               <button role="tab" aria-selected={tab === "events"} className={tab === "events" ? styles.tabActive : ""} onClick={() => setTab("events")}>Events <span className={styles.count}>{events.length}</span></button>
+              <button role="tab" aria-selected={tab === "hunt"} className={tab === "hunt" ? styles.tabActive : ""} onClick={() => setTab("hunt")}>Hunt{huntStops.length ? <span className={styles.count}>{huntDone}/{huntStops.length}</span> : null}</button>
               <button role="tab" aria-selected={false} disabled title="Coming soon" style={{ opacity: .55, cursor: "default" }}>Saved</button>
             </div>
           </div>
@@ -1123,13 +1406,33 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     </div>
                   </div>
                 </div>
+
+                {/* The hunt is the headline feature, so it sits directly under the area card
+                    rather than waiting behind a tab nobody clicks. */}
+                <button className={styles.huntBanner} onClick={() => setTab("hunt")}>
+                  <span className={styles.huntBannerIc}><Route size={19} /></span>
+                  <span className={styles.huntBannerBody}>
+                    <span className={styles.huntBannerTitle}>
+                      Scavenger hunt
+                      <span className={styles.huntBannerTag}>{huntStops.length ? `${huntDone}/${huntStops.length}` : "Free"}</span>
+                    </span>
+                    <span className={styles.huntBannerMeta}>
+                      {huntComplete
+                        ? "Punch card full — start another walk."
+                        : huntStops.length
+                          ? `Next stop: clue ${huntDone + 1} of ${huntStops.length}.`
+                          : "Four clues, four doors, one walk down the strip."}
+                    </span>
+                  </span>
+                  <ChevronRight size={16} color="var(--ink-3)" />
+                </button>
               </div>
 
               <div className={styles.catlist}>
                 {allCategories.map((key) => (
                   <button key={key} className={styles.catcard} onClick={() => openCategory(key)}>
-                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryColor(city, key) }}>
-                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryColor(city, key)} />
+                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryInk(city, key) }}>
+                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryInk(city, key)} />
                     </span>
                     <span className={styles.ccBody}>
                       <span className={styles.ccName}>{CAT_LABEL[key]}</span>
@@ -1159,7 +1462,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <button className={styles.back} onClick={backToBrowse} title="All categories"><ChevronLeft size={16} /></button>
                 {browseCategory ? (
                   <>
-                    <span className={styles.rhTile} style={{ background: wash(categoryColor(city, browseCategory), 38, 16) }}><CatIcon d={CAT_ICON[browseCategory]} size={16} color={categoryColor(city, browseCategory)} /></span>
+                    <span className={styles.rhTile} style={{ background: wash(categoryColor(city, browseCategory), 38, 16) }}><CatIcon d={CAT_ICON[browseCategory]} size={16} color={categoryInk(city, browseCategory)} /></span>
                     <span className={styles.rhText}><b>{CAT_LABEL[browseCategory]}</b><span>{visibleBusinesses.length} places</span></span>
                   </>
                 ) : (
@@ -1175,6 +1478,20 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 {visibleBusinesses.map((biz) => renderBusinessRow(biz))}
               </div>
             </>
+          )}
+
+          {tab === "hunt" && (
+            <HuntPanel
+              stops={huntStops}
+              done={huntDone}
+              revealed={huntRevealed}
+              ready={!!data}
+              onStart={startHunt}
+              onPunch={punchHuntStop}
+              onReset={resetHunt}
+              onReveal={revealHuntStop}
+              onOpen={(stop) => flyToBusiness(stop, true)}
+            />
           )}
 
           {tab === "events" && (
@@ -1369,6 +1686,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <button className={styles.back} onClick={closeSelected} title="Back"><ChevronLeft size={16} /></button>
                 <span className={styles.mSheetTitle}>All places</span>
               </>
+            ) : tab === "hunt" ? (
+              <span className={styles.mSheetTitle}>Scavenger hunt</span>
             ) : tab === "events" ? (
               <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
             ) : (
@@ -1401,6 +1720,18 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               clusterPick.members.map((biz) => renderPickRow(biz))
             ) : selected ? (
               renderDetail(selected)
+            ) : tab === "hunt" ? (
+              <HuntPanel
+                stops={huntStops}
+                done={huntDone}
+                revealed={huntRevealed}
+                ready={!!data}
+                onStart={startHunt}
+                onPunch={punchHuntStop}
+                onReset={resetHunt}
+                onReveal={revealHuntStop}
+                onOpen={(stop) => flyToBusiness(stop, true)}
+              />
             ) : tab === "events" ? (
               events.map((event) => (
                 <button key={event.id} className={styles.row} onClick={() => { mapRef.current?.flyTo({ center: [event.lon, event.lat], zoom: 16.4, duration: 650 }); if (sheetStop !== "peek") snapSheet("peek"); }}>
@@ -1448,8 +1779,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={tab === "events" ? styles.mTabOn : ""} onClick={() => { setTab("events"); closeSelected(); }}>
             <IconEvents />Events
           </button>
-          <button title="Coming soon" onClick={() => setHint("Saved lists are coming in a later phase.")}>
-            <IconSaved />Saved
+          <button className={tab === "hunt" ? styles.mTabOn : ""} onClick={() => { setTab("hunt"); closeSelected(); }}>
+            <Route size={17} />Hunt
           </button>
           <Link href="/portal">
             <IconAdd />Claim

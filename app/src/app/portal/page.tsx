@@ -4,7 +4,7 @@ import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { ChangeEvent, DragEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { getCity } from "../cities";
-import { CAT_LABEL, CatIcon, IconAdd, IconExplore, categoryColor, type Category } from "../StrollCityApp";
+import { CAT_LABEL, CatIcon, IconAdd, IconExplore, categoryColor, categoryInk, onCategory, type Category } from "../StrollCityApp";
 import styles from "../page.module.css";
 
 const city = getCity("calgary")!;
@@ -127,7 +127,7 @@ export default function PortalPage() {
     const glyphInner = logoDataUrl && PLANS.find((p) => p.id === plan)?.logo
       ? `<img src="${logoDataUrl}" alt="" />`
       : picked.mono;
-    el.innerHTML = `<span class="${styles.glyph}" style="background:${color}">${glyphInner}</span><span class="${styles.label}">${picked.name}</span>`;
+    el.innerHTML = `<span class="${styles.glyph}" style="background:${color};color:${onCategory(city, picked.category)}">${glyphInner}</span><span class="${styles.label}">${picked.name}</span>`;
     markerRef.current = new maplibregl.Marker({ element: el, anchor: "left" }).setLngLat([picked.lon, picked.lat]).addTo(map);
     map.flyTo({ center: [picked.lon, picked.lat], zoom: 16, duration: 600 });
   }, [picked, plan, logoDataUrl]);
@@ -339,7 +339,7 @@ export default function PortalPage() {
                             className={`${styles.res} ${takeable && idxAmongTakeable === cursor ? styles.resCursor : ""}`}
                             onClick={() => takeable && choose(b)}
                           >
-                            <span className={styles.resTile} style={{ background: categoryColor(city, b.category) }}>{b.mono}</span>
+                            <span className={styles.resTile} style={{ background: categoryColor(city, b.category), color: onCategory(city, b.category) }}>{b.mono}</span>
                             <span className={styles.resBody}>
                               <span className={styles.resName}>{b.name}</span>
                               <span className={styles.resMeta}>{CAT_LABEL[b.category]} · {b.address}</span>
@@ -356,7 +356,7 @@ export default function PortalPage() {
                 {picked && (
                   <div className={styles.picked}>
                     <div className={styles.pickedHead}>
-                      <span className={styles.pickedTile} style={{ background: categoryColor(city, picked.category) }}>
+                      <span className={styles.pickedTile} style={{ background: categoryColor(city, picked.category), color: onCategory(city, picked.category) }}>
                         {picked.logo_url ? <img src={picked.logo_url} alt="" /> : picked.mono}
                       </span>
                       <span className={styles.pickedBody}>
@@ -486,7 +486,7 @@ export default function PortalPage() {
                 </div>
 
                 <div className={`${styles.callout} ${styles.calloutAmber}`}>
-                  <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={17} color="var(--amber)" strokeWidth={1.7} />
+                  <CatIcon d="M12 3l8 3.5v5c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-5L12 3Zm-3 9 2 2 4-4" size={17} color="var(--accent-ink)" strokeWidth={1.7} />
                   <span><b>Test mode.</b> No card is charged and no payment details are collected. Paid plans move to Stripe Checkout when Phase 5 ships.</span>
                 </div>
 
@@ -560,7 +560,7 @@ export default function PortalPage() {
                 <div>
                   <div className={styles.prevTitle}>{picked.name}</div>
                   <div className={styles.prevSub}>
-                    <span className={styles.pill} style={{ color: categoryColor(city, picked.category), borderColor: `${categoryColor(city, picked.category)}33`, background: `${categoryColor(city, picked.category)}10` }}>{CAT_LABEL[picked.category]}</span>
+                    <span className={styles.pill} style={{ color: categoryInk(city, picked.category), borderColor: `${categoryInk(city, picked.category)}33`, background: `${categoryColor(city, picked.category)}1A` }}>{CAT_LABEL[picked.category]}</span>
                     <span className={`${styles.pill} ${styles.pillOk}`}>✓ Verified</span>
                     <span>{picked.address}</span>
                   </div>
