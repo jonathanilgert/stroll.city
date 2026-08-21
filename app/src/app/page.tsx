@@ -23,15 +23,15 @@ type Business = {
 };
 
 /* The six moods, drawn from the brand board's accent set (the map app keeps its own
-   earthier palette). Chips and pins pick dark or light ink per colour, so the lighter
-   brand tones — gold, green, pink — stay legible without being muddied down. */
+   earthier palette). Chips pick dark or light ink per colour, so the lighter brand
+   tones — gold, green, pink — stay legible without being muddied down. */
 const MOODS: { id: Category; label: string; color: string }[] = [
   { id: "shop", label: "Shops", color: "#0B47E8" },        // cobalt — the brand blue
-  { id: "restaurant", label: "Restaurants", color: "#EE6C43" }, // coral — "this weekend" / "local gem"
+  { id: "restaurant", label: "Restaurants", color: "#F58AB4" }, // pink — the markets blob
   { id: "services", label: "Studios", color: "#57C07A" },  // spring green — "bike routes"
   { id: "cafe", label: "Cafés", color: "#F5C93F" },        // gold — the sunburst
   { id: "bar", label: "Bars", color: "#8468E0" },          // lavender — "hikes"
-  { id: "gallery", label: "Arts", color: "#F58AB4" },      // pink — the markets blob
+  { id: "gallery", label: "Arts", color: "#1573C6" },      // azure — "coffee spots"
 ];
 const MOOD_COLOR = Object.fromEntries(MOODS.map((m) => [m.id, m.color])) as Record<Category, string>;
 const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Record<Category, string>;
@@ -248,12 +248,10 @@ export default function LandingPage() {
       el.type = "button";
       el.className = `${styles.pin} ${on ? styles.pinOn : ""}`;
       el.setAttribute("aria-label", b.name);
-      const tone = MOOD_COLOR[b.category] ?? "#0B47E8";
+      // Pins stay one neutral tone whatever the mood — 162 of them in six colours turns
+      // the street into confetti. Colour is reserved for the selected pin (see .pinOn).
       const glyph = document.createElement("span");
       glyph.className = styles.pinGlyph;
-      glyph.style.background = tone;
-      // Gold and pink pins need dark initials; cobalt and lavender need white ones.
-      glyph.style.color = isLight(tone) ? "#14161A" : "#fff";
       glyph.textContent = b.mono;
       el.appendChild(glyph);
       el.onclick = () => setSelected(b);

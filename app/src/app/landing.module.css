@@ -340,11 +340,17 @@
   place-items: center;
   font-size: 10px;
   font-weight: 600;
-  color: #fff; /* overridden per pin: light brand tones take dark initials */
+  background: var(--ink);
+  color: #fff;
   letter-spacing: .01em;
   box-shadow: 0 0 0 3px rgba(255, 255, 255, .92), 0 3px 10px rgba(20, 22, 26, .22);
+  transition: background .16s;
 }
+.pin:hover .pinGlyph { background: #33363D; }
+/* The one pin that earns colour is the open one. */
 .pinOn { transform: scale(1.16); }
+.pinOn .pinGlyph,
+.pinOn:hover .pinGlyph { background: var(--blue); }
 .pinOn .pinGlyph { box-shadow: 0 0 0 3px #fff, 0 0 0 7px rgba(11, 71, 232, .22), 0 6px 16px rgba(20, 22, 26, .28); }
 
 /* ---------------- marquee ---------------- */
