@@ -143,6 +143,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const strollSeconds = isRace ? elapsed + penalties : elapsed;
   const sessionKey = `${hunt?.id ?? "hunt"}-${teamName || "guest"}`;
   const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
+  const activeClues = active ? [active.clue_1, active.clue_2, active.clue_3].filter(Boolean) : [];
 
   const start = () => {
     const started = Date.now();
@@ -204,9 +205,9 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
             <div className={styles.landBigCard}>
               {!startedAt || !active ? <p className={styles.landCardP}>Start the hunt to draw your stops. Loop Race rotates the same 8-stop route so teams start apart and no destination is named while the race is running.</p> : <>
                 <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
-                <h3 className={styles.landH3}>{hunt?.mode === "race" ? "Mystery stop" : active.name}</h3>
+                <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
-                <div className={styles.locked}>{[active.clue_1, active.clue_2, active.clue_3].slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={clue}><b>Clue {index + 1}</b> {clue}</div>)}</div>
+                <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
                 <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Proof photo challenge:</b> {active.challenge}</span></div>
                 <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue{isRace ? " (+ penalty)" : ""}</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
               </>}
@@ -262,7 +263,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   </div>
                 </div>
               </div>
-              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops. Your finish also opens Inglewood Basket entry, with the CASL consent kept separate and optional.</div>}
+              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops. Your finish also opens Inglewood Basket entry, with the CASL consent kept separate and optional. <Link href="/rules">Read the Basket rules</Link>.</div>}
               {finished && (
                 <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
                   <div className={styles.postcardStampBlock}>YYC</div>

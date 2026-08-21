@@ -26,6 +26,8 @@ type HuntStop = {
   name: string;
   riddle: string;
   clue_1: string;
+  clue_2: string;
+  clue_3: string;
   challenge: string;
   difficulty: string;
 };
@@ -129,6 +131,7 @@ export default function LandingPage() {
   const [active, setActive] = useState<Set<Category>>(new Set(MOODS.map((m) => m.id)));
   const [selected, setSelected] = useState<Business | null>(null);
   const [stop, setStop] = useState(0);
+  const [cluesOpen, setCluesOpen] = useState(0);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
   const [viewTick, setViewTick] = useState(0);
 
@@ -172,6 +175,7 @@ export default function LandingPage() {
   }, [data]);
   const huntDone = huntStops.length > 0 && stop >= huntStops.length;
   const currentStop = huntStops[Math.min(stop, Math.max(huntStops.length - 1, 0))] ?? null;
+  const clueLadder = currentStop ? [currentStop.clue_1, currentStop.clue_2, currentStop.clue_3].filter(Boolean) : [];
 
   /* ---------------- live map in the hero frame ---------------- */
   useEffect(() => {
@@ -260,6 +264,10 @@ export default function LandingPage() {
   }, []);
 
   const postTint = (i: number) => (i < stop ? STOP_TINTS[i] : "#F6E8ED");
+  const goNextRiddle = () => {
+    setStop((s) => Math.min(s + 1, huntStops.length || 4));
+    setCluesOpen(0);
+  };
 
   return (
     <main className={styles.landing}>
@@ -417,11 +425,11 @@ export default function LandingPage() {
       <section className={styles.section} id="hunt">
         <div className={styles.sectionIn}>
           <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
-            <span className={`${styles.eyebrow} ${styles.eyebrowPink} ${styles.mono}`}>The hunter game</span>
-            <h2 className={styles.h2}>A riddle. A doorway. Then the next riddle.</h2>
+            <span className={`${styles.eyebrow} ${styles.eyebrowPink} ${styles.mono}`}>The hunt</span>
+            <h2 className={styles.h2}>A small mystery walk through Inglewood.</h2>
             <p className={styles.lead}>
-              Nothing to print, nothing to carry. Work out which shop the riddle points at, walk there, take a photo at the door.
-              These are the real Friendly Mode riddles — read one before you start.
+              Start with an easy riddle, then tap for clues only when you need them. The third clue gives the shop away, so first-timers can keep strolling instead of getting stuck.
+              These are the same Friendly Mode clues used in the live hunt.
             </p>
           </div>
 
@@ -447,11 +455,15 @@ export default function LandingPage() {
                     ? "Four doors, four photos. Your postcard is ready."
                     : currentStop?.riddle ?? "Fetching the riddles from the street…"}
                 </p>
-                <p className={styles.riddleHint}>
-                  {huntDone
-                    ? "Start the real thing and the punch card fills itself in as you walk."
-                    : currentStop?.clue_1 ?? ""}
-                </p>
+                {huntDone ? (
+                  <p className={styles.riddleHint}>Start the real thing and the punch card fills itself in as you walk.</p>
+                ) : (
+                  <div className={styles.locked}>
+                    {clueLadder.slice(0, cluesOpen).map((clue, index) => (
+                      <div className={styles.callout} key={`${currentStop?.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className={styles.huntActions}>
@@ -460,18 +472,28 @@ export default function LandingPage() {
                     Start the real hunt<Arrow />
                   </Link>
                 ) : (
-                  <button
-                    type="button"
-                    className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
-                    onClick={() => setStop((s) => Math.min(s + 1, huntStops.length || 4))}
-                    disabled={!currentStop}
-                  >
-                    Next riddle<Arrow />
-                  </button>
+                  <>
+                    <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
+                      onClick={() => setCluesOpen((n) => Math.min(3, n + 1))}
+                      disabled={!currentStop || cluesOpen >= 3}
+                    >
+                      {cluesOpen >= 3 ? "All clues shown" : `Show clue ${cluesOpen + 1}`}<Arrow />
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`}
+                      onClick={goNextRiddle}
+                      disabled={!currentStop}
+                    >
+                      Next riddle
+                    </button>
+                  </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => setStop(0)}>Start over</button>
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); }}>Start over</button>
                 <span className={styles.huntNote}>
-                  {huntDone ? "All four riddles read" : `${(huntStops.length || 4) - stop} riddles to go`}
+                  {huntDone ? "All four riddles read" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${(huntStops.length || 4) - stop} riddles to go`}
                 </span>
               </div>
             </div>
@@ -499,8 +521,9 @@ export default function LandingPage() {
               </figure>
 
               <div className={styles.postcard}>
-                <strong className={styles.postcardTitle}>Postcard finish</strong>
-                <p className={styles.postcardCopy}>At the last stop your photos become a postcard you can send or keep.</p>
+                <strong className={styles.postcardTitle}>Postcard + Basket draw</strong>
+                <p className={styles.postcardCopy}>Finish Friendly Mode to make your postcard and open entry to the Inglewood Basket draw. No purchase necessary.</p>
+                <Link className={styles.pickedLink} href="/rules">Basket rules<Arrow size={12} /></Link>
                 <div className={styles.postRow}>
                   {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: postTint(i) }} />)}
                 </div>
@@ -536,8 +559,8 @@ export default function LandingPage() {
 
             <div className={styles.featBlue}>
               <span className={`${styles.eyebrow} ${styles.mono} ${styles.eyebrowFlush}`}>Scavenger hunts</span>
-              <strong className={styles.featTitle}>Four stops free, every time different</strong>
-              <p className={styles.featBlueCopy}>The punch card fills itself in on screen. No printing, no staff to find.</p>
+              <strong className={styles.featTitle}>Four free stops, clues when you need them</strong>
+              <p className={styles.featBlueCopy}>Riddle first, three clues after. The last clue names the shop so the walk keeps moving.</p>
               <Link className={`${styles.btn} ${styles.btnSm} ${styles.btnLime} ${styles.featCta}`} href="/calgary/hunt?type=friendly">
                 Try the hunt<Arrow size={13} />
               </Link>
