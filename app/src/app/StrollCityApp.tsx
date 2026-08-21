@@ -23,7 +23,7 @@ import {
   Waves,
   X,
 } from "lucide-react";
-import type { CityConfig } from "./cities";
+import { inkOn, type CityConfig } from "./cities";
 import styles from "./page.module.css";
 
 export type Category = "restaurant" | "cafe" | "bar" | "shop" | "services" | "gallery";
@@ -142,8 +142,19 @@ function replaceCategoryUrl(categories: Set<Category>) {
   window.history.replaceState(null, "", qs ? `?${qs}` : window.location.pathname);
 }
 
+/** Fill tone — pin borders, tiles, legend dots. */
 export function categoryColor(city: CityConfig, category: Category) {
   return city.theme.categories[category] ?? city.theme.primary;
+}
+
+/** Text/stroke tone — the same hue dark enough to read on a light surface. */
+export function categoryInk(city: CityConfig, category: Category) {
+  return city.theme.categoryInks[category] ?? categoryColor(city, category);
+}
+
+/** Ink to place on top of the category fill. */
+export function onCategory(city: CityConfig, category: Category) {
+  return inkOn(categoryColor(city, category));
 }
 
 export function wash(hex: string, a = 26, b = 10) {
@@ -205,9 +216,9 @@ function edmontonMinutesNow() {
 function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
   const isStroll = biz.plan_tier === "stroll" || biz.plan_tier === "stroll_plus";
   const glyphInner = isStroll && biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
-  const fill = isStroll && biz.logo_url ? "#fff" : "#dce8e3";
+  const fill = isStroll && biz.logo_url ? "#fff" : "#E7E9EC";
   const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
-  const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14181a;border-color:${color}">${glyphInner}</span>`;
+  const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14161A;border-color:${color}">${glyphInner}</span>`;
   if (compact) return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
@@ -633,13 +644,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         },
         layers: [
           { id: "carto", type: "raster", source: "carto" },
-          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14181A", "line-width": 26, "line-opacity": 0.08 } },
-          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#5C6350", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
-          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#5A707E", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
-          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#D6DEDA", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
-          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14181A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
-          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#F7FAF8", "fill-opacity": 0.6 } },
-          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#DCE8E3", "line-width": 1, "line-opacity": 0.85 } },
+          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
+          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
+          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
+          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#E2E4E8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
+          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
+          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
+          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
           { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
         ],
       },
@@ -655,7 +666,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
     map.on("load", () => {
       map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
-      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#5C6350", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
+      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#57C07A", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
       fitStrip(false);
     });
 
@@ -835,7 +846,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       <div className={styles.hero}>
         <img src={biz.photo} alt="" />
         <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
-        <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category) }}>
+        <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
           {biz.plan_tier === "stroll" && biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
       </div>
@@ -843,8 +854,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <div>
           <div className={styles.dTitle}>{biz.name}</div>
           <div className={styles.dSub}>
-            <span className={styles.pill} style={{ color: categoryColor(city, biz.category), borderColor: `${categoryColor(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}10` }}>
-              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryColor(city, biz.category)} /> {CAT_LABEL[biz.category]}
+            <span className={styles.pill} style={{ color: categoryInk(city, biz.category), borderColor: `${categoryInk(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}1A` }}>
+              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryInk(city, biz.category)} /> {CAT_LABEL[biz.category]}
             </span>
             {(() => { const open = isOpenNow(biz.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
             {biz.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
@@ -874,7 +885,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.rowTags}>{biz.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
         </div>
         <button className={styles.claimcard} onClick={() => openPortal(biz)}>
-          <Briefcase size={20} color="var(--amber)" style={{ flex: "0 0 auto" }} />
+          <Briefcase size={20} color="var(--accent-ink)" style={{ flex: "0 0 auto" }} />
           <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
         </button>
       </div>
@@ -918,7 +929,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <div className={styles.rowBody}>
           <div className={styles.rowName}>{biz.name}</div>
           <div className={styles.rowMeta}>
-            <span className={styles.catLabel} style={{ color: categoryColor(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
+            <span className={styles.catLabel} style={{ color: categoryInk(city, biz.category) }}><span className={styles.dot} style={{ background: categoryColor(city, biz.category) }} />{CAT_LABEL[biz.category]}</span>
             {biz.claim_status === "claimed" && <><span className={styles.dotsep} /><span className={styles.claimedBadge}>Claimed</span></>}
           </div>
           <div className={styles.rowMeta}>
@@ -1013,8 +1024,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                   return (
                   <button key={key} className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`} onClick={() => toggleActiveCategory(key)} aria-pressed={on}>
                     <span className={styles.catCheck} style={on ? { background: categoryColor(city, key) } : undefined}>{on ? "✓" : ""}</span>
-                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryColor(city, key) }}>
-                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryColor(city, key)} />
+                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryInk(city, key) }}>
+                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryInk(city, key)} />
                     </span>
                     <span className={styles.ccBody}>
                       <span className={styles.ccName}>{CAT_LABEL[key]}</span>
@@ -1037,7 +1048,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                   <span className={`${styles.ccN} ${styles.num}`}>{openNowCount}</span>
                 </button>
                 <button className={`${styles.catcard} ${showTrees ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowTrees((v) => !v)} aria-pressed={showTrees}>
-                  <span className={styles.catCheck} style={showTrees ? { background: "#5C6350" } : undefined}>{showTrees ? "✓" : ""}</span>
+                  <span className={styles.catCheck} style={showTrees ? { background: "#2E7D50" } : undefined}>{showTrees ? "✓" : ""}</span>
                   <span className={styles.ccTile}><CatIcon d="M12 2c-4 4-4 10 0 20 4-10 4-16 0-20Z" size={20} /></span>
                   <span className={styles.ccBody}><span className={styles.ccName}>Trees</span><span className={styles.ccMeta}>Show the street canopy layer</span></span>
                   <span className={`${styles.ccN} ${styles.num}`}>{data?.trees.length ?? 0}</span>
@@ -1062,7 +1073,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <button className={styles.back} onClick={backToBrowse} title="All categories"><ChevronLeft size={16} /></button>
                 {browseCategory ? (
                   <>
-                    <span className={styles.rhTile} style={{ background: wash(categoryColor(city, browseCategory), 38, 16) }}><CatIcon d={CAT_ICON[browseCategory]} size={16} color={categoryColor(city, browseCategory)} /></span>
+                    <span className={styles.rhTile} style={{ background: wash(categoryColor(city, browseCategory), 38, 16) }}><CatIcon d={CAT_ICON[browseCategory]} size={16} color={categoryInk(city, browseCategory)} /></span>
                     <span className={styles.rhText}><b>{CAT_LABEL[browseCategory]}</b><span>{visibleBusinesses.length} places</span></span>
                   </>
                 ) : (

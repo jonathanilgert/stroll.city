@@ -217,7 +217,7 @@ export default function AdminPage() {
               <div className={styles.grid2} style={{ alignItems: "start" }}>
                 <div className={styles.review} style={{ maxHeight: 480, overflow: "auto" }}>
                   {visible.map((business) => (
-                    <button key={business.id} className={styles.res} style={{ borderRadius: 0, background: picked?.id === business.id ? "var(--mint)" : undefined }} onClick={() => choose(business)}>
+                    <button key={business.id} className={styles.res} style={{ borderRadius: 0, background: picked?.id === business.id ? "var(--paper)" : undefined }} onClick={() => choose(business)}>
                       <span className={styles.resTile}>{business.mono}</span>
                       <span className={styles.resBody}><span className={styles.resName}>{business.name}</span><span className={styles.resMeta}>{business.address} · {CAT_LABEL[business.category]} · {business.claim_status ?? "unclaimed"}</span></span>
                       {business.verified_by_staff && <span className={styles.resTaken}>verified</span>}

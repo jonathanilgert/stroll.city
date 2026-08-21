@@ -1,50 +1,72 @@
+/* ---------------------------------------------------------------------------
+   stroll.city colour system — shared by the map app and the claim portal.
+   Same palette as the landing page (see landing.module.css), which scopes its
+   own copy so it can carry the marketing-only tones.
+
+   Naming is by role, not hue: --brand is the cobalt, --accent the lime, --warm
+   the pink. Change a value here and every surface follows.
+--------------------------------------------------------------------------- */
 :root {
-  --surface: #fff;
-  --surface-2: #F7FAF8;
-  --mint: #EAF1EE;
-  --mint-2: #DCE8E3;
-  --line: #E8EDEA;
-  --line-strong: #D6DEDA;
-  --ink: #14181A;
-  --ink-2: #5A6462;
-  --ink-3: #6E7775;
-  --black: #101413;
-  --amber: #EFA22A;
-  --amber-soft: #FDF3E2;
-  --amber-line: #F6DCB0;
-  --ok: #2F7A64;
-  --ok-soft: #EAF4F0;
-  --err: #B4472E;
-  --err-soft: #FBEFEB;
-  --brand-blue: #DBECFB;
-  --brand-blue-soft: #F0F8FE;
-  --brand-blue-hover: #C3E0F6;
-  --app-bg: linear-gradient(150deg, #AED4F0 0%, #C9E4F8 46%, #DBECFB 100%);
-  --olive: #5C6350;
-  --olive-soft: #F0F2EC;
-  --olive-line: #DDE2D5;
-  --c-eat: #B4703F;
-  --c-cafe: #9A8236;
-  --c-bar: #7E5F86;
-  --c-shop: #3E7A6C;
-  --c-studio: #5A707E;
-  --c-art: #A0607C;
+  /* surfaces */
+  --surface: #FFFFFF;
+  --surface-2: #FAFAFB;
+  --paper: #F4F5F7;
+  --paper-2: #E7E9EC;
+  --line: #EAEBEE;
+  --line-strong: #DDE0E5;
+
+  /* ink */
+  --ink: #14161A;
+  --ink-2: #55585F;
+  --ink-3: #767A82;
+  --black: #14161A;
+
+  /* brand — cobalt */
+  --brand: #0B47E8;
+  --brand-dark: #0736B8;
+  --brand-soft: #EDF2FF;
+  --brand-tint: #E4EBFF;
+  --brand-line: #CFDCFF;
+
+  /* accent — lime. Carries claims, badges and the selected pin. */
+  --accent: #DCF23C;
+  --accent-hi: #E8F877;
+  --accent-soft: #F6FBDA;
+  --accent-line: #E5F0AF;
+  --accent-ink: #5F7A12;
+
+  /* warm — pink. Saves and favourites. */
+  --warm: #FBD9E4;
+  --warm-soft: #FDEDF3;
+  --warm-ink: #C2296B;
+
+  /* status */
+  --ok: #2E7D50;
+  --ok-soft: #E7F4EC;
+  --ok-line: #C9E5D5;
+  --err: #C0392B;
+  --err-soft: #FBEEEC;
+
+  /* Full-screen splashes (welcome, coming soon) — a neutral wash, no tinted slab. */
+  --app-bg: linear-gradient(150deg, #FFFFFF 0%, #F7F8FA 52%, #F1F3F7 100%);
+
   --r-sm: 10px;
   --r-md: 14px;
   --r-lg: 18px;
   --r-xl: 22px;
   --r-2xl: 28px;
-  --sh-1: 0 1px 2px rgba(20, 24, 26, .05);
-  --sh-2: 0 4px 14px rgba(20, 24, 26, .07), 0 1px 3px rgba(20, 24, 26, .04);
-  --sh-3: 0 18px 44px rgba(20, 24, 26, .14), 0 3px 8px rgba(20, 24, 26, .07);
-  --sh-shell: 0 40px 90px rgba(28, 52, 50, .28), 0 8px 24px rgba(28, 52, 50, .14);
+  --sh-1: 0 1px 2px rgba(20, 22, 26, .05);
+  --sh-2: 0 4px 14px rgba(20, 22, 26, .07), 0 1px 3px rgba(20, 22, 26, .04);
+  --sh-3: 0 18px 44px rgba(20, 22, 26, .14), 0 3px 8px rgba(20, 22, 26, .07);
+  --sh-shell: 0 40px 90px rgba(20, 32, 60, .24), 0 8px 24px rgba(20, 32, 60, .12);
 }
 
 * { box-sizing: border-box; }
 html, body { height: 100%; margin: 0; padding: 0; }
 body {
-  padding: 22px;
-  background: var(--app-bg);
+  /* The app runs edge to edge: no inset frame, no backdrop behind it. */
+  padding: 0;
+  background: var(--surface);
   color: var(--ink);
   font-family: var(--font-display), 'Outfit', system-ui, sans-serif;
   font-size: 14px;
@@ -54,11 +76,11 @@ body {
 }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; padding: 0; }
 a { color: var(--ink); text-decoration: none; }
-a:hover { color: var(--olive); }
+a:hover { color: var(--brand); }
 input, select { font: inherit; color: inherit; }
 .mono { font-family: var(--font-mono), monospace; }
 .num { font-weight: 200; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
 .lbl { font-size: 10.5px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
 .maplibregl-ctrl-attrib { font-size: 9.5px !important; background: rgba(255,255,255,.8) !important; color: var(--ink-3) !important; }
 .maplibregl-ctrl-attrib a { color: var(--ink-2) !important; }
-.maplibregl-canvas { filter: saturate(.92) brightness(1.04) contrast(.97); }
+.maplibregl-canvas { filter: saturate(.96) brightness(1.02); }

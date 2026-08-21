@@ -4,7 +4,7 @@ import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { ChangeEvent, DragEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { getCity } from "../cities";
-import { CAT_LABEL, CatIcon, IconAdd, IconExplore, categoryColor, type Category } from "../StrollCityApp";
+import { CAT_LABEL, CatIcon, IconAdd, IconExplore, categoryColor, categoryInk, onCategory, type Category } from "../StrollCityApp";
 import styles from "../page.module.css";
 
 const city = getCity("calgary")!;
@@ -136,7 +136,7 @@ export default function PortalPage() {
     const glyphInner = logoDataUrl && PLANS.find((p) => p.id === plan)?.logo
       ? `<img src="${logoDataUrl}" alt="" />`
       : picked.mono;
-    el.innerHTML = `<span class="${styles.glyph}" style="background:${color}">${glyphInner}</span><span class="${styles.label}">${picked.name}</span>`;
+    el.innerHTML = `<span class="${styles.glyph}" style="background:${color};color:${onCategory(city, picked.category)}">${glyphInner}</span><span class="${styles.label}">${picked.name}</span>`;
     markerRef.current = new maplibregl.Marker({ element: el, anchor: "left" }).setLngLat([picked.lon, picked.lat]).addTo(map);
     map.flyTo({ center: [picked.lon, picked.lat], zoom: 16, duration: 600 });
   }, [picked, plan, logoDataUrl]);
@@ -356,7 +356,7 @@ export default function PortalPage() {
                             className={`${styles.res} ${takeable && idxAmongTakeable === cursor ? styles.resCursor : ""}`}
                             onClick={() => takeable && choose(b)}
                           >
-                            <span className={styles.resTile} style={{ background: categoryColor(city, b.category) }}>{b.mono}</span>
+                            <span className={styles.resTile} style={{ background: categoryColor(city, b.category), color: onCategory(city, b.category) }}>{b.mono}</span>
                             <span className={styles.resBody}>
                               <span className={styles.resName}>{b.name}</span>
                               <span className={styles.resMeta}>{CAT_LABEL[b.category]} · {b.address}</span>
@@ -373,7 +373,7 @@ export default function PortalPage() {
                 {picked && (
                   <div className={styles.picked}>
                     <div className={styles.pickedHead}>
-                      <span className={styles.pickedTile} style={{ background: categoryColor(city, picked.category) }}>
+                      <span className={styles.pickedTile} style={{ background: categoryColor(city, picked.category), color: onCategory(city, picked.category) }}>
                         {picked.logo_url ? <img src={picked.logo_url} alt="" /> : picked.mono}
                       </span>
                       <span className={styles.pickedBody}>
@@ -609,7 +609,7 @@ export default function PortalPage() {
                 <div>
                   <div className={styles.prevTitle}>{picked.name}</div>
                   <div className={styles.prevSub}>
-                    <span className={styles.pill} style={{ color: categoryColor(city, picked.category), borderColor: `${categoryColor(city, picked.category)}33`, background: `${categoryColor(city, picked.category)}10` }}>{CAT_LABEL[picked.category]}</span>
+                    <span className={styles.pill} style={{ color: categoryInk(city, picked.category), borderColor: `${categoryInk(city, picked.category)}33`, background: `${categoryColor(city, picked.category)}1A` }}>{CAT_LABEL[picked.category]}</span>
                     <span className={`${styles.pill} ${styles.pillOk}`}>✓ Verified</span>
                     <span>{picked.address}</span>
                   </div>

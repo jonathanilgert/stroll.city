@@ -274,9 +274,9 @@ export default function LandingPage() {
                 <p className={styles.landCardP} style={{ color: "rgba(255,255,255,.68)" }}>Search your licence record, confirm you can speak for the business, and take the marker. The free tier keeps you visible for nothing.</p>
               </div>
               <div className={styles.landTicks}>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Verified badge, logo marker and a curated profile</div>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Publish hours, photos, links, promos and events yourself</div>
-                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--amber)" />Nothing publishes until you confirm by email</div>
+                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--accent-ink)" />Verified badge, logo marker and a curated profile</div>
+                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--accent-ink)" />Publish hours, photos, links, promos and events yourself</div>
+                <div className={styles.landTick} style={{ color: "rgba(255,255,255,.78)" }}><CatIcon d="m5 13 4.5 4.5L19 7" size={17} strokeWidth={2} color="var(--accent-ink)" />Nothing publishes until you confirm by email</div>
               </div>
               <Link className={`${styles.btn} ${styles.btnClaim}`} href="/portal" style={{ alignSelf: "flex-start" }}>
                 Start a claim
@@ -324,7 +324,7 @@ export default function LandingPage() {
                 <p className={styles.landPlanCopy}>{plan.copy}</p>
                 <div className={styles.landFeat}>
                   {plan.feats.map((feat) => (
-                    <div key={feat}><CatIcon d="m5 13 4.5 4.5L19 7" size={16} strokeWidth={2} color={plan.hot ? "var(--amber)" : "#15558F"} />{feat}</div>
+                    <div key={feat}><CatIcon d="m5 13 4.5 4.5L19 7" size={16} strokeWidth={2} color={plan.hot ? "var(--accent-ink)" : "#15558F"} />{feat}</div>
                   ))}
                 </div>
                 <Link className={`${styles.btn} ${plan.hot ? styles.btnClaim : styles.btnLine}`} href="/portal">{plan.cta}</Link>

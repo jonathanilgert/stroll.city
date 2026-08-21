@@ -42,15 +42,15 @@ const productCopy = {
 };
 
 const stampSwatches = [
-  ["#3e7a6c", "#2b5a50"],
-  ["#b4703f", "#7d4b28"],
-  ["#9a8236", "#6b5a22"],
-  ["#7e5f86", "#543d5b"],
-  ["#5a707e", "#3a4c57"],
-  ["#a0607c", "#6f3f55"],
-  ["#15558f", "#8fb9dc"],
-  ["#5c6350", "#aab198"],
-  ["#efa22a", "#b4703f"],
+  ["#0B47E8", "#0736B8"],
+  ["#F58AB4", "#C2296B"],
+  ["#F5C93F", "#8A6410"],
+  ["#8468E0", "#5B3FC4"],
+  ["#57C07A", "#2E7D50"],
+  ["#1573C6", "#12639F"],
+  ["#DCF23C", "#5F7A12"],
+  ["#14161A", "#55585F"],
+  ["#CFDCFF", "#0B47E8"],
 ];
 
 function hash32(input: string) {
@@ -215,7 +215,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               <span className={styles.lbl}>Punch card</span>
               <div className={`${styles.cardstock} ${styles.punchcard}`}>
                 <div className={styles.punchStub}>
-                  <span className={styles.punchMark}><CatIcon d="M11.6 21l1.7-5.6-2.6-2.2.9-4.4-3.1 1.5-1.2 3M13.3 8.8l2.6 2.3 3.1.6M10.7 13.2 7.9 21" size={14} strokeWidth={1.7} color="#5c6350" /></span>
+                  <span className={styles.punchMark}><CatIcon d="M11.6 21l1.7-5.6-2.6-2.2.9-4.4-3.1 1.5-1.2 3M13.3 8.8l2.6 2.3 3.1.6M10.7 13.2 7.9 21" size={14} strokeWidth={1.7} color="var(--accent-ink)" /></span>
                   <span className={styles.punchVert}>{hunt?.name ?? "Stroll hunt"}</span>
                   <span className={styles.punchSerial}>No. {String(hash32(sessionKey) % 100000).padStart(5, "0")}</span>
                 </div>
