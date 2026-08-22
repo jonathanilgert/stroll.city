@@ -28,7 +28,6 @@ type HuntStop = {
   clue_1: string;
   clue_2: string;
   clue_3: string;
-  challenge: string;
   difficulty: string;
 };
 
@@ -513,7 +512,7 @@ export default function LandingPage() {
                 <figcaption className={styles.huntCap}>
                   <span className={`${styles.huntCapK} ${styles.mono}`}>{cluesOpen >= 3 || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
                   <span className={styles.huntCapV}>
-                    {huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? currentStop?.challenge ?? "Take a proof photo at the door." : "Open the final clue when you want the shop and photo prompt revealed."}
+                    {huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? "Snap a proof photo at the stop before moving on." : "Open the final clue when you want the shop and photo prompt revealed."}
                   </span>
                 </figcaption>
               </figure>

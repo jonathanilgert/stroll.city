@@ -26,7 +26,7 @@ export type HuntStopLite = {
   clue_1: string;
   clue_2: string;
   clue_3: string;
-  challenge: string;
+  challenge?: string;
   difficulty: string;
   age_restricted: boolean;
   status: string;
@@ -208,7 +208,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>{(progress[active.id]?.clues ?? 0) >= 3 ? "Proof photo challenge:" : "Proof photo locked:"}</b> {(progress[active.id]?.clues ?? 0) >= 3 ? active.challenge : "Reveal the final clue when you want the shop and photo prompt shown."}</span></div>
+                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>{(progress[active.id]?.clues ?? 0) >= 3 ? "Proof photo unlocked:" : "Proof photo locked:"}</b> {(progress[active.id]?.clues ?? 0) >= 3 ? "Snap a proof photo at the stop before moving on." : "Reveal the final clue when you want the shop and photo prompt shown."}</span></div>
                 <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue{isRace ? " (+ penalty)" : ""}</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
               </>}
             </div>
