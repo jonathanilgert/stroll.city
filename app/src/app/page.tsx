@@ -496,24 +496,27 @@ export default function LandingPage() {
             </div>
 
             <div className={styles.huntSide}>
-              <figure className={styles.huntFig}>
-                <svg viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice" className={styles.figArt} aria-hidden>
-                  <rect width="400" height="500" fill="#0B47E8" />
-                  <rect x="52" y="120" width="296" height="380" rx="10" fill="#CFDCFF" />
-                  <rect x="52" y="120" width="296" height="34" fill="#DCF23C" />
-                  <rect x="82" y="188" width="104" height="128" rx="6" fill="#fff" opacity=".82" />
-                  <rect x="214" y="188" width="104" height="128" rx="6" fill="#fff" opacity=".82" />
-                  <path d="M158 352h84v148h-84z" fill="#0736B8" />
-                  <circle cx="228" cy="428" r="6" fill="#DCF23C" />
-                  <rect x="82" y="352" width="52" height="8" rx="4" fill="#F9BFD0" />
-                  <rect x="266" y="352" width="52" height="8" rx="4" fill="#F9BFD0" />
-                </svg>
-                <span className={styles.huntShade} aria-hidden />
-                <figcaption className={styles.huntCap}>
-                  <span className={`${styles.huntCapK} ${styles.mono}`}>{cluesOpen >= 3 || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
-                  <span className={styles.huntCapV}>
-                    {huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? "Snap a proof photo at the stop before moving on." : "Open the final clue when you want the shop and photo prompt revealed."}
-                  </span>
+              <figure className={styles.huntMemento}>
+                <div className={styles.miniPunch}>
+                  <div className={styles.miniStub}>
+                    <span className={styles.miniWalk}>↟</span>
+                    <span className={`${styles.miniStubText} ${styles.mono}`}>INGLEWOOD</span>
+                  </div>
+                  <div className={styles.miniPunchBody}>
+                    <div className={styles.miniPunchTop}>
+                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : cluesOpen >= 3 ? "Photo prompt open" : "Postcard in progress"}</span>
+                      <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
+                    </div>
+                    <strong>{huntDone ? "Four stops become a keepsake." : cluesOpen >= 3 ? "Snap the little proof, then keep walking." : "No spoilers until you need them."}</strong>
+                    <div className={styles.mementoGrid} aria-hidden>
+                      {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: i < Math.max(stop, huntDone ? 4 : 1) ? postTint(i) : undefined }} />)}
+                    </div>
+                    <p>{huntDone ? "Friendly Mode ends with a postcard you can save or share — same street, no app install." : cluesOpen >= 3 ? "The final clue names the shop and unlocks the exact photo to take there." : "Clues stay gentle: hint, clearer hint, then the shop name and photo task."}</p>
+                  </div>
+                </div>
+                <figcaption className={styles.mementoCaption}>
+                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{cluesOpen >= 3 || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
+                  <span>{huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? "Snap a proof photo at the stop before moving on." : "Open the final clue when you want the shop and photo prompt revealed."}</span>
                 </figcaption>
               </figure>
 

@@ -475,27 +475,127 @@
 .huntNote { margin-left: auto; font-size: 13px; color: var(--pink-ink); }
 
 .huntSide { display: flex; flex-direction: column; gap: 12px; }
-.huntFig {
+.huntMemento {
   position: relative;
   margin: 0;
   border-radius: 22px;
-  overflow: hidden;
   flex: 1;
   min-height: 220px;
-  background: linear-gradient(160deg, var(--blue-200), var(--blue));
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, .72) 0 9%, transparent 10%),
+    linear-gradient(158deg, #F4F1E7 0%, #ECE8DA 100%);
+  border: 1px solid #DDE2D5;
+  padding: clamp(14px, 2vw, 20px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  overflow: hidden;
+  box-shadow: 0 18px 46px -28px rgba(20, 24, 26, .34);
 }
-.huntFig img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
-.huntShade { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 48%, rgba(12, 14, 18, .72) 100%); }
-.huntCap { position: absolute; left: 14px; right: 14px; bottom: 14px; color: #fff; }
-.huntCapK {
+.huntMemento::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: .16;
+  background-image: radial-gradient(rgba(92, 99, 80, .18) .7px, transparent .7px);
+  background-size: 7px 7px;
+  mix-blend-mode: multiply;
+}
+.miniPunch {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  min-height: 168px;
+  background: rgba(255, 255, 255, .34);
+  border: 1px solid rgba(92, 99, 80, .18);
+  border-radius: 18px;
+  overflow: hidden;
+  transform: rotate(-1deg);
+}
+.miniStub {
+  border-right: 1.5px dashed #DDE2D5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 0;
+  color: #5C6350;
+}
+.miniWalk {
+  width: 23px;
+  height: 23px;
+  border: 1.3px solid #5C6350;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+}
+.miniStubText {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 9px;
+  letter-spacing: .22em;
+}
+.miniPunchBody { padding: clamp(15px, 2vw, 20px); }
+.miniPunchTop { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.mementoKicker,
+.mementoCaptionK {
   display: block;
   font-size: 10.5px;
   letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, .82);
-  margin-bottom: 4px;
+  color: #5C6350;
 }
-.huntCapV { display: block; font-size: 15px; font-weight: 500; letter-spacing: -.025em; }
+.miniCode { font-size: 10px; color: var(--ink-3); letter-spacing: .06em; white-space: nowrap; }
+.miniPunch strong {
+  display: block;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.08;
+  letter-spacing: -.04em;
+  font-weight: 500;
+  max-width: 14ch;
+}
+.miniPunch p {
+  margin: 12px 0 0;
+  color: var(--ink-3);
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 31ch;
+}
+.mementoGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 18px;
+}
+.mementoGrid span {
+  aspect-ratio: 5 / 6;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, .5);
+  border: 1.4px dashed #DDE2D5;
+  box-shadow: 0 3px 7px rgba(20, 24, 26, .08);
+  transform: rotate(var(--mini-rot, -2deg));
+}
+.mementoGrid span:nth-child(2) { --mini-rot: 1.5deg; }
+.mementoGrid span:nth-child(3) { --mini-rot: -1deg; }
+.mementoGrid span:nth-child(4) { --mini-rot: 2deg; }
+.mementoCaption {
+  position: relative;
+  z-index: 1;
+  color: var(--ink-2);
+  background: rgba(255, 255, 255, .5);
+  border: 1px solid rgba(221, 226, 213, .9);
+  border-radius: 16px;
+  padding: 14px;
+  backdrop-filter: blur(10px);
+}
+.mementoCaptionK { margin-bottom: 5px; }
+.mementoCaption span:last-child { display: block; font-size: 14.5px; font-weight: 500; letter-spacing: -.025em; line-height: 1.35; }
 .postcard {
   background: #fff;
   border: 1px solid var(--line);
