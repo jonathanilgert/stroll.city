@@ -426,11 +426,9 @@ export default function LandingPage() {
         <div className={styles.sectionIn}>
           <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
             <span className={`${styles.eyebrow} ${styles.eyebrowPink} ${styles.mono}`}>The hunt</span>
-            <h2 className={styles.h2}>A small mystery walk through Inglewood.</h2>
-            <p className={styles.lead}>
-              Start with an easy riddle, then tap for clues only when you need them. The third clue gives the shop away, so first-timers can keep strolling instead of getting stuck.
-              These are the same Friendly Mode clues used in the live hunt.
-            </p>
+            <h2 className={styles.h2}>Solve the street, one doorway at a time.</h2>
+            <p className={styles.leadVerse}>Read the riddle, guess where to look, stroll on over, snap your picture, then on to the next — and look what you took.</p>
+            <p className={styles.lead}>Can&apos;t crack one? Ask for a clue or two. The last clue names the shop outright, so nobody&apos;s left stranded on the sidewalk. Give it a shot and see how you do.</p>
           </div>
 
           <div className={styles.huntGrid} data-rise>
@@ -557,11 +555,11 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className={styles.featBlue}>
+            <div className={styles.featHuntCard}>
               <span className={`${styles.eyebrow} ${styles.mono} ${styles.eyebrowFlush}`}>Scavenger hunts</span>
               <strong className={styles.featTitle}>Four free stops, clues when you need them</strong>
-              <p className={styles.featBlueCopy}>Riddle first, three clues after. The last clue names the shop so the walk keeps moving.</p>
-              <Link className={`${styles.btn} ${styles.btnSm} ${styles.btnLime} ${styles.featCta}`} href="/calgary/hunt?type=friendly">
+              <p className={styles.featHuntCopy}>Riddle first, three clues after. The last clue names the shop so the walk keeps moving.</p>
+              <Link className={`${styles.btn} ${styles.btnSm} ${styles.btnPaper} ${styles.featCta}`} href="/calgary/hunt?type=friendly">
                 Try the hunt<Arrow size={13} />
               </Link>
             </div>
