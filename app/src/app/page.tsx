@@ -511,9 +511,9 @@ export default function LandingPage() {
                 </svg>
                 <span className={styles.huntShade} aria-hidden />
                 <figcaption className={styles.huntCap}>
-                  <span className={`${styles.huntCapK} ${styles.mono}`}>The challenge at this stop</span>
+                  <span className={`${styles.huntCapK} ${styles.mono}`}>{cluesOpen >= 3 || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
                   <span className={styles.huntCapV}>
-                    {huntDone ? "Ninth Avenue SE, Inglewood" : currentStop?.challenge ?? "Take a proof photo at the door."}
+                    {huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? currentStop?.challenge ?? "Take a proof photo at the door." : "Open the final clue when you want the shop and photo prompt revealed."}
                   </span>
                 </figcaption>
               </figure>
