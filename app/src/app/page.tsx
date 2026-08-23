@@ -21,9 +21,28 @@ type Business = {
   blurb?: string;
 };
 
+type Hunt = {
+  slug: string;
+  name: string;
+  stop_ids: string[];
+  mode?: string;
+};
+
+type HuntStop = {
+  id: string;
+  name: string;
+  riddle: string;
+  clue_1?: string;
+  clue_2?: string;
+  clue_3?: string;
+  challenge?: string;
+  difficulty: string;
+};
+
 type StrollData = {
   businesses: Business[];
-  hunts?: { slug: string; name: string; stop_ids: string[] }[];
+  huntStops?: HuntStop[];
+  hunts?: Hunt[];
 };
 
 /* Six moods with shorter labels than the map app's, but the same colours — they come
@@ -41,73 +60,42 @@ const MOODS: { id: Category; label: string; color: string }[] = (
 const MOOD_COLOR = Object.fromEntries(MOODS.map((m) => [m.id, m.color])) as Record<Category, string>;
 const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Record<Category, string>;
 
-/* The punch dots keep one tint per stop; the front-page postcard stamps use
+/* The punch dots keep one tint per stop; the front-page postcard marks use
    the four numbered proof-photo examples Jonathan supplied. */
 const STOP_TINTS = ["#0B47E8", "#F9BFD0", "#DCF23C", "#FBE08A"];
 const POSTCARD_STAMPS = [
-  { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard stamp", static: true },
-  { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard stamp", static: true },
-  { src: "/brand/hunt-postcard/01-fairs-fair-books.jpeg", alt: "Fair's Fair Books postcard stamp", static: false },
-  { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard stamp", static: false },
+  { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard photo", static: true },
+  { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard photo", static: true },
+  { src: "/brand/hunt-postcard/01-fairs-fair-books.jpeg", alt: "Fair's Fair Books postcard photo", static: false },
+  { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard photo", static: false },
 ];
 
-const HOMEPAGE_RIDDLES = [
-  {
-    id: "fairs-fair-books",
-    name: "Fair's Fair Books",
-    difficulty: "easy",
-    riddle:
-      "Shelves upon shelves of the pages of old,\nwhere a story once read can be bought and resold.\nBring in your finished ones, trade for some more,\nthe river-end block hides this well-loved door.",
-    clues: [
-      "Look for a place that gives used books another walk around the block.",
-      "You are after the bookshop near the east end of the Inglewood strip.",
-      "Fair's Fair Books",
-    ],
-    answers: [
-      "fair's fair books",
-      "fairs fair books",
-      "fair fair books",
-      "fair's fair",
-      "fairs fair",
-      "fair fair",
-      "book store",
-      "bookstore",
-      "book shop",
-      "bookshop",
-      "used book store",
-      "used bookstore",
-      "used books",
-      "books",
-    ],
-  },
-  {
-    id: "doughnut-party",
-    name: "Doughnut Party",
-    difficulty: "sweet",
-    riddle:
-      "A party of circles, glazed, bright and sweet,\nwaits in a window just off the street.\nPick the shop where sprinkles play,\nand your postcard gets one more hooray.",
-    clues: [
-      "This stop is all about a colourful treat with a hole in the middle.",
-      "The name sounds like a celebration for doughnuts.",
-      "Doughnut Party",
-    ],
-    answers: [
-      "doughnut party",
-      "donut party",
-      "doughnuts party",
-      "donuts party",
-      "doughnut",
-      "donut",
-      "doughnuts",
-      "donuts",
-      "doughnut shop",
-      "donut shop",
-      "sprinkles",
-      "glazed doughnuts",
-      "glazed donuts",
-    ],
-  },
-];
+const CLUE_BUTTON_LABELS = ["Give me a clue", "One more", "Just tell me"];
+const CLUE_SUBLABEL = "Three clues per stop";
+const CLUE_DONE_LINE = "Every stop has the same three. You can’t get properly lost.";
+
+function answerOptions(name: string) {
+  const withoutParenthetical = name.replace(/\s*\([^)]*\)/g, "").trim();
+  const variants = new Set([name, withoutParenthetical]);
+  variants.forEach((variant) => {
+    variants.add(variant.replace(/[’']/g, ""));
+    variants.add(variant.replace(/\b\(The\)|\bThe\b/gi, "").trim());
+  });
+  return Array.from(variants).filter(Boolean);
+}
+
+function stopCounterText(stopIndex: number, total: number) {
+  const remaining = total - stopIndex - 1;
+  if (remaining >= 3) return "Three more stops, then a postcard.";
+  if (remaining === 2) return "Two more stops, then a postcard.";
+  if (remaining === 1) return "One more stop, then a postcard.";
+  return "Last stop — then the postcard.";
+}
+
+function cluesForStop(stop: HuntStop | null) {
+  if (!stop) return [];
+  return [stop.clue_1, stop.clue_2, stop.clue_3].filter(Boolean) as string[];
+}
 
 const PLANS = [
   {
@@ -227,13 +215,6 @@ export default function LandingPage() {
   }, []);
 
   const businesses = useMemo(() => data?.businesses ?? [], [data]);
-  const totalCount = businesses.length;
-  const counts = useMemo(() => {
-    const tally = {} as Record<Category, number>;
-    businesses.forEach((b) => { tally[b.category] = (tally[b.category] ?? 0) + 1; });
-    return tally;
-  }, [businesses]);
-
   const visible = useMemo(() => businesses.filter((b) => active.has(b.category)), [businesses, active]);
   const litCount = visible.length;
 
@@ -242,9 +223,15 @@ export default function LandingPage() {
     return names.length ? names.concat(names) : [];
   }, [businesses]);
 
-  const huntDone = stop >= HOMEPAGE_RIDDLES.length;
-  const currentStop = HOMEPAGE_RIDDLES[Math.min(stop, HOMEPAGE_RIDDLES.length - 1)] ?? null;
-  const clueLadder = currentStop?.clues ?? [];
+  const huntStopsById = useMemo(() => new Map((data?.huntStops ?? []).map((item) => [item.id, item])), [data]);
+  const friendlyHunt = useMemo(() => data?.hunts?.find((hunt) => hunt.mode === "friendly") ?? data?.hunts?.[0], [data]);
+  const homepageRiddles = useMemo(() => (friendlyHunt?.stop_ids ?? [])
+    .map((id) => huntStopsById.get(id))
+    .filter(Boolean)
+    .slice(0, 4) as HuntStop[], [friendlyHunt, huntStopsById]);
+  const huntDone = homepageRiddles.length > 0 && stop >= homepageRiddles.length;
+  const currentStop = homepageRiddles[Math.min(stop, Math.max(homepageRiddles.length - 1, 0))] ?? null;
+  const clueLadder = cluesForStop(currentStop);
 
   useEffect(() => {
     if (!showConfetti) return;
@@ -340,8 +327,8 @@ export default function LandingPage() {
 
   const goNextRiddle = () => {
     setStop((s) => {
-      const next = Math.min(s + 1, HOMEPAGE_RIDDLES.length);
-      if (next >= HOMEPAGE_RIDDLES.length && s < HOMEPAGE_RIDDLES.length) {
+      const next = Math.min(s + 1, homepageRiddles.length);
+      if (next >= homepageRiddles.length && s < homepageRiddles.length) {
         setShowConfetti(true);
         setShareOpen(true);
       }
@@ -352,10 +339,18 @@ export default function LandingPage() {
     setAnswerStatus("idle");
   };
 
+  const revealHomeClue = () => {
+    if (!currentStop) return;
+    setCluesOpen((n) => Math.min(3, n + 1));
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("stroll:analytics", { detail: { event: "clue_revealed", surface: "home_demo", stop_index: stop, clue_index: Math.min(3, cluesOpen + 1) } }));
+    }
+  };
+
   const submitGuess = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!currentStop || huntDone) return;
-    if (isCloseGuess(answerText, currentStop.answers)) {
+    if (isCloseGuess(answerText, answerOptions(currentStop.name))) {
       goNextRiddle();
       return;
     }
@@ -391,15 +386,15 @@ export default function LandingPage() {
         <div className={styles.heroCopy}>
           <span className={styles.badge} data-rise>
             <span className={styles.badgeNew}>New</span>
-            Inglewood, Calgary is live{totalCount ? ` — ${totalCount} places mapped` : ""}
+            Inglewood, Calgary is live
           </span>
-          <h1 className={styles.h1} data-rise>The city map that looks like the walk</h1>
+          <h1 className={styles.h1} data-rise>Stroll the strip like never before.</h1>
           <p className={styles.heroSub} data-rise>
-            Every business drawn on its real building, a filter for whatever you feel like, and scavenger hunts that get you through the door. No account, no app.
+            Ready for some casual adventure? Start a riddle hunt and go find the Inglewood doors you&apos;ve walked past a hundred times — or just scroll your stroll and see what the street&apos;s got, whatever you&apos;re in the mood for.
           </p>
           <div className={styles.heroCta} data-rise>
-            <Link className={`${styles.btn} ${styles.btnBlue}`} href="/calgary">Explore the map<Arrow /></Link>
-            <Link className={`${styles.btn} ${styles.btnOutline}`} href="/calgary/hunt?type=friendly">Start a free hunt</Link>
+            <Link className={`${styles.btn} ${styles.btnBlue}`} href="/calgary/hunt?type=friendly">Start a riddle hunt<Arrow /></Link>
+            <Link className={`${styles.btn} ${styles.btnOutline}`} href="/calgary">Explore the map</Link>
           </div>
         </div>
 
@@ -431,7 +426,6 @@ export default function LandingPage() {
                     >
                       <i style={on ? undefined : { background: mood.color, opacity: 1 }} />
                       {mood.label}
-                      {counts[mood.id] ? <small>{counts[mood.id]}</small> : null}
                     </button>
                   );
                 })}
@@ -452,7 +446,7 @@ export default function LandingPage() {
               </div>
 
               <span className={styles.hint}>
-                {litCount ? `${litCount} of ${totalCount} places lit · drag to pan` : "Loading Inglewood…"}
+                {litCount ? "Drag to pan · tap a doorway" : "Loading Inglewood…"}
               </span>
             </div>
           </div>
@@ -493,8 +487,8 @@ export default function LandingPage() {
                   <path d="M3 5.5h14M5.5 10h9M8 14.5h4" stroke="#C2296B" strokeWidth="1.6" strokeLinecap="round" />
                 </svg>
               </span>
-              <strong className={styles.valueTitle}>Filter by mood</strong>
-              <p className={styles.valueCopy}>Six moods, not forty categories. Turn one off and that stretch goes quiet.</p>
+              <strong className={styles.valueTitle}>Scroll your stroll.</strong>
+              <p className={styles.valueCopy}>Pick a mood and see what’s open right now.</p>
             </div>
             <div className={styles.valueCard}>
               <span className={styles.valueIcon} style={{ background: "#EDF7B8" }}>
@@ -525,7 +519,7 @@ export default function LandingPage() {
           <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
             <span className={`${styles.eyebrow} ${styles.eyebrowPink} ${styles.mono}`}>The hunt</span>
             <h2 className={styles.h2}>Solve the street, one doorway at a time.</h2>
-            <p className={styles.leadVerse}>Read the riddle, guess where to look, stroll on over, snap your picture, then on to the next — and look what you took.</p>
+            <p className={styles.leadVerse}>Read the riddle, guess where to look,<br />stroll on over, snap your picture,<br />then on to the next — and look what you took.</p>
             <p className={styles.lead}>Can&apos;t crack one? Ask for a clue or two. The last clue names the shop outright, so nobody&apos;s left stranded on the sidewalk. Give it a shot and see how you do.</p>
           </div>
 
@@ -533,24 +527,27 @@ export default function LandingPage() {
             <div className={styles.huntPanel}>
               <div className={styles.huntHead}>
                 <span className={`${styles.huntStep} ${styles.mono}`}>
-                  Friendly Mode · postcard stop {huntDone ? HOMEPAGE_RIDDLES.length : stop + 1} of {HOMEPAGE_RIDDLES.length}
+                  Friendly Mode · stop {huntDone ? homepageRiddles.length : stop + 1} of {homepageRiddles.length || 4}
                 </span>
                 <span className={styles.punches}>
                   {POSTCARD_STAMPS.map((_, i) => (
-                    <span className={styles.punch} key={i} style={i < 2 + stop ? { background: STOP_TINTS[i] } : undefined} />
+                    <span className={styles.punch} key={i} style={i < Math.min(POSTCARD_STAMPS.length, Math.max(0, stop)) ? { background: STOP_TINTS[i] } : undefined} />
                   ))}
                 </span>
               </div>
 
               <div className={styles.riddleCard}>
                 <span className={styles.riddleTag}>
-                  {huntDone ? "Postcard complete" : `Stamp ${stop + 3} · ${currentStop.difficulty}`}
+                  {huntDone ? "Postcard complete" : `Stop ${stop + 1} · ${currentStop?.difficulty ?? "easy"}`}
                 </span>
                 <p className={`${styles.riddleText} ${styles.riddleVerse}`}>
                   {huntDone
                     ? "Four neighbourhood moments, one finished Inglewood postcard."
-                    : currentStop.riddle}
+                    : currentStop?.riddle ?? "Loading the first riddle…"}
                 </p>
+                {!huntDone && currentStop?.challenge && (
+                  <p className={styles.riddleChallenge}><b>At this stop:</b> {currentStop.challenge}</p>
+                )}
                 {huntDone ? (
                   <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
                 ) : (
@@ -569,14 +566,19 @@ export default function LandingPage() {
                   </button>
                 ) : (
                   <>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
-                      onClick={() => setCluesOpen((n) => Math.min(3, n + 1))}
-                      disabled={cluesOpen >= 3}
-                    >
-                      {cluesOpen >= 3 ? "All clues shown" : `Show clue ${cluesOpen + 1}`}<Arrow />
-                    </button>
+                    {cluesOpen >= 3 ? (
+                      <span className={styles.huntNote}>{CLUE_DONE_LINE}</span>
+                    ) : (
+                      <button
+                        type="button"
+                        className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
+                        onClick={revealHomeClue}
+                        aria-expanded={cluesOpen > 0}
+                      >
+                        {CLUE_BUTTON_LABELS[cluesOpen]}<Arrow />
+                        {cluesOpen === 0 && <small>{CLUE_SUBLABEL}</small>}
+                      </button>
+                    )}
                     <form className={styles.answerForm} onSubmit={submitGuess}>
                       <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
                       <input
@@ -594,7 +596,7 @@ export default function LandingPage() {
                 )}
                 <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
                 <span className={styles.huntNote}>
-                  {huntDone ? "Postcard completed" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${HOMEPAGE_RIDDLES.length - stop} riddles to go`}
+                  {huntDone ? "Postcard completed" : stopCounterText(stop, homepageRiddles.length || 4)}
                 </span>
               </div>
             </div>
@@ -611,18 +613,18 @@ export default function LandingPage() {
                       <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : "Postcard in progress"}</span>
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
-                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Two stamps are in. Solve the riddle for the next one." : "One last sweet stop finishes it."}</strong>
-                    <div className={styles.mementoGrid} aria-label="Postcard stamps earned so far">
-                      {POSTCARD_STAMPS.map((stamp, i) => {
-                        const stamped = i < 2 || i < 2 + stop;
+                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Solve the riddle and the next postcard mark fills in." : "One last stop finishes it."}</strong>
+                    <div className={styles.mementoGrid} aria-label="Postcard photos earned so far">
+                      {POSTCARD_STAMPS.map((mark, i) => {
+                        const found = i < 2 || i < 2 + stop;
                         return (
-                          <span key={stamp.src} className={stamped ? styles.stampFilled : undefined}>
-                            {stamped ? <img src={stamp.src} alt={stamp.alt} /> : <i>{i + 1}</i>}
+                          <span key={mark.src} className={found ? styles.stampFilled : undefined}>
+                            {found ? <img src={mark.src} alt={mark.alt} /> : <i>{i + 1}</i>}
                           </span>
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Share it to Instagram and tag @stroll_city with #StrollInglewood to enter the monthly Inglewood Basket draw, valued at approximately $250." : "The next image lands only after the riddle is completed."}</p>
+                    <p>{huntDone ? "Post it with #StrollInglewood to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together." : "The next photo slot fills in after the riddle is completed."}</p>
                   </div>
                 </div>
               </figure>
@@ -630,8 +632,8 @@ export default function LandingPage() {
               {huntDone && (
                 <div className={styles.shareCard}>
                   <span className={`${styles.mementoKicker} ${styles.mono}`}>Inglewood Basket draw</span>
-                  <strong className={styles.postcardTitle}>Want in? Share the postcard.</strong>
-                  <p className={styles.postcardCopy}>Finishing makes the postcard. Sharing it is what enters the monthly Inglewood Basket prize draw — approximately $250 in local value.</p>
+                  <strong className={styles.postcardTitle}>The finish</strong>
+                  <p className={styles.postcardCopy}>Your four photos land on a postcard, postmarked Inglewood. Keep it, send it to whoever said there was nothing to do today — or post it with <b>#StrollInglewood</b> to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together.</p>
                   <div className={styles.socialLinks} aria-label="Social posting links">
                     <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Open Instagram<Arrow size={12} /></a>
                     <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Open Facebook<Arrow size={12} /></a>

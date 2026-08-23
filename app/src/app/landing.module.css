@@ -470,7 +470,27 @@
   max-width: 36ch;
 }
 .riddleHint { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-4); }
+.riddleChallenge {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #F0D2DE;
+  border-radius: 14px;
+  background: #FFF7FA;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-2);
+}
+.riddleChallenge b { color: var(--pink-ink); }
 .huntActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.huntActions .btnDark small {
+  display: block;
+  margin-left: 2px;
+  color: rgba(255,255,255,.72);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
 .answerForm {
   position: relative;
   display: block;
@@ -657,7 +677,7 @@
   animation: stampIn .24s ease-out;
 }
 .stampFilled::after {
-  content: "STAMPED";
+  content: "FOUND";
   position: absolute;
   left: 50%;
   bottom: 7px;

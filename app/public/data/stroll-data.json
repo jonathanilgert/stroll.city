@@ -134,7 +134,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade"
+      ]
     },
     {
       "id": "6eaa141841dc",
@@ -179,7 +182,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid",
+        "Savoury"
+      ]
     },
     {
       "id": "9df18e70bdc2",
@@ -224,7 +231,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Readable"
+      ]
     },
     {
       "id": "233bf3afee12",
@@ -269,7 +279,8 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": []
     },
     {
       "id": "6d69b904c020",
@@ -314,7 +325,8 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": []
     },
     {
       "id": "88699a0736e7",
@@ -357,7 +369,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "236192258ad8",
@@ -401,7 +416,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Readable",
+        "Liquid"
+      ]
     },
     {
       "id": "94a0baf17bed",
@@ -446,7 +465,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "16e779e13027",
@@ -568,7 +590,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "687822f20e5a",
@@ -613,7 +638,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Green",
+        "Restorative"
+      ]
     },
     {
       "id": "1716d99864a3",
@@ -697,7 +726,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "f694ae890130",
@@ -780,7 +812,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "45932e0c84d0",
@@ -825,7 +860,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade"
+      ]
     },
     {
       "id": "841028781fc1",
@@ -863,7 +901,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "74588358da7f",
@@ -907,7 +948,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "5bc4c633989f",
@@ -992,7 +1036,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Homely"
+      ]
     },
     {
       "id": "916108d117d0",
@@ -1037,7 +1084,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "c508b8125dfe",
@@ -1081,7 +1131,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade",
+        "Wearable"
+      ]
     },
     {
       "id": "aa668db97c13",
@@ -1126,7 +1180,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Homely",
+        "Curious"
+      ]
     },
     {
       "id": "2fa2d989f7e9",
@@ -1170,7 +1228,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "46cf2dc3cfe4",
@@ -1215,7 +1276,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "09c9fd233081",
@@ -1260,7 +1324,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury",
+        "Liquid"
+      ]
     },
     {
       "id": "35c1f13079a4",
@@ -1305,7 +1373,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "e3e6dc5ee309",
@@ -1349,7 +1420,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury",
+        "Sweet"
+      ]
     },
     {
       "id": "55392d8d40b5",
@@ -1394,7 +1469,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Spicy",
+        "Savoury"
+      ]
     },
     {
       "id": "4e8f371b021c",
@@ -1439,7 +1518,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "b8e8d0fd2d3a",
@@ -1484,7 +1566,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Spicy",
+        "Savoury"
+      ]
     },
     {
       "id": "a530ce1bb27e",
@@ -1528,7 +1614,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "d19aba1a4eb6",
@@ -1572,7 +1661,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Homely"
+      ]
     },
     {
       "id": "1d1c8a07d95a",
@@ -1617,7 +1709,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "771bbaecb1e6",
@@ -1662,7 +1757,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "524c489f3b72",
@@ -1707,7 +1805,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Spicy",
+        "Savoury"
+      ]
     },
     {
       "id": "2aaca500ccf5",
@@ -1752,7 +1854,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "21744966d801",
@@ -1797,7 +1902,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "8aa03ffcf4d9",
@@ -1842,7 +1950,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "0d0ecc0fa057",
@@ -1887,7 +1998,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "c1d8eab13593",
@@ -1931,7 +2045,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "eede4681c3bf",
@@ -2015,7 +2132,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "a90455765ddf",
@@ -2060,7 +2180,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid",
+        "Curious"
+      ]
     },
     {
       "id": "84d5b791561e",
@@ -2143,7 +2267,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Homely"
+      ]
     },
     {
       "id": "37ed1bddcb49",
@@ -2188,7 +2315,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "97fdf6fcf0b3",
@@ -2233,7 +2363,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid",
+        "Savoury"
+      ]
     },
     {
       "id": "0df04872d129",
@@ -2278,7 +2412,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "2dd4b6846c10",
@@ -2362,7 +2499,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Listenable"
+      ]
     },
     {
       "id": "a7a9fba12b4b",
@@ -2407,7 +2547,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade",
+        "Homely"
+      ]
     },
     {
       "id": "4574605e3680",
@@ -2452,7 +2596,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "5089a6babc37",
@@ -2497,7 +2644,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Spicy",
+        "Savoury"
+      ]
     },
     {
       "id": "d161032761c5",
@@ -2541,7 +2692,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "4bea70511cd8",
@@ -2586,7 +2740,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade"
+      ]
     },
     {
       "id": "67083be6ccc2",
@@ -2630,7 +2787,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "5007e41b4194",
@@ -2675,7 +2835,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Listenable",
+        "Liquid"
+      ]
     },
     {
       "id": "797848edd816",
@@ -2719,7 +2883,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "54c3547cc3d7",
@@ -2764,7 +2931,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "cab5f9ab3488",
@@ -2808,7 +2978,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Homely",
+        "Handmade"
+      ]
     },
     {
       "id": "487a3fcc7b5d",
@@ -2852,7 +3026,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable",
+        "Handmade"
+      ]
     },
     {
       "id": "f042b4218d69",
@@ -2897,7 +3075,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Curious"
+      ]
     },
     {
       "id": "75154b1f16b5",
@@ -2942,7 +3123,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "c1beb8d914b3",
@@ -2986,7 +3170,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "e38de7ec7f73",
@@ -3031,7 +3218,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable",
+        "Handmade"
+      ]
     },
     {
       "id": "277cf40085c3",
@@ -3076,7 +3267,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "d01c631dc549",
@@ -3121,7 +3315,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "2a4e53351036",
@@ -3205,7 +3402,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "fcc6c0f13afd",
@@ -3249,7 +3449,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "6091b65fad46",
@@ -3294,7 +3497,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "b2c3851f5ef3",
@@ -3339,7 +3545,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "a9233a05bb50",
@@ -3384,7 +3593,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "e670bbb1664a",
@@ -3930,7 +4142,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "807072a32dc5",
@@ -3973,7 +4188,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "cc8c3794c49e",
@@ -4051,7 +4269,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "f50eef980e1b",
@@ -4094,7 +4315,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "f3be6109ae01",
@@ -4139,7 +4363,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Curious"
+      ]
     },
     {
       "id": "4ff6ccc46bc6",
@@ -4184,7 +4411,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "4b6002b0a66d",
@@ -4229,7 +4459,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Listenable"
+      ]
     },
     {
       "id": "e22ed6114477",
@@ -4273,7 +4506,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "b1d63fca1b08",
@@ -4317,7 +4553,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "1af4eb6bb2fd",
@@ -4401,7 +4640,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade",
+        "Wearable"
+      ]
     },
     {
       "id": "c36b3a13013f",
@@ -4525,7 +4768,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "8e71e576c7ad",
@@ -4609,7 +4855,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "a508aaae5b24",
@@ -4853,7 +5102,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "f380866520e2",
@@ -4898,7 +5150,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Sweet"
+      ]
     },
     {
       "id": "a783f67510af",
@@ -4943,7 +5198,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade"
+      ]
     },
     {
       "id": "cff5275976cd",
@@ -5028,7 +5286,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable",
+        "Handmade"
+      ]
     },
     {
       "id": "9257e6fa4ed5",
@@ -5112,7 +5374,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "4c72fe2adf42",
@@ -5235,7 +5500,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "12d77445dc0f",
@@ -5280,7 +5548,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "3df783573f2f",
@@ -5323,7 +5594,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "b49cbb8240cc",
@@ -5408,7 +5682,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "27762f395b94",
@@ -5453,7 +5730,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "e2da7a713064",
@@ -5496,7 +5776,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "660cce1585b4",
@@ -5541,7 +5824,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Curious",
+        "Green"
+      ]
     },
     {
       "id": "fe1f0bae0b79",
@@ -5706,7 +5993,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Wearable"
+      ]
     },
     {
       "id": "0a462a7fdf36",
@@ -5791,7 +6081,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Restorative"
+      ]
     },
     {
       "id": "f0e71e686754",
@@ -5916,7 +6209,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Green"
+      ]
     },
     {
       "id": "baa6a523115f",
@@ -5960,7 +6256,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Curious"
+      ]
     },
     {
       "id": "bced601bb20a",
@@ -6164,7 +6463,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid",
+        "Savoury"
+      ]
     },
     {
       "id": "303651f0e95a",
@@ -6287,7 +6590,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Green"
+      ]
     },
     {
       "id": "54960e7da203",
@@ -6325,7 +6631,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "0150a1d87973",
@@ -6445,7 +6754,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Curious"
+      ]
     },
     {
       "id": "8f4da35ae374",
@@ -6529,7 +6841,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade",
+        "Curious"
+      ]
     },
     {
       "id": "bdb45997e4f9",
@@ -6652,7 +6968,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Liquid"
+      ]
     },
     {
       "id": "44b81446a20e",
@@ -6697,7 +7016,11 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Handmade",
+        "Restorative"
+      ]
     },
     {
       "id": "c21c1143432a",
@@ -6740,7 +7063,10 @@
       "confidence": "licence",
       "hunt_eligible": true,
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "sensory_tags": [
+        "Savoury"
+      ]
     },
     {
       "id": "dbea23c30e5b",
@@ -53141,8 +53467,8 @@
       "riddle": "They sell you no trinket, no treat and no tea,\njust rooms not yet built that they already see.\nWith rulers and pencils they dream up a place,\nthen hammer it up into real living space.",
       "clue_1": "Nothing here goes home in a shopping bag - it's a studio where houses are designed and then actually built.",
       "clue_2": "Far east end of the strip, the 1200 block of 9 Ave SE, on the north side (the Bow River side), past 12 Street.",
-      "clue_3": "Bioi",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Bioi, 1226A 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most interesting window or doorway on this block.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53158,8 +53484,8 @@
       "riddle": "Take the middle of doors, then climb up a flight,\nwhere craft beer and wine keep good company at night.\nSmall plates out of Europe, perogies and cheer,\na hideaway perched up above the street here.",
       "clue_1": "A drinks-first spot famous for craft beer, with a wine list for everyone else, plus European-style small plates.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, north side, right next to the all-day brunch place at 1212.",
-      "clue_3": "Rain Dog Bar",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Rain Dog Bar, 1214B 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the staircase door from the sidewalk and count the second-floor windows.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53173,10 +53499,10 @@
       "business_slug": "fair-s-fair-for-book-lovers",
       "name": "Fair's Fair (For Book Lovers)",
       "riddle": "Shelves upon shelves of the pages of old,\nwhere a story once read can be bought and resold.\nBring in your finished ones, trade for some more,\nthe river-end block hides this well-loved door.",
-      "clue_1": "Paper, spines and second chances - a shop for people who read a lot and re-read even more.",
-      "clue_2": "West end of the strip, the 900 block of 9 Ave SE, south side, closest to the Fort Calgary and Bow River end.",
-      "clue_3": "Fair's Fair (For Book Lovers)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_1": "Paper, spines and second chances. It’s a used bookshop, and it’ll take your finished ones in trade.",
+      "clue_2": "West end of the strip, down by the river — the 900 block of 9 Ave SE.",
+      "clue_3": "It’s Fair's Fair (For Book Lovers), 907 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the tallest book on any shelf and photograph it next to your hand for scale.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53192,8 +53518,8 @@
       "riddle": "Bracelets and blouses and bags on a hook,\na gathered-up collection wherever you look.\nSmall pretty things from all over to wear,\nthe west end of nine keeps this little place there.",
       "clue_1": "A small boutique stocking jewellery, clothing, accessories and gifts collected from all over the world.",
       "clue_2": "West end of the strip, the 900 block of 9 Ave SE, north side, in unit 103 of the building at 902.",
-      "clue_3": "Tuu Shop",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Tuu Shop, 902 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Spot something in the window that travelled from another country and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53209,8 +53535,8 @@
       "riddle": "A pair of round rims with a chain in between,\nfixed up by young hands still learning the scene.\nPay what you can, then go rolling away,\nthe west end of nine sends you off on your way.",
       "clue_1": "Not only a store - it's a charity where teenagers learn to fix the things that roll.",
       "clue_2": "West end of the strip, the 900 block of 9 Ave SE, south side - same address as the big used-book shop, one unit over.",
-      "clue_3": "Two Wheel View",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Two Wheel View, 907 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Count the bikes you can see from the doorway and photograph the smallest one.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53226,8 +53552,8 @@
       "riddle": "Cold in a cone or a cup if you please,\nin flavours invented to make your brain freeze.\nPick out a topping or maybe pick two,\nthe eleven-hundred block is waiting for you.",
       "clue_1": "Something cold and scooped, best on a hot Calgary afternoon.",
       "clue_2": "Middle of the strip, the 1100 block of 9 Ave SE, south side.",
-      "clue_3": "Sweet Treats Co.",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Sweet Treats Co., 1109 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the flavour with the strangest name on the board.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53243,8 +53569,8 @@
       "riddle": "New ones up top and the old ones below,\nwith ladders that slide where the tall shelves go.\nAn espresso to sip while you hunt for a read,\na hundred-year building is all that you need.",
       "clue_1": "Books on the main floor, more books downstairs, and coffee while you browse.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, south side, in a block of shops built back in 1912.",
-      "clue_3": "Next Page (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Next Page (The), 1217A 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the oldest-looking book in the basement and photograph its spine.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53260,8 +53586,8 @@
       "riddle": "Brunch with a twist from a far-away shore,\nPhilippine flavours are what's here in store.\nMorning-time plates with a tropical flair,\nthe eleven-hundred block - go looking right there.",
       "clue_1": "A brunch spot mixing Filipino flavours with breakfast classics.",
       "clue_2": "Middle of the strip, the 1100 block of 9 Ave SE, south side, just east of the ice cream shop.",
-      "clue_3": "Lasa By Cara",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Lasa By Cara, 1117 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the most colourful dish on the menu board.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53277,8 +53603,8 @@
       "riddle": "Leaves in hot water left steeping a while,\nin colour-coded tins all lined up in style.\nLook up at the ceiling, pressed tin overhead,\nskip past the coffee and sip green instead.",
       "clue_1": "No coffee needed here - the whole menu starts with leaves in hot water.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, south side, right beside the bookstore-with-a-coffee-bar.",
-      "clue_3": "Oolong Tea House",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Oolong Tea House, 1219A 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the tea with the most unusual name on the wall.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53294,8 +53620,8 @@
       "riddle": "Jars full of botanicals, powders and oils,\nbring your own bottle and cut down on spoils.\nNo prescriptions in here, just good scents in the air,\nthe west end of nine is where you'll find it there.",
       "clue_1": "Herbs, natural body care and refills - a low-waste wellness shop, and definitely not a pharmacy.",
       "clue_2": "West end of the strip, the 900 block of 9 Ave SE, south side, a few doors east of the big used-book shop.",
-      "clue_3": "Apothecary In Inglewood (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Apothecary In Inglewood (The), 921 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the jar with the longest ingredient name on it and photograph the label.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -53311,8 +53637,8 @@
       "riddle": "Gowns on a rack, floor-length and grand,\nfor weddings and grads and a dance-floor band.\nSequins and satin all shimmer inside,\nthe east end of nine, where the windows are wide.",
       "clue_1": "A shop where nearly everything on the rack is a dress meant for a very big day.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, south side, past 12 Street.",
-      "clue_3": "Lily By Lyla",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Lily By Lyla, 1221 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the sparkliest dress you can see in the window.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53328,8 +53654,8 @@
       "riddle": "A tiny bright needle, a glint and a gleam,\nthen gold in your ear like a small shining beam.\nStuds, hoops and gems in a case in a row,\nmid-block on the avenue, that's where to go.",
       "clue_1": "You leave here wearing a little more jewellery than you arrived with - and it doesn't just slip off.",
       "clue_2": "Middle of the strip, the 1100 block of 9 Ave SE, south side, right at the west end of that block.",
-      "clue_3": "Opulence Piercing",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Opulence Piercing, 1105 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the shiniest piece of jewellery in the display case.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53345,8 +53671,8 @@
       "riddle": "Pictures on walls and some art that goes deeper,\nink under skin from a steady-armed keeper.\nStep off the sidewalk and through the right door,\nthe west end of nine hides a hideaway floor.",
       "clue_1": "Half art space, half tattoo studio - two very different kinds of picture under one roof.",
       "clue_2": "West end of the strip, the 900 block of 9 Ave SE, south side, in unit 10 at number 917.",
-      "clue_3": "Gallery Underground",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Gallery Underground, 917 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Ask first, then photograph your favourite artwork on the wall.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53362,8 +53688,8 @@
       "riddle": "All-day-long breakfast and bowls piled high,\na big heated patio open to sky.\nBring your laptop and coffee or come with a crowd,\nthe east end of nine, where the brunch line is loud.",
       "clue_1": "Brunch served all day, plus nachos and bowls, and a patio people happily camp out on.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, north side, right where the block begins.",
-      "clue_3": "Madison's 12|12",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Madison's 12|12, 1212 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Count the tables on the patio and photograph the busiest one.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53379,8 +53705,8 @@
       "riddle": "Dresses for weddings and grads and for guests,\nwith jewellery and shoes to go with the rest.\nA family picks every piece with great care,\nthe east end of nine - you won't miss it there.",
       "clue_1": "A women's clothing boutique especially known for dresses for special occasions.",
       "clue_2": "East end of the strip, the 1200 block of 9 Ave SE, north side, a couple of doors from the brunch spot at 1212.",
-      "clue_3": "Adorn Boutique",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Adorn Boutique, 1216A 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the dress in the window with the most sparkle and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53396,8 +53722,8 @@
       "riddle": "Cushions and lamps and a chair you could keep,\nvases and blankets to curl up and sleep.\nNothing to eat and no clothes you can wear,\njust beautiful things for a room somewhere.",
       "clue_1": "Everything inside belongs in a living room or a bedroom, not on you.",
       "clue_2": "Between the two ends of the strip, the 1000 block of 9 Ave SE, north side, just east of the 900s.",
-      "clue_3": "Curated Home (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Curated Home (The), 1004 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the softest thing in the store and photograph it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53413,8 +53739,8 @@
       "riddle": "Round as a moon and then cut into eight,\nWith cheese pulling long from the box to the plate.\nNo knife and no fork — you just fold up a slice,\nHot from the oven and gone in a trice.",
       "clue_1": "This one is all about dough, sauce and cheese — you can usually smell the oven before you find the door.",
       "clue_2": "The 1100 block of 9th Avenue SE, south side, right in the middle of the strip — look for a numbered bay tucked into the building rather than a corner spot.",
-      "clue_3": "Pronto Pizza",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Pronto Pizza, 1139 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the menu and count how many different toppings you could choose from, then pick your dream three.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53430,8 +53756,8 @@
       "riddle": "A rainbow of bundles all wound into balls,\nSoft little towers stacked high on the walls.\nTwo pointy sticks, then a loop and a twist —\nA scarf can appear from a flick of the wrist.",
       "clue_1": "Knitters and crocheters treat this place like a clubhouse; everything sold here is soft and comes in colours.",
       "clue_2": "Far east end, the 1200 block of 9th Avenue SE, south side of the street — one of the last shops before the strip runs out.",
-      "clue_3": "Stash",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Stash, 1237 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the fuzziest yarn in the shop and take a photo of the colour you would pick for a hat.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53447,8 +53773,8 @@
       "riddle": "Skinny wood legs from your grandparents' day,\nLow wooden sideboards and sofas in grey.\nNineteen-sixty is still living here,\nWhere old-fashioned somehow looks new every year.",
       "clue_1": "Furniture, but not new furniture — think tapered wooden legs and the shapes your grandparents' living room had.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, south side, in a lettered unit squeezed between neighbours.",
-      "clue_3": "Murphy's Mid-Century",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Murphy's Mid-Century, 1221B 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Spot a chair with tapered wooden legs and photograph it from floor level, looking up.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53464,8 +53790,8 @@
       "riddle": "A serpent of legend curls through the name,\nChasing a gem in a moonlit old game.\nBut the treasure in here isn't silver or gold —\nIt's noodles and rice, and it's never served cold.",
       "clue_1": "Chinese cooking, both sit-down and takeout — the kind of place that has been feeding this block a long while.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, south side, in the same tight row as the pizza place and the vintage furniture shop.",
-      "clue_3": "Dragon Pearl",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Dragon Pearl, 1223A 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Take a photo of the item on the menu with the longest name, then try to say it in one breath.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53481,8 +53807,8 @@
       "riddle": "By day it's a bean that is ground up and pressed,\nBy night it's a glass with a swirl and a rest.\nIts name is the pull that makes apples fall down —\nOne of the coziest corners in town.",
       "clue_1": "Two drinks under one roof: something hot and caffeinated in the morning, something poured from a bottle at night.",
       "clue_2": "Not on the main avenue — it's around the corner on 10th Street SE, at the west end of the district, a few steps off 9th.",
-      "clue_3": "Gravity Espresso And Wine Bar",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Gravity Espresso And Wine Bar, 909 10 St SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the drinks board and count how many items on it you cannot pronounce.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53498,8 +53824,8 @@
       "riddle": "A century-old home with a porch and a stair\nWas somebody's address; now dinner is there.\nIt sits by the Elbow, where currents run cold,\nAcross from the fort where this city took hold.",
       "clue_1": "A restaurant and bar where the building itself is the main attraction — it is older than almost everything around it.",
       "clue_2": "The very west end: the 800 block of 9th Avenue SE, right where the road crosses the Elbow River, directly opposite the Fort Calgary grounds.",
-      "clue_3": "Deane House",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Deane House, 806 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the front porch from the sidewalk, then find a heritage plaque nearby and note the year on it.",
       "difficulty": "easy",
       "age_restricted": true,
       "variant": 1,
@@ -53515,8 +53841,8 @@
       "riddle": "Two Italian cousins share one little shop:\nThe first is a circle with cheese on the top,\nThe second, long ribbons that twirl on a fork —\nOrder them both if you've done a day's work.",
       "clue_1": "Italian comfort food of the delivery-box kind, and both of the classic dishes are right there in the name.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, south side, in a lettered unit in the row of small storefronts.",
-      "clue_3": "Inglewood Pizza & Pasta",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Inglewood Pizza & Pasta, 1225A 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the largest pizza size on the menu and work out how many slices each person in your group would get.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53532,8 +53858,8 @@
       "riddle": "A patty, a bun and a shake thick as glue,\nPlus waffles with squares you can poke a thumb through.\nThe name is a word that the young people say\nWhen something tastes so good it makes their whole day.",
       "clue_1": "Burgers, shakes and waffles — the sort of order that needs two hands and a stack of napkins.",
       "clue_2": "The 1100 block of 9th Avenue SE, south side, in the middle stretch of the strip.",
-      "clue_3": "Bussin",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Bussin, 1121 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Take a photo of the tallest milkshake you can spot and guess how many scoops went into it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53549,8 +53875,8 @@
       "riddle": "Street food from Korea, both spicy and sweet,\nServed fast from a unit just off the main street.\nIts name is a word for a thing that holds tea,\nBut the letter it starts with is wrong — you'll soon see.",
       "clue_1": "Korean street food: quick, bold and built to be eaten standing up.",
       "clue_2": "West end, the 1000 block of 9th Avenue SE, north side — a numbered unit inside one of the newer buildings, not an old brick storefront.",
-      "clue_3": "Kups",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Kups, 1020 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the spiciest thing on the menu and dare a friend to say its name out loud.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53566,8 +53892,8 @@
       "riddle": "No shopping in here and there's nothing to eat,\nJust burpees and music and thump-thumping feet.\nThe whole thing is timed — forty-five on the dot —\nThen out to the sidewalk, exhausted and hot.",
       "clue_1": "Nobody here is buying anything or eating anything; they came to sweat in a group, all doing the same move at once.",
       "clue_2": "West end, the 1000 block of 9th Avenue SE, north side — a numbered unit in the same newer building as a small Korean spot.",
-      "clue_3": "F45 Inglewood",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s F45 Inglewood, 1020 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Take a polite photo from the sidewalk and count how many people are doing the exact same move at the same moment.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53583,8 +53909,8 @@
       "riddle": "Three letters only — the name's very short,\nBut the flavours inside are the fiery sort.\nKorea, reworked with a chef's clever hand,\nOne of the newest arrivals to land.",
       "clue_1": "Korean cooking, but the sit-down, book-a-table kind rather than the grab-it-and-go kind.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, north side, in a lettered unit facing the little shops across the road.",
-      "clue_3": "Sot",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Sot, 1216C 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the shortest business name on this block and photograph its sign.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53600,8 +53926,8 @@
       "riddle": "A counter out back where prescriptions get filled,\nWith shelves full of remedies, bottled and pilled.\nBut here is the surprise in this old corner store:\nYour letters and parcels head out through the door.",
       "clue_1": "If you had a cough, this is where a grown-up would take you — and you can send mail while you wait.",
       "clue_2": "Far east end, the 1200 block of 9th Avenue SE, south side, only a couple of doors along from the yarn shop.",
-      "clue_3": "Marshall Drugs",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Marshall Drugs, 1231 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find and photograph the strangest flavour of cough drop or lozenge on the shelf.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53617,8 +53943,8 @@
       "riddle": "Sofas and tables and chairs in a row,\nAll modern in shape from their tops to below.\nThe name is a promise that there is no end —\nNo stopping, no ceiling, no edge to defend.",
       "clue_1": "Everything inside is something you would sit on, eat at or sleep in, and all of it looks like it stepped out of a design magazine.",
       "clue_2": "West end, the 1000 block of 9th Avenue SE, south side, close to the Italian market.",
-      "clue_3": "Limitless Calgary",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Limitless Calgary, 1015 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the chair you would most want in your bedroom, and the one you would least want.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53634,8 +53960,8 @@
       "riddle": "Clothes with a history, worn once before,\nDenim and dresses from decades of yore.\nThe name is a greeting you'd say with a wave,\nThen a word for the old but still fashionably brave.",
       "clue_1": "Clothing, but nothing here is new — every single piece was already somebody else's favourite.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, north side, in a lettered unit roughly across from the drugstore.",
-      "clue_3": "Hello Vintage Inglewood",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Hello Vintage Inglewood, 1228A 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the oldest-looking garment in the shop and photograph its label.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53651,8 +53977,8 @@
       "riddle": "Olive oil, pasta and coffee to go,\nImported from Italy, row upon row.\nThe last word means 'square' — not the shape, but the town\nKind, where the neighbours all stroll up and down.",
       "clue_1": "Part grocery shop, part cafe, and nearly everything on the shelves comes from one country shaped like a boot.",
       "clue_2": "West end, the 1000 block of 9th Avenue SE, south side, a couple of doors from the modern furniture store.",
-      "clue_3": "Linas Italian Piazza",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Linas Italian Piazza, 1023 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most unusual pasta shape you can find and try to pronounce its name.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53668,8 +53994,8 @@
       "riddle": "A boy from a jungle, a cat with black stripes —\nTwo names at one address, of two different types.\nThe kitchen sends out something fragrant and spiced,\nWith warm bread for scooping and mountains of rice.",
       "clue_1": "Indian cooking — the kind of smell that reaches the sidewalk well before you reach the door.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, south side, near where the row of small storefronts begins.",
-      "clue_3": "Mowgli's/Ninja Tiger",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Mowgli's/Ninja Tiger, 1209 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph a dish on the menu you have never heard of, then look up what is in it.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53685,8 +54011,8 @@
       "riddle": "A garden from stories where everything grew,\nWith apples and orchards and mornings of dew.\nBut this one's a bistro with butter and cream,\nAnd brunch on a plate like a Frenchman's best dream.",
       "clue_1": "A small bistro with a French accent to its cooking — think brunch, butter and something rich.",
       "clue_2": "East end, the 1200 block of 9th Avenue SE, south side, right beside the mid-century furniture shop.",
-      "clue_3": "Eden (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Eden (The), 1219 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Take a photo of the most garden-like thing you can spot at this address — a plant, a flower, or a leaf on a plate.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53702,8 +54028,8 @@
       "riddle": "Wizards and witches both stop for a sip,\nWhere elixirs are stirred with a flourish and flip.\nNo cauldron of soup and no textbook of spells,\nJust glassware that bubbles and curious smells.",
       "clue_1": "A grown-ups-only bar where the drinks are treated like enchanted brews rather than plain old cocktails.",
       "clue_2": "East end of the strip, odd numbers on the south side of 9 Ave, in the 1200 block just past 12 Street.",
-      "clue_3": "Potion Room",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Potion Room, 1211 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most magical-looking bottle or glass you can spot from the doorway.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -53719,8 +54045,8 @@
       "riddle": "Racks full of denim and jackets to try,\nA mirror that asks you, 'Well then? What'll you buy?'\nShoes in a row standing patient and neat,\nAll waiting on somebody's outfit and feet.",
       "clue_1": "Not a place to eat — a place to get dressed, with staff who will happily style you head to toe.",
       "clue_2": "The west end of the strip, the 1000 block on the odd-numbered south side, close to the Fort Calgary and Bow River end of 9 Ave.",
-      "clue_3": "Espy",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Espy, 1009 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find the boldest pattern in the window display and take a photo of it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53736,8 +54062,8 @@
       "riddle": "The labels are fancy, the price tags are kind,\nEach treasure was somebody's before.\nA closetful of luxury given new life —\nStep in through the second-hand door.",
       "clue_1": "A clothing shop where everything has had a previous owner, but every name on the label is a posh one.",
       "clue_2": "East end, odd-numbered south side of the 1200 block of 9 Ave, just east of 12 Street.",
-      "clue_3": "Genuine Design",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Genuine Design, 1213 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Spot a handbag in the window, guess what it cost when it was new, then check the tag if you dare.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53753,8 +54079,8 @@
       "riddle": "Rice rolled in seaweed, all tidy and tight,\nWith ginger and wasabi adding the bite.\nChopsticks stand waiting, the soy sauce is poured,\nAnd fish from the ocean is what's on the board.",
       "clue_1": "A restaurant where a lot of the fish arrives cool and raw rather than fried.",
       "clue_2": "Right at the corner where 12 Street meets 9 Ave, at the very start of the 1200 block on the south side.",
-      "clue_3": "Ari Sushi",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Ari Sushi, 1201 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Take a photo of the menu item with the longest name.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53770,8 +54096,8 @@
       "riddle": "Its name is the noise of a cat feeling grand,\nThough no whiskers live here at all.\nJust dresses and scarves and small sparkling things\nArranged for the shoppers who call.",
       "clue_1": "A boutique for clothing and accessories, with a name borrowed from a very contented animal.",
       "clue_2": "Far east end, odd-numbered south side of 9 Ave, well into the 1200 block past 12 Street.",
-      "clue_3": "Purr",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Purr, 1227 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find something in the window a cat would love to sit on, and photograph it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53787,8 +54113,8 @@
       "riddle": "Silver balls rattle and flippers go snap,\nLights start to flash and the bumpers fire back.\nA cold glass of beer while a high score is chased,\nOld-fashioned fun in a modern-day place.",
       "clue_1": "A 19+ hangout where the entertainment is coin-operated, flashing and gloriously noisy.",
       "clue_2": "East end, odd-numbered south side of 9 Ave in the 1200 block — and look for the unit marked B.",
-      "clue_3": "Burn Block Social Club",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Burn Block Social Club, 1217B 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the pinball machine with the most colourful artwork.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -53804,8 +54130,8 @@
       "riddle": "Candles and cushions and things for a shelf,\nA gift for a friend, or for you.\nNothing gets cooked and no haircut is given,\nJust pretty things, tidy and new.",
       "clue_1": "A shop stuffed with decorations and gifts for making a house feel nicer.",
       "clue_2": "East end of the strip, odd-numbered south side, the 1200 block of 9 Ave — unit B.",
-      "clue_3": "Lemonceillo Home",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Lemonceillo Home, 1223B 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the smallest gift in the shop and photograph it next to your hand for scale.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53821,8 +54147,8 @@
       "riddle": "Roll out a mat and breathe slowly and deep,\nThen stretch till your fingertips rise.\nNo treadmills, no whistles, no scoreboard, no crowd,\nJust balance, and calm, and closed eyes.",
       "clue_1": "Not a shop and not a cafe — somewhere people come to move, stretch and breathe.",
       "clue_2": "The west end of 9 Ave, the 900 block on the odd-numbered south side, closest to Fort Calgary and the Bow River.",
-      "clue_3": "Junction 9 Wellbeing",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Junction 9 Wellbeing, 919 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Strike your best balancing pose outside the door and get a photo of it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53838,8 +54164,8 @@
       "riddle": "Long ago sirens once wailed from this door,\nWhere engines stood waiting on call.\nThe trucks grew too big and moved off down the road,\nSo now pints get poured in the hall.",
       "clue_1": "A neighbourhood pub inside a very old building that once had a far more urgent job.",
       "clue_2": "The 1000 block, even-numbered north side of 9 Ave, toward the west end of the strip.",
-      "clue_3": "Hose & Hound Pub",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Hose & Hound Pub, 1030 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph anything on the outside of the building that hints at its firefighting past.",
       "difficulty": "easy",
       "age_restricted": true,
       "variant": 1,
@@ -53855,8 +54181,8 @@
       "riddle": "Beans that get ground and then poured out as brown,\nSteam on the milk with a swirl spinning down.\nThe name means 'not digital' — dials, not screens,\nA slow kind of morning is just what it means.",
       "clue_1": "Somewhere to get caffeinated — part of a small local cafe family.",
       "clue_2": "Middle of the strip, the 1100 block on the odd-numbered south side of 9 Ave, in unit 1.",
-      "clue_3": "Analog",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Analog, 1139 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find something genuinely analog nearby — a clock with hands, a printed menu, a record — and photograph it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53872,8 +54198,8 @@
       "riddle": "Black circles stacked into towering rows,\nSpin one around and the music still flows.\nNo streaming, no downloads, no playlist, no phone,\nJust crates you can dig through and treasure to own.",
       "clue_1": "A shop for people who like their music in a form they can hold in both hands.",
       "clue_2": "The 1200 block on the even-numbered north side of 9 Ave, toward the east end.",
-      "clue_3": "Recordland",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Recordland, 1208 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find the album with the strangest cover art and photograph it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -53889,8 +54215,8 @@
       "riddle": "Knotted by hand in a faraway land,\nWith blossoms and borders and vines,\nUnroll one out flat and a floor becomes art\nIn a gallery no painting defines.",
       "clue_1": "It calls itself a gallery, but what's on show belongs under your feet, not on the wall.",
       "clue_2": "East end, odd-numbered south side, the 1200 block of 9 Ave — unit B.",
-      "clue_3": "Boft Fine Rugs Gallery",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Boft Fine Rugs Gallery, 1225B 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the rug with the most colours you can count in it.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53906,8 +54232,8 @@
       "riddle": "Bottles and jars for your cheeks and your chin,\nGentle and clean is the promise within.\nNo razors, no scissors, no clippers, no dye,\nJust soft-scented things that are pleasing to try.",
       "clue_1": "A small boutique for skin and makeup, with everything kept on the natural, gentle side.",
       "clue_2": "The 1000 block, even-numbered north side of 9 Ave, out toward the west end near Fort Calgary.",
-      "clue_3": "Evi Beauty",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Evi Beauty, 1010 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the prettiest bottle in the window and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53923,8 +54249,8 @@
       "riddle": "Chutneys get stirred and the spices get warm,\nStreet snacks arrive on a plate.\nThey come from a huge seaside Indian city —\nAll crunchy and tangy and great.",
       "clue_1": "An Indian restaurant that leans hard on the street-food style of one particular enormous coastal city.",
       "clue_2": "The 1200 block, even-numbered north side of 9 Ave, unit C, near the east end.",
-      "clue_3": "Mumbai Bites- Progressive Indian Cuisine",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Mumbai Bites- Progressive Indian Cuisine, 1214C 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the menu item with the most ingredients listed.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53940,8 +54266,8 @@
       "riddle": "When you're sniffly and sneezy and feeling unwell,\nThis counter is where you should go.\nSmall paper bags with your name printed on,\nAnd advice from the person who'd know.",
       "clue_1": "Not a browsing sort of shop — it's where prescriptions get filled.",
       "clue_2": "The very far east end of the strip, odd-numbered south side of the 1200 block, in a building with numbered suites — look for #214.",
-      "clue_3": "Marshall's Rx Centre",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Marshall's Rx Centre, 1231 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find and photograph an Rx symbol somewhere on the building or its signage.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -53957,8 +54283,8 @@
       "riddle": "Aprons go on and the paint jars come out,\nA blank little canvas is waiting for you.\nThe name sounds like whiskers, but no pets are here,\nJust brushes and colours brand new.",
       "clue_1": "A place where children make art — think aprons and paintbrushes, not paintings for sale.",
       "clue_2": "The 1200 block, even-numbered north side of 9 Ave — unit B.",
-      "clue_3": "4Cats",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s 4Cats, 1218B 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most colourful piece of kids' art you can see through the window.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53974,8 +54300,8 @@
       "riddle": "Its name holds two colours as far apart\nAs midnight and moonlight can be.\nWalk in with your hair looking one kind of way,\nWalk out, take a look, and you'll see.",
       "clue_1": "Somewhere to get your hair done, named for two strongly contrasting colours.",
       "clue_2": "The 1000 block, even-numbered north side of 9 Ave toward the west end — suite 116.",
-      "clue_3": "Onyx & Ivory Salon",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Onyx & Ivory Salon, 1020 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the shop's sign and count how many colours are actually in it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -53991,8 +54317,8 @@
       "riddle": "A stage at the back where the guitars get tuned,\nA grill that keeps sizzling all night.\nIts name is a timber that's famously hard —\nCome early to grab a good sight.",
       "clue_1": "A 19+ venue where you can have dinner and hear a live band on the very same night.",
       "clue_2": "The far east end, odd-numbered south side, deep in the 1200 block of 9 Ave.",
-      "clue_3": "Ironwood Stage And Grill",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Ironwood Stage And Grill, 1229 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find a poster or listing for an upcoming show and photograph it.",
       "difficulty": "easy",
       "age_restricted": true,
       "variant": 1,
@@ -54008,8 +54334,8 @@
       "riddle": "Behind cool marble, under glass,\nsmall towers of cream and berries pass.\nA taste of Paris, east of the Bow —\nthe fanciest cakes need three days' notice, though.",
       "clue_1": "A French-style pastry counter — think tarts, layers and cream rather than muffins and drip coffee.",
       "clue_2": "West end of the strip: the 1000 block of 9 Avenue SE, on the even-numbered (north) side, closest to the Fort Calgary end.",
-      "clue_3": "Patisseries Louise",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Patisseries Louise, 1002 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the prettiest pastry in the case without touching the glass.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54025,8 +54351,8 @@
       "riddle": "Leave your shoes beside the door,\nfind a mat upon the floor.\nBreathe in slow and stretch up tall —\nthe quietest place along the wall.",
       "clue_1": "Not a shop at all — a calm studio where the only equipment is a mat and your own breath.",
       "clue_2": "Farthest west on the hunt: the 900 block of 9 Avenue SE, a numbered unit inside a larger building near the Fort Calgary end.",
-      "clue_3": "Wymbin",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Wymbin, 919 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Hold a tree pose on the sidewalk outside and get someone to photograph you at ten seconds.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54042,8 +54368,8 @@
       "riddle": "Platters, pottery, lamps aglow,\nkitchen treasures row on row.\nThe word out front means 'craftsman's hand' —\nin unit B is where they stand.",
       "clue_1": "Home decor and kitchenware — the sort of place where a serving bowl counts as art.",
       "clue_2": "East end: the 1200 block of 9 Avenue SE, on the odd-numbered (south) side, in unit B.",
-      "clue_3": "Artesano Galleria",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Artesano Galleria, 1215 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the item in the window you'd least like to carry home on a bike, and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54059,8 +54385,8 @@
       "riddle": "Threads of blue and gold are sewn\nin patterns handed down through years.\nA shirt can say what words cannot —\ncourage stitched in rows, not tears.",
       "clue_1": "A clothing showroom built around one country's embroidery tradition, not a Canadian label.",
       "clue_2": "The 1000 block at the west end of 9 Avenue SE, even (north) side, a few doors east of the French pastry counter at 1002.",
-      "clue_3": "Be Brave",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Be Brave, 1018 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most intricate embroidery pattern you can spot from the sidewalk.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54076,8 +54402,8 @@
       "riddle": "Climb above the shops and street,\nwhere the art is free to see.\nWindows frame the downtown towers —\na ridge of glacial gravel names me.",
       "clue_1": "Contemporary art with changing exhibitions, and there's no admission charge.",
       "clue_2": "Odd-numbered (south) side of the 1000 block of 9 Avenue SE — but don't look at street level; head up inside the brick art block.",
-      "clue_3": "Esker Foundation",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Esker Foundation, 1011 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "From the top-floor windows, photograph the downtown skyline framed by the glass.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54093,8 +54419,8 @@
       "riddle": "Little pockets, pinched and pleated,\nsteamed or fried and quickly eaten.\nA New York borough lends its name\nto something small that can't be beaten.",
       "clue_1": "A quick-serve spot built around one folded, filled little food.",
       "clue_2": "Middle of the strip: the 1100 block of 9 Avenue SE, odd (south) side.",
-      "clue_3": "Brooklyn Dumplings Shop",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Brooklyn Dumplings Shop, 1113 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Count how many dumpling varieties are on the menu board, then photograph your count.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54110,8 +54436,8 @@
       "riddle": "Behind the door, steel tanks stand tall,\nhops and barley, that is all.\nThe name declares there's nought to do —\nthe taproom flatly proves that untrue.",
       "clue_1": "A craft brewery taproom — adults only, and what's poured is made on site.",
       "clue_2": "East end: the 1200 block of 9 Avenue SE, upstairs in unit 200.",
-      "clue_3": "Bored Brewing Company (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Bored Brewing Company (The), 1212 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the tap list and pick out the beer with the strangest name.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -54127,8 +54453,8 @@
       "riddle": "Felt is steamed and shaped and pressed,\na brim curled up on either side.\nThe colour that a mayor gives away\nis the crown this city wears with pride.",
       "clue_1": "A workshop where the headwear is actually made by hand, not just sold off a rack.",
       "clue_2": "Step off the avenue for this one: it sits on 11 Street SE, a block south of the 9 Avenue shops.",
-      "clue_3": "Smithbilt Hats",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Smithbilt Hats, 914 11 St SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph a white hat — bonus points if someone is wearing it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54144,8 +54470,8 @@
       "riddle": "A letter and four digits make the sign,\nno ordinary cup is poured.\nBook a seat and watch the steam —\ncoffee treated as an art, adored.",
       "clue_1": "Coffee, but served as a booked experience rather than a grab-and-go line.",
       "clue_2": "West end: the 1000 block of 9 Avenue SE, even (north) side, sharing a building with a French pastry counter.",
-      "clue_3": "T2722 Luxury Barista Experience",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s T2722 Luxury Barista Experience, 1002 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the sign and work out what its numbers might stand for.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54161,8 +54487,8 @@
       "riddle": "Racks of labels, spare and clean,\nshoes in rows on polished floor.\nA lion's short name marks the spot\nwhere the well-dressed come for more.",
       "clue_1": "A high-end fashion boutique carrying designer labels, footwear and accessories for men and women.",
       "clue_2": "West end: the 1000 block of 9 Avenue SE, even (north) side, a couple of doors from the pastry shop at 1002.",
-      "clue_3": "Leo Boutique",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Leo Boutique, 1006 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the most colourful pair of shoes in the window and photograph them.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54178,8 +54504,8 @@
       "riddle": "A sturdy tree, a climbing plant —\nthe neighbourhood supplies the rest.\nThe shelves ignore the map entirely\nand group by colour, shade and zest.",
       "clue_1": "A bottle shop where the stock is arranged by colour and flavour instead of by country.",
       "clue_2": "Mid-strip: the 1100 block of 9 Avenue SE, odd (south) side.",
-      "clue_3": "Inglewood Oak & Vine",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Inglewood Oak & Vine, 1139 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the sign and count how many words it takes to name the place.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -54195,8 +54521,8 @@
       "riddle": "Cold and creamy, scooped up high,\nsmall-batch flavours, always new.\nStep one block south of all the fuss\nand a walk-up window waits for you.",
       "clue_1": "Frozen treats made in small batches, with a flavour list that keeps changing.",
       "clue_2": "Not on 9 Avenue at all — one block south, on 10 Avenue SE near 11 Street.",
-      "clue_3": "Made By Marcus",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Made By Marcus, 1119 10 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the flavour board, then pick the one flavour you'd never order.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54212,8 +54538,8 @@
       "riddle": "A ring of dough, a glossy top,\na box that's made for sharing round.\nThe second word means celebration —\nsugar is the only sound.",
       "clue_1": "Sweet fried rings sold by the box, best eaten the same day you buy them.",
       "clue_2": "Mid-strip: the 1100 block of 9 Avenue SE, odd (south) side, not far from the bottle shop at 1139.",
-      "clue_3": "Doughnut Party",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Doughnut Party, 1125 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the doughnut in the case with the most toppings on it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54229,8 +54555,8 @@
       "riddle": "Letters shrinking down a chart,\nframes arranged along the wall.\nThey'll tell you if the world is blurred\nand help you read the small.",
       "clue_1": "A health spot on the strip — the kind of place where you read letters out loud.",
       "clue_2": "West end: the 1000 block of 9 Avenue SE, even (north) side, inside a building at unit 112.",
-      "clue_3": "Respect Eyecare",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Respect Eyecare, 1020 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the wildest pair of frames on display.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54246,8 +54572,8 @@
       "riddle": "Someone else's finest dress\ngets a second chance to shine.\nA showy bird lends out its name\nto feathers that were never mine.",
       "clue_1": "Clothing with a past — pre-loved fashion sold on behalf of its previous owners.",
       "clue_2": "East end: the 1200 block of 9 Avenue SE, even (north) side, near the home-decor gallery at 1215.",
-      "clue_3": "Peacock Boutique Consignment",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Peacock Boutique Consignment, 1218 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the most colourful item on the rack nearest the door and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54263,8 +54589,8 @@
       "riddle": "One number says the same thing twice,\nonce in digits, once in letters.\nFar east end where the avenue bends,\na cold shelf and nothing better.",
       "clue_1": "A bottle shop, adults only, right at the far end of the walk.",
       "clue_2": "The far east end of 9 Avenue SE, the 1400 block, out past 14 Street.",
-      "clue_3": "11-Eleven Liquor",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s 11-Eleven Liquor, 1402 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the sign and spot how the number is written two different ways.",
       "difficulty": "easy",
       "age_restricted": true,
       "variant": 1,
@@ -54280,8 +54606,8 @@
       "riddle": "From a land of mountains, beans and rain,\na menu travels north to stay.\nThe name is really just a promise —\none word for tasty leads the way.",
       "clue_1": "A small restaurant serving the food of one South American country.",
       "clue_2": "East end: the 1300 block of 9 Avenue SE, even (north) side, unit B, close to where the avenue reaches 14 Street.",
-      "clue_3": "Delicious From Colombia",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Delicious From Colombia, 1314B 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph a menu item you have never heard of before.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54297,8 +54623,8 @@
       "riddle": "An Italian word for red is on the cup,\nthe beans are roasted close to home.\nFarthest east along the avenue,\nthe last warm stop before you roam.",
       "clue_1": "A local coffee roaster's café — beans first, everything else second.",
       "clue_2": "The far east end: the 1400 block of 9 Avenue SE, sharing the corner with a bottle shop.",
-      "clue_3": "Rosso Coffee Roasters Inglewood",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Rosso Coffee Roasters Inglewood, 1400 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the bag of beans from the most distant country of origin on the shelf.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54314,8 +54640,8 @@
       "riddle": "A steaming bowl arrives up front,\nwith noodles hiding underneath.\nYou'll need chopsticks and a spoon,\nplus basil, lime, and bean sprout leaf.",
       "clue_1": "The specialty here is a fragrant noodle soup you eat with chopsticks and a spoon at the same time.",
       "clue_2": "North side of 9 Avenue in the 1300 block, just east of the 13 Street SE corner, at number 1318.",
-      "clue_3": "Minh Chau Vietnamese Restaurant",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Minh Chau Vietnamese Restaurant, 1318 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the menu item with the longest list of ingredients.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54331,8 +54657,8 @@
       "riddle": "The walls are hung with hills and skies,\nwith paint an artist's hand applies.\nStep softly in and take a look;\neach frame's a page from someone's book.",
       "clue_1": "Nothing here is edible or wearable. You come to look at what's on the walls, and maybe take one home.",
       "clue_2": "North side of 9 Avenue at the far east end of the 1300 block, close to 14 Street SE, at number 1332.",
-      "clue_3": "Collector's Gallery (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Collector's Gallery (The), 1332A 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find a picture with water in it and photograph its title card (ask staff first).",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54348,8 +54674,8 @@
       "riddle": "A morning crowd waits by the door\nfor eggs and coffee, cups and cream.\nIt calls itself a kind of club,\nbut all you need is appetite and dream.",
       "clue_1": "Brunch is the entire point here: eggs, coffee, and a weekend lineup.",
       "clue_2": "Far east end, north side of 9 Avenue, Unit 4 in the big 1420 complex past 14 Street SE.",
-      "clue_3": "Monki Breakfast Club & Bistro",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Monki Breakfast Club & Bistro, 1420 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Take a photo of the brunch plate with the most colours on it.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54365,8 +54691,8 @@
       "riddle": "Big wooden speakers, dials that glow,\na needle drops and starts to go.\nThe sound is warm, the gear is old;\nhere yesterday's machines are sold.",
       "clue_1": "If your grandparents' music machine quit working, this is where it would get fixed and where you'd find another one.",
       "clue_2": "North side of 9 Avenue in the 1300 block, a couple of doors from the corner at 13 Street SE, at 1314A.",
-      "clue_3": "That Old Retro Store",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s That Old Retro Store, 1314A 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the oldest year printed on any record sleeve or piece of gear and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54382,8 +54708,8 @@
       "riddle": "A wall of hangers, neatly hung,\nwith shirts and scarves for old and young.\nStep inside and try a few;\nthe fit that fits is waiting for you.",
       "clue_1": "Clothing and accessories, picked out by a small crew who like to help you choose.",
       "clue_2": "South side of 9 Avenue in the 1300 block, Unit 2 of the multi-unit building at 1335, shared with a barbershop.",
-      "clue_3": "Twitchin Threadz & Company",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Twitchin Threadz & Company, 1335 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the loudest-patterned item in the whole shop.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54399,8 +54725,8 @@
       "riddle": "A purple berry, blitzed and cold,\nin bowls with fruit piled on the top.\nIt travelled far from Brazil\nto end up in this frosty shop.",
       "clue_1": "Frozen purple fruit served in a bowl, with gelato and smoothies on the side.",
       "clue_2": "North side of 9 Avenue, far east end, first stretch of the 1400 block just past 14 Street SE, at number 1414.",
-      "clue_3": "Tupi Acai Bowls",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Tupi Acai Bowls, 1414 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Build or photograph a bowl with at least five different toppings.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54416,8 +54742,8 @@
       "riddle": "No appointment? Wander in.\nThe artwork here goes on your skin.\nA buzzing needle, steady hand,\nand pictures that forever stand.",
       "clue_1": "The artists here draw on people instead of paper, and you don't have to book ahead.",
       "clue_2": "South side of 9 Avenue in the 1300 block, number 1331, a few doors west of the 14 Street SE corner.",
-      "clue_3": "Boss Tattoos Walk - In Studio",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Boss Tattoos Walk - In Studio, 1331 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the most colourful design in the window (looking only, no ink today).",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54433,8 +54759,8 @@
       "riddle": "A spinning chair, a snap of cape,\na careful comb to set the shape.\nThe clippers hum, the hair drifts down,\nand out you strut around the town.",
       "clue_1": "Walk in shaggy, walk out sharp. It's all about hair here.",
       "clue_2": "South side of 9 Avenue in the 1300 block, Unit 3 at number 1335, right beside a clothing boutique.",
-      "clue_3": "Foundation Barbershop",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Foundation Barbershop, 1335 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Count how many barber chairs there are, then photograph one (with permission).",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54450,8 +54776,8 @@
       "riddle": "No haircut here, no cup of tea,\njust quiet rooms and lighting low.\nThey tend to faces, hands, and skin\nand send you out with extra glow.",
       "clue_1": "A calm little clinic where every treatment is about your skin.",
       "clue_2": "North side of 9 Avenue in the 1400 block at the east end, number 1412, right next to a frozen-fruit-bowl spot.",
-      "clue_3": "Nova Skin & Wellness",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Nova Skin & Wellness, 1412 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the word on the storefront that means 'feeling good' and photograph it.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54467,8 +54793,8 @@
       "riddle": "They always come in twos, not ones,\nstacked up in boxes, rows on rows.\nSlip inside and take a walk;\nthe little mirror shows your toes.",
       "clue_1": "Everything sold here comes in pairs, and you try it on with your feet.",
       "clue_2": "North side of 9 Avenue at the start of the 1400 block, number 1404, just east of 14 Street SE.",
-      "clue_3": "Shoe Closet (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Shoe Closet (The), 1404 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the smallest pair in the whole store.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54484,8 +54810,8 @@
       "riddle": "The smell of cinnamon drifts out,\nof sugar, coffee, warm and sweet.\nBut not one crumb has milk or egg;\nstill every bite's a proper treat.",
       "clue_1": "A bake shop and cafe where nothing on the shelf comes from an animal.",
       "clue_2": "South side of 9 Avenue in the 1300 block, number 1319, roughly opposite the Japanese blade shop.",
-      "clue_3": "Canela",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Canela, 1319 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Take a photo of the pastry with the most seeds or sprinkles on top.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54501,8 +54827,8 @@
       "riddle": "From far across the ocean came\nthe steel that all the cooks adore.\nHand-forged, honed, and wickedly sharp,\nso mind your fingers near the door.",
       "clue_1": "Chefs come here for tools made by Japanese blacksmiths, and to get their edges put right again.",
       "clue_2": "North side of 9 Avenue in the 1300 block, Unit 100A at number 1316, near the 13 Street SE end.",
-      "clue_3": "Knifewear",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Knifewear, 1316 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the longest blade on display, hands safely behind your back.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54518,8 +54844,8 @@
       "riddle": "Stitched-up leather, pointed toe,\na heel that clicks on wooden floor.\nHandmade in Canada to last,\nit's every cowboy's favourite store.",
       "clue_1": "Western footwear, handcrafted and made in Canada.",
       "clue_2": "North side of 9 Avenue in the 1300 block, number 1312A, a couple of doors east of the Italian deli.",
-      "clue_3": "Alberta Boot Company",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Alberta Boot Company, 1312A 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the tallest pair on display and photograph it next to your own shoes.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54535,8 +54861,8 @@
       "riddle": "Round or square, they perch on noses,\nlenses polished, arms that fold.\nPick a pair and read the chart;\nthe smallest line is hard, we're told.",
       "clue_1": "If the street signs look blurry, this is the shop that sorts that out.",
       "clue_2": "South side of 9 Avenue in the 1300 block, number 1321, a door or two from the vegan bake shop.",
-      "clue_3": "Not Another Eye Store",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Not Another Eye Store, 1321 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the funniest pair of frames you can find.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54552,8 +54878,8 @@
       "riddle": "Dry leaves unfurl in steaming cups,\npoured slow from something small and round.\nSit down, breathe in, and take your time;\nthere's hardly any seat around.",
       "clue_1": "Hot water, leaves from far away, and only a handful of seats. Slowness is the entire idea.",
       "clue_2": "North side of 9 Avenue at the far east end, Unit 23 in the same 1420 complex as a popular brunch spot.",
-      "clue_3": "Tea Cult (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Tea Cult (The), 1420 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the tiniest teacup you can spot.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54569,8 +54895,8 @@
       "riddle": "Blazers, brogues, and knotted ties,\nall pre-loved but sharp and clean.\nSomeone wore them once before;\nnow they're waiting to be seen.",
       "clue_1": "Menswear that has already had one owner. It's consignment for gentlemen.",
       "clue_2": "North side of 9 Avenue in the 1400 block at the east end, number 1416, a couple of doors past the acai spot.",
-      "clue_3": "Man Of Distinction",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Man Of Distinction, 1416 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the boldest necktie in the shop and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54586,8 +54912,8 @@
       "riddle": "Sweaters, jackets, cups and plates,\nall second-hand and second-life.\nThe money doesn't stop at the till;\nit helps a neighbour through some strife.",
       "clue_1": "A donation-fed second-hand shop whose profits go to a charity that helps people in recovery.",
       "clue_2": "South side of 9 Avenue in the 1300 block, number 1317, next door west of the vegan bake shop.",
-      "clue_3": "Change Is Good Cdc",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Change Is Good Cdc, 1317 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find the most unusual mug or plate on the shelves and photograph it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54603,8 +54929,8 @@
       "riddle": "Sandwiches stacked as tall as bricks,\nwith sausage coiled behind the glass.\nFramed sports jerseys watch you eat\nwhile lineups out the doorway pass.",
       "clue_1": "An Italian deli known for its sausage and its enormous sandwiches.",
       "clue_2": "North side of 9 Avenue at the west end of the 1300 block, number 1308, closest to 13 Street SE.",
-      "clue_3": "Spolumbo's Fine Food & Deli",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Spolumbo's Fine Food & Deli, 1308 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Count the sausage varieties in the cold case and photograph the strangest flavour.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54620,8 +54946,8 @@
       "riddle": "Steel tanks gleaming, hops in bags,\na taproom counter, glasses tall.\nThey make it here and pour it here;\njust follow where the growlers call.",
       "clue_1": "Brewed on site and poured a few steps away. Bring ID.",
       "clue_2": "North side of 9 Avenue in the 1300 block, Unit 113 inside the building at number 1318.",
-      "clue_3": "High Line Brewing",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s High Line Brewing, 1318 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the beer with the most creative name on the tap list.",
       "difficulty": "medium",
       "age_restricted": true,
       "variant": 1,
@@ -54637,8 +54963,8 @@
       "riddle": "Bell-bottoms swing where the old decades hide,\nWith racks full of years stacked up side by side.\nTry on a jacket somebody once wore —\nA yesterday closet turned into a store.",
       "clue_1": "A clothing shop where every single item already had a first owner.",
       "clue_2": "East end of the strip, south (odd-numbered) side of 9 Ave, in the 1300 block near 13 Street.",
-      "clue_3": "Imagine Vintage Wear",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Imagine Vintage Wear, 1325 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find the outfit you think is the oldest thing in the shop and take a photo of it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54654,8 +54980,8 @@
       "riddle": "Crystals that glitter and candles that glow,\nAnd incense that curls where the quiet lamps go.\nSeekers come looking for wonder and shine,\nWhere ordinary stones turn to something divine.",
       "clue_1": "A shop for crystals, incense and things a fortune-teller would love.",
       "clue_2": "North (even-numbered) side of 9 Ave in the 1300 block, east end, right across from the vintage-shop stretch.",
-      "clue_3": "Elysian Alchemy",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Elysian Alchemy, 1340 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Find the biggest crystal in the shop and photograph it beside your hand for scale.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54671,8 +54997,8 @@
       "riddle": "Tick-tock goes a tiny machine,\nWith gears smaller than crumbs on a plate.\nRings sparkle under the glass,\nAnd time gets a fix while you wait.",
       "clue_1": "Sparkle in the display case, and something that ticks on your wrist.",
       "clue_2": "South (odd-numbered) side of 9 Ave, deep in the 1300 block heading toward 14 Street.",
-      "clue_3": "Ama Jewellery & Watches",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Ama Jewellery & Watches, 1349 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph a clock or watch face showing the exact minute you arrived.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54688,8 +55014,8 @@
       "riddle": "Ten little canvases painted with care,\nThen shoulders unknotted while you sit in a chair.\nPick out a colour from bottles in rows,\nAnd leave with a rainbow on fingers and toes.",
       "clue_1": "Ten tiny paint jobs — and a place to get the knots rubbed out afterwards.",
       "clue_2": "South side of 9 Ave, in one of the units at number 1327, east end near 13 Street.",
-      "clue_3": "Barbie Nail And Massage",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Barbie Nail And Massage, 1327B 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "From the sidewalk, find and photograph the pinkest thing you can spot.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54705,8 +55031,8 @@
       "riddle": "Tiny green worlds under bubbles of glass,\nAs mossy and small as a handful of grass.\nTake home a jungle no bigger than bread —\nJust give it some water and light overhead.",
       "clue_1": "Little gardens grown inside glass, plus the gear to keep green things alive.",
       "clue_2": "South side of 9 Ave at number 1327, east end of the strip.",
-      "clue_3": "Plant Terrariums & Garden Supplies",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Plant Terrariums & Garden Supplies, 1327 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph the smallest living plant you can find here.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54722,8 +55048,8 @@
       "riddle": "Paper and good pens and bright cards,\nWith stickers and gifts, small and neat.\nIts name is the moment school stops\nAnd everybody runs to the street.",
       "clue_1": "If you needed a birthday card, a notebook or a nice pen, this is your stop.",
       "clue_2": "South side of 9 Ave in the 1300 block, a couple of doors east of number 1327.",
-      "clue_3": "Recess",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Recess, 1333 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Find the funniest greeting card on the rack and photograph the front of it.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54739,8 +55065,8 @@
       "riddle": "A fat straw, a cold cup, dark pearls at the base,\nAnd chewy wee bubbles you slurp at your pace.\nA long crusty sandwich packed full to the end —\nSip something sweet while you wait with a friend.",
       "clue_1": "A drink you chew, and a sandwich you definitely don't.",
       "clue_2": "The far east end of the strip, south side of 9 Ave, close to 14 Street.",
-      "clue_3": "Ami Tea Sub",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Ami Tea Sub, 1357 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph your drink with the fat straw in it, before the very first sip.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54756,8 +55082,8 @@
       "riddle": "Buckets of colour on long tidy stems,\nWith petals like ribbons and pollen like gems.\nWrapped up in paper and tied with a bow —\nSomebody's day gets much better, you know.",
       "clue_1": "Everything sold here was grown and cut, and none of it will last the month.",
       "clue_2": "The furthest east stop on the hunt — past 14 Street, in the 1400 block of 9 Ave.",
-      "clue_3": "Blooms On 9Th",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Blooms On 9Th, 1420 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Sniff around, then photograph the flower with the strongest smell.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54773,8 +55099,8 @@
       "riddle": "Piled-high sandwiches, crusty and fat,\nAnd a corner-store name that's a little bit cheeky like that.\nTwo little words, and they both promise more —\nA lunch that is bigger than lunches before.",
       "clue_1": "A sandwich spot with a name borrowed from an old-time corner shop.",
       "clue_2": "South side of 9 Ave, sharing the number 1327 address with its neighbours, east end.",
-      "clue_3": "Supervariety",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Supervariety, 1327A 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "Photograph the sandwich on the menu that lists the most ingredients.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54790,8 +55116,8 @@
       "riddle": "Snacks by the till and a fridge humming low,\nAnd shelves full of movies from decades ago.\nYou still rent a film here — imagine that! —\nAnd the name is a colour, plain simple as that.",
       "clue_1": "Part corner store, part something almost every city has lost: a movie rental counter.",
       "clue_2": "North (even-numbered) side of 9 Ave in the 1300 block, east end, opposite the odd-numbered shops.",
-      "clue_3": "Blue Store (The)",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Blue Store (The), 1344 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Find a movie on the shelf that is older than you are and photograph the cover.",
       "difficulty": "easy",
       "age_restricted": false,
       "variant": 1,
@@ -54807,8 +55133,8 @@
       "riddle": "Prayer beads and statues and cloth painted bright,\nWith wool from the mountains where snow caps the height.\nGifts from a plateau the whole world calls high —\nStep in, and the Himalayas feel nearby.",
       "clue_1": "Handmade crafts and gifts carried down from the world's tallest mountains.",
       "clue_2": "South side of 9 Ave at number 1325, east end, sharing an address with a vintage-clothing shop.",
-      "clue_3": "Tibetan Trom",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Tibetan Trom, 1325A 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Count the strings of prayer beads you can see, then photograph your favourite one.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54824,8 +55150,8 @@
       "riddle": "A pond-dwelling bird who has waded in muck\nPours pints for the grown-ups who stop for a while.\nTwo words in the name: one grimy, one fowl —\nNineteen and over may sit down and smile.",
       "clue_1": "A neighbourhood pub — pints, not lattes — and you need to be of legal age to go in.",
       "clue_2": "North side of 9 Ave in the 1300 block, east end, a few doors west of the convenience store named after a colour.",
-      "clue_3": "Dirty Duck",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Dirty Duck, 1336 9 Ave SE. Pop the name into the map if the door’s playing hard to get.",
+      "challenge": "From the sidewalk, photograph the sign out front and count how many words on it start with D.",
       "difficulty": "easy",
       "age_restricted": true,
       "variant": 1,
@@ -54841,8 +55167,8 @@
       "riddle": "Brushes and blades and a lather of cream,\nWith straight-razor shaving brought back on the scene.\nThere's a chair for a trim and a shave to be had —\nExactly the shop that would please your grand-dad.",
       "clue_1": "Everything you'd need for a very old-fashioned shave, plus a barber's chair out back.",
       "clue_2": "North side of 9 Ave at number 1316, west of 14 Street, sharing an address with a well-known knife shop.",
-      "clue_3": "Kent Of Inglewood",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Kent Of Inglewood, 1316 9 Ave SE. Search it on the map and walk straight to it.",
+      "challenge": "Photograph the shaving brush you'd pick if you woke up tomorrow with a beard.",
       "difficulty": "medium",
       "age_restricted": false,
       "variant": 1,
@@ -54858,8 +55184,8 @@
       "riddle": "Corn cakes and pastries from far to the south,\nWhere coffee grows high and the Andes stretch out.\nStreet food served hot in a small friendly place —\nOne country's whole flavour packed onto a plate.",
       "clue_1": "South American street food from the country best known for coffee and emeralds.",
       "clue_2": "North side of 9 Ave at number 1314, toward the west end of the 1300 block, right next to the shaving shop.",
-      "clue_3": "Norley's Colombian Street Food",
-      "challenge": "Snap a proof photo at the stop before moving on.",
+      "clue_3": "It’s Norley's Colombian Street Food, 1314B 9 Ave SE. It’s on the map if the door is hiding from you.",
+      "challenge": "Photograph a menu item whose name you have never heard before.",
       "difficulty": "hard",
       "age_restricted": false,
       "variant": 1,
@@ -54875,7 +55201,7 @@
       "neighbourhood": "inglewood",
       "slug": "friendly-mode",
       "name": "Friendly Mode",
-      "blurb": "Four stops, no clock, a different four every time, and a postcard finish.",
+      "blurb": "Four stops, a different four every time, and a postcard finish.",
       "stop_ids": [
         "ing-003",
         "ing-000",
@@ -54897,7 +55223,7 @@
       "neighbourhood": "inglewood",
       "slug": "full-hunt",
       "name": "Full Hunt",
-      "blurb": "Eight curated stops, no clock, proof photos, a postcard finish and a possible final-stop treat.",
+      "blurb": "Eight curated stops, proof photos, a postcard finish and a possible final-stop treat.",
       "stop_ids": [
         "ing-003",
         "ing-000",

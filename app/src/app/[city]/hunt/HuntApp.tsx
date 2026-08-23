@@ -36,8 +36,8 @@ type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?
 
 const cluePenalty = [0, 120, 300, 600];
 const productCopy = {
-  friendly: "4 stops · no clock · different every time",
-  full: "8 stops · no clock · postcard finish",
+  friendly: "4 stops · different every time · postcard finish",
+  full: "8 stops · proof photos · postcard finish",
   race: "8 stops · rotated starts · live leaderboard",
 };
 
@@ -224,7 +224,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>{progress[active.id]?.state === "solved" || (progress[active.id]?.clues ?? 0) >= 3 ? "Proof photo unlocked:" : "Proof photo locked:"}</b> {progress[active.id]?.state === "solved" || (progress[active.id]?.clues ?? 0) >= 3 ? "Snap a proof photo at the stop before moving on." : "Reveal the final clue only if you want the answer shown."}</span></div>
+                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>At this stop:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>
                 <div className={styles.landHeroCta}>
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
                   {progress[active.id]?.state === "solved" && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{progress[active.id]?.state === "solved" ? "Solved" : "Mark solved"}</button>}
@@ -282,7 +282,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   </div>
                 </div>
               </div>
-              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops, so your postcard is made. To enter the Inglewood Basket draw, share the postcard with <b>#StrollInglewood</b> and tag <b>@stroll_city</b>; finishing by itself does not enter the draw. CASL consent stays separate and optional. <Link href="/rules">Read the Basket rules</Link>.</div>}
+              {finished && <div className={styles.calloutAmber}><b>Win the Inglewood Basket.</b> Share your postcard publicly tagging <b>@stroll_city</b> or <b>#StrollInglewood</b> and you’re entered in this month’s draw — a basket donated by ten Inglewood businesses, worth around $250. Entering is optional; the hunt is free either way. One entry per completed hunt. No purchase necessary. Alberta residents 18+. Winner answers a skill-testing question. <Link href="/rules">Full rules →</Link></div>}
               {finished && (
                 <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
                   <div className={styles.postcardStampBlock}>YYC</div>
