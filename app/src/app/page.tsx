@@ -343,7 +343,7 @@ export default function LandingPage() {
       const next = Math.min(s + 1, HOMEPAGE_RIDDLES.length);
       if (next >= HOMEPAGE_RIDDLES.length && s < HOMEPAGE_RIDDLES.length) {
         setShowConfetti(true);
-        setShareOpen(false);
+        setShareOpen(true);
       }
       return next;
     });
@@ -579,17 +579,15 @@ export default function LandingPage() {
                     </button>
                     <form className={styles.answerForm} onSubmit={submitGuess}>
                       <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
-                      <div className={styles.answerRow}>
-                        <input
-                          id="homepage-hunt-answer"
-                          className={styles.answerInput}
-                          value={answerText}
-                          onChange={(event) => { setAnswerText(event.target.value); setAnswerStatus("idle"); }}
-                          placeholder="Type a word or two"
-                          autoComplete="off"
-                        />
-                        <button type="submit" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`}>Check</button>
-                      </div>
+                      <input
+                        id="homepage-hunt-answer"
+                        className={styles.answerInput}
+                        value={answerText}
+                        onChange={(event) => { setAnswerText(event.target.value); setAnswerStatus("idle"); }}
+                        placeholder="Type your answer"
+                        autoComplete="off"
+                      />
+                      <button type="submit" className={styles.answerSubmit}>Check your guess</button>
                       {answerStatus === "wrong" && <span className={styles.answerHelp}>Close, but not quite. Try another wording or open the next clue.</span>}
                     </form>
                   </>
@@ -624,7 +622,7 @@ export default function LandingPage() {
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Share it to Instagram and tag @stroll_city with #StrollInglewood to enter the monthly Inglewood Basket draw." : "The next image lands only after the riddle is completed."}</p>
+                    <p>{huntDone ? "Share it to Instagram and tag @stroll_city with #StrollInglewood to enter the monthly Inglewood Basket draw, valued at approximately $250." : "The next image lands only after the riddle is completed."}</p>
                   </div>
                 </div>
               </figure>
@@ -633,9 +631,14 @@ export default function LandingPage() {
                 <div className={styles.shareCard}>
                   <span className={`${styles.mementoKicker} ${styles.mono}`}>Inglewood Basket draw</span>
                   <strong className={styles.postcardTitle}>Want in? Share the postcard.</strong>
-                  <p className={styles.postcardCopy}>Finishing makes the postcard. Sharing it is what enters the monthly Inglewood Basket prize draw.</p>
+                  <p className={styles.postcardCopy}>Finishing makes the postcard. Sharing it is what enters the monthly Inglewood Basket prize draw — approximately $250 in local value.</p>
+                  <div className={styles.socialLinks} aria-label="Social posting links">
+                    <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Open Instagram<Arrow size={12} /></a>
+                    <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Open Facebook<Arrow size={12} /></a>
+                    <a href="https://www.threads.net/" target="_blank" rel="noreferrer">Open Threads<Arrow size={12} /></a>
+                  </div>
                   <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={() => setShareOpen((open) => !open)}>
-                    Share postcard<Arrow size={13} />
+                    Share steps<Arrow size={13} />
                   </button>
                   {shareOpen && (
                     <div className={styles.shareSteps}>
