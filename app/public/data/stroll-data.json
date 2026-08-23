@@ -55203,10 +55203,10 @@
       "name": "Friendly Mode",
       "blurb": "Four stops, a different four every time, and a postcard finish.",
       "stop_ids": [
+        "ing-071",
+        "ing-136",
         "ing-003",
-        "ing-000",
-        "ing-001",
-        "ing-004"
+        "ing-090"
       ],
       "mode": "friendly",
       "audience": "family",

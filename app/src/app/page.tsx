@@ -73,6 +73,7 @@ const POSTCARD_STAMPS = [
 const CLUE_BUTTON_LABELS = ["Give me a clue", "One more", "Just tell me"];
 const CLUE_SUBLABEL = "Three clues per stop";
 const CLUE_DONE_LINE = "Every stop has the same three. You can’t get properly lost.";
+const HOMEPAGE_HUNT_START_INDEX = 2;
 
 function answerOptions(name: string) {
   const withoutParenthetical = name.replace(/\s*\([^)]*\)/g, "").trim();
@@ -191,7 +192,7 @@ export default function LandingPage() {
   const [data, setData] = useState<StrollData | null>(null);
   const [active, setActive] = useState<Set<Category>>(new Set(MOODS.map((m) => m.id)));
   const [selected, setSelected] = useState<Business | null>(null);
-  const [stop, setStop] = useState(0);
+  const [stop, setStop] = useState(HOMEPAGE_HUNT_START_INDEX);
   const [cluesOpen, setCluesOpen] = useState(0);
   const [answerText, setAnswerText] = useState("");
   const [answerStatus, setAnswerStatus] = useState<"idle" | "wrong">("idle");
@@ -393,7 +394,7 @@ export default function LandingPage() {
             Ready for some casual adventure? Start a riddle hunt and go find the Inglewood doors you&apos;ve walked past a hundred times — or just scroll your stroll and see what the street&apos;s got, whatever you&apos;re in the mood for.
           </p>
           <div className={styles.heroCta} data-rise>
-            <Link className={`${styles.btn} ${styles.btnBlue}`} href="/calgary/hunt?type=friendly">Start a riddle hunt<Arrow /></Link>
+            <a className={`${styles.btn} ${styles.btnBlue}`} href="#hunt">Start a riddle hunt<Arrow /></a>
             <Link className={`${styles.btn} ${styles.btnOutline}`} href="/calgary">Explore the map</Link>
           </div>
         </div>
@@ -594,7 +595,7 @@ export default function LandingPage() {
                     </form>
                   </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(HOMEPAGE_HUNT_START_INDEX); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
                 <span className={styles.huntNote}>
                   {huntDone ? "Postcard completed" : stopCounterText(stop, homepageRiddles.length || 4)}
                 </span>
@@ -613,10 +614,10 @@ export default function LandingPage() {
                       <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : "Postcard in progress"}</span>
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
-                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Solve the riddle and the next postcard mark fills in." : "One last stop finishes it."}</strong>
+                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop < 3 ? "Solve this stop and the third postcard mark fills in." : "One last stop finishes it."}</strong>
                     <div className={styles.mementoGrid} aria-label="Postcard photos earned so far">
                       {POSTCARD_STAMPS.map((mark, i) => {
-                        const found = i < 2 || i < 2 + stop;
+                        const found = i < 2 || i < stop;
                         return (
                           <span key={mark.src} className={found ? styles.stampFilled : undefined}>
                             {found ? <img src={mark.src} alt={mark.alt} /> : <i>{i + 1}</i>}
@@ -624,7 +625,7 @@ export default function LandingPage() {
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Post it with #StrollInglewood to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together." : "The next photo slot fills in after the riddle is completed."}</p>
+                    <p>{huntDone ? "Post it with #StrollInglewood to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together." : stop < 3 ? "The Fair’s Fair photo slot fills in after this riddle is completed." : "Doughnut Party is the last stamp in this example."}</p>
                   </div>
                 </div>
               </figure>
@@ -688,9 +689,9 @@ export default function LandingPage() {
               <span className={`${styles.eyebrow} ${styles.mono} ${styles.eyebrowFlush}`}>Scavenger hunts</span>
               <strong className={styles.featTitle}>Four free stops, clues when you need them</strong>
               <p className={styles.featHuntCopy}>Riddle first, three clues after. The last clue names the shop so the walk keeps moving.</p>
-              <Link className={`${styles.btn} ${styles.btnSm} ${styles.btnPaper} ${styles.featCta}`} href="/calgary/hunt?type=friendly">
+              <a className={`${styles.btn} ${styles.btnSm} ${styles.btnPaper} ${styles.featCta}`} href="#hunt">
                 Try the hunt<Arrow size={13} />
-              </Link>
+              </a>
             </div>
           </div>
 
@@ -791,7 +792,7 @@ export default function LandingPage() {
             <p className={styles.closeLead}>Open the Calgary map, pick a mood, or start the free hunt right now. No account, no app.</p>
             <div className={styles.closeActions}>
               <Link className={`${styles.btn} ${styles.btnLime}`} href="/calgary">Explore the map<Arrow /></Link>
-              <Link className={`${styles.btn} ${styles.btnOnBlue}`} href="/calgary/hunt?type=friendly">Start a free hunt</Link>
+              <a className={`${styles.btn} ${styles.btnOnBlue}`} href="#hunt">Start a free hunt</a>
             </div>
           </div>
         </div>
@@ -806,7 +807,7 @@ export default function LandingPage() {
           </span>
           <span>Calgary · Inglewood first</span>
           <span className={styles.footLinks}>
-            <Link href="/calgary/hunt?type=friendly">The hunt</Link>
+            <a href="#hunt">The hunt</a>
             <Link href="/rules">Rules</Link>
             <Link href="/events">Events</Link>
             <Link href="/business">For businesses</Link>
