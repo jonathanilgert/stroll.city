@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from "react";
 import { getCity, isLightHex } from "./cities";
 import { categoryColor, type Category } from "./StrollCityApp";
 import styles from "./landing.module.css";
@@ -63,6 +63,22 @@ const HOMEPAGE_RIDDLES = [
       "You are after the bookshop near the east end of the Inglewood strip.",
       "Fair's Fair Books",
     ],
+    answers: [
+      "fair's fair books",
+      "fairs fair books",
+      "fair fair books",
+      "fair's fair",
+      "fairs fair",
+      "fair fair",
+      "book store",
+      "bookstore",
+      "book shop",
+      "bookshop",
+      "used book store",
+      "used bookstore",
+      "used books",
+      "books",
+    ],
   },
   {
     id: "doughnut-party",
@@ -74,6 +90,21 @@ const HOMEPAGE_RIDDLES = [
       "This stop is all about a colourful treat with a hole in the middle.",
       "The name sounds like a celebration for doughnuts.",
       "Doughnut Party",
+    ],
+    answers: [
+      "doughnut party",
+      "donut party",
+      "doughnuts party",
+      "donuts party",
+      "doughnut",
+      "donut",
+      "doughnuts",
+      "donuts",
+      "doughnut shop",
+      "donut shop",
+      "sprinkles",
+      "glazed doughnuts",
+      "glazed donuts",
     ],
   },
 ];
@@ -148,12 +179,34 @@ function Tick({ color }: { color: string }) {
   );
 }
 
+function normalizeGuess(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\b(the|a|an|and)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function isCloseGuess(guess: string, answers: string[]) {
+  const normalizedGuess = normalizeGuess(guess);
+  if (!normalizedGuess) return false;
+  return answers.some((answer) => {
+    const normalizedAnswer = normalizeGuess(answer);
+    return normalizedGuess === normalizedAnswer || normalizedGuess.includes(normalizedAnswer) || normalizedAnswer.includes(normalizedGuess);
+  });
+}
+
 export default function LandingPage() {
   const [data, setData] = useState<StrollData | null>(null);
   const [active, setActive] = useState<Set<Category>>(new Set(MOODS.map((m) => m.id)));
   const [selected, setSelected] = useState<Business | null>(null);
   const [stop, setStop] = useState(0);
   const [cluesOpen, setCluesOpen] = useState(0);
+  const [answerText, setAnswerText] = useState("");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "wrong">("idle");
   const [shareOpen, setShareOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
@@ -295,6 +348,18 @@ export default function LandingPage() {
       return next;
     });
     setCluesOpen(0);
+    setAnswerText("");
+    setAnswerStatus("idle");
+  };
+
+  const submitGuess = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!currentStop || huntDone) return;
+    if (isCloseGuess(answerText, currentStop.answers)) {
+      goNextRiddle();
+      return;
+    }
+    setAnswerStatus("wrong");
   };
 
   return (
@@ -512,16 +577,24 @@ export default function LandingPage() {
                     >
                       {cluesOpen >= 3 ? "All clues shown" : `Show clue ${cluesOpen + 1}`}<Arrow />
                     </button>
-                    <button
-                      type="button"
-                      className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`}
-                      onClick={goNextRiddle}
-                    >
-                      I found it
-                    </button>
+                    <form className={styles.answerForm} onSubmit={submitGuess}>
+                      <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
+                      <div className={styles.answerRow}>
+                        <input
+                          id="homepage-hunt-answer"
+                          className={styles.answerInput}
+                          value={answerText}
+                          onChange={(event) => { setAnswerText(event.target.value); setAnswerStatus("idle"); }}
+                          placeholder="Type a word or two"
+                          autoComplete="off"
+                        />
+                        <button type="submit" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`}>Check</button>
+                      </div>
+                      {answerStatus === "wrong" && <span className={styles.answerHelp}>Close, but not quite. Try another wording or open the next clue.</span>}
+                    </form>
                   </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setShareOpen(false); }}>Start over</button>
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
                 <span className={styles.huntNote}>
                   {huntDone ? "Postcard completed" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${HOMEPAGE_RIDDLES.length - stop} riddles to go`}
                 </span>
@@ -540,7 +613,7 @@ export default function LandingPage() {
                       <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : "Postcard in progress"}</span>
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
-                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Two stamps are in. Find Fair’s Fair for the next one." : "One last sweet stop finishes it."}</strong>
+                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Two stamps are in. Solve the riddle for the next one." : "One last sweet stop finishes it."}</strong>
                     <div className={styles.mementoGrid} aria-label="Postcard stamps earned so far">
                       {POSTCARD_STAMPS.map((stamp, i) => {
                         const stamped = i < 2 || i < 2 + stop;
@@ -554,10 +627,6 @@ export default function LandingPage() {
                     <p>{huntDone ? "Share it to Instagram and tag @stroll_city with #StrollInglewood to enter the monthly Inglewood Basket draw." : "The next image lands only after the riddle is completed."}</p>
                   </div>
                 </div>
-                <figcaption className={styles.mementoCaption}>
-                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{huntDone ? "Share to enter" : "Next stamp"}</span>
-                  <span>{huntDone ? "Save the postcard, post it to Instagram, and tag @stroll_city with #StrollInglewood." : `Solve ${currentStop.name} to fill the ${stop === 0 ? "third" : "final"} postcard space.`}</span>
-                </figcaption>
               </figure>
 
               {huntDone && (
