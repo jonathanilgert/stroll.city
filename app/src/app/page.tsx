@@ -52,8 +52,15 @@ const MOODS: { id: Category; label: string; color: string }[] = (
 const MOOD_COLOR = Object.fromEntries(MOODS.map((m) => [m.id, m.color])) as Record<Category, string>;
 const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Record<Category, string>;
 
-/* The punch card takes one tint per stop, in the order they're walked. */
+/* The punch dots keep one tint per stop; the front-page postcard stamps use
+   the four numbered proof-photo examples Jonathan supplied. */
 const STOP_TINTS = ["#0B47E8", "#F9BFD0", "#DCF23C", "#FBE08A"];
+const POSTCARD_STAMPS = [
+  { src: "/brand/hunt-postcard/01-fairs-fair-books.jpeg", alt: "Fair's Fair Books postcard stamp" },
+  { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard stamp" },
+  { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard stamp" },
+  { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard stamp" },
+];
 
 const PLANS = [
   {
@@ -176,6 +183,7 @@ export default function LandingPage() {
   const huntDone = huntStops.length > 0 && stop >= huntStops.length;
   const currentStop = huntStops[Math.min(stop, Math.max(huntStops.length - 1, 0))] ?? null;
   const clueLadder = currentStop ? [currentStop.clue_1, currentStop.clue_2, currentStop.clue_3].filter(Boolean) : [];
+  const stampedCount = huntDone ? 4 : Math.min(4, stop + (photoOpen ? 1 : 0));
 
   /* ---------------- live map in the hero frame ---------------- */
   useEffect(() => {
@@ -263,7 +271,6 @@ export default function LandingPage() {
     setSelected((prev) => (prev && prev.category === mood ? null : prev));
   }, []);
 
-  const postTint = (i: number) => (i < stop ? STOP_TINTS[i] : "#F6E8ED");
   const goNextRiddle = () => {
     if (!photoOpen) {
       setPhotoOpen(true);
@@ -514,8 +521,15 @@ export default function LandingPage() {
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
                     <strong>{huntDone ? "Four stops become a keepsake." : cluesOpen >= 3 || photoOpen ? "Snap the little proof, then keep walking." : "No spoilers until you need them."}</strong>
-                    <div className={styles.mementoGrid} aria-hidden>
-                      {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: i < Math.max(stop, huntDone ? 4 : 1) ? postTint(i) : undefined }} />)}
+                    <div className={styles.mementoGrid} aria-label="Postcard stamps earned so far">
+                      {POSTCARD_STAMPS.map((stamp, i) => {
+                        const stamped = i < stampedCount;
+                        return (
+                          <span key={stamp.src} className={stamped ? styles.stampFilled : undefined}>
+                            {stamped ? <img src={stamp.src} alt={stamp.alt} /> : <i>{i + 1}</i>}
+                          </span>
+                        );
+                      })}
                     </div>
                     <p>{huntDone ? "Friendly Mode ends with a postcard you can save or share — same street, no app install." : cluesOpen >= 3 || photoOpen ? "The proof-photo prompt opens when you solve it, even if you never needed the answer." : "Clues stay gentle: hint, clearer hint, then just the shop name if you need it."}</p>
                   </div>
@@ -530,8 +544,12 @@ export default function LandingPage() {
                 <strong className={styles.postcardTitle}>Postcard + Basket draw</strong>
                 <p className={styles.postcardCopy}>Finish Friendly Mode to make your postcard. Share the postcard with #StrollInglewood and tag @stroll_city to enter the Inglewood Basket draw; finishing alone only makes the postcard. No purchase necessary.</p>
                 <Link className={styles.pickedLink} href="/rules">Basket rules<Arrow size={12} /></Link>
-                <div className={styles.postRow}>
-                  {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: postTint(i) }} />)}
+                <div className={styles.postRow} aria-label="Finished postcard stamp preview">
+                  {POSTCARD_STAMPS.map((stamp) => (
+                    <span key={stamp.src}>
+                      <img src={stamp.src} alt="" />
+                    </span>
+                  ))}
                 </div>
               </div>
             </div>

@@ -574,12 +574,55 @@
   margin-top: 18px;
 }
 .mementoGrid span {
+  position: relative;
+  overflow: hidden;
   aspect-ratio: 5 / 6;
   border-radius: 8px;
   background: rgba(255, 255, 255, .5);
   border: 1.4px dashed #DDE2D5;
   box-shadow: 0 3px 7px rgba(20, 24, 26, .08);
   transform: rotate(var(--mini-rot, -2deg));
+  display: grid;
+  place-items: center;
+}
+.mementoGrid span i {
+  font-style: normal;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 10px;
+  color: rgba(69, 74, 70, .38);
+  letter-spacing: .08em;
+}
+.mementoGrid img,
+.postRow img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.stampFilled {
+  border-style: solid !important;
+  border-color: rgba(20, 24, 26, .18) !important;
+  background: #fff !important;
+  animation: stampIn .24s ease-out;
+}
+.stampFilled::after {
+  content: "STAMPED";
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%) rotate(-8deg);
+  border: 1.5px solid rgba(11, 71, 232, .72);
+  border-radius: 999px;
+  color: rgba(11, 71, 232, .82);
+  background: rgba(255, 255, 255, .72);
+  padding: 2px 5px;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 7px;
+  letter-spacing: .08em;
+}
+@keyframes stampIn {
+  from { opacity: .35; transform: rotate(var(--mini-rot, -2deg)) scale(.92); }
+  to { opacity: 1; transform: rotate(var(--mini-rot, -2deg)) scale(1); }
 }
 .mementoGrid span:nth-child(2) { --mini-rot: 1.5deg; }
 .mementoGrid span:nth-child(3) { --mini-rot: -1deg; }
@@ -608,7 +651,14 @@
 .postcardTitle { font-size: 15.5px; font-weight: 600; letter-spacing: -.025em; }
 .postcardCopy { margin: 0; font-size: 13.5px; line-height: 1.55; color: var(--ink-3); }
 .postRow { display: flex; gap: 6px; }
-.postRow span { flex: 1; aspect-ratio: 1; border-radius: 8px; transition: background .3s; }
+.postRow span {
+  flex: 1;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid rgba(20, 24, 26, .1);
+  background: #F6E8ED;
+}
 
 /* ---------------- features ---------------- */
 .featTop { display: grid; grid-template-columns: repeat(auto-fit, minmax(268px, 1fr)); gap: 12px; margin-bottom: 12px; }
