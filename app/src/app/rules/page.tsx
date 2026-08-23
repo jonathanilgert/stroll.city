@@ -19,7 +19,7 @@ export default function RulesPage() {
               <h2 className={styles.landH3}>How to enter without purchase</h2>
               <p className={styles.landCardP}>There are two free ways to enter while a draw is open:</p>
               <div className={styles.locked}>
-                <div className={styles.callout}>Complete Friendly Mode on stroll.city and submit the draw-entry form shown at the finish.</div>
+                <div className={styles.callout}>Complete Friendly Mode on stroll.city, make your postcard, then share it with <b>#StrollInglewood</b> and tag <b>@stroll_city</b> while the draw is open. Finishing the hunt creates the postcard; sharing it is what enters the draw.</div>
                 <div className={styles.callout}>Email <a href="mailto:hello@stroll.city">hello@stroll.city</a> with the subject line “Inglewood Basket Entry” and include your full name, Alberta city/town, and email address. One free email entry per person per draw period.</div>
               </div>
             </div>

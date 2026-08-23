@@ -160,13 +160,29 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
 
   const solve = () => {
     if (!active) return;
-    setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), state: "solved", solvedAt: new Date().toISOString() } }));
-    if (current < huntStops.length - 1) setCurrent((n) => n + 1);
-    else {
+    const wasSolved = progress[active.id]?.state === "solved";
+    setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), state: "solved", solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() } }));
+    if (!wasSolved && current === huntStops.length - 1) {
       const next = [{ team: teamName || "Anonymous team", seconds: strollSeconds }, ...leaderboard].sort((a, b) => a.seconds - b.seconds).slice(0, 8);
       setLeaderboard(next);
       localStorage.setItem("stroll-hunt-board", JSON.stringify(next));
     }
+  };
+
+  const nextStop = () => {
+    if (current < huntStops.length - 1) setCurrent((n) => n + 1);
+  };
+
+  const sharePostcard = async () => {
+    const text = `${teamName || "Our team"} finished ${hunt?.name ?? "a Stroll City hunt"} in Inglewood. #StrollInglewood @stroll_city`;
+    if (typeof window === "undefined") return;
+    const url = window.location.href;
+    const nav = window.navigator;
+    if (typeof nav.share === "function") {
+      await nav.share({ title: "Stroll City postcard", text, url });
+      return;
+    }
+    await nav.clipboard?.writeText(`${text} ${url}`);
   };
 
   return (
@@ -208,8 +224,11 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>{(progress[active.id]?.clues ?? 0) >= 3 ? "Proof photo unlocked:" : "Proof photo locked:"}</b> {(progress[active.id]?.clues ?? 0) >= 3 ? "Snap a proof photo at the stop before moving on." : "Reveal the final clue when you want the shop and photo prompt shown."}</span></div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Reveal clue{isRace ? " (+ penalty)" : ""}</button><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>Mark solved</button></div>
+                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>{progress[active.id]?.state === "solved" || (progress[active.id]?.clues ?? 0) >= 3 ? "Proof photo unlocked:" : "Proof photo locked:"}</b> {progress[active.id]?.state === "solved" || (progress[active.id]?.clues ?? 0) >= 3 ? "Snap a proof photo at the stop before moving on." : "Reveal the final clue only if you want the answer shown."}</span></div>
+                <div className={styles.landHeroCta}>
+                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
+                  {progress[active.id]?.state === "solved" && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{progress[active.id]?.state === "solved" ? "Solved" : "Mark solved"}</button>}
+                </div>
               </>}
             </div>
             <div className={styles.landBigCard}>
@@ -263,7 +282,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   </div>
                 </div>
               </div>
-              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops. Your finish also opens Inglewood Basket entry, with the CASL consent kept separate and optional. <Link href="/rules">Read the Basket rules</Link>.</div>}
+              {finished && <div className={styles.calloutAmber}><b>Postcard ready:</b> {teamName || "Your team"} solved {huntStops.length} stops, so your postcard is made. To enter the Inglewood Basket draw, share the postcard with <b>#StrollInglewood</b> and tag <b>@stroll_city</b>; finishing by itself does not enter the draw. CASL consent stays separate and optional. <Link href="/rules">Read the Basket rules</Link>.</div>}
               {finished && (
                 <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
                   <div className={styles.postcardStampBlock}>YYC</div>
@@ -280,6 +299,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   <div className={styles.postcardTag}>@stroll_city<br /><b>#StrollInglewood</b></div>
                 </div>
               )}
+              {finished && <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={sharePostcard}>Share postcard to enter</button><Link className={`${styles.btn} ${styles.btnGhost}`} href="/rules">Basket rules</Link></div>}
               {leaderboard.length > 0 && isRace && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}
             </div>
           </div>

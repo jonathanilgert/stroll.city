@@ -131,6 +131,7 @@ export default function LandingPage() {
   const [selected, setSelected] = useState<Business | null>(null);
   const [stop, setStop] = useState(0);
   const [cluesOpen, setCluesOpen] = useState(0);
+  const [photoOpen, setPhotoOpen] = useState(false);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
   const [viewTick, setViewTick] = useState(0);
 
@@ -264,8 +265,13 @@ export default function LandingPage() {
 
   const postTint = (i: number) => (i < stop ? STOP_TINTS[i] : "#F6E8ED");
   const goNextRiddle = () => {
+    if (!photoOpen) {
+      setPhotoOpen(true);
+      return;
+    }
     setStop((s) => Math.min(s + 1, huntStops.length || 4));
     setCluesOpen(0);
+    setPhotoOpen(false);
   };
 
   return (
@@ -484,11 +490,11 @@ export default function LandingPage() {
                       onClick={goNextRiddle}
                       disabled={!currentStop}
                     >
-                      Next riddle
+                      {photoOpen ? "Next riddle" : "I found it"}
                     </button>
                   </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); }}>Start over</button>
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setPhotoOpen(false); }}>Start over</button>
                 <span className={styles.huntNote}>
                   {huntDone ? "All four riddles read" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${(huntStops.length || 4) - stop} riddles to go`}
                 </span>
@@ -504,25 +510,25 @@ export default function LandingPage() {
                   </div>
                   <div className={styles.miniPunchBody}>
                     <div className={styles.miniPunchTop}>
-                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : cluesOpen >= 3 ? "Photo prompt open" : "Postcard in progress"}</span>
+                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : cluesOpen >= 3 || photoOpen ? "Photo prompt open" : "Postcard in progress"}</span>
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
-                    <strong>{huntDone ? "Four stops become a keepsake." : cluesOpen >= 3 ? "Snap the little proof, then keep walking." : "No spoilers until you need them."}</strong>
+                    <strong>{huntDone ? "Four stops become a keepsake." : cluesOpen >= 3 || photoOpen ? "Snap the little proof, then keep walking." : "No spoilers until you need them."}</strong>
                     <div className={styles.mementoGrid} aria-hidden>
                       {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: i < Math.max(stop, huntDone ? 4 : 1) ? postTint(i) : undefined }} />)}
                     </div>
-                    <p>{huntDone ? "Friendly Mode ends with a postcard you can save or share — same street, no app install." : cluesOpen >= 3 ? "The final clue names the shop and unlocks the exact photo to take there." : "Clues stay gentle: hint, clearer hint, then the shop name and photo task."}</p>
+                    <p>{huntDone ? "Friendly Mode ends with a postcard you can save or share — same street, no app install." : cluesOpen >= 3 || photoOpen ? "The proof-photo prompt opens when you solve it, even if you never needed the answer." : "Clues stay gentle: hint, clearer hint, then just the shop name if you need it."}</p>
                   </div>
                 </div>
                 <figcaption className={styles.mementoCaption}>
-                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{cluesOpen >= 3 || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
-                  <span>{huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 ? "Snap a proof photo at the stop before moving on." : "Open the final clue when you want the shop and photo prompt revealed."}</span>
+                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{cluesOpen >= 3 || photoOpen || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
+                  <span>{huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 || photoOpen ? "Snap a proof photo at the stop before moving on." : "Solve the riddle to unlock the photo prompt, or open the final clue if you want the answer."}</span>
                 </figcaption>
               </figure>
 
               <div className={styles.postcard}>
                 <strong className={styles.postcardTitle}>Postcard + Basket draw</strong>
-                <p className={styles.postcardCopy}>Finish Friendly Mode to make your postcard and open entry to the Inglewood Basket draw. No purchase necessary.</p>
+                <p className={styles.postcardCopy}>Finish Friendly Mode to make your postcard. Share the postcard with #StrollInglewood and tag @stroll_city to enter the Inglewood Basket draw; finishing alone only makes the postcard. No purchase necessary.</p>
                 <Link className={styles.pickedLink} href="/rules">Basket rules<Arrow size={12} /></Link>
                 <div className={styles.postRow}>
                   {[0, 1, 2, 3].map((i) => <span key={i} style={{ background: postTint(i) }} />)}
