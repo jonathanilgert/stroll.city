@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { getCity, isLightHex } from "./cities";
 import { categoryColor, type Category } from "./StrollCityApp";
 import styles from "./landing.module.css";
@@ -21,20 +21,9 @@ type Business = {
   blurb?: string;
 };
 
-type HuntStop = {
-  id: string;
-  name: string;
-  riddle: string;
-  clue_1: string;
-  clue_2: string;
-  clue_3: string;
-  difficulty: string;
-};
-
 type StrollData = {
   businesses: Business[];
   hunts?: { slug: string; name: string; stop_ids: string[] }[];
-  huntStops?: HuntStop[];
 };
 
 /* Six moods with shorter labels than the map app's, but the same colours — they come
@@ -56,10 +45,37 @@ const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Reco
    the four numbered proof-photo examples Jonathan supplied. */
 const STOP_TINTS = ["#0B47E8", "#F9BFD0", "#DCF23C", "#FBE08A"];
 const POSTCARD_STAMPS = [
-  { src: "/brand/hunt-postcard/01-fairs-fair-books.jpeg", alt: "Fair's Fair Books postcard stamp" },
-  { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard stamp" },
-  { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard stamp" },
-  { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard stamp" },
+  { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard stamp", static: true },
+  { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard stamp", static: true },
+  { src: "/brand/hunt-postcard/01-fairs-fair-books.jpeg", alt: "Fair's Fair Books postcard stamp", static: false },
+  { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard stamp", static: false },
+];
+
+const HOMEPAGE_RIDDLES = [
+  {
+    id: "fairs-fair-books",
+    name: "Fair's Fair Books",
+    difficulty: "easy",
+    riddle:
+      "Shelves upon shelves of the pages of old,\nwhere a story once read can be bought and resold.\nBring in your finished ones, trade for some more,\nthe river-end block hides this well-loved door.",
+    clues: [
+      "Look for a place that gives used books another walk around the block.",
+      "You are after the bookshop near the east end of the Inglewood strip.",
+      "Fair's Fair Books",
+    ],
+  },
+  {
+    id: "doughnut-party",
+    name: "Doughnut Party",
+    difficulty: "sweet",
+    riddle:
+      "A party of circles, glazed, bright and sweet,\nwaits in a window just off the street.\nPick the shop where sprinkles play,\nand your postcard gets one more hooray.",
+    clues: [
+      "This stop is all about a colourful treat with a hole in the middle.",
+      "The name sounds like a celebration for doughnuts.",
+      "Doughnut Party",
+    ],
+  },
 ];
 
 const PLANS = [
@@ -138,7 +154,8 @@ export default function LandingPage() {
   const [selected, setSelected] = useState<Business | null>(null);
   const [stop, setStop] = useState(0);
   const [cluesOpen, setCluesOpen] = useState(0);
-  const [photoOpen, setPhotoOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
   const [viewTick, setViewTick] = useState(0);
 
@@ -172,18 +189,15 @@ export default function LandingPage() {
     return names.length ? names.concat(names) : [];
   }, [businesses]);
 
-  /* The preview walks the real Friendly Mode hunt — same riddles you get on the street. */
-  const huntStops = useMemo(() => {
-    const hunt = data?.hunts?.find((h) => h.slug === "friendly-mode");
-    if (!hunt || !data?.huntStops) return [];
-    return hunt.stop_ids
-      .map((id) => data.huntStops!.find((s) => s.id === id))
-      .filter(Boolean) as HuntStop[];
-  }, [data]);
-  const huntDone = huntStops.length > 0 && stop >= huntStops.length;
-  const currentStop = huntStops[Math.min(stop, Math.max(huntStops.length - 1, 0))] ?? null;
-  const clueLadder = currentStop ? [currentStop.clue_1, currentStop.clue_2, currentStop.clue_3].filter(Boolean) : [];
-  const stampedCount = huntDone ? 4 : Math.min(4, stop + (photoOpen ? 1 : 0));
+  const huntDone = stop >= HOMEPAGE_RIDDLES.length;
+  const currentStop = HOMEPAGE_RIDDLES[Math.min(stop, HOMEPAGE_RIDDLES.length - 1)] ?? null;
+  const clueLadder = currentStop?.clues ?? [];
+
+  useEffect(() => {
+    if (!showConfetti) return;
+    const timer = window.setTimeout(() => setShowConfetti(false), 1900);
+    return () => window.clearTimeout(timer);
+  }, [showConfetti]);
 
   /* ---------------- live map in the hero frame ---------------- */
   useEffect(() => {
@@ -272,17 +286,24 @@ export default function LandingPage() {
   }, []);
 
   const goNextRiddle = () => {
-    if (!photoOpen) {
-      setPhotoOpen(true);
-      return;
-    }
-    setStop((s) => Math.min(s + 1, huntStops.length || 4));
+    setStop((s) => {
+      const next = Math.min(s + 1, HOMEPAGE_RIDDLES.length);
+      if (next >= HOMEPAGE_RIDDLES.length && s < HOMEPAGE_RIDDLES.length) {
+        setShowConfetti(true);
+        setShareOpen(false);
+      }
+      return next;
+    });
     setCluesOpen(0);
-    setPhotoOpen(false);
   };
 
   return (
     <main className={styles.landing}>
+      {showConfetti && (
+        <div className={styles.confettiBurst} aria-hidden>
+          {Array.from({ length: 34 }).map((_, i) => <span key={i} style={{ "--i": i } as CSSProperties} />)}
+        </div>
+      )}
       <nav className={styles.nav}>
         <a className={styles.brand} href="#top">
           {/* eslint-disable-next-line @next/next/no-img-element -- static export, same as the map app's rail logo */}
@@ -447,30 +468,30 @@ export default function LandingPage() {
             <div className={styles.huntPanel}>
               <div className={styles.huntHead}>
                 <span className={`${styles.huntStep} ${styles.mono}`}>
-                  Friendly Mode · stop {huntDone ? huntStops.length : Math.min(stop + 1, Math.max(huntStops.length, 1))} of {huntStops.length || 4}
+                  Friendly Mode · postcard stop {huntDone ? HOMEPAGE_RIDDLES.length : stop + 1} of {HOMEPAGE_RIDDLES.length}
                 </span>
                 <span className={styles.punches}>
-                  {(huntStops.length ? huntStops : [0, 1, 2, 3]).map((_, i) => (
-                    <span className={styles.punch} key={i} style={i < stop ? { background: STOP_TINTS[i] } : undefined} />
+                  {POSTCARD_STAMPS.map((_, i) => (
+                    <span className={styles.punch} key={i} style={i < 2 + stop ? { background: STOP_TINTS[i] } : undefined} />
                   ))}
                 </span>
               </div>
 
               <div className={styles.riddleCard}>
                 <span className={styles.riddleTag}>
-                  {huntDone ? "That’s Friendly Mode" : currentStop ? `Stop ${Math.min(stop + 1, huntStops.length)} · ${currentStop.difficulty}` : "Loading the hunt…"}
+                  {huntDone ? "Postcard complete" : `Stamp ${stop + 3} · ${currentStop.difficulty}`}
                 </span>
                 <p className={`${styles.riddleText} ${styles.riddleVerse}`}>
                   {huntDone
-                    ? "Four doors, four photos. Your postcard is ready."
-                    : currentStop?.riddle ?? "Fetching the riddles from the street…"}
+                    ? "Four neighbourhood moments, one finished Inglewood postcard."
+                    : currentStop.riddle}
                 </p>
                 {huntDone ? (
-                  <p className={styles.riddleHint}>Start the real thing and the punch card fills itself in as you walk.</p>
+                  <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
                 ) : (
                   <div className={styles.locked}>
                     {clueLadder.slice(0, cluesOpen).map((clue, index) => (
-                      <div className={styles.callout} key={`${currentStop?.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>
+                      <div className={styles.callout} key={`${currentStop.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>
                     ))}
                   </div>
                 )}
@@ -478,16 +499,16 @@ export default function LandingPage() {
 
               <div className={styles.huntActions}>
                 {huntDone ? (
-                  <Link className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`} href="/calgary/hunt?type=friendly">
-                    Start the real hunt<Arrow />
-                  </Link>
+                  <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={() => setShareOpen((open) => !open)}>
+                    Share postcard<Arrow size={13} />
+                  </button>
                 ) : (
                   <>
                     <button
                       type="button"
                       className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
                       onClick={() => setCluesOpen((n) => Math.min(3, n + 1))}
-                      disabled={!currentStop || cluesOpen >= 3}
+                      disabled={cluesOpen >= 3}
                     >
                       {cluesOpen >= 3 ? "All clues shown" : `Show clue ${cluesOpen + 1}`}<Arrow />
                     </button>
@@ -495,21 +516,20 @@ export default function LandingPage() {
                       type="button"
                       className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`}
                       onClick={goNextRiddle}
-                      disabled={!currentStop}
                     >
-                      {photoOpen ? "Next riddle" : "I found it"}
+                      I found it
                     </button>
                   </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setPhotoOpen(false); }}>Start over</button>
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(0); setCluesOpen(0); setShareOpen(false); }}>Start over</button>
                 <span className={styles.huntNote}>
-                  {huntDone ? "All four riddles read" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${(huntStops.length || 4) - stop} riddles to go`}
+                  {huntDone ? "Postcard completed" : cluesOpen ? `${cluesOpen} of 3 clues open` : `${HOMEPAGE_RIDDLES.length - stop} riddles to go`}
                 </span>
               </div>
             </div>
 
             <div className={styles.huntSide}>
-              <figure className={styles.huntMemento}>
+              <figure className={`${styles.huntMemento} ${huntDone ? styles.huntMementoDone : ""}`}>
                 <div className={styles.miniPunch}>
                   <div className={styles.miniStub}>
                     <span className={styles.miniWalk}>↟</span>
@@ -517,13 +537,13 @@ export default function LandingPage() {
                   </div>
                   <div className={styles.miniPunchBody}>
                     <div className={styles.miniPunchTop}>
-                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : cluesOpen >= 3 || photoOpen ? "Photo prompt open" : "Postcard in progress"}</span>
+                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : "Postcard in progress"}</span>
                       <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
                     </div>
-                    <strong>{huntDone ? "Four stops become a keepsake." : cluesOpen >= 3 || photoOpen ? "Snap the little proof, then keep walking." : "No spoilers until you need them."}</strong>
+                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop === 0 ? "Two stamps are in. Find Fair’s Fair for the next one." : "One last sweet stop finishes it."}</strong>
                     <div className={styles.mementoGrid} aria-label="Postcard stamps earned so far">
                       {POSTCARD_STAMPS.map((stamp, i) => {
-                        const stamped = i < stampedCount;
+                        const stamped = i < 2 || i < 2 + stop;
                         return (
                           <span key={stamp.src} className={stamped ? styles.stampFilled : undefined}>
                             {stamped ? <img src={stamp.src} alt={stamp.alt} /> : <i>{i + 1}</i>}
@@ -531,27 +551,36 @@ export default function LandingPage() {
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Friendly Mode ends with a postcard you can save or share — same street, no app install." : cluesOpen >= 3 || photoOpen ? "The proof-photo prompt opens when you solve it, even if you never needed the answer." : "Clues stay gentle: hint, clearer hint, then just the shop name if you need it."}</p>
+                    <p>{huntDone ? "Share it to Instagram and tag @stroll_city with #StrollInglewood to enter the monthly Inglewood Basket draw." : "The next image lands only after the riddle is completed."}</p>
                   </div>
                 </div>
                 <figcaption className={styles.mementoCaption}>
-                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{cluesOpen >= 3 || photoOpen || huntDone ? "The challenge at this stop" : "Photo prompt locked"}</span>
-                  <span>{huntDone ? "Ninth Avenue SE, Inglewood" : cluesOpen >= 3 || photoOpen ? "Snap a proof photo at the stop before moving on." : "Solve the riddle to unlock the photo prompt, or open the final clue if you want the answer."}</span>
+                  <span className={`${styles.mementoCaptionK} ${styles.mono}`}>{huntDone ? "Share to enter" : "Next stamp"}</span>
+                  <span>{huntDone ? "Save the postcard, post it to Instagram, and tag @stroll_city with #StrollInglewood." : `Solve ${currentStop.name} to fill the ${stop === 0 ? "third" : "final"} postcard space.`}</span>
                 </figcaption>
               </figure>
 
-              <div className={styles.postcard}>
-                <strong className={styles.postcardTitle}>Postcard + Basket draw</strong>
-                <p className={styles.postcardCopy}>Finish Friendly Mode to make your postcard. Share the postcard with #StrollInglewood and tag @stroll_city to enter the Inglewood Basket draw; finishing alone only makes the postcard. No purchase necessary.</p>
-                <Link className={styles.pickedLink} href="/rules">Basket rules<Arrow size={12} /></Link>
-                <div className={styles.postRow} aria-label="Finished postcard stamp preview">
-                  {POSTCARD_STAMPS.map((stamp) => (
-                    <span key={stamp.src}>
-                      <img src={stamp.src} alt="" />
-                    </span>
-                  ))}
+              {huntDone && (
+                <div className={styles.shareCard}>
+                  <span className={`${styles.mementoKicker} ${styles.mono}`}>Inglewood Basket draw</span>
+                  <strong className={styles.postcardTitle}>Want in? Share the postcard.</strong>
+                  <p className={styles.postcardCopy}>Finishing makes the postcard. Sharing it is what enters the monthly Inglewood Basket prize draw.</p>
+                  <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={() => setShareOpen((open) => !open)}>
+                    Share postcard<Arrow size={13} />
+                  </button>
+                  {shareOpen && (
+                    <div className={styles.shareSteps}>
+                      <b>Instagram share steps</b>
+                      <ol>
+                        <li>Save or screenshot the completed postcard.</li>
+                        <li>Post it to your story or feed.</li>
+                        <li>Tag <span>@stroll_city</span> and add <span>#StrollInglewood</span>.</li>
+                      </ol>
+                      <Link className={styles.pickedLink} href="/rules">Basket rules<Arrow size={12} /></Link>
+                    </div>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>
