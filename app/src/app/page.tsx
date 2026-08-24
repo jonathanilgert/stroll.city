@@ -207,6 +207,7 @@ export default function LandingPage() {
   const [cluesOpen, setCluesOpen] = useState(0);
   const [answerText, setAnswerText] = useState("");
   const [answerStatus, setAnswerStatus] = useState<"idle" | "wrong" | "correct">("idle");
+  const [photoStepDone, setPhotoStepDone] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
@@ -344,6 +345,7 @@ export default function LandingPage() {
     setCluesOpen(0);
     setAnswerText("");
     setAnswerStatus("idle");
+    setPhotoStepDone(false);
   };
 
   const revealHomeClue = () => {
@@ -359,6 +361,7 @@ export default function LandingPage() {
     if (!currentStop || huntDone) return;
     if (isCloseGuess(answerText, answerOptions(currentStop.name))) {
       setAnswerStatus("correct");
+      setPhotoStepDone(false);
       return;
     }
     setAnswerStatus("wrong");
@@ -571,9 +574,6 @@ export default function LandingPage() {
                     ? "Four neighbourhood moments, one finished Inglewood postcard."
                     : currentStop?.riddle ?? "Loading the first riddle…"}
                 </p>
-                {!huntDone && answerStatus === "correct" && currentStop?.challenge && (
-                  <p className={styles.riddleChallenge}><b>Correct — photo to take:</b> {currentStop.challenge}</p>
-                )}
                 {huntDone ? (
                   <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
                 ) : (
@@ -588,49 +588,104 @@ export default function LandingPage() {
                 )}
               </div>
 
-              <div className={styles.huntActions}>
+              <div className={styles.huntSteps} aria-label="How this riddle stop works">
                 {huntDone ? (
-                  <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={() => setShareOpen((open) => !open)}>
-                    Share postcard<Arrow size={13} />
-                  </button>
+                  <>
+                    <div className={`${styles.huntStepItem} ${styles.huntStepItemDone}`}>
+                      <span className={styles.huntStepNo}>✓</span>
+                      <div className={styles.huntStepBody}>
+                        <strong>Postcard complete</strong>
+                        <p>Your four photo marks are finished. Save it, share it, or start the demo again.</p>
+                      </div>
+                    </div>
+                    <div className={styles.huntStepControls}>
+                      <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={() => setShareOpen((open) => !open)}>
+                        Share postcard<Arrow size={13} />
+                      </button>
+                      <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(HOMEPAGE_HUNT_START_INDEX); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setPhotoStepDone(false); setShareOpen(false); }}>Start over</button>
+                    </div>
+                  </>
                 ) : (
                   <>
-                    {answerStatus === "correct" ? (
-                      <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={goNextRiddle}>
-                        Photo taken — next stop<Arrow size={13} />
-                      </button>
-                    ) : cluesOpen >= 3 ? (
-                      <span className={styles.huntNote}>{CLUE_DONE_LINE}</span>
-                    ) : (
-                      <button
-                        type="button"
-                        className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
-                        onClick={revealHomeClue}
-                        aria-expanded={cluesOpen > 0}
-                      >
-                        {CLUE_BUTTON_LABELS[cluesOpen]}<Arrow />
-                        {cluesOpen === 0 && <small>{CLUE_SUBLABEL}</small>}
-                      </button>
+                    <div className={`${styles.huntStepItem} ${answerStatus === "correct" ? styles.huntStepItemDone : ""}`}>
+                      <span className={styles.huntStepNo}>1</span>
+                      <div className={styles.huntStepBody}>
+                        <strong>Enter your answer</strong>
+                        {answerStatus === "correct" ? (
+                          <p>Correct — you found the destination.</p>
+                        ) : (
+                          <form className={styles.answerForm} onSubmit={submitGuess}>
+                            <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
+                            <input
+                              id="homepage-hunt-answer"
+                              className={styles.answerInput}
+                              value={answerText}
+                              onChange={(event) => { setAnswerText(event.target.value); setAnswerStatus("idle"); }}
+                              placeholder="Type your answer"
+                              autoComplete="off"
+                            />
+                            <button type="submit" className={styles.answerSubmit}>Check your guess</button>
+                            {answerStatus === "wrong" && <span className={styles.answerHelp}>Close, but not quite. Try another wording or open the next clue.</span>}
+                          </form>
+                        )}
+                      </div>
+                    </div>
+
+                    {answerStatus !== "correct" && (
+                      <div className={styles.huntStepItem}>
+                        <span className={styles.huntStepNo}>2</span>
+                        <div className={styles.huntStepBody}>
+                          <strong>Need a clue?</strong>
+                          {cluesOpen >= 3 ? (
+                            <p>{CLUE_DONE_LINE}</p>
+                          ) : (
+                            <button
+                              type="button"
+                              className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`}
+                              onClick={revealHomeClue}
+                              aria-expanded={cluesOpen > 0}
+                            >
+                              {CLUE_BUTTON_LABELS[cluesOpen]}<Arrow />
+                              {cluesOpen === 0 && <small>{CLUE_SUBLABEL}</small>}
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     )}
-                    {answerStatus !== "correct" && <form className={styles.answerForm} onSubmit={submitGuess}>
-                      <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
-                      <input
-                        id="homepage-hunt-answer"
-                        className={styles.answerInput}
-                        value={answerText}
-                        onChange={(event) => { setAnswerText(event.target.value); setAnswerStatus("idle"); }}
-                        placeholder="Type your answer"
-                        autoComplete="off"
-                      />
-                      <button type="submit" className={styles.answerSubmit}>Check your guess</button>
-                      {answerStatus === "wrong" && <span className={styles.answerHelp}>Close, but not quite. Try another wording or open the next clue.</span>}
-                    </form>}
+
+                    {answerStatus === "correct" && currentStop?.challenge && (
+                      <div className={`${styles.huntStepItem} ${photoStepDone ? styles.huntStepItemDone : styles.huntStepItemActive}`}>
+                        <span className={styles.huntStepNo}>3</span>
+                        <div className={styles.huntStepBody}>
+                          <strong>Take photo</strong>
+                          <p>{currentStop.challenge}</p>
+                          {!photoStepDone && (
+                            <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnDark}`} onClick={() => setPhotoStepDone(true)}>
+                              Photo taken<Arrow size={13} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {answerStatus === "correct" && photoStepDone && (
+                      <div className={`${styles.huntStepItem} ${styles.huntStepItemActive}`}>
+                        <span className={styles.huntStepNo}>4</span>
+                        <div className={styles.huntStepBody}>
+                          <strong>Next riddle, next stop!</strong>
+                          <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={goNextRiddle}>
+                            Next riddle, next stop!<Arrow size={13} />
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className={styles.huntStepControls}>
+                      <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(HOMEPAGE_HUNT_START_INDEX); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setPhotoStepDone(false); setShareOpen(false); }}>Start over</button>
+                      <span className={styles.huntNoteInline}>{stopCounterText(stop, homepageRiddles.length || 4)}</span>
+                    </div>
                   </>
                 )}
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(HOMEPAGE_HUNT_START_INDEX); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
-                <span className={styles.huntNote}>
-                  {huntDone ? "Postcard completed" : stopCounterText(stop, homepageRiddles.length || 4)}
-                </span>
               </div>
             </div>
 
