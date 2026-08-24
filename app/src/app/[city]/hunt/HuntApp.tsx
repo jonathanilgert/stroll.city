@@ -144,6 +144,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const sessionKey = `${hunt?.id ?? "hunt"}-${teamName || "guest"}`;
   const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
   const activeClues = active ? [active.clue_1, active.clue_2, active.clue_3].filter(Boolean) : [];
+  const activeSolved = active ? progress[active.id]?.state === "solved" : false;
 
   const start = () => {
     const started = Date.now();
@@ -222,12 +223,12 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               {!startedAt || !active ? <p className={styles.landCardP}>Start the hunt to draw your stops. Loop Race rotates the same 8-stop route so teams start apart and no destination is named while the race is running.</p> : <>
                 <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
                 <h3 className={styles.landH3}>Mystery stop</h3>
-                <p className={styles.landCardP} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
+                <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>At this stop:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>
+                {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>At this stop:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
                 <div className={styles.landHeroCta}>
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
-                  {progress[active.id]?.state === "solved" && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{progress[active.id]?.state === "solved" ? "Solved" : "Mark solved"}</button>}
+                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Photo done — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{activeSolved ? "Photo instruction revealed" : "Mark solved"}</button>}
                 </div>
               </>}
             </div>

@@ -319,6 +319,7 @@
 .landH2 { font-size: clamp(30px, 3.6vw, 48px); font-weight: 200; letter-spacing: -.035em; line-height: 1.08; margin: 14px 0 0; }
 .landH3 { font-size: 20px; font-weight: 400; letter-spacing: -.02em; line-height: 1.25; margin: 9px 0 0; }
 .landCardP { font-size: 14px; margin-top: 10px; color: var(--ink-2); line-height: 1.5; }
+.landRiddle { font-family: var(--font-treasure), Georgia, "Times New Roman", serif; font-size: clamp(17px, 1.7vw, 23px); line-height: 1.38; letter-spacing: .01em; color: var(--ink); }
 
 /* buttons (extra variants alongside the shared .btn/.btnPrimary/.btnGhost) */
 .btnSm { height: 44px; padding: 0 20px; font-size: 14px; }

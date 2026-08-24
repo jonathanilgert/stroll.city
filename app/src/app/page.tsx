@@ -188,7 +188,7 @@ export default function LandingPage() {
   const [stop, setStop] = useState(HOMEPAGE_HUNT_START_INDEX);
   const [cluesOpen, setCluesOpen] = useState(0);
   const [answerText, setAnswerText] = useState("");
-  const [answerStatus, setAnswerStatus] = useState<"idle" | "wrong">("idle");
+  const [answerStatus, setAnswerStatus] = useState<"idle" | "wrong" | "correct">("idle");
   const [shareOpen, setShareOpen] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   /* Bumped on every map idle so the marker thinning re-runs against the new screen positions. */
@@ -345,7 +345,7 @@ export default function LandingPage() {
     event.preventDefault();
     if (!currentStop || huntDone) return;
     if (isCloseGuess(answerText, answerOptions(currentStop.name))) {
-      goNextRiddle();
+      setAnswerStatus("correct");
       return;
     }
     setAnswerStatus("wrong");
@@ -538,7 +538,7 @@ export default function LandingPage() {
                     ? "Four neighbourhood moments, one finished Inglewood postcard."
                     : currentStop?.riddle ?? "Loading the first riddle…"}
                 </p>
-                {!huntDone && currentStop?.challenge && (
+                {!huntDone && answerStatus === "correct" && currentStop?.challenge && (
                   <p className={styles.riddleChallenge}><b>At this stop:</b> {currentStop.challenge}</p>
                 )}
                 {huntDone ? (
@@ -559,7 +559,11 @@ export default function LandingPage() {
                   </button>
                 ) : (
                   <>
-                    {cluesOpen >= 3 ? (
+                    {answerStatus === "correct" ? (
+                      <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={goNextRiddle}>
+                        Photo done — next stop<Arrow size={13} />
+                      </button>
+                    ) : cluesOpen >= 3 ? (
                       <span className={styles.huntNote}>{CLUE_DONE_LINE}</span>
                     ) : (
                       <button
@@ -572,7 +576,7 @@ export default function LandingPage() {
                         {cluesOpen === 0 && <small>{CLUE_SUBLABEL}</small>}
                       </button>
                     )}
-                    <form className={styles.answerForm} onSubmit={submitGuess}>
+                    {answerStatus !== "correct" && <form className={styles.answerForm} onSubmit={submitGuess}>
                       <label className={styles.answerLabel} htmlFor="homepage-hunt-answer">Your guess</label>
                       <input
                         id="homepage-hunt-answer"
@@ -584,7 +588,7 @@ export default function LandingPage() {
                       />
                       <button type="submit" className={styles.answerSubmit}>Check your guess</button>
                       {answerStatus === "wrong" && <span className={styles.answerHelp}>Close, but not quite. Try another wording or open the next clue.</span>}
-                    </form>
+                    </form>}
                   </>
                 )}
                 <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnHuntGhost}`} onClick={() => { setStop(HOMEPAGE_HUNT_START_INDEX); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setShareOpen(false); }}>Start over</button>
