@@ -95,15 +95,19 @@ jobs:
           cd "${RELEASE_DIR}/app"
           rm -rf .stroll
           mkdir -p "${SHARED_DIR}/.stroll"
-          ln -s "${SHARED_DIR}/.stroll" .stroll
 
           # Re-running a deploy for the same SHA can leave a partial node_modules
           # behind because the upload intentionally excludes dependencies.
           # Start dependency/build artifacts clean so npm ci is deterministic.
+          # Keep the shared runtime symlink out of the source tree until after
+          # `next build`; Turbopack follows symlinks and can panic on runtime
+          # files that intentionally live outside the immutable release.
           rm -rf node_modules .next
           npm ci
           npm run build
+          ln -s "${SHARED_DIR}/.stroll" .stroll
 
+          chown -h www-data:www-data .stroll
           chown -R www-data:www-data "${RELEASE_DIR}"
           ln -sfn "${RELEASE_DIR}" "${APP_ROOT}/current"
 
