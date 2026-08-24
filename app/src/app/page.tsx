@@ -145,13 +145,6 @@ const PLANS = [
   },
 ];
 
-const FEATURE_CARDS = [
-  { title: "Loop Race", copy: "Same eight stops, rotated starts, live leaderboard.", href: "/calgary/hunt/race/new" },
-  { title: "Event bookings", copy: "Birthdays, staff days, class trips, youth groups.", href: "/events" },
-  { title: "Claim your doorway", copy: "Owners update hours and photos in minutes.", href: "/portal" },
-  { title: "How it works", copy: "The rules of the hunt, in one short page.", href: "/rules" },
-];
-
 function Arrow({ size = 14 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 16 16" aria-hidden>
@@ -374,7 +367,6 @@ export default function LandingPage() {
         <span className={styles.navLinks}>
           <a className={styles.navLink} href="#value">Why stroll</a>
           <a className={styles.navLink} href="#hunt">The hunt</a>
-          <a className={styles.navLink} href="#features">Features</a>
           <a className={styles.navLink} href="#pricing">Pricing</a>
         </span>
         <span className={styles.navRight}>
@@ -657,51 +649,6 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.section} id="features">
-        <div className={styles.sectionIn}>
-          <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
-            <span className={`${styles.eyebrow} ${styles.eyebrowLime} ${styles.mono}`}>Features</span>
-            <h2 className={styles.h2}>Everything the street needs, nothing it doesn’t</h2>
-          </div>
-
-          <div className={styles.featTop} data-rise>
-            <div className={styles.featBig}>
-              <span className={`${styles.eyebrow} ${styles.eyebrowMuted} ${styles.mono} ${styles.eyebrowFlush}`}>Mood filters</span>
-              <strong className={styles.featTitle}>Six moods instead of forty categories</strong>
-              <p className={styles.featCopy}>
-                Shops, restaurants, studios, cafés, bars, arts. Every place carries one, so nothing lands in the wrong drawer.
-              </p>
-              <div className={styles.featChips}>
-                {MOODS.map((mood) => (
-                  <span className={styles.featChip} key={mood.id}>
-                    <i style={{ background: mood.color }} />
-                    {mood.label}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.featHuntCard}>
-              <span className={`${styles.eyebrow} ${styles.mono} ${styles.eyebrowFlush}`}>Scavenger hunts</span>
-              <strong className={styles.featTitle}>Four free stops, clues when you need them</strong>
-              <p className={styles.featHuntCopy}>Riddle first, three clues after. The last clue names the shop so the walk keeps moving.</p>
-              <a className={`${styles.btn} ${styles.btnSm} ${styles.btnPaper} ${styles.featCta}`} href="#hunt">
-                Try the hunt<Arrow size={13} />
-              </a>
-            </div>
-          </div>
-
-          <div className={styles.featSmalls} data-rise>
-            {FEATURE_CARDS.map((card) => (
-              <Link className={styles.featSmall} key={card.title} href={card.href}>
-                <strong className={styles.featSmallTitle}>{card.title}</strong>
-                <p className={styles.featSmallCopy}>{card.copy}</p>
-              </Link>
-            ))}
           </div>
         </div>
       </section>
