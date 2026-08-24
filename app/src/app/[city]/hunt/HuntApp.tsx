@@ -32,7 +32,7 @@ export type HuntStopLite = {
   status: string;
 };
 
-type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?: string; solvedAt?: string };
+type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?: string; photoName?: string; solvedAt?: string };
 
 const cluePenalty = [0, 120, 300, 600];
 const productCopy = {
@@ -104,10 +104,13 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   });
   const teamInputRef = useRef<HTMLInputElement>(null);
   const [teamName, setTeamName] = useState("");
+  const [sessionId, setSessionId] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [now, setNow] = useState<number>(0);
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState<Record<string, Progress>>({});
+  const [uploadingStopId, setUploadingStopId] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState("");
   const [leaderboard, setLeaderboard] = useState<Array<{ team: string; seconds: number }>>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem("stroll-hunt-board") ?? "[]"); } catch { return []; }
@@ -136,7 +139,6 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   }, [hunt, stopsById, teamName]);
   const active = huntStops[current];
   const solvedCount = huntStops.filter((stop) => progress[stop.id]?.state === "solved").length;
-  const finished = huntStops.length > 0 && solvedCount === huntStops.length;
   const isRace = hunt?.mode === "race";
   const penalties = isRace ? huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0], 0) : 0;
   const elapsed = startedAt && now ? Math.floor((now - startedAt) / 1000) : 0;
@@ -145,13 +147,25 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
   const activeClues = active ? [active.clue_1, active.clue_2, active.clue_3].filter(Boolean) : [];
   const activeSolved = active ? progress[active.id]?.state === "solved" : false;
+  const activePhoto = active ? progress[active.id]?.photo : undefined;
+  const allPhotosUploaded = huntStops.length > 0 && huntStops.every((stop) => Boolean(progress[stop.id]?.photo));
+  const finished = huntStops.length > 0 && solvedCount === huntStops.length && allPhotosUploaded;
+  const citySlug = cityName.toLowerCase();
 
   const start = () => {
     const started = Date.now();
+    const nextSessionId = `session_${started.toString(36)}`;
+    setSessionId(nextSessionId);
     setStartedAt(started);
     setNow(started);
     setCurrent(0);
+    setUploadError("");
     setProgress(Object.fromEntries(huntStops.map((stop) => [stop.id, { state: "pending", clues: 0 }])));
+    void fetch(`/api/v1/${citySlug}/hunts/${hunt?.slug ?? selectedSlug}/sessions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ team_name: teamName || "Anonymous team", mode: hunt?.mode }),
+    }).catch(() => undefined);
   };
 
   const revealClue = () => {
@@ -172,6 +186,37 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
 
   const nextStop = () => {
     if (current < huntStops.length - 1) setCurrent((n) => n + 1);
+  };
+
+  const uploadPhoto = async (file: File | undefined) => {
+    if (!active || !file) return;
+    if (!file.type.startsWith("image/")) {
+      setUploadError("Please choose a photo file.");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("Please choose a photo under 10MB.");
+      return;
+    }
+    const currentSessionId = sessionId || `session_${Date.now().toString(36)}`;
+    if (!sessionId) setSessionId(currentSessionId);
+    setUploadingStopId(active.id);
+    setUploadError("");
+    const form = new FormData();
+    form.append("photo", file);
+    form.append("stop_id", active.id);
+    form.append("team_name", teamName || "Anonymous team");
+    const response = await fetch(`/api/v1/${citySlug}/sessions/${encodeURIComponent(currentSessionId)}/photos`, { method: "POST", body: form });
+    const payload = await response.json().catch(() => null) as { ok?: boolean; data?: { url?: string; file_name?: string }; error?: string } | null;
+    setUploadingStopId(null);
+    if (!response.ok || !payload?.ok || !payload.data?.url) {
+      setUploadError(payload?.error ?? "Photo upload did not finish. Please try again.");
+      return;
+    }
+    setProgress((rows) => ({
+      ...rows,
+      [active.id]: { ...(rows[active.id] ?? { state: "solved", clues: 0 }), state: "solved", photo: payload.data?.url, photoName: file.name, solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() },
+    }));
   };
 
   const sharePostcard = async () => {
@@ -226,9 +271,22 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
                 {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Photo to take:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
+                {activeSolved && (
+                  <div className={styles.photoUploadPanel}>
+                    {activePhoto ? <img className={styles.uploadedPhotoPreview} src={activePhoto} alt={`Uploaded proof for ${active.name}`} /> : null}
+                    <div>
+                      <label className={`${styles.btn} ${styles.btnGhost} ${uploadingStopId === active.id ? styles.btnDisabled : ""}`}>
+                        {uploadingStopId === active.id ? "Uploading photo…" : activePhoto ? "Replace postcard photo" : "Upload photo to postcard"}
+                        <input type="file" accept="image/*" capture="environment" disabled={uploadingStopId === active.id} onChange={(event) => { void uploadPhoto(event.target.files?.[0]); event.currentTarget.value = ""; }} />
+                      </label>
+                      <p className={styles.photoUploadHint}>{activePhoto ? "This stop will use your uploaded photo on the finished postcard." : "Upload the photo you just took so the final postcard is authentically yours."}</p>
+                    </div>
+                  </div>
+                )}
+                {uploadError && <div className={styles.calloutAmber}>{uploadError}</div>}
                 <div className={styles.landHeroCta}>
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
-                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Photo taken — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{activeSolved ? "Photo instruction revealed" : "Mark solved"}</button>}
+                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop} disabled={!activePhoto || uploadingStopId === active.id}>Photo uploaded — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve} disabled={activeSolved && !activePhoto}>{activeSolved ? (activePhoto ? "Postcard photo uploaded" : "Upload photo to finish stop") : "Mark solved"}</button>}
                 </div>
               </>}
             </div>
@@ -254,6 +312,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   <div className={styles.punchSlots}>
                     {huntStops.map((stop, index) => {
                       const solved = progress[stop.id]?.state === "solved";
+                      const photo = progress[stop.id]?.photo;
                       const next = startedAt && index === current && !solved;
                       const tilt = tiltFor(sessionKey, index);
                       const [a, b] = stampSwatches[index % stampSwatches.length];
@@ -263,8 +322,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                           {solved && (
                             <div className={styles.punchStamp} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)` }}>
                               <div className={styles.punchStampPaper}>
-                                <div className={styles.punchStampPhoto} style={{ background: `linear-gradient(150deg, ${a}, ${b})` }}>
-                                  <span>{stop.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>
+                                <div className={`${styles.punchStampPhoto} ${photo ? styles.punchStampPhotoUploaded : ""}`} style={photo ? undefined : { background: `linear-gradient(150deg, ${a}, ${b})` }}>
+                                  {photo ? <img src={photo} alt="" /> : <span>{stop.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>}
                                 </div>
                                 <span className={styles.punchDenom}>{String(index + 1).padStart(2, "0")}</span>
                               </div>
@@ -283,6 +342,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   </div>
                 </div>
               </div>
+              {solvedCount === huntStops.length && !allPhotosUploaded && <div className={styles.calloutAmber}><b>Almost there.</b> Upload the remaining stop photos and your postcard will be built from the pictures your team actually took.</div>}
               {finished && <div className={styles.calloutAmber}><b>Win the Inglewood Basket.</b> Share your postcard publicly tagging <b>@stroll_city</b> or <b>#StrollInglewood</b> and you’re entered in this month’s draw — a basket donated by ten Inglewood businesses, worth around $250. Entering is optional; the hunt is free either way. One entry per completed hunt. No purchase necessary. Alberta residents 18+. Winner answers a skill-testing question. <Link href="/rules">Full rules →</Link></div>}
               {finished && (
                 <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
@@ -293,7 +353,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                     {huntStops.map((stop, index) => {
                       const tilt = tiltFor(sessionKey, index + 20);
                       const [a, b] = stampSwatches[index % stampSwatches.length];
-                      return <span key={stop.id} className={styles.postcardMiniStamp} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)`, background: `linear-gradient(150deg, ${a}, ${b})` }}>{String(index + 1).padStart(2, "0")}</span>;
+                      const photo = progress[stop.id]?.photo;
+                      return <span key={stop.id} className={`${styles.postcardMiniStamp} ${photo ? styles.postcardMiniStampPhoto : ""}`} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)`, background: photo ? undefined : `linear-gradient(150deg, ${a}, ${b})` }}>{photo ? <img src={photo} alt="" /> : String(index + 1).padStart(2, "0")}</span>;
                     })}
                   </div>
                   <div className={styles.postcardHeroFigure}><small>{isRace ? "STROLL TIME" : "INGLEWOOD"}</small><b>{isRace ? fmt(strollSeconds) : `${huntStops.length} STOPS`}</b></div>
