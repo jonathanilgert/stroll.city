@@ -782,7 +782,10 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
-          <p className={styles.groupPriceLink}>Booking for a group? <Link href="/events">From $9 a person<Arrow size={12} /></Link></p>
+          <p className={styles.groupPriceLink}>
+            Booking for a group? <Link href="/events">From $9 a person<Arrow size={12} /></Link>
+            <span className={styles.groupExamples}>Corporate events, bachelor parties, bachelorette parties, birthday parties, youth groups, charity fundraiser events and more.</span>
+          </p>
         </div>
       </section>
 
