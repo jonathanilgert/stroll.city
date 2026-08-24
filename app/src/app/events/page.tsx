@@ -33,7 +33,7 @@ export default function EventsPage() {
           <div className={styles.landHeroCopy}><span className={styles.landEyebrow}><i /> Group bookings</span><h1 className={styles.landH1}>Book a walkable team hunt.</h1><p className={styles.landHeroSub}>Published per-person pricing for staff days, schools, youth groups and charity fundraisers. We’ll confirm the date, venue option and payment details by email.</p><p className={styles.landCardP}><Link href="/">Walking on your own? The self-serve hunts are over here →</Link></p></div>
           <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}><span className={styles.lbl}>Price card</span><div className={styles.locked} style={{ marginTop: 16 }}>{products.map(([id, name, price, copy]) => <button key={id} className={styles.plan} aria-pressed={form.product === id} onClick={() => setForm({ ...form, product: id })}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{name}</span><span className={styles.planPrice}>{price}</span></span><span className={styles.planDesc}>{copy}</span></span></button>)}</div></div>
         </div></div></header>
-        <section className={styles.landBlk}><div className={styles.landDuo}>
+        <section className={styles.landBlk}><div className={styles.landDuo} style={{ gridTemplateColumns: "minmax(0, 1fr)" }}>
           <div className={styles.landBigCard}><span className={styles.lbl}>Booking request</span><div className={styles.grid2}>
             <Field label="Email" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
             <Field label="Date" type="date" value={form.date} onChange={(v) => setForm({ ...form, date: v })} />
@@ -42,7 +42,6 @@ export default function EventsPage() {
             <div className={styles.claimField}><label>Audience</label><div className={styles.ctl}><select value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })}><option value="family">Family</option><option value="adult">Adult</option></select></div></div>
             <Field label="Finish preference" value={form.finishPreference} onChange={(v) => setForm({ ...form, finishPreference: v })} />
           </div><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={submit}>Send booking request</button><Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary/hunt">Try a hunt first</Link></div><p className={styles.landCardP}>{status}</p></div>
-          <div className={styles.landBigCard}><span className={styles.lbl}>Before first paid booking</span><div className={styles.locked}><div className={styles.callout}>Commercial general liability insurance and a signed waiver.</div><div className={styles.callout}>Youth supervision and consent remain the booking organisation&apos;s responsibility.</div><div className={styles.callout}>Weather/cancellation policy: free reschedule with 24 hours notice, full refund if stroll.city cancels, no refund for no-shows.</div><div className={styles.callout}>GST registration once revenue crosses $30K rolling threshold.</div></div></div>
         </div></section>
       </div>
     </main>
