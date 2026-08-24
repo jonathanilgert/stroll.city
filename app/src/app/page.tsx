@@ -224,11 +224,6 @@ export default function LandingPage() {
   const visible = useMemo(() => businesses.filter((b) => active.has(b.category)), [businesses, active]);
   const litCount = visible.length;
 
-  const marquee = useMemo(() => {
-    const names = businesses.slice(0, 22).map((b) => b.name);
-    return names.length ? names.concat(names) : [];
-  }, [businesses]);
-
   const huntStopsById = useMemo(() => new Map((data?.huntStops ?? []).map((item) => [item.id, item])), [data]);
   const friendlyHunt = useMemo(() => data?.hunts?.find((hunt) => hunt.mode === "friendly") ?? data?.hunts?.[0], [data]);
   const homepageRiddles = useMemo(() => (friendlyHunt?.stop_ids ?? [])
@@ -438,124 +433,109 @@ export default function LandingPage() {
           </div>
         </div>
 
-        <div className={styles.frameWrap} data-rise>
-          <div className={styles.frame}>
-            <div className={styles.frameBar}>
-              <span className={styles.frameDots} aria-hidden><i /><i /><i /></span>
-              <span className={`${styles.frameUrl} ${styles.mono}`}>stroll.city/calgary/inglewood</span>
-              <span className={styles.frameEnd}>
-                <span className={`${styles.frameLive} ${styles.mono}`}><i />Live</span>
-              </span>
-            </div>
+      </section>
 
-            <div className={styles.stage}>
-              <div ref={mapNode} className={styles.map} />
-
-              <div className={styles.chips}>
-                {MOODS.map((mood) => {
-                  const on = active.has(mood.id);
-                  const dark = isLightHex(mood.color);
-                  return (
-                    <button
-                      key={mood.id}
-                      type="button"
-                      className={styles.chip}
-                      aria-pressed={on}
-                      onClick={() => toggleMood(mood.id)}
-                      style={on ? { background: mood.color, borderColor: mood.color, color: dark ? "#14161A" : "#fff" } : undefined}
-                    >
-                      <i style={on ? undefined : { background: mood.color, opacity: 1 }} />
-                      {mood.label}
-                    </button>
-                  );
-                })}
+      <section className={`${styles.section} ${styles.exploreSection}`} id="value">
+        <div className={`${styles.sectionIn} ${styles.exploreGrid}`}>
+          <div className={styles.frameWrap} data-rise>
+            <div className={styles.frame}>
+              <div className={styles.frameBar}>
+                <span className={styles.frameDots} aria-hidden><i /><i /><i /></span>
+                <span className={`${styles.frameUrl} ${styles.mono}`}>stroll.city/calgary/inglewood</span>
+                <span className={styles.frameEnd}>
+                  <span className={`${styles.frameLive} ${styles.mono}`}><i />Live</span>
+                </span>
               </div>
 
-              <div className={`${styles.picked} ${selected ? styles.pickedOn : ""}`}>
-                {selected && (
-                  <>
-                    <div className={styles.pickedName}>{selected.name}</div>
-                    <div className={styles.pickedMeta}>
-                      <i style={{ background: MOOD_COLOR[selected.category] }} />
-                      {MOOD_LABEL[selected.category]}
-                    </div>
-                    <div className={styles.pickedAddr}>{selected.blurb?.trim() || selected.address}</div>
-                    <Link className={styles.pickedLink} href="/calgary">Open in the map<Arrow size={12} /></Link>
-                  </>
-                )}
+              <div className={styles.stage}>
+                <div ref={mapNode} className={styles.map} />
+
+                <div className={styles.chips}>
+                  {MOODS.map((mood) => {
+                    const on = active.has(mood.id);
+                    const dark = isLightHex(mood.color);
+                    return (
+                      <button
+                        key={mood.id}
+                        type="button"
+                        className={styles.chip}
+                        aria-pressed={on}
+                        onClick={() => toggleMood(mood.id)}
+                        style={on ? { background: mood.color, borderColor: mood.color, color: dark ? "#14161A" : "#fff" } : undefined}
+                      >
+                        <i style={on ? undefined : { background: mood.color, opacity: 1 }} />
+                        {mood.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className={`${styles.picked} ${selected ? styles.pickedOn : ""}`}>
+                  {selected && (
+                    <>
+                      <div className={styles.pickedName}>{selected.name}</div>
+                      <div className={styles.pickedMeta}>
+                        <i style={{ background: MOOD_COLOR[selected.category] }} />
+                        {MOOD_LABEL[selected.category]}
+                      </div>
+                      <div className={styles.pickedAddr}>{selected.blurb?.trim() || selected.address}</div>
+                      <Link className={styles.pickedLink} href="/calgary">Open in the map<Arrow size={12} /></Link>
+                    </>
+                  )}
+                </div>
+
+                <span className={styles.hint}>
+                  {litCount ? "Drag to pan · tap a doorway" : "Loading Inglewood…"}
+                </span>
               </div>
+            </div>
+          </div>
 
-              <span className={styles.hint}>
-                {litCount ? "Drag to pan · tap a doorway" : "Loading Inglewood…"}
-              </span>
+          <div className={styles.exploreCopy} data-rise>
+            <div className={`${styles.head} ${styles.headWide}`}>
+              <span className={`${styles.eyebrow} ${styles.mono}`}>Why stroll.city</span>
+              <h2 className={styles.h2}>Search engines list places. We draw the street.</h2>
+              <p className={styles.lead}>
+                A map of a shopping street should tell you what it feels like to stand on it — which side has the cafés, how far the next block really is, what’s behind the door you keep walking past.
+              </p>
+            </div>
+            <div className={styles.valueGrid}>
+              <div className={styles.valueCard}>
+                <span className={styles.valueIcon} style={{ background: "#E4EBFF" }}>
+                  <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
+                    <rect x="2.6" y="6.4" width="6" height="11" rx="1.4" fill="none" stroke="#0B47E8" strokeWidth="1.5" />
+                    <rect x="11.4" y="3.4" width="6" height="14" rx="1.4" fill="none" stroke="#0B47E8" strokeWidth="1.5" />
+                  </svg>
+                </span>
+                <strong className={styles.valueTitle}>Real building footprints</strong>
+                <p className={styles.valueCopy}>Each shop sits on the building it actually occupies.</p>
+              </div>
+              <div className={styles.valueCard}>
+                <span className={styles.valueIcon} style={{ background: "#FBD9E4" }}>
+                  <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
+                    <path d="M3 5.5h14M5.5 10h9M8 14.5h4" stroke="#C2296B" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <strong className={styles.valueTitle}>Scroll your stroll.</strong>
+                <p className={styles.valueCopy}>Pick a mood and see what’s open right now.</p>
+              </div>
+              <div className={styles.valueCard}>
+                <span className={styles.valueIcon} style={{ background: "#EDF7B8" }}>
+                  <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
+                    <circle cx="10" cy="10" r="6.6" fill="none" stroke="#5F7A12" strokeWidth="1.5" />
+                    <path d="M10 6.4v4l2.6 1.6" stroke="#5F7A12" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+                <strong className={styles.valueTitle}>No route generator</strong>
+                <p className={styles.valueCopy}>You decide the walk. The map stays out of the way.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className={styles.marquee} aria-label="On the street">
-        <div className={styles.marqueeTrack}>
-          {marquee.map((name, i) => (
-            <span className={styles.marqueeItem} key={`${name}-${i}`}>{name}<i /></span>
-          ))}
-        </div>
-      </section>
-
-      <section className={styles.section} id="value">
-        <div className={styles.sectionIn}>
-          <div className={`${styles.head} ${styles.headWide}`} data-rise>
-            <span className={`${styles.eyebrow} ${styles.mono}`}>Why stroll.city</span>
-            <h2 className={styles.h2}>Search engines list places. We draw the street.</h2>
-            <p className={styles.lead}>
-              A map of a shopping street should tell you what it feels like to stand on it — which side has the cafés, how far the next block really is, what’s behind the door you keep walking past.
-            </p>
-          </div>
-          <div className={styles.valueGrid} data-rise>
-            <div className={styles.valueCard}>
-              <span className={styles.valueIcon} style={{ background: "#E4EBFF" }}>
-                <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
-                  <rect x="2.6" y="6.4" width="6" height="11" rx="1.4" fill="none" stroke="#0B47E8" strokeWidth="1.5" />
-                  <rect x="11.4" y="3.4" width="6" height="14" rx="1.4" fill="none" stroke="#0B47E8" strokeWidth="1.5" />
-                </svg>
-              </span>
-              <strong className={styles.valueTitle}>Real building footprints</strong>
-              <p className={styles.valueCopy}>Each shop sits on the building it actually occupies, at the size it actually is.</p>
-            </div>
-            <div className={styles.valueCard}>
-              <span className={styles.valueIcon} style={{ background: "#FBD9E4" }}>
-                <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
-                  <path d="M3 5.5h14M5.5 10h9M8 14.5h4" stroke="#C2296B" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-              </span>
-              <strong className={styles.valueTitle}>Scroll your stroll.</strong>
-              <p className={styles.valueCopy}>Pick a mood and see what’s open right now.</p>
-            </div>
-            <div className={styles.valueCard}>
-              <span className={styles.valueIcon} style={{ background: "#EDF7B8" }}>
-                <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
-                  <circle cx="10" cy="10" r="6.6" fill="none" stroke="#5F7A12" strokeWidth="1.5" />
-                  <path d="M10 6.4v4l2.6 1.6" stroke="#5F7A12" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </span>
-              <strong className={styles.valueTitle}>No route generator</strong>
-              <p className={styles.valueCopy}>You decide the walk. The map stays out of the way and tells the truth.</p>
-            </div>
-            <div className={styles.valueCard}>
-              <span className={styles.valueIcon} style={{ background: "#FDECBE" }}>
-                <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden>
-                  <path d="M6 3.5h8a1.5 1.5 0 0 1 1.5 1.5v10A1.5 1.5 0 0 1 14 16.5H6A1.5 1.5 0 0 1 4.5 15V5A1.5 1.5 0 0 1 6 3.5z" fill="none" stroke="#8A6410" strokeWidth="1.5" />
-                  <path d="M8.4 13.6h3.2" stroke="#8A6410" strokeWidth="1.5" strokeLinecap="round" />
-                </svg>
-              </span>
-              <strong className={styles.valueTitle}>Opens in a browser</strong>
-              <p className={styles.valueCopy}>Nothing to install, no account to make. A link is the whole product.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className={styles.section} id="hunt">
-        <div className={styles.sectionIn}>
+      <section className={`${styles.section} ${styles.huntSection}`} id="hunt">
+        <div className={`${styles.sectionIn} ${styles.huntSectionIn}`}>
           <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
             <span className={`${styles.eyebrow} ${styles.eyebrowPink} ${styles.mono}`}>The hunt</span>
             <h2 className={styles.h2}>Solve the street, one doorway at a time.</h2>

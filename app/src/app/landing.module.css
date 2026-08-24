@@ -163,7 +163,7 @@
 @media (max-width: 620px) { .navGhost { display: none; } }
 
 /* ---------------- hero ---------------- */
-.hero { padding: clamp(40px, 6.5vw, 104px) var(--gutter) 0; }
+.hero { padding: clamp(32px, 5.4vw, 82px) var(--gutter) 0; }
 .heroCopy { max-width: 1120px; margin: 0 auto; text-align: center; }
 .badge {
   display: inline-flex;
@@ -206,12 +206,28 @@
   gap: 8px;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: clamp(26px, 3.4vw, 44px);
+  margin-bottom: 0;
 }
 
 /* ---------------- hero frame + live map ---------------- */
-.frameWrap { max-width: 1240px; margin: 0 auto; }
-.frame { background: var(--paper); border: 1px solid var(--line); border-radius: 22px; padding: clamp(8px, 1vw, 12px); }
+.exploreSection { padding-top: clamp(26px, 4.2vw, 62px); }
+.exploreGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(360px, .94fr);
+  gap: clamp(22px, 4vw, 60px);
+  align-items: center;
+}
+.exploreCopy { min-width: 0; }
+.exploreCopy .head { margin-bottom: clamp(18px, 2.6vw, 28px); }
+.exploreCopy .valueGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(10px, 1.4vw, 16px); }
+.exploreCopy .valueCard { border: 0; padding: 0; background: transparent; }
+.exploreCopy .valueIcon { width: 38px; height: 38px; border-radius: 12px; }
+@media (max-width: 980px) {
+  .exploreGrid { grid-template-columns: minmax(0, 1fr); }
+  .exploreCopy .valueGrid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+}
+.frameWrap { max-width: 1240px; margin: 0 auto; width: 100%; }
+.frame { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: clamp(7px, .9vw, 10px); box-shadow: 0 20px 48px -38px rgba(20, 22, 26, .32); }
 .frameBar { display: flex; align-items: center; gap: 8px; padding: 6px 8px 12px; }
 /* Equal flex on both ends keeps the URL pill optically centred in the chrome. */
 .frameDots { flex: 1; display: flex; gap: 5px; }
@@ -247,7 +263,7 @@
   border-radius: 14px;
   overflow: hidden;
   aspect-ratio: 16 / 9;
-  min-height: 320px;
+  min-height: 300px;
   background: #fff;
   border: 1px solid var(--line-4);
 }
@@ -423,8 +439,19 @@
 .valueCopy { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-3); }
 
 /* ---------------- hunt ---------------- */
-.huntGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .82fr); gap: 12px; align-items: start; }
-@media (max-width: 900px) { .huntGrid { grid-template-columns: minmax(0, 1fr); } }
+.huntSection { padding-top: clamp(46px, 7vw, 96px); }
+.huntSectionIn {
+  display: grid;
+  grid-template-columns: minmax(300px, .76fr) minmax(0, 1.24fr);
+  gap: clamp(18px, 4vw, 58px);
+  align-items: start;
+}
+.huntSection .head { margin: clamp(18px, 3vw, 44px) 0 0; }
+.huntGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
+@media (max-width: 980px) {
+  .huntSectionIn { grid-template-columns: minmax(0, 1fr); }
+  .huntSection .head { margin-top: 0; }
+}
 .huntPanel {
   background: transparent;
   border: 0;
@@ -435,14 +462,14 @@
   gap: 18px;
   align-self: start;
 }
-.huntHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.huntHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 clamp(10px, 1.8vw, 24px); }
 .huntStep { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--pink-ink); }
 .punches { margin-left: auto; display: flex; gap: 5px; }
 .punch { width: 26px; height: 5px; border-radius: 99px; background: #F1DCE5; transition: background .3s; display: block; }
 .riddleCard {
   position: relative;
   isolation: isolate;
-  min-height: clamp(430px, 39vw, 560px);
+  min-height: clamp(430px, 39vw, 585px);
   background: url("/brand/stroll-riddle-postcard-backdrop.png") center / 100% 100% no-repeat;
   border: 0;
   border-radius: 28px;
@@ -452,7 +479,7 @@
   gap: clamp(14px, 1.8vw, 22px);
   flex: 0 0 auto;
   filter: drop-shadow(0 24px 24px rgba(64, 45, 25, .18));
-  transform: rotate(-1.4deg);
+  transform: rotate(-1.4deg) translateX(clamp(0px, 1.3vw, 18px));
   transform-origin: center;
 }
 .riddleCard > * {
@@ -564,7 +591,7 @@
   line-height: 1.42;
   font-weight: 650;
 }
-.huntActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+.huntActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; padding: 0 clamp(10px, 1.8vw, 24px); }
 .huntActions .btnDark small {
   display: block;
   margin-left: 2px;
@@ -629,7 +656,7 @@
 .btnHuntGhost:hover { border-color: #D99CB6; color: var(--ink); background: #fff; }
 .huntNote { flex: 1 0 100%; margin-left: 0; font-size: 13px; color: var(--pink-ink); }
 
-.huntSide { display: flex; flex-direction: column; gap: 12px; }
+.huntSide { display: flex; flex-direction: column; gap: 12px; width: min(64%, 430px); margin-top: clamp(-128px, -8vw, -72px); margin-left: clamp(0px, 1.4vw, 22px); z-index: 3; }
 .huntMemento {
   position: relative;
   margin: 0;
@@ -647,6 +674,7 @@
   gap: 14px;
   overflow: hidden;
   box-shadow: 0 18px 46px -28px rgba(20, 24, 26, .34);
+  transform: rotate(-6deg);
 }
 .huntMemento::before {
   content: "";
