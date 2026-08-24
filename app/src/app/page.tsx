@@ -70,7 +70,7 @@ const POSTCARD_STAMPS = [
   { src: "/brand/hunt-postcard/04-doughnut-party.jpeg", alt: "Doughnut Party postcard photo", static: false },
 ];
 
-const CLUE_BUTTON_LABELS = ["Give me a clue", "One more", "Just tell me"];
+const CLUE_BUTTON_LABELS = ["Give me a clue", "One more", "Final hint"];
 const CLUE_SUBLABEL = "Three clues per stop";
 const CLUE_DONE_LINE = "Every stop has the same three. You can’t get properly lost.";
 const HOMEPAGE_HUNT_START_INDEX = 2;
@@ -95,7 +95,13 @@ function stopCounterText(stopIndex: number, total: number) {
 
 function cluesForStop(stop: HuntStop | null) {
   if (!stop) return [];
-  return [stop.clue_1, stop.clue_2, stop.clue_3].filter(Boolean) as string[];
+  const clues = [stop.clue_1, stop.clue_2, stop.clue_3].filter(Boolean) as string[];
+  return clues.map((clue, index) => {
+    if (index !== 2) return clue;
+    if (/Fair's Fair/i.test(clue)) return "Look for the used bookstore on the river-end block. Type the name you find on the door once you’re sure.";
+    if (/Doughnut Party/i.test(clue)) return "Look for the bright doughnut shop on 9 Ave SE. Type the name you find on the door once you’re sure.";
+    return clue;
+  });
 }
 
 async function imageToDataUrl(src: string) {
@@ -651,7 +657,7 @@ export default function LandingPage() {
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Four photos from your stroll, postmarked Inglewood and ready to save or share." : stop < 3 ? "The Fair’s Fair photo slot fills in after this riddle is completed." : "Doughnut Party is the last stamp in this example."}</p>
+                    <p>{huntDone ? "Four photos from your stroll, postmarked Inglewood and ready to save or share." : stop < 3 ? "The next postcard photo slot fills in after this riddle is completed." : "The final postcard photo slot fills in after this riddle is completed."}</p>
                   </div>
                 </div>
               </figure>
