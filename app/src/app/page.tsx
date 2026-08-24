@@ -539,7 +539,7 @@ export default function LandingPage() {
                     : currentStop?.riddle ?? "Loading the first riddle…"}
                 </p>
                 {!huntDone && answerStatus === "correct" && currentStop?.challenge && (
-                  <p className={styles.riddleChallenge}><b>At this stop:</b> {currentStop.challenge}</p>
+                  <p className={styles.riddleChallenge}><b>Correct — photo to take:</b> {currentStop.challenge}</p>
                 )}
                 {huntDone ? (
                   <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
@@ -561,7 +561,7 @@ export default function LandingPage() {
                   <>
                     {answerStatus === "correct" ? (
                       <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue}`} onClick={goNextRiddle}>
-                        Photo done — next stop<Arrow size={13} />
+                        Photo taken — next stop<Arrow size={13} />
                       </button>
                     ) : cluesOpen >= 3 ? (
                       <span className={styles.huntNote}>{CLUE_DONE_LINE}</span>

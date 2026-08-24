@@ -225,10 +225,10 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
                 <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>At this stop:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
+                {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Photo to take:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
                 <div className={styles.landHeroCta}>
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
-                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Photo done — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{activeSolved ? "Photo instruction revealed" : "Mark solved"}</button>}
+                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Photo taken — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve}>{activeSolved ? "Photo instruction revealed" : "Mark solved"}</button>}
                 </div>
               </>}
             </div>
