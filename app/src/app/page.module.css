@@ -926,3 +926,290 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .postcardTag { position: absolute; right: 30px; bottom: 30px; z-index: 2; text-align: right; font-family: var(--font-mono); font-size: 11px; color: rgba(61,49,33,.65); }
 .postcardTag b { color: #15558F; font-weight: 600; }
 @media (max-width: 560px) { .postcardArt { padding: 24px; } .postcardCollage8 { grid-template-columns: repeat(2, max-content); } .postcardMiniStamp { width: 66px; height: 78px; } }
+
+/* ---------- Stroll Landing v8 compatibility for legacy pages ----------
+   Non-home routes (business, events, rules, race, live hunt panels) still use the older
+   land* class names from this module. Keep those routes visually aligned with the
+   current homepage without touching the full-screen map/admin shell classes above. */
+.landing {
+  scroll-padding-top: 64px;
+  scroll-behavior: smooth;
+  --ink: #14161A;
+  --ink-2: #55585F;
+  --ink-3: #6B6F77;
+  --ink-4: #767A82;
+  --line: #EAEBEE;
+  --line-2: #E2E4E8;
+  --line-3: #EDEEF1;
+  --paper: #F4F5F7;
+  --blue: #0B47E8;
+  --blue-dark: #0736B8;
+  --blue-100: #E4EBFF;
+  --lime: #DCF23C;
+  --lime-hi: #E8F877;
+  --pink: #FBD9E4;
+  --gutter: clamp(16px, 3vw, 40px);
+  background: #fff;
+  color: var(--ink);
+  font-family: var(--font-instrument), var(--font-display), system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  text-wrap: pretty;
+  -webkit-font-smoothing: antialiased;
+}
+.landing a { text-decoration: none; }
+.landing h1, .landing h2, .landing h3 { font-weight: 500; letter-spacing: -.032em; line-height: 1.04; }
+
+.landing .landNav {
+  position: sticky;
+  top: 0;
+  z-index: 900;
+  max-width: none;
+  margin: 0;
+  padding: 12px var(--gutter);
+  background: rgba(255,255,255,.86);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line-3);
+}
+.landing .landNavIn {
+  height: auto;
+  max-width: none;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  gap: 18px;
+}
+.landing .landBrand { gap: 8px; color: var(--ink); font-weight: 600; font-size: 15px; letter-spacing: -.03em; }
+.landing .landBrand img { width: 26px; height: 26px; object-fit: contain; }
+.landing .landBrandName { font-size: 15px; font-weight: 600; letter-spacing: -.03em; }
+.landing .landBrandName span { color: inherit; }
+.landing .landNavLinks { margin: 0 auto; gap: clamp(10px, 1.6vw, 22px); font-size: 13.5px; font-weight: 500; }
+.landing .landNavLinks a { color: var(--ink-2); padding: 6px 10px; border-radius: 8px; font-size: 13.5px; }
+.landing .landNavLinks a:hover { background: var(--paper); color: var(--ink); }
+.landing .landSp { margin-left: auto; }
+.landing .landNavSecondary,
+.landing .landNavIn > .btn { margin-left: 0; }
+
+.landing .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: auto;
+  min-height: 0;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .16s, border-color .16s, color .16s;
+  box-shadow: none;
+}
+.landing .btnSm { padding: 9px 16px; font-size: 13.5px; height: auto; }
+.landing .btnPrimary { background: var(--blue); color: #fff; }
+.landing .btnPrimary:hover { background: var(--blue-dark); color: #fff; }
+.landing .btnGhost,
+.landing .btnLine { background: #fff; border-color: var(--line-2); color: var(--ink); }
+.landing .btnGhost:hover,
+.landing .btnLine:hover { background: #FAFAFB; border-color: #C9CCD3; color: var(--ink); }
+.landing .btnClaim { background: var(--ink); color: #fff; }
+.landing .btnClaim:hover { background: var(--blue); color: #fff; }
+
+.landing .landWrap { max-width: none; margin: 0; padding: 0; }
+.landing .landHero { padding: clamp(54px, 9vw, 116px) var(--gutter) clamp(32px, 5vw, 70px); background: linear-gradient(180deg, #fff 0%, #F7F8FA 100%); }
+.landing .landHeroCard {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.landing .landHeroGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(330px, .72fr); gap: clamp(28px, 5vw, 72px); align-items: center; }
+.landing .landHeroCopy { max-width: 680px; padding: 0; }
+.landing .landEyebrow {
+  height: auto;
+  min-height: 30px;
+  padding: 6px 10px;
+  background: var(--paper);
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  font: 600 12px/1.2 var(--font-mono), ui-monospace, monospace;
+  letter-spacing: .02em;
+}
+.landing .landEyebrow i { background: var(--blue); }
+.landing .landH1 { margin: 18px 0 0; max-width: 20ch; color: var(--ink); font-size: clamp(34px, 5.6vw, 72px); font-weight: 500; letter-spacing: -.04em; line-height: 1.02; }
+.landing .landH1 em { color: var(--blue); font-style: normal; }
+.landing .landHeroSub { margin-top: 22px; max-width: 56ch; color: var(--ink-2); font-size: clamp(15px, 1.15vw, 16.5px); line-height: 1.6; }
+.landing .landHeroCta { gap: 8px; margin-top: 28px; }
+.landing .landTrust { color: var(--ink-3); }
+.landing .landTrust b { color: var(--ink); }
+
+.landing .landShowcase {
+  min-height: 360px;
+  height: auto;
+  border-radius: 34px;
+  background: #fff;
+  border: 1px solid var(--line-2);
+  box-shadow: 0 24px 80px -48px rgba(20,22,26,.4);
+  overflow: hidden;
+  cursor: default;
+}
+.landing .landShowcase:hover { transform: none; box-shadow: 0 24px 80px -48px rgba(20,22,26,.4); }
+.landing .landScBar { border-bottom-color: var(--line-3); }
+.landing .landScUrl { background: var(--paper); color: var(--ink-3); }
+.landing .landScMap { background: #F7F8FA; }
+.landing .landChip { border-color: var(--line-2); background: rgba(255,255,255,.92); box-shadow: 0 8px 26px -20px rgba(20,22,26,.45); }
+.landing .landScCard,
+.landing .landScHint { box-shadow: 0 18px 44px -28px rgba(20,22,26,.45); }
+
+.landing .landStats { max-width: 1180px; margin: -18px auto 0; padding: 0 var(--gutter); grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.landing .landStat { background: var(--ink); border-radius: 24px; padding: 22px; }
+.landing .landStatAccent { background: var(--lime); color: var(--ink); }
+.landing .landStatV { font-weight: 500; letter-spacing: -.06em; }
+
+.landing .landBlk { padding: clamp(56px, 8vw, 104px) var(--gutter) 0; }
+.landing .landBlk > *,
+.landing .landCta,
+.landing .landFooter > * { max-width: 1180px; margin-left: auto; margin-right: auto; }
+.landing .landSecHead { align-items: flex-end; gap: 28px; margin-bottom: 28px; }
+.landing .landSecHead p,
+.landing .landCardP { color: var(--ink-2); }
+.landing .lbl { color: var(--blue); font: 700 12px/1.2 var(--font-mono), ui-monospace, monospace; letter-spacing: .06em; text-transform: uppercase; }
+.landing .landH2 { margin: 12px 0 0; color: var(--ink); font-size: clamp(34px, 4.8vw, 64px); font-weight: 500; letter-spacing: -.055em; line-height: .96; }
+.landing .landH3 { color: var(--ink); font-size: clamp(21px, 2.2vw, 28px); font-weight: 500; letter-spacing: -.04em; }
+.landing .landDuo { gap: 18px; }
+.landing .landBigCard,
+.landing .landStepCard,
+.landing .landPlan,
+.landing .pcard,
+.landing .pane,
+.landing .helpCard,
+.landing .review {
+  background: #fff;
+  border: 1px solid var(--line-2);
+  border-radius: 28px;
+  box-shadow: 0 18px 60px -48px rgba(20,22,26,.42);
+}
+.landing .landBigCardDark,
+.landing .landPlanHot { background: var(--ink); border-color: var(--ink); color: #fff; }
+.landing .landBcIc,
+.landing .valueIcon { background: var(--blue-100); }
+.landing .landTick { color: var(--ink-2); }
+
+.landing .plan,
+.landing .optionCard,
+.landing .lockRow,
+.landing .callout,
+.landing .revRow,
+.landing .claimField .ctl,
+.landing .ctl {
+  border-color: var(--line-2);
+  background: #fff;
+}
+.landing .locked { gap: 10px; }
+.landing .plan {
+  border-radius: 22px;
+  padding: 18px;
+  transition: border-color .16s, background .16s, transform .16s;
+}
+.landing .plan:hover,
+.landing .plan[aria-pressed="true"] { border-color: var(--blue); background: #F7FAFF; transform: translateY(-1px); }
+.landing .planPrice { color: var(--blue); }
+.landing .claimField label { color: var(--ink-2); font-weight: 600; }
+.landing .ctl input,
+.landing .ctl select,
+.landing .ctl textarea { color: var(--ink); }
+.landing .callout { border-radius: 18px; color: var(--ink-2); }
+
+.landing .landPlans { gap: 18px; }
+.landing .landPlansTwo { max-width: 760px; }
+.landing .landPrice { font-weight: 500; letter-spacing: -.06em; }
+.landing .landHotpill { background: var(--lime); }
+.landing .landPlanHot .landPlanCopy,
+.landing .landPlanHot .landFeat { color: rgba(255,255,255,.76); }
+
+.landing .landCta {
+  margin-top: clamp(58px, 8vw, 104px);
+  border-radius: 34px;
+  background: var(--blue);
+  color: #fff;
+  padding: clamp(36px, 5vw, 64px);
+}
+.landing .landFooter { border-top-color: var(--line-3); }
+
+@media (max-width: 900px) {
+  .landing .landHeroGrid,
+  .landing .landDuo,
+  .landing .landStats { grid-template-columns: minmax(0, 1fr); }
+  .landing .landShowcase { min-height: 300px; }
+  .landing .landNavLinks { display: none; }
+}
+@media (max-width: 560px) {
+  .landing .landHero { padding-top: 42px; }
+  .landing .landHeroGrid { gap: 26px; }
+  .landing .landH1 { font-size: clamp(36px, 13vw, 58px); }
+  .landing .landShowcase { border-radius: 24px; }
+  .landing .landBigCard,
+  .landing .landStepCard,
+  .landing .landPlan { border-radius: 24px; padding: 24px; }
+  .landing .landStats { margin-top: 0; }
+}
+
+/* The public owner-claim portal is an app-like flow rather than a marketing page, but
+   it should still inherit the homepage's white/blue/lime material language. Scope via
+   :has(.portalMain) so the full-screen map shell keeps its purpose-built UI. */
+.shell:has(.portalMain) {
+  background: #fff;
+  color: #14161A;
+  font-family: var(--font-instrument), var(--font-display), system-ui, sans-serif;
+}
+.shell:has(.portalMain) .rail { background: rgba(255,255,255,.86); border-right: 1px solid #EDEEF1; }
+.shell:has(.portalMain) .railLogo { width: 28px; height: 28px; }
+.shell:has(.portalMain) .railBtn { background: #fff; border: 1px solid #E2E4E8; color: #14161A; }
+.shell:has(.portalMain) .portalMain { padding: clamp(16px, 3vw, 38px); background: linear-gradient(180deg, #fff 0%, #F7F8FA 100%); }
+.shell:has(.portalMain) .formCol,
+.shell:has(.portalMain) .aside > *,
+.shell:has(.portalMain) .pcard,
+.shell:has(.portalMain) .helpCard,
+.shell:has(.portalMain) .review {
+  background: #fff;
+  border: 1px solid #E2E4E8;
+  border-radius: 28px;
+  box-shadow: 0 18px 60px -48px rgba(20,22,26,.42);
+}
+.shell:has(.portalMain) .claimTitle { max-width: 18ch; color: #14161A; font-size: clamp(34px, 4.4vw, 58px); font-weight: 500; letter-spacing: -.045em; line-height: 1; }
+.shell:has(.portalMain) .claimSub,
+.shell:has(.portalMain) .paneHint,
+.shell:has(.portalMain) .helper { color: #55585F; }
+.shell:has(.portalMain) .lbl,
+.shell:has(.portalMain) .claimEyebrow { color: #0B47E8; font-weight: 700; letter-spacing: .06em; }
+.shell:has(.portalMain) .stepOn .stepDot,
+.shell:has(.portalMain) .btnPrimary { background: #0B47E8; color: #fff; }
+.shell:has(.portalMain) .stepDone .stepDot { background: #DCF23C; color: #14161A; }
+.shell:has(.portalMain) .btnGhost { background: #fff; border-color: #E2E4E8; color: #14161A; }
+.shell:has(.portalMain) .claimField .ctl,
+.shell:has(.portalMain) .ctl,
+.shell:has(.portalMain) .optionCard,
+.shell:has(.portalMain) .plan,
+.shell:has(.portalMain) .lockRow,
+.shell:has(.portalMain) .callout,
+.shell:has(.portalMain) .revRow { background: #fff; border-color: #E2E4E8; }
+.shell:has(.portalMain) .plan[aria-pressed="true"],
+.shell:has(.portalMain) .optionCard[aria-pressed="true"] { border-color: #0B47E8; background: #F7FAFF; }
+@media (max-width: 760px) {
+  .shell:has(.portalMain) { overflow-y: auto; display: block; }
+  .shell:has(.portalMain) .rail { position: sticky; top: 0; z-index: 20; width: auto; height: 56px; flex-direction: row; padding: 10px 16px; }
+  .shell:has(.portalMain) .railSpacer { margin-left: auto; margin-top: 0; }
+  .shell:has(.portalMain) .portalMain { display: block; padding: 16px; }
+}

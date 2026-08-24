@@ -13,7 +13,7 @@ export default function RaceSetupPage() {
     const seed = `${hostName || "host"}-${raceName || "race"}`.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 5);
     return `RACE-${seed || "TEAM"}`;
   }, [hostName, raceName]);
-  const total = teams * 20;
+  const total = teams * 15;
 
   return (
     <main className={styles.landing}>
@@ -33,7 +33,7 @@ export default function RaceSetupPage() {
               <div className={styles.landHeroCopy}>
                 <span className={styles.landEyebrow}><i /> Loop Race</span>
                 <h1 className={styles.landH1}>Race the scavenger hunt, from different doors.</h1>
-                <p className={styles.landHeroSub}>Choose a team count, share one link, and every team gets a rotated start around the loop with the same $20/team price as a Full Hunt. The host pays once for everyone.</p>
+                <p className={styles.landHeroSub}>Choose a team count, share one link, and every team gets a rotated start around the loop. Loop Race is $15/team because it skips the final-stop treat; the host pays once for everyone.</p>
               </div>
               <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
                 <span className={styles.lbl}>Set up race</span>
@@ -49,7 +49,7 @@ export default function RaceSetupPage() {
                     </div>
                     <span className={styles.helper}>Self-serve supports 2–8 teams. For more than 8, book an event.</span>
                   </div>
-                  <div className={styles.callout}><span className={styles.racePrice}>{teams} teams × $20 = ${total}</span></div>
+                  <div className={styles.callout}><span className={styles.racePrice}>{teams} teams × $15 = ${total}</span></div>
                   <div className={styles.callout}><b>First-hunt credit applies to Full Hunts, not race bookings.</b></div>
                   <div className={styles.review}>
                     <div className={styles.revRow}><span className={styles.revKey}>Code</span><span className={styles.revVal}>{code}</span></div>

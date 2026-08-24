@@ -1,13 +1,18 @@
 import { envelope, error } from "../../_lib/data";
 
-const products: Record<string, { label: string; price: number; teams: number; stripePriceEnv?: string }> = {
-  friendly: { label: "Friendly Mode", price: 0, teams: 1 },
-  full: { label: "Full Hunt", price: 20, teams: 1 },
-  race: { label: "Loop Race", price: 20, teams: 2 },
-  private: { label: "Private Event", price: 199, teams: 6 },
-  corporate: { label: "Corporate", price: 499, teams: 10 },
-  school: { label: "School / youth non-profit", price: 99, teams: 8 },
-  charity: { label: "Charity fundraiser", price: 299, teams: 20 },
+type BookingProduct = {
+  label: string;
+  teamLimit: number | null;
+  amountCad: (groupSize: number) => number;
+};
+
+const products: Record<string, BookingProduct> = {
+  friendly: { label: "Friendly Mode", teamLimit: 1, amountCad: () => 0 },
+  full: { label: "Full Hunt", teamLimit: 1, amountCad: () => 20 },
+  race: { label: "Loop Race", teamLimit: 8, amountCad: (groupSize) => Math.max(2, groupSize) * 15 },
+  group: { label: "Group booking", teamLimit: null, amountCad: (groupSize) => Math.max(199, Math.max(1, groupSize) * 9) },
+  school: { label: "School or youth group", teamLimit: null, amountCad: (groupSize) => Math.max(99, Math.max(1, groupSize) * 4) },
+  charity: { label: "Charity fundraiser", teamLimit: null, amountCad: () => 299 },
 };
 
 type BookingPayload = {
@@ -30,6 +35,8 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
 
   const now = new Date().toISOString();
   const id = `booking_${Date.now().toString(36)}`;
+  const groupSize = Math.max(1, Number(payload.groupSize ?? 1));
+  const amountCad = product.amountCad(groupSize);
   const stripeReady = Boolean(process.env.STRIPE_SECRET_KEY && process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
   const mockCheckoutUrl = `/events/confirm?booking=${encodeURIComponent(id)}&mode=${stripeReady ? "payment" : "request"}`;
 
@@ -38,17 +45,17 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     city,
     product: payload.product,
     label: product.label,
-    amount_cad: product.price,
-    team_limit: product.teams,
+    amount_cad: amountCad,
+    team_limit: product.teamLimit,
     audience: payload.audience ?? "family",
-    group_size: Math.max(1, Number(payload.groupSize ?? 1)),
+    group_size: groupSize,
     starts_at_local: `${payload.date}T${payload.time}`,
     finish_preference: payload.finishPreference ?? "surprise me",
-    paid: product.price === 0,
+    paid: amountCad === 0,
     checkout_mode: stripeReady ? "payment" : "request",
     checkout_url: mockCheckoutUrl,
     stripe_note: stripeReady ? "Payment details can be confirmed after route approval." : "No payment collected in this request.",
-    waiver_required: product.price > 0 || payload.product !== "friendly",
+    waiver_required: amountCad > 0 || payload.product !== "friendly",
     youth_policy_note: "Booking organisation keeps custody/supervision responsibility for minors.",
     cancellation_policy: "Free reschedule with 24 hours notice; full refund if stroll.city cancels; no refund for no-shows.",
     created_at: now,

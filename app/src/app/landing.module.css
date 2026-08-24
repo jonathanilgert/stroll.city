@@ -1076,6 +1076,11 @@
 .priceAmt { display: block; font-size: 30px; font-weight: 500; letter-spacing: -.04em; line-height: 1; }
 .priceAmt small { font-size: 14px; color: var(--ink-4); letter-spacing: 0; }
 .priceHot .priceAmt small { color: rgba(255, 255, 255, .66); }
+.priceNote { display: block; min-height: 14px; margin-top: 5px; font: 500 11px/1.25 var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; color: var(--ink-3); }
+.priceHot .priceNote { color: rgba(255, 255, 255, .66); }
+.groupPriceLink { margin: 16px 0 0; text-align: center; font-size: 14px; color: var(--ink-3); }
+.groupPriceLink a { display: inline-flex; align-items: center; gap: 3px; color: var(--blue); font-weight: 600; }
+.groupPriceLink a:hover { color: var(--ink); }
 .priceList { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 9px; flex: 1; font-size: 13.5px; color: var(--ink-3); }
 .priceHot .priceList { color: rgba(255, 255, 255, .82); }
 .priceList li { display: flex; gap: 9px; align-items: flex-start; }

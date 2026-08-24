@@ -122,6 +122,7 @@ const PLANS = [
     name: "Friendly Mode",
     price: "Free",
     suffix: "",
+    note: "",
     flag: "",
     hot: false,
     feats: ["4 stops, always", "No account, no card", "Postcard finish"],
@@ -133,6 +134,7 @@ const PLANS = [
     name: "Full Hunt",
     price: "$20",
     suffix: " /team",
+    note: "",
     flag: "First one free",
     hot: true,
     feats: ["8 stops", "Something waiting at the last one", "Postcard finish"],
@@ -142,24 +144,14 @@ const PLANS = [
   {
     id: "loop",
     name: "Loop Race",
-    price: "$20",
+    price: "$15",
     suffix: " /team",
+    note: "2 teams and up",
     flag: "",
     hot: false,
-    feats: ["8 stops, 2 teams and up", "Rotated starts", "Live leaderboard"],
+    feats: ["8 stops", "Rotated starts", "Live leaderboard"],
     cta: "Set up a race",
     href: "/calgary/hunt/race/new",
-  },
-  {
-    id: "events",
-    name: "Event bookings",
-    price: "From $99",
-    suffix: "",
-    flag: "",
-    hot: false,
-    feats: ["Birthdays and staff days", "Class trips and youth groups", "Private group booking"],
-    cta: "Book an event",
-    href: "/events",
   },
 ];
 
@@ -774,6 +766,7 @@ export default function LandingPage() {
                     {plan.price}
                     {plan.suffix && <small>{plan.suffix}</small>}
                   </span>
+                  <span className={styles.priceNote}>{plan.note}</span>
                 </div>
                 <ul className={styles.priceList}>
                   {plan.feats.map((feat) => (
@@ -789,6 +782,7 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+          <p className={styles.groupPriceLink}>Booking for a group? <Link href="/events">From $9 a person<Arrow size={12} /></Link></p>
         </div>
       </section>
 

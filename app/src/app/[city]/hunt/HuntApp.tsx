@@ -256,7 +256,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
             </div>
             <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
               <span className={styles.lbl}>Products</span>
-              <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$20/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
+              <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$15/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
             </div>
           </div></div>
         </header>
