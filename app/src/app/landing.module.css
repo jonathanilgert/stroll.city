@@ -450,21 +450,23 @@
 .huntGrid {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: clamp(18px, 3vw, 28px);
+  gap: clamp(10px, 1.6vw, 18px);
   align-items: start;
+  justify-items: center;
 }
 @media (max-width: 980px) {
   .huntSectionIn { grid-template-columns: minmax(0, 1fr); }
   .huntSection .head { margin-top: 0; }
 }
 .huntPanel {
+  width: min(100%, 540px);
   background: transparent;
   border: 0;
   border-radius: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 10px;
   align-self: start;
 }
 .huntHead { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 0 clamp(10px, 1.8vw, 24px); }
@@ -474,17 +476,18 @@
 .riddleCard {
   position: relative;
   isolation: isolate;
-  min-height: clamp(500px, 44.2vw, 650px);
+  width: 100%;
+  min-height: clamp(190px, 15vw, 220px);
   background: url("/brand/stroll-riddle-postcard-backdrop.png") center / 100% 100% no-repeat;
   border: 0;
-  border-radius: 28px;
-  padding: clamp(78px, 8.5vw, 118px) clamp(54px, 7vw, 96px) clamp(76px, 8vw, 108px);
+  border-radius: 20px;
+  padding: clamp(28px, 3.2vw, 38px) clamp(28px, 3.5vw, 44px) clamp(26px, 3vw, 36px);
   display: flex;
   flex-direction: column;
-  gap: clamp(14px, 1.8vw, 22px);
+  gap: clamp(6px, .8vw, 10px);
   flex: 0 0 auto;
-  filter: drop-shadow(0 24px 24px rgba(64, 45, 25, .18));
-  transform: rotate(-1.4deg) translateX(clamp(0px, 1.3vw, 18px));
+  filter: drop-shadow(0 14px 18px rgba(64, 45, 25, .16));
+  transform: rotate(-1.4deg) translateX(clamp(0px, 1vw, 10px));
   transform-origin: center;
 }
 .riddleCard > * {
@@ -496,59 +499,59 @@
   display: inline-flex;
   align-self: flex-start;
   align-items: center;
-  gap: 7px;
-  padding: 8px 13px 7px;
-  border: 2px solid rgba(122, 54, 39, .72);
+  gap: 6px;
+  padding: 6px 10px 5px;
+  border: 1.5px solid rgba(122, 54, 39, .72);
   border-radius: 4px;
   background:
     radial-gradient(circle at 18% 20%, rgba(255, 255, 255, .48), transparent 26%),
     linear-gradient(145deg, rgba(249, 225, 180, .94), rgba(224, 185, 124, .9));
   color: #7A3627;
-  box-shadow: 0 5px 0 rgba(95, 54, 28, .08), inset 0 0 0 1px rgba(255, 246, 218, .45);
-  font-size: 11px;
+  box-shadow: 0 4px 0 rgba(95, 54, 28, .08), inset 0 0 0 1px rgba(255, 246, 218, .45);
+  font-size: 9.5px;
   font-weight: 700;
-  letter-spacing: .13em;
+  letter-spacing: .12em;
   text-transform: uppercase;
 }
 .riddleText {
   margin: 0;
   color: #2D271F;
-  font-size: clamp(18px, 1.9vw, 26px);
+  font-size: clamp(13px, 1.12vw, 16px);
   font-weight: 700;
   font-family: var(--font-treasure), Georgia, "Times New Roman", serif;
   letter-spacing: .01em;
-  line-height: 1.38;
-  max-width: 34ch;
+  line-height: 1.22;
+  max-width: 44ch;
   text-wrap: balance;
   text-shadow: 0 1px 0 rgba(255, 248, 226, .65);
 }
-.riddleHint { margin: 0; max-width: 39ch; font-size: 13.5px; line-height: 1.55; color: #6D5942; }
+.riddleHint { margin: 0; max-width: 44ch; font-size: 11.5px; line-height: 1.32; color: #6D5942; }
 .riddleChallenge {
   margin: 0;
-  padding: 12px 14px;
+  padding: 6px 9px;
   border: 1px solid rgba(122, 54, 39, .28);
-  border-radius: 14px;
+  border-radius: 10px;
   background: rgba(255, 247, 222, .72);
-  font-size: 13.5px;
-  line-height: 1.55;
+  font-size: 11.5px;
+  line-height: 1.3;
   color: #5B4732;
 }
 .riddleChallenge b { color: #7A3627; }
 .locked {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 8px;
   align-items: flex-start;
   margin-top: auto;
-  padding-top: 6px;
+  padding-top: 2px;
 }
 .clueStamp {
   position: relative;
   display: grid;
-  gap: 8px;
-  width: min(100%, 236px);
-  min-height: 128px;
-  padding: 18px 18px 16px;
+  gap: 5px;
+  width: min(100%, 180px);
+  min-height: 78px;
+  padding: 12px 12px 10px;
   color: #573723;
   background:
     linear-gradient(135deg, rgba(255, 246, 219, .96), rgba(228, 196, 143, .94)),
@@ -584,33 +587,28 @@
   position: relative;
   z-index: 1;
   color: #9C3342;
-  font-size: 12px;
+  font-size: 9.5px;
   font-weight: 800;
-  letter-spacing: .16em;
+  letter-spacing: .14em;
   text-transform: uppercase;
 }
 .clueStampCopy {
   position: relative;
   z-index: 1;
-  font-size: 14px;
-  line-height: 1.42;
+  font-size: 12px;
+  line-height: 1.3;
   font-weight: 650;
 }
-.huntActions { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; padding: 0 clamp(10px, 1.8vw, 24px); }
+.huntActions { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; padding: 0 clamp(6px, 1.1vw, 14px); }
+.huntActions .btnMd { padding: 9px 14px; font-size: 12.5px; }
 .huntActions .btnDark small {
-  display: block;
-  margin-left: 2px;
-  color: rgba(255,255,255,.72);
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .08em;
-  text-transform: uppercase;
+  display: none;
 }
 .answerForm {
   position: relative;
   display: block;
-  width: min(100%, 280px);
-  flex: 0 0 min(100%, 280px);
+  width: min(100%, 206px);
+  flex: 0 0 min(100%, 206px);
   isolation: isolate;
   animation: answerPulse 2.4s ease-in-out infinite;
 }
@@ -627,12 +625,12 @@
 }
 .answerInput {
   width: 100%;
-  min-height: 54px;
+  min-height: 44px;
   border: 1.5px solid #EAB7CC;
-  border-radius: 18px;
+  border-radius: 15px;
   background: #fff;
   color: var(--ink);
-  padding: 10px 118px 20px 15px;
+  padding: 8px 100px 17px 13px;
   font: inherit;
   outline: none;
   box-shadow: 0 12px 24px -20px rgba(123, 44, 80, .36);
@@ -640,16 +638,16 @@
 .answerInput:focus { border-color: #D99CB6; box-shadow: 0 0 0 3px rgba(217, 156, 182, .22), 0 14px 28px -20px rgba(123, 44, 80, .42); }
 .answerSubmit {
   position: absolute;
-  right: 13px;
-  bottom: 7px;
+  right: 11px;
+  bottom: 6px;
   border: 0;
   background: transparent;
   color: var(--pink-ink);
-  font-size: 11.5px;
+  font-size: 10.5px;
   font-weight: 800;
   letter-spacing: .02em;
   cursor: pointer;
-  padding: 3px 0;
+  padding: 2px 0;
 }
 .answerSubmit:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
 .answerHelp { display: block; margin-top: 6px; font-size: 12.5px; color: var(--pink-ink); }
@@ -659,34 +657,34 @@
 }
 .btnHuntGhost { background: #fff; border-color: #F0D2DE; color: var(--ink-2); }
 .btnHuntGhost:hover { border-color: #D99CB6; color: var(--ink); background: #fff; }
-.huntNote { flex: 1 0 100%; margin-left: 0; font-size: 13px; color: var(--pink-ink); }
+.huntNote { display: none; }
 
 .huntSide {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  width: 100%;
+  gap: 10px;
+  width: min(100%, 540px);
   margin: 0;
   z-index: 1;
 }
 .huntMemento {
   position: relative;
   margin: 0;
-  border-radius: 22px;
+  border-radius: 20px;
   flex: 0 0 auto;
-  min-height: clamp(500px, 44.2vw, 650px);
+  min-height: clamp(190px, 15vw, 220px);
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 255, 255, .72) 0 9%, transparent 10%),
     linear-gradient(158deg, #F4F1E7 0%, #ECE8DA 100%);
   border: 1px solid #DDE2D5;
-  padding: clamp(14px, 2vw, 20px);
+  padding: clamp(9px, 1.2vw, 13px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 14px;
+  gap: 10px;
   overflow: hidden;
-  box-shadow: 0 18px 46px -28px rgba(20, 24, 26, .34);
-  transform: rotate(-1.4deg) translateX(clamp(0px, 1.3vw, 18px));
+  box-shadow: 0 12px 30px -22px rgba(20, 24, 26, .34);
+  transform: rotate(-1.4deg) translateX(clamp(0px, 1vw, 10px));
   transform-origin: center;
 }
 .huntMemento::before {
@@ -704,11 +702,11 @@
   position: relative;
   z-index: 1;
   display: grid;
-  grid-template-columns: 42px minmax(0, 1fr);
+  grid-template-columns: 34px minmax(0, 1fr);
   min-height: 100%;
   background: rgba(255, 255, 255, .34);
   border: 1px solid rgba(92, 99, 80, .18);
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
   transform: rotate(1.4deg);
 }
@@ -718,62 +716,62 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 13px 0;
+  padding: 9px 0;
   color: #5C6350;
 }
 .miniWalk {
-  width: 23px;
-  height: 23px;
+  width: 19px;
+  height: 19px;
   border: 1.3px solid #5C6350;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  font-size: 12px;
+  font-size: 10px;
   line-height: 1;
 }
 .miniStubText {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 9px;
-  letter-spacing: .22em;
+  font-size: 8px;
+  letter-spacing: .2em;
 }
-.miniPunchBody { padding: clamp(15px, 2vw, 20px); }
-.miniPunchTop { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; margin-bottom: 10px; }
+.miniPunchBody { padding: clamp(10px, 1.2vw, 13px); }
+.miniPunchTop { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
 .mementoKicker,
 .mementoCaptionK {
   display: block;
-  font-size: 10.5px;
-  letter-spacing: .14em;
+  font-size: 9px;
+  letter-spacing: .13em;
   text-transform: uppercase;
   color: #5C6350;
 }
-.miniCode { font-size: 10px; color: var(--ink-3); letter-spacing: .06em; white-space: nowrap; }
+.miniCode { font-size: 9px; color: var(--ink-3); letter-spacing: .06em; white-space: nowrap; }
 .miniPunch strong {
   display: block;
-  font-size: clamp(18px, 2vw, 24px);
-  line-height: 1.08;
+  font-size: clamp(15px, 1.35vw, 18px);
+  line-height: 1.05;
   letter-spacing: -.04em;
   font-weight: 500;
-  max-width: 14ch;
+  max-width: 18ch;
 }
 .miniPunch p {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--ink-3);
-  font-size: 13.5px;
-  line-height: 1.5;
-  max-width: 31ch;
+  font-size: 12px;
+  line-height: 1.35;
+  max-width: 34ch;
 }
 .mementoGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
-  margin-top: 18px;
+  gap: 7px;
+  margin-top: 10px;
 }
 .mementoGrid span {
   position: relative;
   overflow: hidden;
-  aspect-ratio: 5 / 6;
-  border-radius: 8px;
+  aspect-ratio: 6 / 5;
+  border-radius: 7px;
   background: rgba(255, 255, 255, .5);
   border: 1.4px dashed #DDE2D5;
   box-shadow: 0 3px 7px rgba(20, 24, 26, .08);
