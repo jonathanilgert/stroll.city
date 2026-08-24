@@ -591,9 +591,12 @@ export default function LandingPage() {
                 {huntDone ? (
                   <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
                 ) : (
-                  <div className={styles.locked}>
+                  <div className={styles.locked} aria-live="polite">
                     {clueLadder.slice(0, cluesOpen).map((clue, index) => (
-                      <div className={styles.callout} key={`${currentStop.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>
+                      <div className={styles.clueStamp} key={`${currentStop.id}-clue-${index}`}>
+                        <span className={`${styles.clueStampNo} ${styles.mono}`}>Clue {index + 1}</span>
+                        <span className={styles.clueStampCopy}>{clue}</span>
+                      </div>
                     ))}
                   </div>
                 )}
