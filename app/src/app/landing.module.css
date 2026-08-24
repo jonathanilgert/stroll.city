@@ -447,7 +447,12 @@
   align-items: start;
 }
 .huntSection .head { margin: clamp(18px, 3vw, 44px) 0 0; }
-.huntGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; align-items: start; }
+.huntGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(18px, 3vw, 28px);
+  align-items: start;
+}
 @media (max-width: 980px) {
   .huntSectionIn { grid-template-columns: minmax(0, 1fr); }
   .huntSection .head { margin-top: 0; }
@@ -469,7 +474,7 @@
 .riddleCard {
   position: relative;
   isolation: isolate;
-  min-height: clamp(430px, 39vw, 585px);
+  min-height: clamp(500px, 44.2vw, 650px);
   background: url("/brand/stroll-riddle-postcard-backdrop.png") center / 100% 100% no-repeat;
   border: 0;
   border-radius: 28px;
@@ -656,13 +661,20 @@
 .btnHuntGhost:hover { border-color: #D99CB6; color: var(--ink); background: #fff; }
 .huntNote { flex: 1 0 100%; margin-left: 0; font-size: 13px; color: var(--pink-ink); }
 
-.huntSide { display: flex; flex-direction: column; gap: 12px; width: min(64%, 430px); margin-top: clamp(-128px, -8vw, -72px); margin-left: clamp(0px, 1.4vw, 22px); z-index: 3; }
+.huntSide {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  margin: 0;
+  z-index: 1;
+}
 .huntMemento {
   position: relative;
   margin: 0;
   border-radius: 22px;
-  flex: 1;
-  min-height: 220px;
+  flex: 0 0 auto;
+  min-height: clamp(500px, 44.2vw, 650px);
   background:
     radial-gradient(circle at 18% 16%, rgba(255, 255, 255, .72) 0 9%, transparent 10%),
     linear-gradient(158deg, #F4F1E7 0%, #ECE8DA 100%);
@@ -674,7 +686,8 @@
   gap: 14px;
   overflow: hidden;
   box-shadow: 0 18px 46px -28px rgba(20, 24, 26, .34);
-  transform: rotate(-6deg);
+  transform: rotate(-1.4deg) translateX(clamp(0px, 1.3vw, 18px));
+  transform-origin: center;
 }
 .huntMemento::before {
   content: "";
@@ -692,12 +705,12 @@
   z-index: 1;
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
-  min-height: 168px;
+  min-height: 100%;
   background: rgba(255, 255, 255, .34);
   border: 1px solid rgba(92, 99, 80, .18);
   border-radius: 18px;
   overflow: hidden;
-  transform: rotate(-2deg);
+  transform: rotate(1.4deg);
 }
 .miniStub {
   border-right: 1.5px dashed #DDE2D5;
