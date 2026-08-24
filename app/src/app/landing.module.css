@@ -729,6 +729,12 @@
     linear-gradient(150deg, #F4F1E7 0%, #FFF5D6 54%, #ECE8DA 100%);
 }
 .huntMementoDone .miniPunch { transform: rotate(-1.2deg); box-shadow: 0 16px 36px -26px rgba(20, 24, 26, .55); }
+.downloadPostcard {
+  width: 100%;
+  justify-content: center;
+  margin-top: -2px;
+  box-shadow: 0 12px 24px -18px rgba(11, 71, 232, .55);
+}
 .shareCard {
   background: #fff;
   border: 1px solid var(--line);

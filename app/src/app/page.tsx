@@ -98,6 +98,18 @@ function cluesForStop(stop: HuntStop | null) {
   return [stop.clue_1, stop.clue_2, stop.clue_3].filter(Boolean) as string[];
 }
 
+async function imageToDataUrl(src: string) {
+  const response = await fetch(src);
+  if (!response.ok) throw new Error(`Could not load ${src}`);
+  const blob = await response.blob();
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error ?? new Error("Could not read image"));
+    reader.readAsDataURL(blob);
+  });
+}
+
 const PLANS = [
   {
     id: "friendly",
@@ -349,6 +361,41 @@ export default function LandingPage() {
       return;
     }
     setAnswerStatus("wrong");
+  };
+
+  const downloadDemoPostcard = async () => {
+    if (!huntDone || typeof window === "undefined") return;
+    const images = await Promise.all(POSTCARD_STAMPS.map((stamp) => imageToDataUrl(stamp.src)));
+    const slots = [
+      { x: 146, y: 156, rotate: -4 },
+      { x: 326, y: 146, rotate: 3 },
+      { x: 138, y: 332, rotate: -3.5 },
+      { x: 330, y: 326, rotate: 4 },
+    ];
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+      <defs><filter id="paper"><feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#14181a" flood-opacity=".18"/></filter><clipPath id="stamp"><rect width="150" height="180" rx="12"/></clipPath></defs>
+      <rect width="1200" height="800" fill="#f7f1e6"/>
+      <rect x="88" y="70" width="1024" height="660" rx="38" fill="#f4f1e7" stroke="#d9dccf" filter="url(#paper)"/>
+      <rect x="88" y="70" width="1024" height="660" rx="38" fill="none" stroke="#fff" stroke-opacity=".65"/>
+      <text x="160" y="142" font-family="Georgia, serif" font-size="22" fill="#5c6350" letter-spacing="4">GREETINGS FROM</text>
+      <text x="160" y="220" font-family="Georgia, serif" font-size="86" fill="#392d1d">Inglewood</text>
+      <rect x="914" y="106" width="116" height="142" fill="#f8fbf8" stroke="#8f7653" stroke-opacity=".45"/>
+      <text x="950" y="188" font-family="Courier New, monospace" font-size="30" fill="#15558f">YYC</text>
+      ${images.map((src, index) => {
+        const slot = slots[index];
+        return `<g transform="translate(${slot.x} ${slot.y}) rotate(${slot.rotate} 75 90)"><rect x="-8" y="-8" width="166" height="196" fill="#fff" stroke="#d4c8b4"/><image href="${src}" x="0" y="0" width="150" height="180" preserveAspectRatio="xMidYMid slice" clip-path="url(#stamp)"/><text x="118" y="165" font-family="Courier New, monospace" font-size="18" fill="#fff" fill-opacity=".9">${String(index + 1).padStart(2, "0")}</text></g>`;
+      }).join("")}
+      <text x="748" y="604" text-anchor="middle" font-family="Courier New, monospace" font-size="30" fill="#392d1d">FOUR STOPS</text>
+      <text x="748" y="646" text-anchor="middle" font-family="Courier New, monospace" font-size="22" fill="#5c6350">@stroll_city · #StrollInglewood</text>
+    </svg>`;
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "stroll-city-inglewood-postcard.svg";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 500);
   };
 
   return (
@@ -621,16 +668,22 @@ export default function LandingPage() {
                         );
                       })}
                     </div>
-                    <p>{huntDone ? "Post it with #StrollInglewood to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together." : stop < 3 ? "The Fair’s Fair photo slot fills in after this riddle is completed." : "Doughnut Party is the last stamp in this example."}</p>
+                    <p>{huntDone ? "Four photos from your stroll, postmarked Inglewood and ready to save or share." : stop < 3 ? "The Fair’s Fair photo slot fills in after this riddle is completed." : "Doughnut Party is the last stamp in this example."}</p>
                   </div>
                 </div>
               </figure>
 
               {huntDone && (
+                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue} ${styles.downloadPostcard}`} onClick={() => { void downloadDemoPostcard(); }}>
+                  Download postcard<Arrow size={13} />
+                </button>
+              )}
+
+              {huntDone && (
                 <div className={styles.shareCard}>
                   <span className={`${styles.mementoKicker} ${styles.mono}`}>Inglewood Basket draw</span>
                   <strong className={styles.postcardTitle}>The finish</strong>
-                  <p className={styles.postcardCopy}>Your four photos land on a postcard, postmarked Inglewood. Keep it, send it to whoever said there was nothing to do today — or post it with <b>#StrollInglewood</b> to enter the draw for the Inglewood Basket: ten Inglewood shops, one thing each, worth around $250 all together.</p>
+                  <p className={styles.postcardCopy}>Your four photos land on a postcard, postmarked Inglewood. Download it, keep it, send it to whoever said there was nothing to do today — or post it with <b>#StrollInglewood</b> to enter the Inglewood Basket draw. Ten Inglewood shops each add one thing, worth around $250 all together.</p>
                   <div className={styles.socialLinks} aria-label="Social posting links">
                     <a href="https://www.instagram.com/" target="_blank" rel="noreferrer">Open Instagram<Arrow size={12} /></a>
                     <a href="https://www.facebook.com/" target="_blank" rel="noreferrer">Open Facebook<Arrow size={12} /></a>
@@ -643,7 +696,7 @@ export default function LandingPage() {
                     <div className={styles.shareSteps}>
                       <b>Instagram share steps</b>
                       <ol>
-                        <li>Save or screenshot the completed postcard.</li>
+                        <li>Tap <b>Download postcard</b> to save the completed postcard.</li>
                         <li>Post it to your story or feed.</li>
                         <li>Tag <span>@stroll_city</span> and add <span>#StrollInglewood</span>.</li>
                       </ol>
