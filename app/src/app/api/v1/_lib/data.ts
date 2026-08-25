@@ -77,8 +77,12 @@ export type ClaimPayload = {
 export type BusinessClaim = ClaimPayload & {
   id: string;
   status: "pending" | "approved" | "rejected";
+  payment_status?: "not_required" | "pending" | "paid" | "cancelled";
   checkout_mode: "mock" | "stripe";
   checkout_url: string | null;
+  stripe_checkout_session_id?: string;
+  stripe_customer_id?: string;
+  stripe_subscription_id?: string;
   created_at: string;
 };
 
@@ -416,6 +420,7 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
     logo_data_url: logo,
     logo_name: sanitizeString(payload.logo_name, 160),
     status: "pending",
+    payment_status: tier === "free" ? "not_required" : "pending",
     checkout_mode: checkoutMode,
     checkout_url: checkoutUrl,
     created_at: new Date().toISOString(),
@@ -433,6 +438,22 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
   });
 
   return claim;
+}
+
+export async function updateBusinessClaim(city: string, claimId: string, patch: Partial<BusinessClaim>) {
+  const claims = await readOverlay<BusinessClaim>(city, "claims");
+  const current = claims.find((claim) => claim.id === claimId);
+  if (!current) return null;
+  const updated = { ...current, ...patch, id: claimId };
+  await writeOverlay(city, "claims", claims.map((claim) => claim.id === claimId ? updated : claim));
+  return updated;
+}
+
+export async function markClaimCheckoutPaid(city: string, claimId: string, patch: Pick<Partial<BusinessClaim>, "stripe_customer_id" | "stripe_subscription_id"> = {}) {
+  const updated = await updateBusinessClaim(city, claimId, { ...patch, payment_status: "paid" });
+  if (!updated) return null;
+  await patchBusiness(city, updated.business_id, { plan_tier: updated.plan_tier, claim_status: "pending", needsReview: false });
+  return updated;
 }
 
 export function fallbackEvents(data: StrollData): StrollEvent[] {

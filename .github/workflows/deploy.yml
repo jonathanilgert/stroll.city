@@ -83,14 +83,43 @@ jobs:
           DEPLOY_USER: ${{ secrets.STROLL_DEPLOY_USER }}
           DEPLOY_PORT: ${{ secrets.STROLL_DEPLOY_PORT }}
           RELEASE_ID: ${{ github.sha }}
+          STRIPE_SECRET_KEY: ${{ secrets.STROLL_STRIPE_SECRET_KEY }}
+          STRIPE_PUBLISHABLE_KEY: ${{ secrets.STROLL_STRIPE_PUBLISHABLE_KEY }}
+          STRIPE_WEBHOOK_SECRET: ${{ secrets.STROLL_STRIPE_WEBHOOK_SECRET }}
         run: |
           set -euo pipefail
-          ssh -i ~/.ssh/stroll_city_deploy -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_ID='${RELEASE_ID}' bash -s" <<'REMOTE'
+          ssh -i ~/.ssh/stroll_city_deploy -p "${DEPLOY_PORT:-22}" "${DEPLOY_USER}@${DEPLOY_HOST}" "RELEASE_ID='${RELEASE_ID}' STRIPE_SECRET_KEY='${STRIPE_SECRET_KEY}' STRIPE_PUBLISHABLE_KEY='${STRIPE_PUBLISHABLE_KEY}' STRIPE_WEBHOOK_SECRET='${STRIPE_WEBHOOK_SECRET}' bash -s" <<'REMOTE'
           set -euo pipefail
 
           APP_ROOT=/var/www/stroll.city
           RELEASE_DIR="${APP_ROOT}/releases/${RELEASE_ID}"
           SHARED_DIR="${APP_ROOT}/shared"
+
+          cat > /etc/systemd/system/stroll-city.service <<UNIT
+          [Unit]
+          Description=stroll.city Next.js app
+          After=network.target
+
+          [Service]
+          Type=simple
+          User=www-data
+          Group=www-data
+          WorkingDirectory=/var/www/stroll.city/current/app
+          Environment=NODE_ENV=production
+          Environment=NEXT_TELEMETRY_DISABLED=1
+          Environment=NEXT_PUBLIC_SITE_URL=https://stroll.city
+          Environment=PORT=8792
+          Environment="STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}"
+          Environment="NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${STRIPE_PUBLISHABLE_KEY}"
+          Environment="STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}"
+          ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1 --port 8792
+          Restart=always
+          RestartSec=5
+          TimeoutStopSec=20
+
+          [Install]
+          WantedBy=multi-user.target
+          UNIT
 
           cd "${RELEASE_DIR}/app"
           rm -rf .stroll
@@ -111,6 +140,8 @@ jobs:
           chown -R www-data:www-data "${RELEASE_DIR}"
           ln -sfn "${RELEASE_DIR}" "${APP_ROOT}/current"
 
+          systemctl daemon-reload
+          systemctl enable stroll-city.service
           systemctl restart stroll-city.service
           systemctl is-active --quiet stroll-city.service
           nginx -t

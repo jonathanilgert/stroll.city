@@ -245,6 +245,11 @@ export default function PortalPage() {
         return;
       }
       setResult(json.data);
+      if (json.data?.checkout_mode === "stripe" && json.data?.checkout_url) {
+        setMessage("Opening secure Stripe Checkout…");
+        window.location.href = json.data.checkout_url;
+        return;
+      }
       setMessage(null);
     } catch {
       setMessage("Claim submission failed. Check your connection and try again.");
