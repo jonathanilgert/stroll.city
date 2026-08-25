@@ -6,6 +6,7 @@ const allowed = new Set([
   "hunt_completed", "postcard_generated", "card_shared", "draw_entered",
   "deal_claimed", "deal_redeemed", "race_created", "race_joined", "race_finished", "finisher_treat_offered", "finisher_treat_redeemed", "draw_entered",
   "event_booked", "claim_started", "claim_completed", "claim_frozen", "sticker_scan",
+  "finish_venue_requested", "finish_venue_confirmed", "finish_venue_declined",
 ]);
 
 export async function POST(request: Request, context: { params: Promise<{ city: string }> }) {

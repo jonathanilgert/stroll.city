@@ -135,11 +135,11 @@ export default function LandingPage() {
           <div className={styles.landSecHead}>
             <div className={styles.landSecHeadL}>
               <span className={styles.lbl}>Optional extras</span>
-              <h2 className={styles.landH2}>Two things you can switch on, if you want to.</h2>
+              <h2 className={styles.landH2}>Three things you can switch on, if you want to.</h2>
             </div>
-            <p>Neither is required. Both start off, and both are yours to change or pause whenever you like.</p>
+            <p>None of them is required. They all start off, and they&apos;re all yours to change or pause whenever you like.</p>
           </div>
-          <div className={styles.landDuo}>
+          <div className={`${styles.landDuo} ${styles.landTrio}`}>
             <div className={styles.landBigCard}>
               <span className={styles.lbl}>Put my shop in the pool</span>
               <h3 className={styles.landH3}>Be the final stop</h3>
@@ -149,6 +149,11 @@ export default function LandingPage() {
               <span className={styles.lbl}>Add me to a basket</span>
               <h3 className={styles.landH3}>Join the Inglewood Basket</h3>
               <p className={styles.landCardP}>Ten shops each put one item into a basket, and we draw one winner a month. Your part is a single item off your own shelf — a candle, a book, a bag of beans, a gift card. Ten of those together come to around $250, which is what makes the basket worth entering. You choose the item and which months you&apos;re in.</p>
+            </div>
+            <div className={styles.landBigCard}>
+              <span className={styles.lbl}>Host a group finish</span>
+              <h3 className={styles.landH3}>Host the group afterwards</h3>
+              <p className={styles.landCardP}>Groups book walks for staff days, birthdays and fundraisers — thirty or forty people who need somewhere to land when it&apos;s over. Switch this on and tell us the biggest group you can take and the hours you&apos;d actually want them. You pick the days, you pick how many a month. No money passes through Stroll — the group pays you directly.</p>
             </div>
           </div>
         </section>

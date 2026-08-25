@@ -23,6 +23,7 @@ type BookingPayload = {
   groupSize?: number;
   audience?: "adult" | "family";
   finishPreference?: string;
+  finishVenueRequested?: boolean;
 };
 
 export async function POST(request: Request, context: { params: Promise<{ city: string }> }) {
@@ -51,6 +52,8 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     group_size: groupSize,
     starts_at_local: `${payload.date}T${payload.time}`,
     finish_preference: payload.finishPreference ?? "surprise me",
+    finish_venue_requested: Boolean(payload.finishVenueRequested),
+    analytics_event: payload.finishVenueRequested ? "finish_venue_requested" : "event_booked",
     paid: amountCad === 0,
     checkout_mode: stripeReady ? "payment" : "request",
     checkout_url: mockCheckoutUrl,

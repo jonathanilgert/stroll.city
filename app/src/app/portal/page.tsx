@@ -40,7 +40,10 @@ type PlanId = (typeof PLANS)[number]["id"];
 const ROLES = ["Owner", "Co-owner or partner", "General manager", "Staff member, authorised", "Agency or representative"];
 
 const STEP_LABELS = ["Your business", "Verify ownership", "Plan & review"];
-
+const VENUE_CATEGORIES: Category[] = ["restaurant", "bar"];
+const GROUP_SIZE_OPTIONS = ["up to 20", "up to 40", "up to 60", "more than 60"];
+const GROUP_WINDOW_OPTIONS = ["Weekday lunch", "Weekday afternoon", "Weekday evening", "Weekend afternoon", "Weekend evening"];
+const NOTICE_OPTIONS = ["3 days", "1 week", "2 weeks"];
 const emailOk = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
 
 export default function PortalPage() {
@@ -75,6 +78,12 @@ export default function PortalPage() {
   const [basketValue, setBasketValue] = useState("");
   const [basketMonths, setBasketMonths] = useState("");
   const [basketNote, setBasketNote] = useState("");
+  const [finishVenueOn, setFinishVenueOn] = useState(false);
+  const [finishVenueGroupSize, setFinishVenueGroupSize] = useState("");
+  const [finishVenueWindows, setFinishVenueWindows] = useState<string[]>([]);
+  const [finishVenueNotice, setFinishVenueNotice] = useState("1 week");
+  const [finishVenueHold, setFinishVenueHold] = useState("");
+  const [finishVenueCap, setFinishVenueCap] = useState(2);
 
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -197,6 +206,11 @@ export default function PortalPage() {
     const file = event.target.files?.[0];
     if (file) readLogoFile(file);
   };
+
+  const hasFinishVenue = !!picked && VENUE_CATEGORIES.includes(picked.category);
+  const toggleFinishVenueWindow = (window: string) => {
+    setFinishVenueWindows((current) => current.includes(window) ? current.filter((item) => item !== window) : [...current, window]);
+  };
   const onLogoDrop = (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setDragOver(false);
@@ -236,6 +250,7 @@ export default function PortalPage() {
           logo_name: logoName,
           finisher_offer: plan === "stroll" ? { enabled: finisherOn, type: finisherOfferType, offer: finisherOffer, weekly_cap: finisherCap, note: finisherNote } : undefined,
           basket: plan === "stroll" ? { enabled: basketOn, item: basketItem, approximate_value: basketValue, months: basketMonths, note: basketNote } : undefined,
+          finish_venue: plan === "stroll" && hasFinishVenue ? { enabled: finishVenueOn, biggest_group: finishVenueGroupSize, windows: finishVenueWindows, notice: finishVenueNotice, holds: finishVenueHold, monthly_cap: finishVenueCap } : undefined,
         }),
       });
       const json = await response.json();
@@ -278,6 +293,12 @@ export default function PortalPage() {
     setBasketValue("");
     setBasketMonths("");
     setBasketNote("");
+    setFinishVenueOn(false);
+    setFinishVenueGroupSize("");
+    setFinishVenueWindows([]);
+    setFinishVenueNotice("1 week");
+    setFinishVenueHold("");
+    setFinishVenueCap(2);
     setResult(null);
     setMessage(null);
   };
@@ -541,6 +562,25 @@ export default function PortalPage() {
                         </div>
                       )}
                     </div>
+                    {hasFinishVenue && (
+                      <div className={styles.optionCard}>
+                        <label className={styles.switchLine}>
+                          <input type="checkbox" checked={finishVenueOn} onChange={(e) => setFinishVenueOn(e.target.checked)} />
+                          <span>Host a group finish</span>
+                        </label>
+                        <h3 className={styles.landH3}>Bring the group to your place</h3>
+                        <p className={styles.landCardP}>Groups often want somewhere to land at the end — thirty people, one table, an hour or two. Tell us the biggest group you can take and the times you&apos;d actually want them. No money passes through Stroll — the group pays you directly.</p>
+                        {finishVenueOn && (
+                          <div className={styles.optionFields}>
+                            <div className={styles.claimField}><label>Biggest group you can take</label><div className={styles.ctl}><select value={finishVenueGroupSize} onChange={(e) => setFinishVenueGroupSize(e.target.value)}><option value="">Select size</option>{GROUP_SIZE_OPTIONS.map((option) => <option key={option}>{option}</option>)}</select></div></div>
+                            <div className={styles.claimField}><label>When you&apos;d want them</label><div className={styles.checkStack}>{GROUP_WINDOW_OPTIONS.map((option) => <label key={option} className={styles.switchLine}><input type="checkbox" checked={finishVenueWindows.includes(option)} onChange={() => toggleFinishVenueWindow(option)} /><span>{option}</span></label>)}</div></div>
+                            <div className={styles.claimField}><label>Notice you need</label><div className={styles.ctl}><select value={finishVenueNotice} onChange={(e) => setFinishVenueNotice(e.target.value)}>{NOTICE_OPTIONS.map((option) => <option key={option}>{option}</option>)}</select></div></div>
+                            <div className={styles.claimField}><label>What you&apos;d hold for them <span className={styles.optional}>— optional</span></label><div className={styles.ctl}><input value={finishVenueHold} onChange={(e) => setFinishVenueHold(e.target.value)} placeholder="The back room, long table, drinks package" /></div></div>
+                            <div className={styles.claimField}><label>How many groups a month</label><div className={styles.ctl}><input type="number" min={1} value={finishVenueCap} onChange={(e) => setFinishVenueCap(Math.max(1, Number(e.target.value) || 2))} /></div></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -624,6 +664,7 @@ export default function PortalPage() {
                   <LockRow on={activePlan.logo && !!logoDataUrl} text={activePlan.logo ? `Logo marker${logoDataUrl ? "" : " — drop a logo below"}` : "Logo marker"} />
                   <LockRow on={activePlan.gallery} text="Photos, hours, links, highlights" />
                   <LockRow on={activePlan.promos} text="Deals, events, analytics" />
+                  {hasFinishVenue && <LockRow on={activePlan.promos && finishVenueOn} text="Group-finish venue option" />}
                 </div>
                 {claimantName && <div className={styles.managedBy}>Managed by {claimantName}{role ? ` · ${role}` : ""}</div>}
               </div>
