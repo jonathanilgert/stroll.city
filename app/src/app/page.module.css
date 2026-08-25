@@ -1033,6 +1033,8 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .landing .btnLine:hover { background: #FAFAFB; border-color: #C9CCD3; color: var(--ink); }
 .landing .btnClaim { background: var(--ink); color: #fff; }
 .landing .btnClaim:hover { background: var(--blue); color: #fff; }
+.landing .landHeroClaimCard .btnClaim { background: var(--blue); color: #fff; }
+.landing .landHeroClaimCard .btnClaim:hover { background: var(--blue-dark); color: #fff; }
 
 .landing .landWrap { max-width: none; margin: 0; padding: 0; }
 .landing .landHero { padding: clamp(54px, 9vw, 116px) var(--gutter) clamp(32px, 5vw, 70px); background: linear-gradient(180deg, #fff 0%, #F7F8FA 100%); }
