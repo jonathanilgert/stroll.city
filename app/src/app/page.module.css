@@ -213,6 +213,12 @@
 .pinActive { background: var(--black); box-shadow: 0 0 0 8px rgba(220,242,60,.42), 0 10px 26px rgba(20,24,26,.3); transform: scale(1.06); }
 .pinActive .label { color: #fff; }
 .pinActive .glyph { background: var(--accent) !important; color: var(--black); }
+.youAreHere { position: relative; width: 18px; height: 18px; border-radius: 999px; background: #1677ff; border: 3px solid #fff; box-shadow: 0 2px 12px rgba(22,119,255,.46); }
+.youAreHere::before { content: ""; position: absolute; inset: -16px; border-radius: 999px; background: rgba(22,119,255,.22); animation: locationPulse 1.8s ease-out infinite; }
+.youAreHere span { position: absolute; inset: 3px; border-radius: 999px; background: #0b5ed7; }
+@keyframes locationPulse { 0% { transform: scale(.45); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
+.routeNote { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); background: rgba(227,52,47,.08); border: 1px solid rgba(227,52,47,.18); color: var(--ink-2); font-size: 12.5px; line-height: 1.35; }
+.routeNote button { flex: 0 0 auto; color: #B3261E; font-weight: 600; }
 
 /* ---------- drawer ---------- */
 .drawer { position: absolute; top: 20px; right: 20px; bottom: 20px; width: 376px; z-index: 700; background: var(--surface);
