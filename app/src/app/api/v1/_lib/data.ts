@@ -792,8 +792,13 @@ export async function attachHuntPhoto(
   return saveSession(city, recomputeSession({ ...session, stops }));
 }
 
-/* The session plus the stop content it points at — what the dashboard renders. */
-export function hydrateHuntSession(session: HuntSession, data: StrollData) {
+/* The session plus the stop content it points at — what the dashboard renders.
+
+   Unsolved stops are masked: no name, no business, because that is the answer the
+   riddle is withholding. Hiding it in the UI would not be enough — it would still
+   sit in the API response and the server-rendered payload, a one-keystroke cheat.
+   Pass { reveal: true } from server-side callers that legitimately need the lot. */
+export function hydrateHuntSession(session: HuntSession, data: StrollData, options: { reveal?: boolean } = {}) {
   const stopsById = new Map((data.huntStops ?? []).map((stop) => [stop.id, stop]));
   const solved = session.stops.filter((stop) => stop.state === "solved").length;
   return {
@@ -804,12 +809,13 @@ export function hydrateHuntSession(session: HuntSession, data: StrollData) {
     stroll_seconds: session.elapsed_seconds + session.penalty_seconds,
     stops: session.stops.map((stop, index) => {
       const content = stopsById.get(stop.stop_id);
+      const earned = options.reveal || stop.state === "solved";
       return {
         ...stop,
         index,
-        name: content?.name ?? "Unknown stop",
-        business_id: content?.business_id ?? null,
-        business_slug: content?.business_slug ?? null,
+        name: earned ? content?.name ?? "Unknown stop" : "",
+        business_id: earned ? content?.business_id ?? null : null,
+        business_slug: earned ? content?.business_slug ?? null : null,
         riddle: content?.riddle ?? "",
         /* Clues are handed out one at a time; an unsolved stop never ships the
            clues the team has not yet paid the time for. */

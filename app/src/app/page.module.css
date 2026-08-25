@@ -1219,3 +1219,133 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
   .shell:has(.portalMain) .railSpacer { margin-left: auto; margin-top: 0; }
   .shell:has(.portalMain) .portalMain { display: block; padding: 16px; }
 }
+
+/* ---------- scavenger hunt: launcher + picker ----------
+   Pink carries the hunt across the product, lime marks progress. */
+.huntCta { background: var(--accent); color: var(--ink); box-shadow: var(--sh-2); }
+.huntCta:hover { background: var(--accent-hi); color: var(--ink); }
+
+.huntBanner { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; padding: 14px 15px;
+  border: 1px solid var(--warm); border-radius: var(--r-xl); background: var(--warm-soft);
+  transition: border-color .16s, box-shadow .16s, transform .16s; }
+.huntBanner:hover { border-color: #F3B9CE; box-shadow: var(--sh-2); transform: translateY(-1px); }
+.huntBannerIc { width: 40px; height: 40px; flex: 0 0 40px; border-radius: 13px; display: grid; place-items: center;
+  background: var(--surface); color: var(--warm-ink); border: 1px solid var(--warm); }
+.huntBannerBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.huntBannerTitle { font-size: 14.5px; font-weight: 500; letter-spacing: -.015em; display: flex; align-items: center; gap: 8px; }
+.huntBannerTag { font-size: 10px; font-weight: 500; letter-spacing: .06em; text-transform: uppercase;
+  background: var(--accent); color: var(--ink); border-radius: 6px; padding: 2px 6px; }
+.huntBannerMeta { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
+
+.huntScrim { position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 20px;
+  background: rgba(20, 22, 26, .48); backdrop-filter: blur(6px); }
+.huntDialog { width: min(480px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; background: var(--surface);
+  border-radius: var(--r-2xl); box-shadow: var(--sh-3); padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+.huntDialogHead { display: flex; align-items: flex-start; gap: 12px; }
+.huntDialogTitle { margin: 6px 0 0; font-size: 24px; font-weight: 300; letter-spacing: -.03em; line-height: 1.15; }
+.huntDialogSub { margin: 7px 0 0; font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.huntDialogClose { width: 34px; height: 34px; flex: 0 0 34px; border-radius: 11px; display: grid; place-items: center;
+  color: var(--ink-2); border: 1px solid var(--line-strong); margin-left: auto; }
+.huntDialogClose:hover { background: var(--paper); color: var(--ink); }
+
+.huntOptions { display: flex; flex-direction: column; gap: 9px; }
+.huntOption { display: flex; align-items: flex-start; gap: 13px; width: 100%; padding: 15px; text-align: left;
+  border: 1px solid var(--line-strong); border-radius: var(--r-xl); background: var(--surface);
+  transition: border-color .16s, box-shadow .16s; }
+.huntOption:hover { border-color: var(--ink-3); }
+.huntOption[aria-pressed="true"] { border-color: var(--black); box-shadow: 0 0 0 1px var(--black), var(--sh-2); }
+.huntOptionBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.huntOptionTop { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.huntOptionName { font-size: 15.5px; font-weight: 500; letter-spacing: -.015em; }
+.huntOptionPrice { margin-left: auto; font-size: 15px; font-weight: 400; white-space: nowrap; }
+.huntOptionFree { color: var(--accent-ink); }
+.huntOptionMeta { font-size: 12.5px; color: var(--ink-2); line-height: 1.45; }
+.huntOptionStops { font-size: 11.5px; color: var(--ink-3); }
+.huntDialogError { font-size: 12.5px; color: var(--err); }
+.huntDialogActions { display: flex; gap: 9px; align-items: center; }
+.huntDialogActions .btn { height: 44px; }
+
+/* ---------- scavenger hunt dashboard ----------
+   Three regions: clue panel on the left, postcard on the right, map along the
+   bottom. The map only ever shows stops that are already solved — pinning an
+   unsolved one would hand over the answer the riddle is withholding. */
+.hdShell { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--paper); overflow: hidden; }
+.hdHead { flex: 0 0 auto; display: flex; align-items: center; gap: 14px; padding: 14px 20px; background: var(--surface);
+  border-bottom: 1px solid var(--line); }
+.hdBack { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 12px; border: 1px solid var(--line-strong);
+  display: grid; place-items: center; color: var(--ink-2); }
+.hdBack:hover { background: var(--paper); color: var(--ink); }
+.hdHeadText { display: flex; flex-direction: column; min-width: 0; }
+.hdHuntName { font-size: 16px; font-weight: 500; letter-spacing: -.02em; }
+.hdTeam { font-size: 12px; color: var(--ink-3); }
+.hdPips { display: flex; gap: 5px; margin-left: auto; }
+.hdPip { width: 30px; height: 6px; border-radius: 99px; background: var(--paper-2); }
+.hdPipOn { background: var(--accent); }
+.hdPipNow { background: var(--warm-ink); }
+.hdClock { font-family: var(--font-mono), monospace; font-size: 15px; color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.hdBody { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 420px) minmax(0, 1fr); gap: 16px; padding: 16px; }
+.hdMapRow { flex: 0 0 34%; min-height: 200px; padding: 0 16px 16px; }
+@media (max-width: 1000px) {
+  .hdBody { grid-template-columns: minmax(0, 1fr); overflow-y: auto; }
+  .hdMapRow { flex: 0 0 240px; }
+}
+
+.hdPanel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-2xl); padding: 20px;
+  display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+.hdStep { font-size: 11px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; color: var(--warm-ink); }
+.hdRiddle { margin: 0; font-size: 18px; line-height: 1.5; letter-spacing: -.01em; color: var(--ink); white-space: pre-line; }
+.hdClues { display: flex; flex-direction: column; gap: 8px; }
+.hdClue { display: flex; gap: 10px; font-size: 13px; line-height: 1.5; color: var(--ink-2); padding: 11px 13px;
+  border-radius: var(--r-md); background: var(--paper); border: 1px solid var(--line); }
+.hdClueN { flex: 0 0 auto; font-weight: 500; color: var(--ink-3); }
+.hdActions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: auto; }
+.hdActions .btn { height: 44px; }
+.hdUpload { position: relative; overflow: hidden; }
+.hdUpload input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.hdNote { font-size: 11.5px; line-height: 1.5; color: var(--ink-3); }
+.hdError { font-size: 12.5px; color: var(--err); }
+.hdStops { display: flex; flex-direction: column; gap: 6px; }
+.hdStopRow { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: var(--r-md);
+  border: 1px solid var(--line); background: var(--surface); font-size: 13px; width: 100%; text-align: left; }
+.hdStopRow[aria-current="true"] { border-color: var(--black); box-shadow: 0 0 0 1px var(--black); }
+.hdStopN { width: 22px; height: 22px; flex: 0 0 22px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--paper); color: var(--ink-2); font-size: 11px; }
+.hdStopDone .hdStopN { background: var(--accent); color: var(--ink); }
+.hdStopName { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hdStopHidden { color: var(--ink-3); }
+
+/* the postcard, in the printed-card style */
+.hdCardWrap { display: grid; place-items: center; overflow: auto; padding: 4px; }
+.pcard { width: 100%; max-width: 760px; background: #F3F1E9; border-radius: var(--r-2xl); padding: 14px;
+  box-shadow: var(--sh-2); }
+.pcardInner { position: relative; background: #FAF9F4; border: 1px solid #E4E2D8; border-radius: var(--r-xl);
+  padding: 22px 24px 24px 74px; min-height: 300px; }
+.pcardSpine { position: absolute; left: 52px; top: 18px; bottom: 18px; width: 1px; border-left: 1px dashed #DFDDD2; }
+.pcardStamp { position: absolute; left: 18px; top: 20px; width: 30px; height: 30px; border-radius: 999px;
+  border: 1px solid #D8D5C8; display: grid; place-items: center; color: #767A82; }
+.pcardVert { position: absolute; left: 12px; bottom: 26px; font-family: var(--font-mono), monospace; font-size: 11px;
+  letter-spacing: .34em; color: #8A8E96; writing-mode: vertical-rl; transform: rotate(180deg); }
+.pcardTop { display: flex; align-items: baseline; gap: 12px; font-family: var(--font-mono), monospace; font-size: 12px;
+  letter-spacing: .28em; color: #767A82; text-transform: uppercase; }
+.pcardSerial { margin-left: auto; letter-spacing: .12em; }
+.pcardTitle { margin: 12px 0 20px; font-size: clamp(20px, 2.4vw, 27px); font-weight: 500; letter-spacing: -.03em;
+  line-height: 1.22; color: var(--ink); max-width: 24ch; }
+.pcardSlots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.pcardSlot { position: relative; aspect-ratio: 4 / 3.4; border-radius: 10px; overflow: hidden; background: #FDFCF8;
+  border: 2px dashed #DDDACD; display: grid; place-items: center; }
+.pcardSlotFilled { border: 0; box-shadow: 0 6px 18px rgba(20, 22, 26, .16); background: var(--paper); }
+.pcardSlot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcardSlotN { font-family: var(--font-mono), monospace; font-size: 15px; color: #C9CCD3; }
+.pcardFound { position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%); padding: 4px 12px;
+  border-radius: 999px; background: rgba(255, 255, 255, .96); border: 1.5px solid var(--brand); color: var(--brand);
+  font-family: var(--font-mono), monospace; font-size: 10.5px; letter-spacing: .12em; }
+.pcardFoot { margin: 18px 0 0; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); max-width: 46ch; }
+
+.hdMap { position: relative; height: 100%; border-radius: var(--r-2xl); overflow: hidden; border: 1px solid var(--line);
+  background: var(--paper-2); }
+.hdMapCanvas { position: absolute; inset: 0; }
+.hdMapHint { position: absolute; left: 12px; bottom: 12px; z-index: 5; padding: 7px 13px; border-radius: 999px;
+  background: rgba(255, 255, 255, .94); border: 1px solid var(--line); font-size: 12px; color: var(--ink-2); }
+.hdPin { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 999px; background: var(--accent);
+  color: var(--ink); font-size: 11px; font-weight: 600; box-shadow: 0 0 0 3px #fff, 0 3px 10px rgba(20, 22, 26, .25); }
