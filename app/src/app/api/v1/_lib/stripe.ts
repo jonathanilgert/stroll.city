@@ -23,6 +23,7 @@ export async function createClaimCheckoutSession(city: string, claim: BusinessCl
   const plan = paidPlanPrices[claim.plan_tier];
   return stripe.checkout.sessions.create({
     mode: "subscription",
+    integration_identifier: "strollcity_jxmfqkpr",
     customer_email: claim.claimant_email,
     client_reference_id: claim.id,
     success_url: `${origin}/portal?claim=${encodeURIComponent(claim.id)}&checkout=success`,

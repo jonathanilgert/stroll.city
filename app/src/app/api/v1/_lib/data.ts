@@ -456,6 +456,13 @@ export async function markClaimCheckoutPaid(city: string, claimId: string, patch
   return updated;
 }
 
+export async function updateClaimBySubscription(city: string, subscriptionId: string, patch: Partial<BusinessClaim>) {
+  const claims = await readOverlay<BusinessClaim>(city, "claims");
+  const current = claims.find((claim) => claim.stripe_subscription_id === subscriptionId);
+  if (!current) return null;
+  return updateBusinessClaim(city, current.id, patch);
+}
+
 export function fallbackEvents(data: StrollData): StrollEvent[] {
   return data.events?.length ? data.events : [
     { id: "night-market-demo", name: "Inglewood Night Market", venue: "9 Ave SE between 12 & 13 St", starts_at: "2026-07-24T17:00:00-06:00", ends_at: "2026-07-24T22:00:00-06:00", source: "Stroll event", lon: data.center[0] - 0.0028, lat: data.center[1] + 0.0006, emoji: "🏮" },
