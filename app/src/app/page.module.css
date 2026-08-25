@@ -1247,11 +1247,6 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .memoryStrip { display: flex; flex-wrap: wrap; gap: 7px; }
 .memoryStrip span { display: inline-flex; min-height: 28px; align-items: center; padding: 0 10px; border-radius: 999px; background: var(--paper); color: var(--ink-2); font-size: 12px; }
 .huntDashboard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.huntResumePill { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 22; display: inline-flex; align-items: center; gap: 12px; padding: 10px 12px 10px 14px; min-width: min(360px, calc(100% - 32px)); color: var(--ink); text-decoration: none; box-shadow: 0 16px 34px rgba(20,24,26,.18); }
-.huntResumePill span { display: grid; gap: 2px; min-width: 0; }
-.huntResumePill b { font-size: 13px; font-weight: 700; }
-.huntResumePill em { font-style: normal; color: var(--ink-2); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-@media (max-width: 760px) { .huntResumePill { bottom: 78px; } }
 .huntNowBar { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 16px; }
 .huntNowBar > div { border: 1px solid rgba(13,25,23,.14); border-radius: var(--r-lg); background: rgba(255,255,255,.62); padding: 12px 14px; }
 .huntNowBar b { display: block; font-weight: 600; color: var(--ink); }
