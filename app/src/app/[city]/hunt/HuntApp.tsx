@@ -47,6 +47,26 @@ const productCopy = {
   race: "8 stops · rotated starts · live leaderboard",
 };
 
+type SavedHuntState = {
+  version: 1;
+  selectedSlug: string;
+  teamName: string;
+  sessionId: string;
+  startedAt: number | null;
+  screen: "setup" | "briefing" | "play" | "paused" | "trouble" | "finish" | "memory";
+  current: number;
+  progress: Record<string, Progress>;
+  playMood: string;
+  playerRole: string;
+  avatarEmoji: string;
+  deviceMode: "one" | "everyone";
+  eventName: string;
+  eventDate: string;
+  teamCount: number;
+};
+
+const stateKeyFor = (cityName: string) => `stroll-hunt-session:${cityName.toLowerCase()}`;
+
 const stampSwatches = [
   ["#0B47E8", "#0736B8"],
   ["#F58AB4", "#C2296B"],
@@ -152,6 +172,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
     return hunts.find((item) => item.mode === type)?.slug ?? hunts[0]?.slug ?? "friendly-mode";
   });
   const teamInputRef = useRef<HTMLInputElement>(null);
+  const restoredRef = useRef(false);
   const [teamName, setTeamName] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
@@ -175,6 +196,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   });
 
   const hunt = hunts.find((item) => item.slug === selectedSlug) ?? hunts[0];
+  const citySlug = cityName.toLowerCase();
+  const storageKey = stateKeyFor(cityName);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
@@ -208,11 +231,48 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const activePhoto = active ? progress[active.id]?.photo : undefined;
   const allPhotosUploaded = huntStops.length > 0 && huntStops.every((stop) => Boolean(progress[stop.id]?.photo));
   const finished = huntStops.length > 0 && solvedCount === huntStops.length && allPhotosUploaded;
-  const citySlug = cityName.toLowerCase();
   const inviteCode = sessionId ? sessionId.replace("session_", "").slice(-6).toUpperCase() : "READY";
   const routeDistance = hunt?.distance_m ? `${(hunt.distance_m / 1000).toFixed(1)} km` : "Walkable loop";
   const completedStops = huntStops.filter((stop) => progress[stop.id]?.state === "solved");
   const upcomingStops = huntStops.slice(Math.min(current + 1, huntStops.length));
+
+  useEffect(() => {
+    if (typeof window === "undefined" || restoredRef.current) return;
+    restoredRef.current = true;
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "null") as SavedHuntState | null;
+      if (!saved?.startedAt || saved.version !== 1 || !hunts.some((item) => item.slug === saved.selectedSlug)) return;
+      window.setTimeout(() => {
+        setSelectedSlug(saved.selectedSlug);
+        setTeamName(saved.teamName);
+        setSessionId(saved.sessionId);
+        setStartedAt(saved.startedAt);
+        setNow(Date.now());
+        setScreen(saved.screen === "setup" ? "play" : saved.screen);
+        setCurrent(Math.max(0, saved.current));
+        setProgress(saved.progress ?? {});
+        setPlayMood(saved.playMood || "Relaxed");
+        setPlayerRole(saved.playerRole || "Explorer");
+        setAvatarEmoji(saved.avatarEmoji || "🧭");
+        setDeviceMode(saved.deviceMode || "one");
+        setEventName(saved.eventName || "");
+        setEventDate(saved.eventDate || "");
+        setTeamCount(saved.teamCount || 2);
+      }, 0);
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
+  }, [hunts, storageKey]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !restoredRef.current) return;
+    if (!startedAt) {
+      localStorage.removeItem(storageKey);
+      return;
+    }
+    const saved: SavedHuntState = { version: 1, selectedSlug, teamName, sessionId, startedAt, screen, current, progress, playMood, playerRole, avatarEmoji, deviceMode, eventName, eventDate, teamCount };
+    localStorage.setItem(storageKey, JSON.stringify(saved));
+  }, [avatarEmoji, current, deviceMode, eventDate, eventName, playMood, playerRole, progress, screen, selectedSlug, sessionId, startedAt, storageKey, teamCount, teamName]);
 
   const start = () => {
     const started = Date.now();
@@ -349,8 +409,16 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               </>}
             </div>
             <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
-              <span className={styles.lbl}>Products</span>
-              <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$15/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
+              {!startedAt ? <>
+                <span className={styles.lbl}>Products</span>
+                <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$20/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
+              </> : <>
+                <span className={styles.lbl}>Active hunt app</span>
+                <h3 className={styles.landH3}>{screen === "play" ? `Stop ${current + 1}: ${activeSolved ? active?.name : "mystery stop"}` : "Progress saved on this device"}</h3>
+                <p className={styles.landCardP}>You can leave for directions or the full Calgary map and come back to this hunt without starting over.</p>
+                <HuntMiniMap stops={huntStops} current={current} solvedCount={solvedCount} />
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Continue hunt</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Open city map</Link></div>
+              </>}
             </div>
           </div></div>
         </header>
