@@ -106,11 +106,20 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const [teamName, setTeamName] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
+  const [screen, setScreen] = useState<"setup" | "briefing" | "play" | "paused" | "trouble" | "finish" | "memory">("setup");
   const [now, setNow] = useState<number>(0);
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState<Record<string, Progress>>({});
   const [uploadingStopId, setUploadingStopId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [playMood, setPlayMood] = useState("Relaxed");
+  const [playerRole, setPlayerRole] = useState("Explorer");
+  const [avatarEmoji, setAvatarEmoji] = useState("🧭");
+  const [deviceMode, setDeviceMode] = useState<"one" | "everyone">("one");
+  const [eventName, setEventName] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [teamCount, setTeamCount] = useState(2);
+  const [feedback, setFeedback] = useState("");
   const [leaderboard, setLeaderboard] = useState<Array<{ team: string; seconds: number }>>(() => {
     if (typeof window === "undefined") return [];
     try { return JSON.parse(localStorage.getItem("stroll-hunt-board") ?? "[]"); } catch { return []; }
@@ -151,6 +160,10 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   const allPhotosUploaded = huntStops.length > 0 && huntStops.every((stop) => Boolean(progress[stop.id]?.photo));
   const finished = huntStops.length > 0 && solvedCount === huntStops.length && allPhotosUploaded;
   const citySlug = cityName.toLowerCase();
+  const inviteCode = sessionId ? sessionId.replace("session_", "").slice(-6).toUpperCase() : "READY";
+  const routeDistance = hunt?.distance_m ? `${(hunt.distance_m / 1000).toFixed(1)} km` : "Walkable loop";
+  const completedStops = huntStops.filter((stop) => progress[stop.id]?.state === "solved");
+  const upcomingStops = huntStops.slice(Math.min(current + 1, huntStops.length));
 
   const start = () => {
     const started = Date.now();
@@ -159,6 +172,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
     setStartedAt(started);
     setNow(started);
     setCurrent(0);
+    setScreen("briefing");
     setUploadError("");
     setProgress(Object.fromEntries(huntStops.map((stop) => [stop.id, { state: "pending", clues: 0 }])));
     void fetch(`/api/v1/${citySlug}/hunts/${hunt?.slug ?? selectedSlug}/sessions`, {
@@ -185,7 +199,18 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
   };
 
   const nextStop = () => {
-    if (current < huntStops.length - 1) setCurrent((n) => n + 1);
+    if (current < huntStops.length - 1) {
+      setCurrent((n) => n + 1);
+      setScreen("play");
+    }
+  };
+
+  const exitHunt = () => {
+    setStartedAt(null);
+    setScreen("setup");
+    setCurrent(0);
+    setProgress({});
+    setUploadError("");
   };
 
   const uploadPhoto = async (file: File | undefined) => {
@@ -217,6 +242,7 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
       ...rows,
       [active.id]: { ...(rows[active.id] ?? { state: "solved", clues: 0 }), state: "solved", photo: payload.data?.url, photoName: file.name, solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() },
     }));
+    if (current === huntStops.length - 1) setScreen("finish");
   };
 
   const sharePostcard = async () => {
@@ -248,11 +274,22 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               <p className={styles.landHeroSub}>Riddles reveal the next shop only after your team solves the current one. Proof photos stay private; the finish creates a shareable postcard.</p>
               <div className={styles.grid2}>
                 <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
-                <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setProgress({}); }}>
+                <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setScreen("setup"); setProgress({}); }}>
                   {hunts.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
                 </select></div></div>
               </div>
-              <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={start}>Start this hunt</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${cityName.toLowerCase()}`}>Browse map first</Link></div>
+              <div className={styles.huntSetupGrid}>
+                <div className={styles.claimField}><label>Nickname or avatar</label><div className={styles.avatarPick}>{["🧭", "📷", "🕵️", "🦊"].map((emoji) => <button key={emoji} type="button" aria-pressed={avatarEmoji === emoji} onClick={() => setAvatarEmoji(emoji)}>{emoji}</button>)}</div></div>
+                <div className={styles.claimField}><label>Play style</label><div className={styles.segmentedMini}>{["Relaxed", "Competitive", "Family-friendly"].map((mood) => <button key={mood} type="button" aria-pressed={playMood === mood} onClick={() => setPlayMood(mood)}>{mood}</button>)}</div></div>
+                <div className={styles.claimField}><label>Your role</label><div className={styles.segmentedMini}>{["Explorer", "Photographer", "Trivia hunter"].map((role) => <button key={role} type="button" aria-pressed={playerRole === role} onClick={() => setPlayerRole(role)}>{role}</button>)}</div></div>
+                <div className={styles.claimField}><label>Devices</label><div className={styles.segmentedMini}><button type="button" aria-pressed={deviceMode === "one"} onClick={() => setDeviceMode("one")}>One device</button><button type="button" aria-pressed={deviceMode === "everyone"} onClick={() => setDeviceMode("everyone")}>Everyone joins</button></div></div>
+              </div>
+              {isRace && <div className={styles.raceSetupStrip}><span>Teams</span><button type="button" onClick={() => setTeamCount((n) => Math.max(2, n - 1))}>−</button><b>{teamCount}</b><button type="button" onClick={() => setTeamCount((n) => Math.min(8, n + 1))}>+</button><em>{teamCount} teams × $20 = ${teamCount * 20}</em></div>}
+              {hunt?.mode === "race" && <div className={styles.grid2}><div className={styles.claimField}><label>Event name</label><div className={styles.ctl}><input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="Friday loop race" /></div></div><div className={styles.claimField}><label>Date</label><div className={styles.ctl}><input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div></div></div>}
+              <div className={styles.huntScreenRail} aria-label="Hunt screen roadmap">
+                {[["setup", "Setup"], ["briefing", "Briefing"], ["play", "Hunt"], ["paused", "Pause"], ["trouble", "Help"], ["finish", "Finish"], ["memory", "Memories"]].map(([key, label]) => <button key={key} type="button" aria-current={screen === key ? "step" : undefined} onClick={() => setScreen(key as typeof screen)} disabled={key !== "setup" && !startedAt}>{label}</button>)}
+              </div>
+              <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={start}>{startedAt ? "Restart this hunt" : "Start this hunt"}</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${cityName.toLowerCase()}`}>Browse map first</Link></div>
             </div>
             <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
               <span className={styles.lbl}>Products</span>
@@ -265,7 +302,43 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
           <div className={styles.landSecHead}><div className={styles.landSecHeadL}><span className={styles.lbl}>Play</span><h2 className={styles.landH2}>{hunt?.name ?? "Hunt"}</h2></div><p>{hunt?.blurb}</p></div>
           <div className={styles.landDuo}>
             <div className={styles.landBigCard}>
-              {!startedAt || !active ? <p className={styles.landCardP}>Start the hunt to draw your stops. Loop Race rotates the same 8-stop route so teams start apart and no destination is named while the race is running.</p> : <>
+              {!startedAt || !active ? <>
+                <span className={styles.lbl}>Branch A · solo, team or event</span>
+                <h3 className={styles.landH3}>Start with the smallest useful setup.</h3>
+                <p className={styles.landCardP}>Pick a nickname, avatar, play style and device mode. Race hosts can set teams, date and event name before the shared invite code appears.</p>
+                <div className={styles.huntInfoGrid}>
+                  <div><b>{avatarEmoji} {teamName || "Your team"}</b><span>{playMood} · {playerRole}</span></div>
+                  <div><b>{deviceMode === "one" ? "One shared device" : "Everyone on their own device"}</b><span>Invite code and QR unlock after start.</span></div>
+                  <div><b>{isRace ? `${teamCount} teams` : `${hunt?.mode === "friendly" ? 4 : 8} stops`}</b><span>{isRace ? "Same route · staggered starts." : "Map, distance and directions included."}</span></div>
+                </div>
+              </> : screen === "briefing" ? <>
+                <span className={styles.lbl}>Universal pre-game</span>
+                <h3 className={styles.landH3}>Get everyone to the first doorway before the game starts.</h3>
+                <div className={styles.huntRouteCard}><b>First-stop directions</b><span>{routeDistance} · walking directions · open in maps</span><Link href={`/${citySlug}`}>Open the map →</Link></div>
+                <div className={styles.huntInfoGrid}>
+                  <div><b>You&apos;re close</b><span>Location prompts switch from “keep walking” to “you&apos;ve arrived”.</span></div>
+                  <div><b>Photos and clues</b><span>{isRace ? "Clues add race time; photos prove the stop." : "Clues are free; photos build your postcard."}</span></div>
+                  <div><b>Invite {inviteCode}</b><span>{deviceMode === "everyone" ? "Joined players appear in the waiting state." : "Perfect for people sharing one phone."}</span></div>
+                </div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Begin official gameplay</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("setup")}>Adjust setup</button></div>
+              </> : screen === "paused" ? <>
+                <span className={styles.lbl}>Pause and interruption</span>
+                <h3 className={styles.landH3}>Your hunt is saved right here.</h3>
+                <p className={styles.landCardP}>Timer and progress stop while paused. Resume returns exactly to stop {current + 1}, with the same clues, photos and active hunt card.</p>
+                <div className={styles.huntInfoGrid}><div><b>Active hunt card</b><span>{hunt?.name} · {solvedCount}/{huntStops.length} solved.</span></div><div><b>Progress saved</b><span>Current stop, photos and clues stay attached to this session.</span></div></div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Resume hunt</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={exitHunt}>Exit and clear progress</button></div>
+              </> : screen === "trouble" ? <>
+                <span className={styles.lbl}>Help if the street gets messy</span>
+                <h3 className={styles.landH3}>Keep walking without losing the game.</h3>
+                <div className={styles.troubleGrid}>{["Continue manually or open directions", "Explain why photo access is needed", "Cached clue and retry connection", "You may not be at the right place", "Rejoin via team code", "Confirm skip and point impact", "Alternative clue or bypass stop"].map((item) => <div key={item}>{item}</div>)}</div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Back to current stop</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Show another clue</button></div>
+              </> : screen === "finish" || screen === "memory" ? <>
+                <span className={styles.lbl}>{screen === "finish" ? "Final stop" : "Memory and retention"}</span>
+                <h3 className={styles.landH3}>{screen === "finish" ? "Complete the hunt, then make it worth remembering." : "Your route, photos and postcard live here."}</h3>
+                <div className={styles.finishStats}><div><b>{solvedCount}/{huntStops.length}</b><span>Stops solved</span></div><div><b>{isRace ? fmt(strollSeconds) : "No clock"}</b><span>{isRace ? "Stroll Time" : "Walk at your pace"}</span></div><div><b>{activeClues.length}</b><span>Hints available</span></div></div>
+                {screen === "memory" && <><div className={styles.memoryStrip}>{completedStops.map((stop) => <span key={stop.id}>{stop.name}</span>)}</div><textarea className={styles.ctl} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Quick rating or note for next time" /></>}
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("memory")}>View photos and postcard</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Another Calgary neighbourhood</Link></div>
+              </> : <>
                 <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
                 <h3 className={styles.landH3}>Mystery stop</h3>
                 <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
@@ -286,6 +359,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 {uploadError && <div className={styles.calloutAmber}>{uploadError}</div>}
                 <div className={styles.landHeroCta}>
                   <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
+                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("trouble")}>Need help</button>
+                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("paused")}>Pause</button>
                   {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop} disabled={!activePhoto || uploadingStopId === active.id}>Photo uploaded — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve} disabled={activeSolved && !activePhoto}>{activeSolved ? (activePhoto ? "Postcard photo uploaded" : "Upload photo to finish stop") : "Mark solved"}</button>}
                 </div>
               </>}
@@ -342,6 +417,12 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                   </div>
                 </div>
               </div>
+              {startedAt && <div className={styles.huntDashboard}>
+                <div><b>Completed</b><span>{completedStops.length ? completedStops.map((stop) => stop.name).join(" · ") : "No stops found yet"}</span></div>
+                <div><b>Upcoming</b><span>{upcomingStops.length ? `${upcomingStops.length} stops left` : "Final screen ready"}</span></div>
+                <div><b>{deviceMode === "everyone" ? "Players" : "Device"}</b><span>{deviceMode === "everyone" ? `${teamName || "Leader"}, photographer, trivia hunter` : "Shared phone mode"}</span></div>
+                <div><b>Photos</b><span>{huntStops.filter((stop) => progress[stop.id]?.photo).length} captured so far</span></div>
+              </div>}
               {solvedCount === huntStops.length && !allPhotosUploaded && <div className={styles.calloutAmber}><b>Almost there.</b> Upload the remaining stop photos and your postcard will be built from the pictures your team actually took.</div>}
               {finished && <div className={styles.calloutAmber}><b>Win the Inglewood Basket.</b> Share your postcard publicly tagging <b>@stroll_city</b> or <b>#StrollInglewood</b> and you’re entered in this month’s draw — a basket donated by ten Inglewood businesses, worth around $250. Entering is optional; the hunt is free either way. One entry per completed hunt. No purchase necessary. Alberta residents 18+. Winner answers a skill-testing question. <Link href="/rules">Full rules →</Link></div>}
               {finished && (
