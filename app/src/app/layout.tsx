@@ -23,9 +23,15 @@ export const metadata: Metadata = {
   },
 };
 
+const UMAMI_WEBSITE_ID = "7010698c-5897-44a6-b8bb-1955245857e6";
+const UMAMI_SCRIPT_URL = "https://analytics.digitalbuilders.ca/script.js";
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${plexMono.variable} ${instrument.variable} ${jetbrains.variable} ${treasure.variable}`}>
+      <head>
+        <script defer src={UMAMI_SCRIPT_URL} data-website-id={UMAMI_WEBSITE_ID} />
+      </head>
       <body>{children}</body>
     </html>
   );
