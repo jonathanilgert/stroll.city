@@ -21,7 +21,13 @@ export type Hunt = {
 export type HuntStopLite = {
   id: string;
   business_id: string;
+  business_slug?: string;
   name: string;
+  lon?: number;
+  lat?: number;
+  address?: string;
+  mono?: string;
+  category?: string;
   riddle: string;
   clue_1: string;
   clue_2: string;
@@ -88,6 +94,49 @@ function fmt(seconds: number) {
   const m = Math.floor((safe % 3600) / 60);
   const s = safe % 60;
   return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
+}
+
+function mapLink(stop: HuntStopLite | undefined) {
+  if (!stop?.lat || !stop?.lon) return "#";
+  return `https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lon}`;
+}
+
+function HuntMiniMap({ stops, current, solvedCount }: { stops: HuntStopLite[]; current: number; solvedCount: number }) {
+  const plotted = stops.filter((stop) => typeof stop.lon === "number" && typeof stop.lat === "number");
+  if (!plotted.length) {
+    return <div className={styles.huntMapEmpty}>Map coordinates are loading. Use the Calgary map link while we reconnect the route.</div>;
+  }
+  const lons = plotted.map((stop) => stop.lon as number);
+  const lats = plotted.map((stop) => stop.lat as number);
+  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const pad = 11;
+  const point = (stop: HuntStopLite) => {
+    const x = pad + (((stop.lon as number) - minLon) / Math.max(0.0001, maxLon - minLon)) * (100 - pad * 2);
+    const y = pad + ((maxLat - (stop.lat as number)) / Math.max(0.0001, maxLat - minLat)) * (100 - pad * 2);
+    return { x, y };
+  };
+  const route = plotted.map((stop) => point(stop)).map((pt) => `${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(" ");
+  return (
+    <div className={styles.huntMapCard} aria-label="Hunt route map">
+      <div className={styles.huntMapTop}><b>Live route map</b><span>{solvedCount}/{stops.length} stops solved</span></div>
+      <svg className={styles.huntMapSvg} viewBox="0 0 100 100" role="img" aria-label="Map of this hunt route">
+        <defs><linearGradient id="huntMapRoute" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#0B47E8" /><stop offset="1" stopColor="#DCF23C" /></linearGradient></defs>
+        <rect x="0" y="0" width="100" height="100" rx="12" />
+        <path d="M8 28 C26 18 37 35 55 25 S79 18 92 30" />
+        <path d="M12 68 C29 54 40 72 58 62 S78 55 90 72" />
+        {plotted.length > 1 && <polyline points={route} />}
+        {stops.map((stop, index) => {
+          if (typeof stop.lon !== "number" || typeof stop.lat !== "number") return null;
+          const pt = point(stop);
+          const solved = index < current || index < solvedCount;
+          const activePin = index === current;
+          return <g key={stop.id} className={`${styles.huntMapPin} ${activePin ? styles.huntMapPinActive : ""} ${solved ? styles.huntMapPinSolved : ""}`} transform={`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`}><circle r={activePin ? 5.6 : 4.4} /><text y="1.8">{index + 1}</text></g>;
+        })}
+      </svg>
+      <div className={styles.huntMapLegend}><span><i /> Current stop</span><span><i /> Completed</span><span>Open map for walking directions.</span></div>
+    </div>
+  );
 }
 
 function rotate<T>(rows: T[], offset: number) {
@@ -272,24 +321,32 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               <span className={styles.landEyebrow}><i /> {cityName} scavenger hunt</span>
               <h1 className={styles.landH1}>Solve the street,<br />one doorway at a time.</h1>
               <p className={styles.landHeroSub}>Riddles reveal the next shop only after your team solves the current one. Proof photos stay private; the finish creates a shareable postcard.</p>
-              <div className={styles.grid2}>
-                <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
-                <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setScreen("setup"); setProgress({}); }}>
-                  {hunts.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-                </select></div></div>
-              </div>
-              <div className={styles.huntSetupGrid}>
-                <div className={styles.claimField}><label>Nickname or avatar</label><div className={styles.avatarPick}>{["🧭", "📷", "🕵️", "🦊"].map((emoji) => <button key={emoji} type="button" aria-pressed={avatarEmoji === emoji} onClick={() => setAvatarEmoji(emoji)}>{emoji}</button>)}</div></div>
-                <div className={styles.claimField}><label>Play style</label><div className={styles.segmentedMini}>{["Relaxed", "Competitive", "Family-friendly"].map((mood) => <button key={mood} type="button" aria-pressed={playMood === mood} onClick={() => setPlayMood(mood)}>{mood}</button>)}</div></div>
-                <div className={styles.claimField}><label>Your role</label><div className={styles.segmentedMini}>{["Explorer", "Photographer", "Trivia hunter"].map((role) => <button key={role} type="button" aria-pressed={playerRole === role} onClick={() => setPlayerRole(role)}>{role}</button>)}</div></div>
-                <div className={styles.claimField}><label>Devices</label><div className={styles.segmentedMini}><button type="button" aria-pressed={deviceMode === "one"} onClick={() => setDeviceMode("one")}>One device</button><button type="button" aria-pressed={deviceMode === "everyone"} onClick={() => setDeviceMode("everyone")}>Everyone joins</button></div></div>
-              </div>
-              {isRace && <div className={styles.raceSetupStrip}><span>Teams</span><button type="button" onClick={() => setTeamCount((n) => Math.max(2, n - 1))}>−</button><b>{teamCount}</b><button type="button" onClick={() => setTeamCount((n) => Math.min(8, n + 1))}>+</button><em>{teamCount} teams × $20 = ${teamCount * 20}</em></div>}
-              {hunt?.mode === "race" && <div className={styles.grid2}><div className={styles.claimField}><label>Event name</label><div className={styles.ctl}><input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="Friday loop race" /></div></div><div className={styles.claimField}><label>Date</label><div className={styles.ctl}><input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div></div></div>}
-              <div className={styles.huntScreenRail} aria-label="Hunt screen roadmap">
-                {[["setup", "Setup"], ["briefing", "Briefing"], ["play", "Hunt"], ["paused", "Pause"], ["trouble", "Help"], ["finish", "Finish"], ["memory", "Memories"]].map(([key, label]) => <button key={key} type="button" aria-current={screen === key ? "step" : undefined} onClick={() => setScreen(key as typeof screen)} disabled={key !== "setup" && !startedAt}>{label}</button>)}
-              </div>
-              <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={start}>{startedAt ? "Restart this hunt" : "Start this hunt"}</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${cityName.toLowerCase()}`}>Browse map first</Link></div>
+              {!startedAt ? <>
+                <div className={styles.grid2}>
+                  <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
+                  <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setScreen("setup"); setProgress({}); }}>
+                    {hunts.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
+                  </select></div></div>
+                </div>
+                <div className={styles.huntSetupGrid}>
+                  <div className={styles.claimField}><label>Nickname or avatar</label><div className={styles.avatarPick}>{["🧭", "📷", "🕵️", "🦊"].map((emoji) => <button key={emoji} type="button" aria-pressed={avatarEmoji === emoji} onClick={() => setAvatarEmoji(emoji)}>{emoji}</button>)}</div></div>
+                  <div className={styles.claimField}><label>Play style</label><div className={styles.segmentedMini}>{["Relaxed", "Competitive", "Family-friendly"].map((mood) => <button key={mood} type="button" aria-pressed={playMood === mood} onClick={() => setPlayMood(mood)}>{mood}</button>)}</div></div>
+                  <div className={styles.claimField}><label>Your role</label><div className={styles.segmentedMini}>{["Explorer", "Photographer", "Trivia hunter"].map((role) => <button key={role} type="button" aria-pressed={playerRole === role} onClick={() => setPlayerRole(role)}>{role}</button>)}</div></div>
+                  <div className={styles.claimField}><label>Devices</label><div className={styles.segmentedMini}><button type="button" aria-pressed={deviceMode === "one"} onClick={() => setDeviceMode("one")}>One device</button><button type="button" aria-pressed={deviceMode === "everyone"} onClick={() => setDeviceMode("everyone")}>Everyone joins</button></div></div>
+                </div>
+                {isRace && <div className={styles.raceSetupStrip}><span>Teams</span><button type="button" onClick={() => setTeamCount((n) => Math.max(2, n - 1))}>−</button><b>{teamCount}</b><button type="button" onClick={() => setTeamCount((n) => Math.min(8, n + 1))}>+</button><em>{teamCount} teams × $20 = ${teamCount * 20}</em></div>}
+                {hunt?.mode === "race" && <div className={styles.grid2}><div className={styles.claimField}><label>Event name</label><div className={styles.ctl}><input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="Friday loop race" /></div></div><div className={styles.claimField}><label>Date</label><div className={styles.ctl}><input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div></div></div>}
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={start}>Start this hunt</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${cityName.toLowerCase()}`}>Browse map first</Link></div>
+              </> : <>
+                <div className={styles.huntNowBar}>
+                  <div><b>{avatarEmoji} {teamName || "Your team"}</b><span>{hunt?.name} · stop {current + 1} of {huntStops.length} · invite {inviteCode}</span></div>
+                  <div><b>{isRace ? fmt(strollSeconds) : `${solvedCount}/${huntStops.length}`}</b><span>{isRace ? "Stroll Time" : "Stops solved"}</span></div>
+                </div>
+                <div className={styles.huntScreenRail} aria-label="Hunt screen roadmap">
+                  {[["briefing", "Briefing"], ["play", "Current stop"], ["paused", "Pause"], ["trouble", "Help"], ["finish", "Finish"], ["memory", "Memories"]].map(([key, label]) => <button key={key} type="button" aria-current={screen === key ? "step" : undefined} onClick={() => setScreen(key as typeof screen)}>{label}</button>)}
+                </div>
+                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Return to current stop</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={exitHunt}>Restart setup</button></div>
+              </>}
             </div>
             <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
               <span className={styles.lbl}>Products</span>
@@ -314,7 +371,8 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
               </> : screen === "briefing" ? <>
                 <span className={styles.lbl}>Universal pre-game</span>
                 <h3 className={styles.landH3}>Get everyone to the first doorway before the game starts.</h3>
-                <div className={styles.huntRouteCard}><b>First-stop directions</b><span>{routeDistance} · walking directions · open in maps</span><Link href={`/${citySlug}`}>Open the map →</Link></div>
+                <div className={styles.huntRouteCard}><b>First-stop directions</b><span>{routeDistance} · walking directions · open in maps</span><Link href={mapLink(active)} target="_blank">Open map to stop 1 →</Link></div>
+                <HuntMiniMap stops={huntStops} current={0} solvedCount={solvedCount} />
                 <div className={styles.huntInfoGrid}>
                   <div><b>You&apos;re close</b><span>Location prompts switch from “keep walking” to “you&apos;ve arrived”.</span></div>
                   <div><b>Photos and clues</b><span>{isRace ? "Clues add race time; photos prove the stop." : "Clues are free; photos build your postcard."}</span></div>
@@ -340,9 +398,17 @@ export default function HuntApp({ cityName, hunts, stops }: { cityName: string; 
                 <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("memory")}>View photos and postcard</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Another Calgary neighbourhood</Link></div>
               </> : <>
                 <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
-                <h3 className={styles.landH3}>Mystery stop</h3>
-                <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
-                <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
+                <h3 className={styles.landH3}>{activeSolved ? active.name : "Find this mystery stop"}</h3>
+                <div className={styles.huntPlayGrid}>
+                  <div>
+                    <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
+                    <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
+                  </div>
+                  <div className={styles.huntMapColumn}>
+                    <HuntMiniMap stops={huntStops} current={current} solvedCount={solvedCount} />
+                    <div className={styles.huntRouteCard}><b>{activeSolved ? active.name : "Current search zone"}</b><span>{active.address ?? "Inglewood business district"}</span><Link href={mapLink(active)} target="_blank">Open map / directions →</Link></div>
+                  </div>
+                </div>
                 {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Photo to take:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
                 {activeSolved && (
                   <div className={styles.photoUploadPanel}>
