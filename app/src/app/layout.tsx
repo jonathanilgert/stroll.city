@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { IBM_Plex_Mono, IM_Fell_English, Instrument_Sans, JetBrains_Mono, Outfit } from "next/font/google";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
@@ -29,10 +30,8 @@ const UMAMI_SCRIPT_URL = "https://analytics.digitalbuilders.ca/script.js";
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${outfit.variable} ${plexMono.variable} ${instrument.variable} ${jetbrains.variable} ${treasure.variable}`}>
-      <head>
-        <script defer src={UMAMI_SCRIPT_URL} data-website-id={UMAMI_WEBSITE_ID} />
-      </head>
       <body>{children}</body>
+      <Script src={UMAMI_SCRIPT_URL} data-website-id={UMAMI_WEBSITE_ID} />
     </html>
   );
 }
