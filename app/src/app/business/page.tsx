@@ -327,7 +327,7 @@ export default function LandingPage() {
                     <div key={feat}><CatIcon d="m5 13 4.5 4.5L19 7" size={16} strokeWidth={2} color={plan.hot ? "var(--accent-ink)" : "#15558F"} />{feat}</div>
                   ))}
                 </div>
-                <Link className={`${styles.btn} ${plan.hot ? styles.btnClaim : styles.btnLine}`} href="/portal">{plan.cta}</Link>
+                <Link className={`${styles.btn} ${plan.hot ? styles.btnPrimary : styles.btnLine}`} href="/portal">{plan.cta}</Link>
               </div>
             ))}
           </div>
