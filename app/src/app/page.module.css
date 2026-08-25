@@ -1219,32 +1219,3 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
   .shell:has(.portalMain) .railSpacer { margin-left: auto; margin-top: 0; }
   .shell:has(.portalMain) .portalMain { display: block; padding: 16px; }
 }
-/* Hunt roadmap screens from the Aug 25 flow boards */
-.huntSetupGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
-.avatarPick, .segmentedMini { display: flex; flex-wrap: wrap; gap: 7px; }
-.avatarPick button { width: 38px; height: 38px; border-radius: 999px; background: rgba(255,255,255,.58); border: 1px solid rgba(13,25,23,.16); font-size: 18px; }
-.avatarPick button[aria-pressed="true"], .segmentedMini button[aria-pressed="true"] { background: var(--black); border-color: var(--black); color: #fff; box-shadow: var(--sh-2); }
-.segmentedMini button { min-height: 34px; padding: 0 12px; border-radius: 999px; background: rgba(255,255,255,.58); border: 1px solid rgba(13,25,23,.16); color: var(--ink-2); font-size: 12.5px; }
-.huntScreenRail { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 18px; }
-.huntScreenRail button { height: 30px; padding: 0 11px; border-radius: 999px; background: rgba(255,255,255,.52); color: var(--ink-2); border: 1px solid rgba(13,25,23,.14); font-size: 11.5px; }
-.huntScreenRail button[aria-current="step"] { background: var(--accent); border-color: transparent; color: var(--ink); }
-.huntScreenRail button:disabled { opacity: .4; cursor: not-allowed; }
-.raceSetupStrip { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; padding: 10px 12px; border-radius: var(--r-lg); background: rgba(255,255,255,.54); border: 1px solid rgba(13,25,23,.14); font-family: var(--font-mono); }
-.raceSetupStrip span { font-family: var(--font-body); color: var(--ink-2); font-size: 12px; }
-.raceSetupStrip button { width: 30px; height: 30px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line-strong); }
-.raceSetupStrip em { margin-left: auto; font-style: normal; color: var(--ink-2); font-size: 12px; }
-.huntInfoGrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.huntInfoGrid div, .huntRouteCard, .huntDashboard div, .finishStats div, .troubleGrid div { border: 1px solid var(--line); border-radius: var(--r-lg); background: linear-gradient(112deg, var(--surface-2), #fff); padding: 14px; }
-.huntInfoGrid b, .huntRouteCard b, .huntDashboard b, .finishStats b { display: block; font-weight: 500; color: var(--ink); letter-spacing: -.01em; }
-.huntInfoGrid span, .huntRouteCard span, .huntDashboard span, .finishStats span { display: block; margin-top: 5px; color: var(--ink-2); font-size: 12.5px; line-height: 1.45; }
-.huntRouteCard { display: flex; flex-direction: column; gap: 5px; }
-.huntRouteCard a { margin-top: 5px; color: #15558F; font-size: 13px; font-weight: 500; }
-.troubleGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.troubleGrid div { color: var(--ink-2); font-size: 12.5px; line-height: 1.4; }
-.troubleGrid div::before { content: ""; width: 7px; height: 7px; border-radius: 999px; display: inline-block; margin-right: 8px; background: var(--accent); vertical-align: 1px; }
-.finishStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.finishStats b { font-family: var(--font-mono); font-size: 22px; }
-.memoryStrip { display: flex; flex-wrap: wrap; gap: 7px; }
-.memoryStrip span { display: inline-flex; min-height: 28px; align-items: center; padding: 0 10px; border-radius: 999px; background: var(--paper); color: var(--ink-2); font-size: 12px; }
-.huntDashboard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-@media (max-width: 760px) { .huntSetupGrid, .huntInfoGrid, .troubleGrid, .finishStats, .huntDashboard { grid-template-columns: minmax(0, 1fr); } .raceSetupStrip em { margin-left: 0; flex-basis: 100%; } }
