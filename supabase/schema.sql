@@ -193,3 +193,131 @@ exception when duplicate_object then null; end $$;
 do $$ begin
   create policy "public create pending business assets" on public.business_assets for insert with check (status = 'pending');
 exception when duplicate_object then null; end $$;
+
+-- ---------------------------------------------------------------------------
+-- Scavenger hunts
+-- Mirrors the runtime-overlay shape the API writes today (.stroll/runtime/<city>/
+-- hunt_sessions.json), so moving to Postgres is a data copy rather than a rewrite.
+-- ---------------------------------------------------------------------------
+create table if not exists public.hunts (
+  id text primary key,
+  city_slug text not null references public.cities(slug) on delete cascade,
+  neighbourhood text,
+  slug text not null,
+  name text not null,
+  blurb text,
+  mode text not null check (mode in ('friendly', 'full', 'race')),
+  audience text not null default 'family' check (audience in ('family', 'adult')),
+  stop_ids text[] not null default '{}',
+  est_minutes int,
+  distance_m int,
+  difficulty text,
+  status text not null default 'draft' check (status in ('draft', 'live', 'retired')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (city_slug, slug)
+);
+
+create table if not exists public.hunt_stops (
+  id text primary key,
+  city_slug text not null references public.cities(slug) on delete cascade,
+  business_id text references public.businesses(id) on delete set null,
+  business_slug text,
+  name text not null,
+  riddle text not null,
+  clue_1 text,
+  clue_2 text,
+  clue_3 text,
+  challenge text,
+  difficulty text,
+  age_restricted boolean not null default false,
+  variant int not null default 1,
+  status text not null default 'draft' check (status in ('draft', 'live', 'retired')),
+  authored_by text,
+  updated_at timestamptz not null default now()
+);
+
+-- One team walking one hunt. The stop order is stored per session because races
+-- rotate their start, so two sessions of the same hunt are not the same walk.
+create table if not exists public.hunt_sessions (
+  id text primary key,
+  city_slug text not null references public.cities(slug) on delete cascade,
+  hunt_id text references public.hunts(id) on delete set null,
+  hunt_slug text not null,
+  hunt_name text,
+  mode text not null check (mode in ('friendly', 'full', 'race')),
+  team_name text not null default 'Anonymous team',
+  email text,
+  stop_ids text[] not null default '{}',
+  start_index int not null default 0,
+  status text not null default 'active' check (status in ('active', 'finished', 'abandoned')),
+  paid boolean not null default false,
+  stripe_payment_id text,
+  photos_consented boolean not null default false,
+  penalty_seconds int not null default 0,
+  elapsed_seconds int not null default 0,
+  started_at timestamptz not null default now(),
+  finished_at timestamptz,
+  updated_at timestamptz not null default now()
+);
+create index if not exists hunt_sessions_hunt_idx on public.hunt_sessions (city_slug, hunt_slug, started_at desc);
+
+-- Per-stop state. Unique on (session, stop): a stop appears once per walk, and the
+-- row carries both the solve and the proof photo that finishes it.
+create table if not exists public.hunt_session_stops (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null references public.hunt_sessions(id) on delete cascade,
+  stop_id text not null references public.hunt_stops(id) on delete restrict,
+  position int not null default 0,
+  state text not null default 'pending' check (state in ('pending', 'solved', 'skipped')),
+  clues_used int not null default 0 check (clues_used between 0 and 3),
+  seconds int not null default 0,
+  photo_id text,
+  photo_url text,
+  solved_at timestamptz,
+  unique (session_id, stop_id)
+);
+
+-- Append-only event log: clue reveals and solves, for analytics and for rebuilding
+-- a session if the aggregate above is ever suspect.
+create table if not exists public.hunt_events (
+  id uuid primary key default gen_random_uuid(),
+  session_id text not null references public.hunt_sessions(id) on delete cascade,
+  stop_id text,
+  action text not null check (action in ('stop_solved', 'clue_revealed', 'stop_skipped', 'stop_reset', 'photo_uploaded')),
+  clues_used int,
+  seconds int,
+  created_at timestamptz not null default now()
+);
+create index if not exists hunt_events_session_idx on public.hunt_events (session_id, created_at);
+
+create table if not exists public.hunt_photos (
+  id text primary key,
+  session_id text not null references public.hunt_sessions(id) on delete cascade,
+  stop_id text not null,
+  team_name text,
+  file_name text not null,
+  content_type text not null,
+  byte_size bigint not null,
+  url text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.hunts enable row level security;
+alter table public.hunt_stops enable row level security;
+alter table public.hunt_sessions enable row level security;
+alter table public.hunt_session_stops enable row level security;
+alter table public.hunt_events enable row level security;
+alter table public.hunt_photos enable row level security;
+
+-- Live hunts are public; the riddle text is the product, so stops stay readable too.
+do $$ begin
+  create policy "public read live hunts" on public.hunts for select using (status = 'live');
+exception when duplicate_object then null; end $$;
+do $$ begin
+  create policy "public read live hunt stops" on public.hunt_stops for select using (status = 'live');
+exception when duplicate_object then null; end $$;
+
+-- Sessions hold a team name and an optional email, so they are not public reads.
+-- The session id is the capability: the API looks a session up by id and returns
+-- only that row. Service role handles everything else.

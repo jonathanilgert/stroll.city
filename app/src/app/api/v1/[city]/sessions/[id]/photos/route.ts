@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { envelope, error, slugify } from "../../../../_lib/data";
+import { attachHuntPhoto, envelope, error, slugify } from "../../../../_lib/data";
 
 const runtimeRoot = path.join(process.cwd(), ".stroll", "runtime");
 const maxBytes = 10 * 1024 * 1024;
@@ -75,5 +75,11 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
   };
   await fs.writeFile(metadataPath, `${JSON.stringify([...existing.filter((row) => row.stop_id !== stopId), meta], null, 2)}\n`);
 
-  return envelope(city, meta, "runtime-overlay");
+  /* Hang the photo on the session too, so the punch card and the postcard read one
+     record instead of cross-referencing a directory listing. An upload against an
+     unknown session still succeeds — the file is on disk and the metadata is
+     written; it simply has no walk to attach to. */
+  const session = await attachHuntPhoto(city, sessionId, { stop_id: stopId, photo_id: photoId, photo_url: meta.url });
+
+  return envelope(city, { ...meta, session_updated: Boolean(session) }, "runtime-overlay");
 }

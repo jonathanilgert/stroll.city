@@ -206,7 +206,17 @@ export async function loadCityData(city: string): Promise<StrollData | null> {
   return JSON.parse(raw) as StrollData;
 }
 
-async function readOverlay<T>(city: string, kind: "events" | "attractions" | "businesses" | "claims" | "business_edits" | "claim_codes" | "bia_evidence"): Promise<T[]> {
+type OverlayKind =
+  | "events"
+  | "attractions"
+  | "businesses"
+  | "claims"
+  | "business_edits"
+  | "claim_codes"
+  | "bia_evidence"
+  | "hunt_sessions";
+
+async function readOverlay<T>(city: string, kind: OverlayKind): Promise<T[]> {
   try {
     const raw = await fs.readFile(path.join(runtimeRoot, city, `${kind}.json`), "utf8");
     const parsed = JSON.parse(raw) as T[];
@@ -216,7 +226,7 @@ async function readOverlay<T>(city: string, kind: "events" | "attractions" | "bu
   }
 }
 
-async function writeOverlay<T extends { id: string }>(city: string, kind: "events" | "attractions" | "businesses" | "claims" | "business_edits" | "claim_codes" | "bia_evidence", rows: T[]) {
+async function writeOverlay<T extends { id: string }>(city: string, kind: OverlayKind, rows: T[]) {
   const dir = path.join(runtimeRoot, city);
   await fs.mkdir(dir, { recursive: true });
   await fs.writeFile(path.join(dir, `${kind}.json`), `${JSON.stringify(rows, null, 2)}\n`);
@@ -580,4 +590,236 @@ export function envelope<T>(city: string, data: T, source: ApiEnvelope<T>["sourc
 
 export function error(status: number, message: string): Response {
   return Response.json({ ok: false, error: message }, { status });
+}
+
+/* ---------------------------------------------------------------------------
+   Hunt sessions
+
+   A session is the record of one team walking one hunt: which stops, in which
+   order, which are solved, how many clues they burned, and which proof photo
+   belongs to each stop. Everything the punch card and the postcard render from
+   lives here, so a refresh — or a phone handed to someone else — resumes the
+   same walk instead of silently starting a new one.
+
+   Persistence follows the same runtime-overlay pattern as claims and business
+   edits: a JSON file under .stroll/runtime. supabase/schema.sql carries the
+   matching tables for when the platform moves to Postgres.
+--------------------------------------------------------------------------- */
+
+export type HuntSessionStop = {
+  stop_id: string;
+  state: "pending" | "solved" | "skipped";
+  clues_used: number;
+  solved_at: string | null;
+  seconds: number;
+  photo_url: string | null;
+  photo_id: string | null;
+};
+
+export type HuntSession = {
+  id: string;
+  city: string;
+  hunt_id: string;
+  hunt_slug: string;
+  hunt_name: string;
+  mode: "friendly" | "full" | "race";
+  team_name: string;
+  email: string | null;
+  /* The stop order this team walks — rotated for races so two teams starting
+     together don't queue at the same doorway. */
+  stop_ids: string[];
+  stops: HuntSessionStop[];
+  start_index: number;
+  status: "active" | "finished";
+  paid: boolean;
+  stripe_payment_id: string | null;
+  photos_consented: boolean;
+  /* Race scoring: each revealed clue adds time. Friendly and full runs ignore it. */
+  penalty_seconds: number;
+  elapsed_seconds: number;
+  started_at: string;
+  finished_at: string | null;
+  updated_at: string;
+};
+
+/* Clue 1 costs 2 minutes, clue 2 five, clue 3 ten. Index 0 is "no clues used". */
+export const CLUE_PENALTY_SECONDS = [0, 120, 300, 600];
+const SESSION_LIMIT = 500;
+const STOPS_FOR_MODE: Record<HuntSession["mode"], number> = { friendly: 4, full: 8, race: 8 };
+
+function rotateStops<T>(rows: T[], offset: number) {
+  if (!rows.length) return rows;
+  const n = ((offset % rows.length) + rows.length) % rows.length;
+  return [...rows.slice(n), ...rows.slice(0, n)];
+}
+
+/* Races rotate their start by team name so the order is stable if a team
+   reconnects, but different between teams that started at the same minute. */
+function startOffsetFor(teamName: string) {
+  return [...teamName].reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
+}
+
+/* Hyphen, not underscore: the photo route slugifies the id for use as a directory
+   name, and an underscore there would no longer match the stored session. */
+function newSessionId() {
+  const random = Math.random().toString(36).slice(2, 8);
+  return `sess-${Date.now().toString(36)}-${random}`;
+}
+
+async function readSessions(city: string) {
+  return readOverlay<HuntSession>(city, "hunt_sessions");
+}
+
+async function saveSession(city: string, session: HuntSession) {
+  const rows = await readSessions(city);
+  const next = [session, ...rows.filter((row) => row.id !== session.id)].slice(0, SESSION_LIMIT);
+  await writeOverlay(city, "hunt_sessions", next);
+  return session;
+}
+
+export async function getHuntSession(city: string, id: string) {
+  const rows = await readSessions(city);
+  return rows.find((row) => row.id === id) ?? null;
+}
+
+export async function createHuntSession(
+  city: string,
+  hunt: Hunt,
+  payload: { team_name?: string; email?: string; photos_consented?: boolean },
+) {
+  const teamName = sanitizeString(payload.team_name, 80) || "Anonymous team";
+  const startIndex = hunt.mode === "race" ? startOffsetFor(teamName) % Math.max(1, hunt.stop_ids.length) : 0;
+  const ordered = (hunt.mode === "race" ? rotateStops(hunt.stop_ids, startIndex) : hunt.stop_ids)
+    .slice(0, STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length);
+  const now = new Date().toISOString();
+  const session: HuntSession = {
+    id: newSessionId(),
+    city,
+    hunt_id: hunt.id,
+    hunt_slug: hunt.slug,
+    hunt_name: hunt.name,
+    mode: hunt.mode,
+    team_name: teamName,
+    email: payload.email ? sanitizeString(payload.email, 160) : null,
+    stop_ids: ordered,
+    stops: ordered.map((stopId) => ({
+      stop_id: stopId,
+      state: "pending",
+      clues_used: 0,
+      solved_at: null,
+      seconds: 0,
+      photo_url: null,
+      photo_id: null,
+    })),
+    start_index: startIndex,
+    status: "active",
+    /* Friendly Mode is free; the paid modes stay unpaid until Stripe says otherwise. */
+    paid: hunt.mode === "friendly",
+    stripe_payment_id: null,
+    photos_consented: Boolean(payload.photos_consented),
+    penalty_seconds: 0,
+    elapsed_seconds: 0,
+    started_at: now,
+    finished_at: null,
+    updated_at: now,
+  };
+  return saveSession(city, session);
+}
+
+function recomputeSession(session: HuntSession): HuntSession {
+  const penalty = session.mode === "race"
+    ? session.stops.reduce((total, stop) => total + (CLUE_PENALTY_SECONDS[Math.min(stop.clues_used, 3)] ?? 0), 0)
+    : 0;
+  /* A stop is only finished when it is both solved and photographed — the photo is
+     the proof, so a session with a missing photo is not a finished walk. */
+  const complete = session.stops.length > 0
+    && session.stops.every((stop) => stop.state === "solved" && Boolean(stop.photo_url));
+  const finishedAt = complete ? session.finished_at ?? new Date().toISOString() : null;
+  return {
+    ...session,
+    penalty_seconds: penalty,
+    status: complete ? "finished" : "active",
+    finished_at: finishedAt,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+export type HuntProgressAction = "stop_solved" | "clue_revealed" | "stop_skipped" | "stop_reset";
+
+export async function recordHuntProgress(
+  city: string,
+  sessionId: string,
+  payload: { stop_id?: string; action?: string; clues_used?: number; seconds?: number; elapsed_seconds?: number },
+) {
+  const session = await getHuntSession(city, sessionId);
+  if (!session) return null;
+  const stopId = sanitizeString(payload.stop_id, 120);
+  const action = (payload.action ?? "stop_solved") as HuntProgressAction;
+  const index = session.stops.findIndex((stop) => stop.stop_id === stopId);
+  if (index === -1) return null;
+
+  const stops = session.stops.map((stop, i) => {
+    if (i !== index) return stop;
+    const seconds = Math.max(0, Math.floor(Number(payload.seconds ?? stop.seconds) || 0));
+    if (action === "clue_revealed") {
+      const requested = Number(payload.clues_used ?? stop.clues_used + 1);
+      /* Clues only ever go up: re-reading clue 1 must not refund a race penalty. */
+      return { ...stop, clues_used: Math.min(3, Math.max(stop.clues_used, Math.floor(requested) || 0)), seconds };
+    }
+    if (action === "stop_skipped") return { ...stop, state: "skipped" as const, seconds };
+    if (action === "stop_reset") return { ...stop, state: "pending" as const, solved_at: null, seconds };
+    return { ...stop, state: "solved" as const, solved_at: stop.solved_at ?? new Date().toISOString(), seconds };
+  });
+
+  const elapsed = Math.max(0, Math.floor(Number(payload.elapsed_seconds ?? session.elapsed_seconds) || 0));
+  return saveSession(city, recomputeSession({ ...session, stops, elapsed_seconds: elapsed }));
+}
+
+/* Called by the photo upload once the file is on disk, so the session — not the
+   client — is the record of which photo belongs to which doorway. */
+export async function attachHuntPhoto(
+  city: string,
+  sessionId: string,
+  payload: { stop_id: string; photo_id: string; photo_url: string },
+) {
+  const session = await getHuntSession(city, sessionId);
+  if (!session) return null;
+  const index = session.stops.findIndex((stop) => stop.stop_id === payload.stop_id);
+  if (index === -1) return null;
+  const stops = session.stops.map((stop, i) => (
+    i === index ? { ...stop, photo_url: payload.photo_url, photo_id: payload.photo_id } : stop
+  ));
+  return saveSession(city, recomputeSession({ ...session, stops }));
+}
+
+/* The session plus the stop content it points at — what the dashboard renders. */
+export function hydrateHuntSession(session: HuntSession, data: StrollData) {
+  const stopsById = new Map((data.huntStops ?? []).map((stop) => [stop.id, stop]));
+  const solved = session.stops.filter((stop) => stop.state === "solved").length;
+  return {
+    ...session,
+    solved_count: solved,
+    total_stops: session.stops.length,
+    photo_count: session.stops.filter((stop) => Boolean(stop.photo_url)).length,
+    stroll_seconds: session.elapsed_seconds + session.penalty_seconds,
+    stops: session.stops.map((stop, index) => {
+      const content = stopsById.get(stop.stop_id);
+      return {
+        ...stop,
+        index,
+        name: content?.name ?? "Unknown stop",
+        business_id: content?.business_id ?? null,
+        business_slug: content?.business_slug ?? null,
+        riddle: content?.riddle ?? "",
+        /* Clues are handed out one at a time; an unsolved stop never ships the
+           clues the team has not yet paid the time for. */
+        clues: [content?.clue_1, content?.clue_2, content?.clue_3]
+          .filter(Boolean)
+          .slice(0, stop.state === "solved" ? 3 : stop.clues_used) as string[],
+        challenge: content?.challenge ?? "Take a proof photo at the stop.",
+        difficulty: content?.difficulty ?? "medium",
+        age_restricted: Boolean(content?.age_restricted),
+      };
+    }),
+  };
 }
