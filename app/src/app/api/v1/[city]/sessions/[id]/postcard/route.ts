@@ -17,7 +17,7 @@ function formatDuration(seconds: number) {
    by anything — the share sheet, an OG card, a print. Photo slots are drawn as
    frames rather than embedded images: the files live behind the session's own photo
    route, and inlining them here would make the payload enormous. */
-export async function GET(_request: Request, context: { params: Promise<{ city: string; id: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ city: string; id: string }> }) {
   const { city, id } = await context.params;
   const data = await loadCityData(city);
   if (!data) return error(404, "City not found");
@@ -53,6 +53,14 @@ export async function GET(_request: Request, context: { params: Promise<{ city: 
   <text x="168" y="500" font-family="Helvetica,Arial,sans-serif" font-size="20" fill="#6B6F77">${session.photo_count} of ${session.total_stops} stops photographed${session.mode === "race" ? ` · ${formatDuration(session.stroll_seconds)}` : ""}</text>
   <text x="168" y="556" font-family="ui-monospace,monospace" font-size="16" fill="#8A8E96">stroll.city · #StrollInglewood</text>
 </svg>`;
+
+  /* ?format=svg serves the card itself, so it can be opened, shared or used as an
+     OG image; the default JSON is what the dashboard renders from. */
+  if (new URL(request.url).searchParams.get("format") === "svg") {
+    return new Response(svg, {
+      headers: { "Content-Type": "image/svg+xml; charset=utf-8", "Cache-Control": "no-store" },
+    });
+  }
 
   return envelope(city, {
     session_id: session.id,
