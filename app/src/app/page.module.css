@@ -1247,29 +1247,4 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .memoryStrip { display: flex; flex-wrap: wrap; gap: 7px; }
 .memoryStrip span { display: inline-flex; min-height: 28px; align-items: center; padding: 0 10px; border-radius: 999px; background: var(--paper); color: var(--ink-2); font-size: 12px; }
 .huntDashboard { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.huntNowBar { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 16px; }
-.huntNowBar > div { border: 1px solid rgba(13,25,23,.14); border-radius: var(--r-lg); background: rgba(255,255,255,.62); padding: 12px 14px; }
-.huntNowBar b { display: block; font-weight: 600; color: var(--ink); }
-.huntNowBar span { display: block; margin-top: 4px; color: var(--ink-2); font-size: 12.5px; line-height: 1.35; }
-.huntPlayGrid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(260px, .95fr); gap: 14px; align-items: start; }
-.huntMapColumn { display: flex; flex-direction: column; gap: 10px; }
-.huntMapCard { border: 1px solid var(--line); border-radius: var(--r-xl); background: linear-gradient(145deg, #fff, var(--surface-2)); padding: 12px; box-shadow: 0 14px 32px rgba(20,24,26,.08); }
-.huntMapTop { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.huntMapTop b { color: var(--ink); font-weight: 600; letter-spacing: -.01em; }
-.huntMapTop span { color: var(--ink-2); font-size: 12px; }
-.huntMapSvg { display: block; width: 100%; min-height: 220px; border-radius: var(--r-lg); overflow: visible; }
-.huntMapSvg rect { fill: #EEF3F0; stroke: rgba(13,25,23,.08); }
-.huntMapSvg path { fill: none; stroke: rgba(138,142,150,.45); stroke-width: 2.1; stroke-linecap: round; }
-.huntMapSvg polyline { fill: none; stroke: url(#huntMapRoute); stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 5; }
-.huntMapPin circle { fill: #fff; stroke: var(--ink); stroke-width: 1.4; filter: drop-shadow(0 3px 5px rgba(20,24,26,.2)); }
-.huntMapPin text { fill: var(--ink); text-anchor: middle; font-family: var(--font-mono); font-size: 5px; font-weight: 700; pointer-events: none; }
-.huntMapPinActive circle { fill: var(--accent); stroke: var(--black); stroke-width: 2; }
-.huntMapPinSolved circle { fill: var(--black); stroke: var(--accent); }
-.huntMapPinSolved text { fill: #fff; }
-.huntMapLegend { display: flex; flex-wrap: wrap; align-items: center; gap: 9px 12px; margin-top: 10px; color: var(--ink-2); font-size: 11.5px; line-height: 1.3; }
-.huntMapLegend span { display: inline-flex; align-items: center; gap: 5px; }
-.huntMapLegend i { width: 9px; height: 9px; border-radius: 999px; background: var(--accent); border: 1px solid var(--black); }
-.huntMapLegend span:nth-child(2) i { background: var(--black); border-color: var(--accent); }
-.huntMapEmpty { border: 1px dashed var(--line-strong); border-radius: var(--r-lg); padding: 16px; background: var(--paper); color: var(--ink-2); font-size: 13px; }
-@media (max-width: 960px) { .huntPlayGrid { grid-template-columns: minmax(0, 1fr); } .huntMapSvg { min-height: 190px; } }
-@media (max-width: 760px) { .huntSetupGrid, .huntInfoGrid, .troubleGrid, .finishStats, .huntDashboard, .huntNowBar { grid-template-columns: minmax(0, 1fr); } .raceSetupStrip em { margin-left: 0; flex-basis: 100%; } }
+@media (max-width: 760px) { .huntSetupGrid, .huntInfoGrid, .troubleGrid, .finishStats, .huntDashboard { grid-template-columns: minmax(0, 1fr); } .raceSetupStrip em { margin-left: 0; flex-basis: 100%; } }
