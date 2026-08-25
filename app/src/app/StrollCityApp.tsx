@@ -408,7 +408,32 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [locating, setLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [walkingRoute, setWalkingRoute] = useState<WalkingRoute | null>(null);
-  const [activeHunt, setActiveHunt] = useState<{ teamName?: string; selectedSlug?: string; current?: number; total?: number; solved?: number } | null>(null);
+  const [activeHuntResume, setActiveHuntResume] = useState<{ teamName: string; current: number; total: number; solved: number } | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const refreshHuntResume = () => {
+      try {
+        const raw = window.localStorage.getItem("stroll-active-hunt");
+        if (!raw) { setActiveHuntResume(null); return; }
+        const saved = JSON.parse(raw) as { teamName?: string; current?: number; progress?: Record<string, { state?: string }>; selectedSlug?: string };
+        if (!saved.selectedSlug) { setActiveHuntResume(null); return; }
+        const states = Object.values(saved.progress ?? {});
+        setActiveHuntResume({
+          teamName: saved.teamName || "Saved team",
+          current: (saved.current ?? 0) + 1,
+          total: Math.max(states.length, 1),
+          solved: states.filter((item) => item.state === "solved" || item.state === "skipped").length,
+        });
+      } catch {
+        setActiveHuntResume(null);
+      }
+    };
+    const timer = window.setTimeout(refreshHuntResume, 0);
+    window.addEventListener("storage", refreshHuntResume);
+    window.addEventListener("focus", refreshHuntResume);
+    return () => { window.clearTimeout(timer); window.removeEventListener("storage", refreshHuntResume); window.removeEventListener("focus", refreshHuntResume); };
+  }, []);
 
   /* ---------------- mobile/desktop layout switch (live, not a one-time check) ---------------- */
   useEffect(() => {
@@ -419,26 +444,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    const readActiveHunt = () => {
-      try {
-        const saved = JSON.parse(window.localStorage.getItem(`stroll-hunt-session:${city.slug}`) ?? "null") as { startedAt?: number; teamName?: string; selectedSlug?: string; current?: number; progress?: Record<string, { state?: string }> } | null;
-        if (!saved?.startedAt) { setActiveHunt(null); return; }
-        const total = saved.selectedSlug?.includes("friendly") ? 4 : 8;
-        const solved = Object.values(saved.progress ?? {}).filter((row) => row.state === "solved").length;
-        setActiveHunt({ teamName: saved.teamName, selectedSlug: saved.selectedSlug, current: (saved.current ?? 0) + 1, total, solved });
-      } catch { setActiveHunt(null); }
-    };
-    readActiveHunt();
-    window.addEventListener("storage", readActiveHunt);
-    window.addEventListener("focus", readActiveHunt);
-    return () => {
-      window.removeEventListener("storage", readActiveHunt);
-      window.removeEventListener("focus", readActiveHunt);
-    };
-  }, [city.slug]);
 
   useEffect(() => {
     if (city.status !== "live" || !city.dataPath) return;
@@ -1215,6 +1220,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           {tab === "explore" && !isResultsView && (
             <div className={styles.browse}>
               <div className={styles.insights}>
+                {activeHuntResume && (
+                  <Link className={styles.activeHuntResumeCard} href={`/${city.slug}/hunt?resume=1`}>
+                    <span className={styles.lbl}>Continue hunt</span>
+                    <b>{activeHuntResume.teamName}</b>
+                    <small>Stop {activeHuntResume.current}/{activeHuntResume.total} · {activeHuntResume.solved}/{activeHuntResume.total} found · return without reset</small>
+                  </Link>
+                )}
                 <div className={styles.icard}>
                   <div className={styles.icardHead}>
                     <div>
@@ -1342,13 +1354,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       <div ref={stageRef} className={`${styles.stage} ${stageTight ? styles.tight : ""} ${stageSnug ? styles.snug : ""} ${stageShort ? styles.short : ""} ${mobileLayout ? styles.mStage : ""}`}>
         <div ref={mapWrapRef} className={styles.mapWrap}>
           <div ref={mapNode} className={styles.map} />
-
-          {activeHunt && (
-            <Link className={`${styles.cardUi} ${styles.huntResumePill}`} href={`/${city.slug}/hunt?resume=1`}>
-              <span><b>Continue hunt</b><em>{activeHunt.teamName || "Your team"} · stop {activeHunt.current}/{activeHunt.total} · {activeHunt.solved}/{activeHunt.total} solved</em></span>
-              <ChevronRight size={15} />
-            </Link>
-          )}
 
           {!mobileLayout && (
           <>

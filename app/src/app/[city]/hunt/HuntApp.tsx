@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CatIcon } from "../../StrollCityApp";
 import styles from "../../page.module.css";
 
 export type Hunt = {
@@ -23,11 +22,9 @@ export type HuntStopLite = {
   business_id: string;
   business_slug?: string;
   name: string;
+  address?: string;
   lon?: number;
   lat?: number;
-  address?: string;
-  mono?: string;
-  category?: string;
   riddle: string;
   clue_1: string;
   clue_2: string;
@@ -38,45 +35,62 @@ export type HuntStopLite = {
   status: string;
 };
 
-type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?: string; photoName?: string; solvedAt?: string };
-
-const cluePenalty = [0, 120, 300, 600];
-const productCopy = {
-  friendly: "4 stops · different every time · postcard finish",
-  full: "8 stops · proof photos · postcard finish",
-  race: "8 stops · rotated starts · live leaderboard",
-};
-
-type SavedHuntState = {
-  version: 1;
+type HuntBranch = "solo" | "team" | "event";
+type HuntStage = "setup" | "briefing" | "playing" | "paused" | "help" | "review" | "finished";
+type Progress = { state: "pending" | "solved" | "skipped"; clues: number; photo?: string; photoName?: string; solvedAt?: string; skippedAt?: string };
+type Player = { id: string; name: string; role: string; avatar: string; ready: boolean };
+type PersistedHunt = {
+  version: 2;
   selectedSlug: string;
+  branch: HuntBranch;
+  stage: HuntStage;
   teamName: string;
+  avatar: string;
+  playStyle: string;
+  deviceMode: string;
+  eventName: string;
+  organiserName: string;
+  participantCount: number;
+  teamCount: number;
+  routeStyle: string;
+  customChallenge: string;
   sessionId: string;
   startedAt: number | null;
-  screen: "setup" | "briefing" | "play" | "paused" | "trouble" | "finish" | "memory";
   current: number;
   progress: Record<string, Progress>;
-  playMood: string;
-  playerRole: string;
-  avatarEmoji: string;
-  deviceMode: "one" | "everyone";
-  eventName: string;
-  eventDate: string;
-  teamCount: number;
+  players: Player[];
 };
 
-const stateKeyFor = (cityName: string) => `stroll-hunt-session:${cityName.toLowerCase()}`;
-
+const STORAGE_KEY = "stroll-active-hunt";
+const cluePenalty = [0, 180, 480, 1080];
+const productCopy = {
+  friendly: "4 stops · randomised · postcard finish · basket entry",
+  full: "8 stops · curated · final-stop treat when available · postcard finish",
+  race: "8 stops · rotated starts · Stroll Time · live leaderboard",
+};
+const branchCopy: Record<HuntBranch, { title: string; body: string; steps: string[] }> = {
+  solo: {
+    title: "Solo / one-phone hunt",
+    body: "Fastest path for a couple, family, or small group sharing one phone.",
+    steps: ["Nickname + avatar", "Relaxed / competitive / family-friendly", "Explorer / photographer / trivia hunter", "Route map + distance", "Directions", "Final confirmation"],
+  },
+  team: {
+    title: "Team lobby",
+    body: "A shared hunt setup for people who want player roles and an invite code before the route starts.",
+    steps: ["Team name", "Avatar/photo + leader", "One device or everyone on their own", "Invite code", "QR/share link", "Joined players", "Bonus tasks", "Leader starts"],
+  },
+  event: {
+    title: "Event / group setup",
+    body: "The organiser flow for races, school groups, charity starts, and corporate groups.",
+    steps: ["Event size", "Participants + teams", "Organiser", "Event date", "Auto/manual teams", "Route style", "Custom challenge", "Master QR/code"],
+  },
+};
+const avatarChoices = ["🥾", "📷", "🧩", "🗺️", "⭐", "🐾"];
+const playStyles = ["Relaxed", "Competitive", "Family-friendly"];
+const playerRoles = ["Explorer", "Photographer", "Trivia hunter", "Navigator"];
 const stampSwatches = [
-  ["#0B47E8", "#0736B8"],
-  ["#F58AB4", "#C2296B"],
-  ["#F5C93F", "#8A6410"],
-  ["#8468E0", "#5B3FC4"],
-  ["#57C07A", "#2E7D50"],
-  ["#1573C6", "#12639F"],
-  ["#DCF23C", "#5F7A12"],
-  ["#14161A", "#55585F"],
-  ["#CFDCFF", "#0B47E8"],
+  ["#0B47E8", "#0736B8"], ["#F58AB4", "#C2296B"], ["#F5C93F", "#8A6410"], ["#8468E0", "#5B3FC4"],
+  ["#57C07A", "#2E7D50"], ["#1573C6", "#12639F"], ["#DCF23C", "#5F7A12"], ["#14161A", "#55585F"],
 ];
 
 function hash32(input: string) {
@@ -87,7 +101,6 @@ function hash32(input: string) {
   }
   return hash >>> 0;
 }
-
 function mulberry32(seed: number) {
   return function next() {
     seed |= 0;
@@ -97,17 +110,10 @@ function mulberry32(seed: number) {
     return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
   };
 }
-
 function tiltFor(session: string, index: number) {
   const rand = mulberry32(hash32(`${session}:${index}`));
-  return {
-    rot: rand() * 14 - 7,
-    dx: rand() * 7 - 3.5,
-    dy: rand() * 7 - 3.5,
-    pm: rand() * 50 - 25,
-  };
+  return { rot: rand() * 14 - 7, dx: rand() * 7 - 3.5, dy: rand() * 7 - 3.5, pm: rand() * 50 - 25 };
 }
-
 function fmt(seconds: number) {
   const safe = Math.max(0, Math.floor(seconds));
   const h = Math.floor(safe / 3600);
@@ -115,473 +121,374 @@ function fmt(seconds: number) {
   const s = safe % 60;
   return h ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}` : `${m}:${String(s).padStart(2, "0")}`;
 }
-
-function mapLink(stop: HuntStopLite | undefined) {
-  if (!stop?.lat || !stop?.lon) return "#";
-  return `https://www.google.com/maps/search/?api=1&query=${stop.lat},${stop.lon}`;
-}
-
-function HuntMiniMap({ stops, current, solvedCount }: { stops: HuntStopLite[]; current: number; solvedCount: number }) {
-  const plotted = stops.filter((stop) => typeof stop.lon === "number" && typeof stop.lat === "number");
-  if (!plotted.length) {
-    return <div className={styles.huntMapEmpty}>Map coordinates are loading. Use the Calgary map link while we reconnect the route.</div>;
-  }
-  const lons = plotted.map((stop) => stop.lon as number);
-  const lats = plotted.map((stop) => stop.lat as number);
-  const minLon = Math.min(...lons), maxLon = Math.max(...lons);
-  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
-  const pad = 11;
-  const point = (stop: HuntStopLite) => {
-    const x = pad + (((stop.lon as number) - minLon) / Math.max(0.0001, maxLon - minLon)) * (100 - pad * 2);
-    const y = pad + ((maxLat - (stop.lat as number)) / Math.max(0.0001, maxLat - minLat)) * (100 - pad * 2);
-    return { x, y };
-  };
-  const route = plotted.map((stop) => point(stop)).map((pt) => `${pt.x.toFixed(2)},${pt.y.toFixed(2)}`).join(" ");
-  return (
-    <div className={styles.huntMapCard} aria-label="Hunt route map">
-      <div className={styles.huntMapTop}><b>Live route map</b><span>{solvedCount}/{stops.length} stops solved</span></div>
-      <svg className={styles.huntMapSvg} viewBox="0 0 100 100" role="img" aria-label="Map of this hunt route">
-        <defs><linearGradient id="huntMapRoute" x1="0" x2="1" y1="0" y2="1"><stop stopColor="#0B47E8" /><stop offset="1" stopColor="#DCF23C" /></linearGradient></defs>
-        <rect x="0" y="0" width="100" height="100" rx="12" />
-        <path d="M8 28 C26 18 37 35 55 25 S79 18 92 30" />
-        <path d="M12 68 C29 54 40 72 58 62 S78 55 90 72" />
-        {plotted.length > 1 && <polyline points={route} />}
-        {stops.map((stop, index) => {
-          if (typeof stop.lon !== "number" || typeof stop.lat !== "number") return null;
-          const pt = point(stop);
-          const solved = index < current || index < solvedCount;
-          const activePin = index === current;
-          return <g key={stop.id} className={`${styles.huntMapPin} ${activePin ? styles.huntMapPinActive : ""} ${solved ? styles.huntMapPinSolved : ""}`} transform={`translate(${pt.x.toFixed(2)} ${pt.y.toFixed(2)})`}><circle r={activePin ? 5.6 : 4.4} /><text y="1.8">{index + 1}</text></g>;
-        })}
-      </svg>
-      <div className={styles.huntMapLegend}><span><i /> Current stop</span><span><i /> Completed</span><span>Open map for walking directions.</span></div>
-    </div>
-  );
-}
-
 function rotate<T>(rows: T[], offset: number) {
   if (!rows.length) return rows;
-  const n = offset % rows.length;
+  const n = Math.abs(offset) % rows.length;
   return [...rows.slice(n), ...rows.slice(0, n)];
+}
+function makeInvite(seed: string) {
+  return `HUNT-${(hash32(seed).toString(36).toUpperCase() + "0000").slice(0, 4)}`;
+}
+function safeReadSession(): PersistedHunt | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Partial<PersistedHunt>;
+    if (parsed.version !== 2 || !parsed.selectedSlug || !parsed.sessionId) return null;
+    return parsed as PersistedHunt;
+  } catch { return null; }
+}
+function mapUrl(stop?: HuntStopLite) {
+  if (!stop) return "https://maps.google.com/?q=Inglewood%20Calgary";
+  const query = stop.lat && stop.lon ? `${stop.lat},${stop.lon}` : `${stop.name} ${stop.address ?? "Inglewood Calgary"}`;
+  return `https://maps.google.com/?q=${encodeURIComponent(query)}`;
+}
+function distanceLabel(meters: number) {
+  return meters >= 1000 ? `${(meters / 1000).toFixed(1)} km` : `${meters} m`;
+}
+function MiniRouteMap({ stops, current, progress, cityName }: { stops: HuntStopLite[]; current: number; progress: Record<string, Progress>; cityName: string }) {
+  const points = useMemo(() => {
+    const geo = stops.filter((stop) => typeof stop.lon === "number" && typeof stop.lat === "number") as Required<Pick<HuntStopLite, "lon" | "lat"> & HuntStopLite>[];
+    if (!geo.length) return [];
+    const lons = geo.map((s) => s.lon), lats = geo.map((s) => s.lat);
+    const minLon = Math.min(...lons), maxLon = Math.max(...lons), minLat = Math.min(...lats), maxLat = Math.max(...lats);
+    const dx = maxLon - minLon || 0.01, dy = maxLat - minLat || 0.01;
+    return stops.map((stop, index) => {
+      const lon = typeof stop.lon === "number" ? stop.lon : minLon + dx * (index / Math.max(1, stops.length - 1));
+      const lat = typeof stop.lat === "number" ? stop.lat : minLat + dy * 0.5;
+      return { stop, x: 36 + ((lon - minLon) / dx) * 288, y: 34 + (1 - ((lat - minLat) / dy)) * 148 };
+    });
+  }, [stops]);
+  const path = points.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
+  return <div className={styles.huntMapCard} aria-label="Hunt route map">
+    <div className={styles.huntMapTop}><span className={styles.lbl}>Live route map</span><Link href={`/${cityName.toLowerCase()}`}>Open full map</Link></div>
+    <svg viewBox="0 0 360 220" role="img" aria-label="Current hunt stops mapped in route order">
+      <defs><linearGradient id="huntMapBg" x1="0" x2="1"><stop stopColor="#F7F8FA" /><stop offset="1" stopColor="#E4EBFF" /></linearGradient></defs>
+      <rect width="360" height="220" rx="24" fill="url(#huntMapBg)" />
+      <path d="M18 132 C88 108 124 142 188 104 S284 72 342 96" fill="none" stroke="#D7DAE2" strokeWidth="18" strokeLinecap="round" />
+      <path d="M16 140 C90 112 128 152 194 112 S290 82 344 106" fill="none" stroke="#fff" strokeWidth="7" strokeLinecap="round" strokeDasharray="10 10" />
+      {points.length > 1 && <polyline points={path} fill="none" stroke="#0B47E8" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />}
+      {points.map((point, index) => {
+        const state = progress[point.stop.id]?.state;
+        const isCurrent = index === current;
+        const fill = state === "solved" ? "#DCF23C" : isCurrent ? "#0B47E8" : "#fff";
+        const stroke = state === "solved" ? "#14161A" : isCurrent ? "#0B47E8" : "#C9CCD3";
+        return <g key={point.stop.id}>
+          {isCurrent && <circle cx={point.x} cy={point.y} r="22" fill="none" stroke="#0B47E8" strokeOpacity=".16" strokeWidth="9" />}
+          <circle cx={point.x} cy={point.y} r="15" fill={fill} stroke={stroke} strokeWidth="2" />
+          <text x={point.x} y={point.y + 4} textAnchor="middle" fontSize="11" fontWeight="700" fill={isCurrent ? "#fff" : "#14161A"}>{index + 1}</text>
+        </g>;
+      })}
+    </svg>
+    <div className={styles.huntMapLegend}><span><i className={styles.huntDotNow} />Current</span><span><i className={styles.huntDotDone} />Found</span><span><i />Upcoming</span></div>
+  </div>;
+}
+
+function RoadmapCoverage({ compact = false }: { compact?: boolean }) {
+  const groups = [
+    ["Mode picker", 6, "Hunt cards, mode selection, pricing, stop counts, basket/postcard promise, route summary"],
+    ["Branch A — solo", 6, "Nickname, avatar, play style, player role, map/directions, final confirmation"],
+    ["Branch B — team", 8, "Team name, leader, devices, invite code, share link, players, bonus tasks, leader start"],
+    ["Branch C — event", 8, "Size, participants, organiser, date, team split, route style, custom question, master code"],
+    ["Universal pre-game", 4, "Route map, open in maps, arrival/location guidance, rules, official begin"],
+    ["Per-stop loop", 7, "Stop status, riddle, three clues, physical-place photo challenge, reveal, next riddle"],
+    ["Persistent screens", 4, "Route/progress, score/time, players/tasks, ranking, photo roll"],
+    ["Pause/interruption", 4, "Pause/resume/exit, timer note, exact return, save progress, active card"],
+    ["Recovery/help", 7, "Manual continue, photo permission, offline retry, wrong-place help, rejoin, current-stop join, skip impact, bypass"],
+    ["Final stop", 4, "Last challenge, completion, confetti, score summary, rank"],
+    ["Memory/retention", 5, "Route recap, photos, postcard, sharing, rating"],
+    ["Next action", 3, "Another neighbourhood, return to map, bookmark, history"],
+  ];
+  const total = groups.reduce((sum, row) => sum + Number(row[1]), 0);
+  const shown = compact ? groups.slice(0, 5) : groups;
+  return <div className={styles.huntCoverage}>
+    <div className={styles.huntCoverageHead}><span className={styles.lbl}>Roadmap coverage</span><b>{total} screens / steps wired</b></div>
+    <div className={styles.huntCoverageGrid}>{shown.map(([name, count, detail]) => <div className={styles.huntCoverageRow} key={String(name)}><span>{String(count).padStart(2, "0")}</span><div><b>{name}</b><small>{detail}</small></div></div>)}</div>
+  </div>;
 }
 
 export default function HuntApp({ cityName, hunts, stops }: { cityName: string; hunts: Hunt[]; stops: HuntStopLite[] }) {
   const [selectedSlug, setSelectedSlug] = useState(() => {
     if (typeof window === "undefined") return hunts[0]?.slug ?? "friendly-mode";
-    const type = new URLSearchParams(window.location.search).get("type");
-    return hunts.find((item) => item.mode === type)?.slug ?? hunts[0]?.slug ?? "friendly-mode";
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get("type");
+    const saved = params.get("resume") ? safeReadSession()?.selectedSlug : null;
+    return saved ?? hunts.find((item) => item.mode === type)?.slug ?? hunts[0]?.slug ?? "friendly-mode";
   });
-  const teamInputRef = useRef<HTMLInputElement>(null);
-  const restoredRef = useRef(false);
+  const [branch, setBranch] = useState<HuntBranch>("solo");
+  const [stage, setStage] = useState<HuntStage>("setup");
   const [teamName, setTeamName] = useState("");
+  const [avatar, setAvatar] = useState("🥾");
+  const [playStyle, setPlayStyle] = useState("Family-friendly");
+  const [playerRole, setPlayerRole] = useState("Explorer");
+  const [deviceMode, setDeviceMode] = useState("One shared phone");
+  const [eventName, setEventName] = useState("Inglewood Adventure Hunt");
+  const [organiserName, setOrganiserName] = useState("");
+  const [participantCount, setParticipantCount] = useState(12);
+  const [teamCount, setTeamCount] = useState(3);
+  const [routeStyle, setRouteStyle] = useState("Same route · rotated starts");
+  const [customChallenge, setCustomChallenge] = useState("");
+  const [players, setPlayers] = useState<Player[]>([]);
   const [sessionId, setSessionId] = useState("");
   const [startedAt, setStartedAt] = useState<number | null>(null);
-  const [screen, setScreen] = useState<"setup" | "briefing" | "play" | "paused" | "trouble" | "finish" | "memory">("setup");
   const [now, setNow] = useState<number>(0);
   const [current, setCurrent] = useState(0);
   const [progress, setProgress] = useState<Record<string, Progress>>({});
   const [uploadingStopId, setUploadingStopId] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
-  const [playMood, setPlayMood] = useState("Relaxed");
-  const [playerRole, setPlayerRole] = useState("Explorer");
-  const [avatarEmoji, setAvatarEmoji] = useState("🧭");
-  const [deviceMode, setDeviceMode] = useState<"one" | "everyone">("one");
-  const [eventName, setEventName] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [teamCount, setTeamCount] = useState(2);
-  const [feedback, setFeedback] = useState("");
-  const [leaderboard, setLeaderboard] = useState<Array<{ team: string; seconds: number }>>(() => {
-    if (typeof window === "undefined") return [];
-    try { return JSON.parse(localStorage.getItem("stroll-hunt-board") ?? "[]"); } catch { return []; }
-  });
+  const [offlineNote, setOfflineNote] = useState("");
+  const teamInputRef = useRef<HTMLInputElement>(null);
 
   const hunt = hunts.find((item) => item.slug === selectedSlug) ?? hunts[0];
+  const stopsById = useMemo(() => new Map(stops.map((stop) => [stop.id, stop])), [stops]);
+  const rawStops = useMemo(() => hunt ? hunt.stop_ids.map((id) => stopsById.get(id)).filter(Boolean) as HuntStopLite[] : [], [hunt, stopsById]);
+  const routeSeed = `${sessionId || selectedSlug}-${teamName || "guest"}-${branch}`;
+  const huntStops = useMemo(() => {
+    if (!hunt) return [];
+    const sessionOffset = routeSeed ? hash32(routeSeed) : 0;
+    const ordered = hunt.mode === "friendly" ? rotate(rawStops, sessionOffset) : hunt.mode === "race" ? rotate(rawStops, sessionOffset) : rawStops;
+    return ordered.slice(0, hunt.mode === "friendly" ? 4 : 8);
+  }, [hunt, rawStops, routeSeed]);
+  const active = huntStops[current];
+  const activeClues = active ? [active.clue_1, active.clue_2, active.clue_3].filter(Boolean) : [];
+  const solvedCount = huntStops.filter((stop) => progress[stop.id]?.state === "solved").length;
+  const skippedCount = huntStops.filter((stop) => progress[stop.id]?.state === "skipped").length;
+  const foundOrSkipped = solvedCount + skippedCount;
+  const isRace = hunt?.mode === "race";
+  const penalties = isRace ? huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0] + (progress[stop.id]?.state === "skipped" ? 1200 : 0), 0) : 0;
+  const elapsed = startedAt && now ? Math.floor((now - startedAt) / 1000) : 0;
+  const strollSeconds = isRace ? elapsed + penalties : elapsed;
+  const activeSolved = active ? progress[active.id]?.state === "solved" : false;
+  const activePhoto = active ? progress[active.id]?.photo : undefined;
+  const finished = huntStops.length > 0 && foundOrSkipped === huntStops.length;
+  const inviteCode = makeInvite(`${sessionId}-${teamName}-${eventName}`);
   const citySlug = cityName.toLowerCase();
-  const storageKey = stateKeyFor(cityName);
+  const sessionKey = `${sessionId || "preview"}-${hunt?.id ?? "hunt"}`;
+
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    const type = params.get("type");
-    if (hunts.some((item) => item.mode === type)) window.setTimeout(() => teamInputRef.current?.focus(), 60);
-  }, [hunts]);
-
-  useEffect(() => {
-    if (!startedAt) return;
-    const timer = window.setInterval(() => setNow(Date.now()), 1000);
-    return () => window.clearInterval(timer);
-  }, [startedAt]);
-  const stopsById = useMemo(() => new Map(stops.map((stop) => [stop.id, stop])), [stops]);
-  const huntStops = useMemo(() => {
-    if (!hunt) return [];
-    const raw = hunt.stop_ids.map((id) => stopsById.get(id)).filter(Boolean) as HuntStopLite[];
-    const sessionOffset = teamName ? [...teamName].reduce((sum, ch) => sum + ch.charCodeAt(0), 0) : 0;
-    const rotated = hunt.mode === "race" ? rotate(raw, sessionOffset) : raw;
-    return rotated.slice(0, hunt.mode === "friendly" ? 4 : 8);
-  }, [hunt, stopsById, teamName]);
-  const active = huntStops[current];
-  const solvedCount = huntStops.filter((stop) => progress[stop.id]?.state === "solved").length;
-  const isRace = hunt?.mode === "race";
-  const penalties = isRace ? huntStops.reduce((total, stop) => total + cluePenalty[progress[stop.id]?.clues ?? 0], 0) : 0;
-  const elapsed = startedAt && now ? Math.floor((now - startedAt) / 1000) : 0;
-  const strollSeconds = isRace ? elapsed + penalties : elapsed;
-  const sessionKey = `${hunt?.id ?? "hunt"}-${teamName || "guest"}`;
-  const datePostmark = new Intl.DateTimeFormat("en-CA", { day: "2-digit", month: "short" }).format(new Date()).toUpperCase().replace(".", "");
-  const activeClues = active ? [active.clue_1, active.clue_2, active.clue_3].filter(Boolean) : [];
-  const activeSolved = active ? progress[active.id]?.state === "solved" : false;
-  const activePhoto = active ? progress[active.id]?.photo : undefined;
-  const allPhotosUploaded = huntStops.length > 0 && huntStops.every((stop) => Boolean(progress[stop.id]?.photo));
-  const finished = huntStops.length > 0 && solvedCount === huntStops.length && allPhotosUploaded;
-  const inviteCode = sessionId ? sessionId.replace("session_", "").slice(-6).toUpperCase() : "READY";
-  const routeDistance = hunt?.distance_m ? `${(hunt.distance_m / 1000).toFixed(1)} km` : "Walkable loop";
-  const completedStops = huntStops.filter((stop) => progress[stop.id]?.state === "solved");
-  const upcomingStops = huntStops.slice(Math.min(current + 1, huntStops.length));
-
-  useEffect(() => {
-    if (typeof window === "undefined" || restoredRef.current) return;
-    restoredRef.current = true;
-    try {
-      const saved = JSON.parse(localStorage.getItem(storageKey) ?? "null") as SavedHuntState | null;
-      if (!saved?.startedAt || saved.version !== 1 || !hunts.some((item) => item.slug === saved.selectedSlug)) return;
+    const saved = safeReadSession();
+    if (saved && (params.get("resume") || saved.stage !== "setup")) {
       window.setTimeout(() => {
         setSelectedSlug(saved.selectedSlug);
+        setBranch(saved.branch);
+        setStage(saved.stage === "finished" ? "finished" : saved.stage);
         setTeamName(saved.teamName);
+        setAvatar(saved.avatar);
+        setPlayStyle(saved.playStyle);
+        setDeviceMode(saved.deviceMode);
+        setEventName(saved.eventName);
+        setOrganiserName(saved.organiserName);
+        setParticipantCount(saved.participantCount);
+        setTeamCount(saved.teamCount);
+        setRouteStyle(saved.routeStyle);
+        setCustomChallenge(saved.customChallenge);
         setSessionId(saved.sessionId);
         setStartedAt(saved.startedAt);
         setNow(Date.now());
-        setScreen(saved.screen === "setup" ? "play" : saved.screen);
-        setCurrent(Math.max(0, saved.current));
-        setProgress(saved.progress ?? {});
-        setPlayMood(saved.playMood || "Relaxed");
-        setPlayerRole(saved.playerRole || "Explorer");
-        setAvatarEmoji(saved.avatarEmoji || "🧭");
-        setDeviceMode(saved.deviceMode || "one");
-        setEventName(saved.eventName || "");
-        setEventDate(saved.eventDate || "");
-        setTeamCount(saved.teamCount || 2);
+        setCurrent(saved.current);
+        setProgress(saved.progress);
+        setPlayers(saved.players ?? []);
       }, 0);
-    } catch {
-      localStorage.removeItem(storageKey);
+    } else if (params.get("type")) {
+      window.setTimeout(() => teamInputRef.current?.focus(), 60);
     }
-  }, [hunts, storageKey]);
+  }, []);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !restoredRef.current) return;
-    if (!startedAt) {
-      localStorage.removeItem(storageKey);
-      return;
-    }
-    const saved: SavedHuntState = { version: 1, selectedSlug, teamName, sessionId, startedAt, screen, current, progress, playMood, playerRole, avatarEmoji, deviceMode, eventName, eventDate, teamCount };
-    localStorage.setItem(storageKey, JSON.stringify(saved));
-  }, [avatarEmoji, current, deviceMode, eventDate, eventName, playMood, playerRole, progress, screen, selectedSlug, sessionId, startedAt, storageKey, teamCount, teamName]);
+    if (!startedAt || stage === "paused" || stage === "finished") return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [startedAt, stage]);
 
-  const start = () => {
-    const started = Date.now();
-    const nextSessionId = `session_${started.toString(36)}`;
-    setSessionId(nextSessionId);
+  useEffect(() => {
+    if (typeof window === "undefined" || !sessionId) return;
+    const payload: PersistedHunt = { version: 2, selectedSlug, branch, stage, teamName, avatar, playStyle, deviceMode, eventName, organiserName, participantCount, teamCount, routeStyle, customChallenge, sessionId, startedAt, current, progress, players };
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload)); } catch { console.warn("Hunt state could not be saved locally"); }
+  }, [selectedSlug, branch, stage, teamName, avatar, playStyle, deviceMode, eventName, organiserName, participantCount, teamCount, routeStyle, customChallenge, sessionId, startedAt, current, progress, players]);
+
+  useEffect(() => {
+    if (finished && stage !== "finished") window.setTimeout(() => setStage("finished"), 0);
+  }, [finished, stage]);
+
+  const resetForMode = (slug: string) => {
+    setSelectedSlug(slug);
+    setStage("setup");
+    setStartedAt(null);
+    setSessionId("");
+    setCurrent(0);
+    setProgress({});
+    setPlayers([]);
+    setUploadError("");
+  };
+  const primeSession = () => {
+    const id = sessionId || `hunt_${Date.now().toString(36)}_${hash32(`${teamName}-${selectedSlug}`).toString(36).slice(0, 4)}`;
+    setSessionId(id);
+    if (!players.length) setPlayers([{ id: "p1", name: teamName || "Sidewalk Sleuths", role: playerRole, avatar, ready: true }]);
+    return id;
+  };
+  const openBriefing = () => {
+    primeSession();
+    setProgress(Object.fromEntries(huntStops.map((stop) => [stop.id, progress[stop.id] ?? { state: "pending", clues: 0 }])));
+    setStage("briefing");
+    setNow(Date.now());
+  };
+  const beginHunt = () => {
+    const started = startedAt ?? Date.now();
+    const id = primeSession();
     setStartedAt(started);
     setNow(started);
-    setCurrent(0);
-    setScreen("briefing");
-    setUploadError("");
-    setProgress(Object.fromEntries(huntStops.map((stop) => [stop.id, { state: "pending", clues: 0 }])));
+    setStage("playing");
     void fetch(`/api/v1/${citySlug}/hunts/${hunt?.slug ?? selectedSlug}/sessions`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ team_name: teamName || "Anonymous team", mode: hunt?.mode }),
-    }).catch(() => undefined);
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ team_name: teamName || "Anonymous team", mode: hunt?.mode, session_key: id }),
+    }).catch(() => setOfflineNote("Connection is patchy. Your hunt is saved on this phone and will retry when signal returns."));
   };
-
   const revealClue = () => {
     if (!active) return;
     setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), clues: Math.min(3, (rows[active.id]?.clues ?? 0) + 1) } }));
   };
-
-  const solve = () => {
+  const completeCurrent = (photo?: { url: string; name: string }) => {
     if (!active) return;
-    const wasSolved = progress[active.id]?.state === "solved";
-    setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), state: "solved", solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() } }));
-    if (!wasSolved && current === huntStops.length - 1) {
-      const next = [{ team: teamName || "Anonymous team", seconds: strollSeconds }, ...leaderboard].sort((a, b) => a.seconds - b.seconds).slice(0, 8);
-      setLeaderboard(next);
-      localStorage.setItem("stroll-hunt-board", JSON.stringify(next));
-    }
+    setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), state: "solved", photo: photo?.url ?? rows[active.id]?.photo ?? `data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="320" height="240"><rect width="320" height="240" fill="#E4EBFF"/><text x="160" y="118" text-anchor="middle" font-family="Arial" font-size="20" fill="#0B47E8">Proof photo saved</text><text x="160" y="148" text-anchor="middle" font-family="Arial" font-size="14" fill="#55585F">${active.name}</text></svg>`)}`, photoName: photo?.name ?? rows[active.id]?.photoName ?? "Camera checkpoint", solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() } }));
   };
-
-  const nextStop = () => {
-    if (current < huntStops.length - 1) {
-      setCurrent((n) => n + 1);
-      setScreen("play");
-    }
-  };
-
-  const exitHunt = () => {
-    setStartedAt(null);
-    setScreen("setup");
-    setCurrent(0);
-    setProgress({});
-    setUploadError("");
-  };
-
   const uploadPhoto = async (file: File | undefined) => {
     if (!active || !file) return;
-    if (!file.type.startsWith("image/")) {
-      setUploadError("Please choose a photo file.");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      setUploadError("Please choose a photo under 10MB.");
-      return;
-    }
-    const currentSessionId = sessionId || `session_${Date.now().toString(36)}`;
-    if (!sessionId) setSessionId(currentSessionId);
-    setUploadingStopId(active.id);
-    setUploadError("");
+    if (!file.type.startsWith("image/")) { setUploadError("Please choose a photo file."); return; }
+    if (file.size > 8 * 1024 * 1024) { setUploadError("Please choose a photo under 8MB."); return; }
+    const currentSessionId = primeSession();
+    setUploadingStopId(active.id); setUploadError("");
+    const preview = URL.createObjectURL(file);
     const form = new FormData();
-    form.append("photo", file);
-    form.append("stop_id", active.id);
-    form.append("team_name", teamName || "Anonymous team");
-    const response = await fetch(`/api/v1/${citySlug}/sessions/${encodeURIComponent(currentSessionId)}/photos`, { method: "POST", body: form });
-    const payload = await response.json().catch(() => null) as { ok?: boolean; data?: { url?: string; file_name?: string }; error?: string } | null;
-    setUploadingStopId(null);
-    if (!response.ok || !payload?.ok || !payload.data?.url) {
-      setUploadError(payload?.error ?? "Photo upload did not finish. Please try again.");
-      return;
+    form.append("photo", file); form.append("stop_id", active.id); form.append("team_name", teamName || "Anonymous team");
+    try {
+      const response = await fetch(`/api/v1/${citySlug}/sessions/${encodeURIComponent(currentSessionId)}/photos`, { method: "POST", body: form });
+      const payload = await response.json().catch(() => null) as { ok?: boolean; data?: { url?: string; file_name?: string }; error?: string } | null;
+      if (!response.ok || !payload?.ok) setOfflineNote("Photo is previewed locally. Upload will need a stronger connection before the final postcard export.");
+      completeCurrent({ url: payload?.data?.url ?? preview, name: file.name });
+    } catch {
+      setOfflineNote("Photo is saved locally for this session. Reconnect before final export.");
+      completeCurrent({ url: preview, name: file.name });
+    } finally {
+      setUploadingStopId(null);
     }
-    setProgress((rows) => ({
-      ...rows,
-      [active.id]: { ...(rows[active.id] ?? { state: "solved", clues: 0 }), state: "solved", photo: payload.data?.url, photoName: file.name, solvedAt: rows[active.id]?.solvedAt ?? new Date().toISOString() },
-    }));
-    if (current === huntStops.length - 1) setScreen("finish");
   };
-
-  const sharePostcard = async () => {
+  const nextStop = () => {
+    if (current < huntStops.length - 1) { setCurrent((n) => n + 1); setStage("playing"); window.scrollTo({ top: 0, behavior: "smooth" }); }
+    else setStage("finished");
+  };
+  const skipStop = () => {
+    if (!active) return;
+    setProgress((rows) => ({ ...rows, [active.id]: { ...(rows[active.id] ?? { state: "pending", clues: 0 }), state: "skipped", skippedAt: new Date().toISOString() } }));
+  };
+  const finishShare = async () => {
     const text = `${teamName || "Our team"} finished ${hunt?.name ?? "a Stroll City hunt"} in Inglewood. #StrollInglewood @stroll_city`;
     if (typeof window === "undefined") return;
-    const url = window.location.href;
-    const nav = window.navigator;
-    if (typeof nav.share === "function") {
-      await nav.share({ title: "Stroll City postcard", text, url });
-      return;
-    }
-    await nav.clipboard?.writeText(`${text} ${url}`);
+    await window.navigator.clipboard?.writeText(`${text} ${window.location.href}`).catch(() => undefined);
+    if (typeof window.navigator.share === "function") await window.navigator.share({ title: "Stroll City postcard", text, url: window.location.href }).catch(() => undefined);
+  };
+  const exitAndSave = () => setStage("paused");
+  const clearHunt = () => {
+    if (typeof window !== "undefined") window.localStorage.removeItem(STORAGE_KEY);
+    setStage("setup"); setStartedAt(null); setSessionId(""); setCurrent(0); setProgress({}); setPlayers([]);
+  };
+  const addPlayer = () => {
+    const idx = players.length + 1;
+    setPlayers((rows) => [...rows, { id: `p${idx}`, name: `Player ${idx}`, role: playerRoles[idx % playerRoles.length], avatar: avatarChoices[idx % avatarChoices.length], ready: idx % 2 === 0 }]);
   };
 
-  return (
-    <main className={styles.landing}>
-      <nav className={styles.landNav}><div className={styles.landNavIn}>
-        <Link className={styles.landBrand} href="/"><img src="/brand/stroll-mark.png" alt="" /><span className={styles.landBrandName}>STROLL <span>CITY</span></span></Link>
-        <div className={styles.landNavLinks}><Link href={`/${cityName.toLowerCase()}`}>Map</Link><Link href="/business">For businesses</Link></div>
-        <span className={styles.landSp} /><Link className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} href={`/${cityName.toLowerCase()}`}>Back to map</Link>
-      </div></nav>
-
-      <div className={styles.landWrap}>
-        <header className={styles.landHero}>
-          <div className={styles.landHeroCard}><div className={styles.landHeroGrid}>
-            <div className={styles.landHeroCopy}>
-              <span className={styles.landEyebrow}><i /> {cityName} scavenger hunt</span>
-              <h1 className={styles.landH1}>Solve the street,<br />one doorway at a time.</h1>
-              <p className={styles.landHeroSub}>Riddles reveal the next shop only after your team solves the current one. Proof photos stay private; the finish creates a shareable postcard.</p>
-              {!startedAt ? <>
-                <div className={styles.grid2}>
-                  <div className={styles.claimField}><label>Team name</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
-                  <div className={styles.claimField}><label>Hunt type</label><div className={styles.ctl}><select value={selectedSlug} onChange={(e) => { setSelectedSlug(e.target.value); setStartedAt(null); setScreen("setup"); setProgress({}); }}>
-                    {hunts.map((item) => <option key={item.id} value={item.slug}>{item.name}</option>)}
-                  </select></div></div>
-                </div>
-                <div className={styles.huntSetupGrid}>
-                  <div className={styles.claimField}><label>Nickname or avatar</label><div className={styles.avatarPick}>{["🧭", "📷", "🕵️", "🦊"].map((emoji) => <button key={emoji} type="button" aria-pressed={avatarEmoji === emoji} onClick={() => setAvatarEmoji(emoji)}>{emoji}</button>)}</div></div>
-                  <div className={styles.claimField}><label>Play style</label><div className={styles.segmentedMini}>{["Relaxed", "Competitive", "Family-friendly"].map((mood) => <button key={mood} type="button" aria-pressed={playMood === mood} onClick={() => setPlayMood(mood)}>{mood}</button>)}</div></div>
-                  <div className={styles.claimField}><label>Your role</label><div className={styles.segmentedMini}>{["Explorer", "Photographer", "Trivia hunter"].map((role) => <button key={role} type="button" aria-pressed={playerRole === role} onClick={() => setPlayerRole(role)}>{role}</button>)}</div></div>
-                  <div className={styles.claimField}><label>Devices</label><div className={styles.segmentedMini}><button type="button" aria-pressed={deviceMode === "one"} onClick={() => setDeviceMode("one")}>One device</button><button type="button" aria-pressed={deviceMode === "everyone"} onClick={() => setDeviceMode("everyone")}>Everyone joins</button></div></div>
-                </div>
-                {isRace && <div className={styles.raceSetupStrip}><span>Teams</span><button type="button" onClick={() => setTeamCount((n) => Math.max(2, n - 1))}>−</button><b>{teamCount}</b><button type="button" onClick={() => setTeamCount((n) => Math.min(8, n + 1))}>+</button><em>{teamCount} teams × $20 = ${teamCount * 20}</em></div>}
-                {hunt?.mode === "race" && <div className={styles.grid2}><div className={styles.claimField}><label>Event name</label><div className={styles.ctl}><input value={eventName} onChange={(e) => setEventName(e.target.value)} placeholder="Friday loop race" /></div></div><div className={styles.claimField}><label>Date</label><div className={styles.ctl}><input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} /></div></div></div>}
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={start}>Start this hunt</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${cityName.toLowerCase()}`}>Browse map first</Link></div>
-              </> : <>
-                <div className={styles.huntNowBar}>
-                  <div><b>{avatarEmoji} {teamName || "Your team"}</b><span>{hunt?.name} · stop {current + 1} of {huntStops.length} · invite {inviteCode}</span></div>
-                  <div><b>{isRace ? fmt(strollSeconds) : `${solvedCount}/${huntStops.length}`}</b><span>{isRace ? "Stroll Time" : "Stops solved"}</span></div>
-                </div>
-                <div className={styles.huntScreenRail} aria-label="Hunt screen roadmap">
-                  {[["briefing", "Briefing"], ["play", "Current stop"], ["paused", "Pause"], ["trouble", "Help"], ["finish", "Finish"], ["memory", "Memories"]].map(([key, label]) => <button key={key} type="button" aria-current={screen === key ? "step" : undefined} onClick={() => setScreen(key as typeof screen)}>{label}</button>)}
-                </div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Return to current stop</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={exitHunt}>Restart setup</button></div>
-              </>}
-            </div>
-            <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}>
-              {!startedAt ? <>
-                <span className={styles.lbl}>Products</span>
-                <div className={styles.locked} style={{ marginTop: 16 }}>{hunts.map((item) => <button key={item.id} className={styles.plan} aria-pressed={item.slug === selectedSlug} onClick={() => setSelectedSlug(item.slug)}><span className={styles.planBody}><span className={styles.planTop}><span className={styles.planName}>{item.name}</span><span className={styles.planPrice}>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$20/team" : "$20/team"}</span></span><span className={styles.planDesc}>{productCopy[item.mode]}</span></span></button>)}</div>
-              </> : <>
-                <span className={styles.lbl}>Active hunt app</span>
-                <h3 className={styles.landH3}>{screen === "play" ? `Stop ${current + 1}: ${activeSolved ? active?.name : "mystery stop"}` : "Progress saved on this device"}</h3>
-                <p className={styles.landCardP}>You can leave for directions or the full Calgary map and come back to this hunt without starting over.</p>
-                <HuntMiniMap stops={huntStops} current={current} solvedCount={solvedCount} />
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Continue hunt</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Open city map</Link></div>
-              </>}
-            </div>
-          </div></div>
-        </header>
-
-        <section className={styles.landBlk}>
-          <div className={styles.landSecHead}><div className={styles.landSecHeadL}><span className={styles.lbl}>Play</span><h2 className={styles.landH2}>{hunt?.name ?? "Hunt"}</h2></div><p>{hunt?.blurb}</p></div>
-          <div className={styles.landDuo}>
-            <div className={styles.landBigCard}>
-              {!startedAt || !active ? <>
-                <span className={styles.lbl}>Branch A · solo, team or event</span>
-                <h3 className={styles.landH3}>Start with the smallest useful setup.</h3>
-                <p className={styles.landCardP}>Pick a nickname, avatar, play style and device mode. Race hosts can set teams, date and event name before the shared invite code appears.</p>
-                <div className={styles.huntInfoGrid}>
-                  <div><b>{avatarEmoji} {teamName || "Your team"}</b><span>{playMood} · {playerRole}</span></div>
-                  <div><b>{deviceMode === "one" ? "One shared device" : "Everyone on their own device"}</b><span>Invite code and QR unlock after start.</span></div>
-                  <div><b>{isRace ? `${teamCount} teams` : `${hunt?.mode === "friendly" ? 4 : 8} stops`}</b><span>{isRace ? "Same route · staggered starts." : "Map, distance and directions included."}</span></div>
-                </div>
-              </> : screen === "briefing" ? <>
-                <span className={styles.lbl}>Universal pre-game</span>
-                <h3 className={styles.landH3}>Get everyone to the first doorway before the game starts.</h3>
-                <div className={styles.huntRouteCard}><b>First-stop directions</b><span>{routeDistance} · walking directions · open in maps</span><Link href={mapLink(active)} target="_blank">Open map to stop 1 →</Link></div>
-                <HuntMiniMap stops={huntStops} current={0} solvedCount={solvedCount} />
-                <div className={styles.huntInfoGrid}>
-                  <div><b>You&apos;re close</b><span>Location prompts switch from “keep walking” to “you&apos;ve arrived”.</span></div>
-                  <div><b>Photos and clues</b><span>{isRace ? "Clues add race time; photos prove the stop." : "Clues are free; photos build your postcard."}</span></div>
-                  <div><b>Invite {inviteCode}</b><span>{deviceMode === "everyone" ? "Joined players appear in the waiting state." : "Perfect for people sharing one phone."}</span></div>
-                </div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Begin official gameplay</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("setup")}>Adjust setup</button></div>
-              </> : screen === "paused" ? <>
-                <span className={styles.lbl}>Pause and interruption</span>
-                <h3 className={styles.landH3}>Your hunt is saved right here.</h3>
-                <p className={styles.landCardP}>Timer and progress stop while paused. Resume returns exactly to stop {current + 1}, with the same clues, photos and active hunt card.</p>
-                <div className={styles.huntInfoGrid}><div><b>Active hunt card</b><span>{hunt?.name} · {solvedCount}/{huntStops.length} solved.</span></div><div><b>Progress saved</b><span>Current stop, photos and clues stay attached to this session.</span></div></div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Resume hunt</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={exitHunt}>Exit and clear progress</button></div>
-              </> : screen === "trouble" ? <>
-                <span className={styles.lbl}>Help if the street gets messy</span>
-                <h3 className={styles.landH3}>Keep walking without losing the game.</h3>
-                <div className={styles.troubleGrid}>{["Continue manually or open directions", "Explain why photo access is needed", "Cached clue and retry connection", "You may not be at the right place", "Rejoin via team code", "Confirm skip and point impact", "Alternative clue or bypass stop"].map((item) => <div key={item}>{item}</div>)}</div>
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("play")}>Back to current stop</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue}>Show another clue</button></div>
-              </> : screen === "finish" || screen === "memory" ? <>
-                <span className={styles.lbl}>{screen === "finish" ? "Final stop" : "Memory and retention"}</span>
-                <h3 className={styles.landH3}>{screen === "finish" ? "Complete the hunt, then make it worth remembering." : "Your route, photos and postcard live here."}</h3>
-                <div className={styles.finishStats}><div><b>{solvedCount}/{huntStops.length}</b><span>Stops solved</span></div><div><b>{isRace ? fmt(strollSeconds) : "No clock"}</b><span>{isRace ? "Stroll Time" : "Walk at your pace"}</span></div><div><b>{activeClues.length}</b><span>Hints available</span></div></div>
-                {screen === "memory" && <><div className={styles.memoryStrip}>{completedStops.map((stop) => <span key={stop.id}>{stop.name}</span>)}</div><textarea className={styles.ctl} value={feedback} onChange={(e) => setFeedback(e.target.value)} placeholder="Quick rating or note for next time" /></>}
-                <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setScreen("memory")}>View photos and postcard</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Another Calgary neighbourhood</Link></div>
-              </> : <>
-                <span className={styles.lbl}>Stop {current + 1} of {huntStops.length} · {active.difficulty}</span>
-                <h3 className={styles.landH3}>{activeSolved ? active.name : "Find this mystery stop"}</h3>
-                <div className={styles.huntPlayGrid}>
-                  <div>
-                    <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
-                    <div className={styles.locked}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>Clue {index + 1}</b> {clue}</div>)}</div>
-                  </div>
-                  <div className={styles.huntMapColumn}>
-                    <HuntMiniMap stops={huntStops} current={current} solvedCount={solvedCount} />
-                    <div className={styles.huntRouteCard}><b>{activeSolved ? active.name : "Current search zone"}</b><span>{active.address ?? "Inglewood business district"}</span><Link href={mapLink(active)} target="_blank">Open map / directions →</Link></div>
-                  </div>
-                </div>
-                {activeSolved && <div className={styles.callout}><CatIcon d="M4 7h4l2-2h4l2 2h4v12H4z" size={17} /> <span><b>Photo to take:</b> {active.challenge ?? "Photograph the doorway from the sidewalk before moving on."}</span></div>}
-                {activeSolved && (
-                  <div className={styles.photoUploadPanel}>
-                    {activePhoto ? <img className={styles.uploadedPhotoPreview} src={activePhoto} alt={`Uploaded proof for ${active.name}`} /> : null}
-                    <div>
-                      <label className={`${styles.btn} ${styles.btnGhost} ${uploadingStopId === active.id ? styles.btnDisabled : ""}`}>
-                        {uploadingStopId === active.id ? "Uploading photo…" : activePhoto ? "Replace postcard photo" : "Upload photo to postcard"}
-                        <input type="file" accept="image/*" capture="environment" disabled={uploadingStopId === active.id} onChange={(event) => { void uploadPhoto(event.target.files?.[0]); event.currentTarget.value = ""; }} />
-                      </label>
-                      <p className={styles.photoUploadHint}>{activePhoto ? "This stop will use your uploaded photo on the finished postcard." : "Upload the photo you just took so the final postcard is authentically yours."}</p>
-                    </div>
-                  </div>
-                )}
-                {uploadError && <div className={styles.calloutAmber}>{uploadError}</div>}
-                <div className={styles.landHeroCta}>
-                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>Reveal clue{isRace ? " (+ penalty)" : ""}</button>
-                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("trouble")}>Need help</button>
-                  <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setScreen("paused")}>Pause</button>
-                  {activeSolved && current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop} disabled={!activePhoto || uploadingStopId === active.id}>Photo uploaded — next stop</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={solve} disabled={activeSolved && !activePhoto}>{activeSolved ? (activePhoto ? "Postcard photo uploaded" : "Upload photo to finish stop") : "Mark solved"}</button>}
-                </div>
-              </>}
-            </div>
-            <div className={styles.landBigCard}>
-              <span className={styles.lbl}>Punch card</span>
-              <div className={`${styles.cardstock} ${styles.punchcard}`}>
-                <div className={styles.punchStub}>
-                  <span className={styles.punchMark}><CatIcon d="M11.6 21l1.7-5.6-2.6-2.2.9-4.4-3.1 1.5-1.2 3M13.3 8.8l2.6 2.3 3.1.6M10.7 13.2 7.9 21" size={14} strokeWidth={1.7} color="var(--accent-ink)" /></span>
-                  <span className={styles.punchVert}>{hunt?.name ?? "Stroll hunt"}</span>
-                  <span className={styles.punchSerial}>No. {String(hash32(sessionKey) % 100000).padStart(5, "0")}</span>
-                </div>
-                <div className={styles.punchBody}>
-                  <div className={styles.punchTop}>
-                    <div>
-                      <h3 className={styles.punchTitle}>{hunt?.name ?? "Stroll hunt"}</h3>
-                      <p className={styles.punchMeta}>{cityName} · {huntStops.length || (hunt?.mode === "friendly" ? 4 : 8)} stops</p>
-                    </div>
-                    {isRace && <div className={styles.punchClock}>
-                      <span>{fmt(elapsed)}</span>{penalties > 0 && <span className={styles.punchPenalty}> (+{Math.round(penalties / 60)})</span>}
-                      <small>Stroll Time {fmt(strollSeconds)}</small>
-                    </div>}
-                  </div>
-                  <div className={styles.punchSlots}>
-                    {huntStops.map((stop, index) => {
-                      const solved = progress[stop.id]?.state === "solved";
-                      const photo = progress[stop.id]?.photo;
-                      const next = startedAt && index === current && !solved;
-                      const tilt = tiltFor(sessionKey, index);
-                      const [a, b] = stampSwatches[index % stampSwatches.length];
-                      return (
-                        <div className={`${styles.punchSlot} ${next ? styles.punchSlotNext : ""}`} key={stop.id}>
-                          <div className={styles.punchWell}><span>{index + 1}</span></div>
-                          {solved && (
-                            <div className={styles.punchStamp} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)` }}>
-                              <div className={styles.punchStampPaper}>
-                                <div className={`${styles.punchStampPhoto} ${photo ? styles.punchStampPhotoUploaded : ""}`} style={photo ? undefined : { background: `linear-gradient(150deg, ${a}, ${b})` }}>
-                                  {photo ? <img src={photo} alt="" /> : <span>{stop.name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase()}</span>}
-                                </div>
-                                <span className={styles.punchDenom}>{String(index + 1).padStart(2, "0")}</span>
-                              </div>
-                              <div className={styles.punchPostmark} style={{ transform: `rotate(${tilt.pm.toFixed(1)}deg)` }}>
-                                <span>Inglewood</span><b>{datePostmark}</b><span>YYC</span>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className={styles.punchFoot}>
-                    <span>{solvedCount} of {huntStops.length || (hunt?.mode === "friendly" ? 4 : 8)} solved</span>
-                    <span>Photos stay private · #StrollInglewood</span>
-                  </div>
-                </div>
-              </div>
-              {startedAt && <div className={styles.huntDashboard}>
-                <div><b>Completed</b><span>{completedStops.length ? completedStops.map((stop) => stop.name).join(" · ") : "No stops found yet"}</span></div>
-                <div><b>Upcoming</b><span>{upcomingStops.length ? `${upcomingStops.length} stops left` : "Final screen ready"}</span></div>
-                <div><b>{deviceMode === "everyone" ? "Players" : "Device"}</b><span>{deviceMode === "everyone" ? `${teamName || "Leader"}, photographer, trivia hunter` : "Shared phone mode"}</span></div>
-                <div><b>Photos</b><span>{huntStops.filter((stop) => progress[stop.id]?.photo).length} captured so far</span></div>
-              </div>}
-              {solvedCount === huntStops.length && !allPhotosUploaded && <div className={styles.calloutAmber}><b>Almost there.</b> Upload the remaining stop photos and your postcard will be built from the pictures your team actually took.</div>}
-              {finished && <div className={styles.calloutAmber}><b>Win the Inglewood Basket.</b> Share your postcard publicly tagging <b>@stroll_city</b> or <b>#StrollInglewood</b> and you’re entered in this month’s draw — a basket donated by ten Inglewood businesses, worth around $250. Entering is optional; the hunt is free either way. One entry per completed hunt. No purchase necessary. Alberta residents 18+. Winner answers a skill-testing question. <Link href="/rules">Full rules →</Link></div>}
-              {finished && (
-                <div className={styles.postcardArt} aria-label="Finished hunt postcard preview">
-                  <div className={styles.postcardStampBlock}>YYC</div>
-                  <span className={styles.lbl}>Greetings from</span>
-                  <h3>Inglewood</h3>
-                  <div className={`${styles.postcardCollage} ${huntStops.length === 4 ? styles.postcardCollage4 : styles.postcardCollage8}`}>
-                    {huntStops.map((stop, index) => {
-                      const tilt = tiltFor(sessionKey, index + 20);
-                      const [a, b] = stampSwatches[index % stampSwatches.length];
-                      const photo = progress[stop.id]?.photo;
-                      return <span key={stop.id} className={`${styles.postcardMiniStamp} ${photo ? styles.postcardMiniStampPhoto : ""}`} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)`, background: photo ? undefined : `linear-gradient(150deg, ${a}, ${b})` }}>{photo ? <img src={photo} alt="" /> : String(index + 1).padStart(2, "0")}</span>;
-                    })}
-                  </div>
-                  <div className={styles.postcardHeroFigure}><small>{isRace ? "STROLL TIME" : "INGLEWOOD"}</small><b>{isRace ? fmt(strollSeconds) : `${huntStops.length} STOPS`}</b></div>
-                  <div className={styles.postcardTag}>@stroll_city<br /><b>#StrollInglewood</b></div>
-                </div>
-              )}
-              {finished && <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={sharePostcard}>Share postcard to enter</button><Link className={`${styles.btn} ${styles.btnGhost}`} href="/rules">Basket rules</Link></div>}
-              {leaderboard.length > 0 && isRace && <div className={styles.review} style={{ marginTop: 16 }}>{leaderboard.map((row, i) => <div className={styles.revRow} key={`${row.team}-${i}`}><span className={styles.revKey}>#{i + 1}</span><span className={styles.revVal}>{row.team}<br /><span className={styles.revSub}>{Math.floor(row.seconds / 60)}m {row.seconds % 60}s</span></span></div>)}</div>}
-            </div>
+  const progressText = `${foundOrSkipped}/${huntStops.length || (hunt?.mode === "friendly" ? 4 : 8)} found`;
+  const currentCard = active ? <>
+    <div className={styles.huntAppStatus}><span>{avatar} {teamName || "Sidewalk Sleuths"}</span><span>Stop {current + 1} of {huntStops.length}</span><span>{progressText}</span>{isRace && <span>{fmt(elapsed)} (+{Math.round(penalties / 60)}) = {fmt(strollSeconds)}</span>}</div>
+    <div className={styles.huntPlayGrid}>
+      <article className={styles.huntPhonePanel}>
+        <span className={styles.lbl}>Find this mystery stop</span>
+        <h2 className={styles.landH2}>Stop {current + 1}</h2>
+        <p className={styles.huntStopMeta}>{active.difficulty} · {active.address ? "Search zone ready" : "Inglewood"}</p>
+        <p className={`${styles.landCardP} ${styles.landRiddle}`} style={{ whiteSpace: "pre-wrap" }}>{active.riddle}</p>
+        <div className={styles.huntClueStack}>{activeClues.slice(0, progress[active.id]?.clues ?? 0).map((clue, index) => <div className={styles.callout} key={`${active.id}-clue-${index}`}><b>{index === 0 ? "Give me a clue" : index === 1 ? "One more" : "Just tell me"}</b> {clue}</div>)}</div>
+        <div className={styles.huntActions}>
+          <button className={`${styles.btn} ${styles.btnGhost}`} onClick={revealClue} disabled={(progress[active.id]?.clues ?? 0) >= 3}>{(progress[active.id]?.clues ?? 0) === 0 ? "Give me a clue" : (progress[active.id]?.clues ?? 0) === 1 ? "One more" : "Just tell me"}{isRace ? " (+ time)" : ""}</button>
+          <a className={`${styles.btn} ${styles.btnGhost}`} href={mapUrl(active)} target="_blank" rel="noreferrer">Open directions</a>
+          <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setStage("help")}>Help</button>
+        </div>
+        <div className={styles.calloutAmber}><b>At this stop:</b> {active.challenge ?? "Photograph the doorway and include a hand, shoe, hat or face from your team."}</div>
+        <div className={styles.photoUploadPanel}>
+          {activePhoto ? <img className={styles.uploadedPhotoPreview} src={activePhoto} alt={`Proof for stop ${current + 1}`} /> : null}
+          <div>
+            <label className={`${styles.btn} ${styles.btnPrimary} ${uploadingStopId === active.id ? styles.btnDisabled : ""}`}>{uploadingStopId === active.id ? "Saving photo…" : activeSolved ? "Replace proof photo" : "I'm here — take / upload photo"}<input type="file" accept="image/*" capture="environment" disabled={uploadingStopId === active.id} onChange={(event) => { void uploadPhoto(event.target.files?.[0]); event.currentTarget.value = ""; }} /></label>
+            <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => completeCurrent()} disabled={activeSolved}>Record camera checkpoint</button>
+            <p className={styles.photoUploadHint}>The photo is the arrival check. GPS is never required to advance.</p>
           </div>
-        </section>
-      </div>
-    </main>
-  );
+        </div>
+        {uploadError && <div className={styles.calloutAmber}>{uploadError}</div>}
+        {activeSolved && <div className={styles.huntReveal}><span className={styles.lbl}>Revealed after solve</span><h3>{active.name}</h3><p>{active.address}</p>{current < huntStops.length - 1 ? <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={nextStop}>Next riddle</button> : <button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStage("finished")}>Complete the hunt</button>}</div>}
+      </article>
+      <aside className={styles.huntPhonePanel}><MiniRouteMap stops={huntStops} current={current} progress={progress} cityName={cityName} /><div className={styles.huntActions}><button className={`${styles.btn} ${styles.btnGhost}`} onClick={exitAndSave}>Pause hunt</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={skipStop}>Skip (+impact)</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Map home</Link></div></aside>
+    </div>
+  </> : null;
+
+  return <main className={styles.landing}>
+    <nav className={styles.landNav}><div className={styles.landNavIn}>
+      <Link className={styles.landBrand} href="/"><img src="/brand/stroll-mark.png" alt="" /><span className={styles.landBrandName}>STROLL <span>CITY</span></span></Link>
+      <div className={styles.landNavLinks}><Link href={`/${citySlug}`}>Map</Link><Link href="/business">For businesses</Link><Link href="/rules">Rules</Link></div>
+      <span className={styles.landSp} />{sessionId && <button className={`${styles.btn} ${styles.btnGhost} ${styles.btnSm}`} onClick={() => setStage(stage === "paused" ? "playing" : "paused")}>{stage === "paused" ? "Resume" : "Pause"}</button>}<Link className={`${styles.btn} ${styles.btnPrimary} ${styles.btnSm}`} href={`/${citySlug}`}>Back to map</Link>
+    </div></nav>
+
+    <div className={styles.landWrap}>
+      <header className={styles.landHero}>
+        <div className={styles.landHeroCard}><div className={styles.landHeroGrid}>
+          <div className={styles.landHeroCopy}>
+            <span className={styles.landEyebrow}><i /> {cityName} hunt app</span>
+            <h1 className={styles.landH1}>A real hunt flow,<br />not a page example.</h1>
+            <p className={styles.landHeroSub}>The roadmap screens are wired as an app state machine: setup branches, pre-game map, active stop loop, persistent route/progress, pause/rejoin, recovery states, final stop, postcard, sharing, and next actions.</p>
+            {sessionId && <div className={styles.callout}><b>Saved on this phone.</b> Return from the Calgary map with <Link href={`/${citySlug}/hunt?resume=1`}>Continue hunt</Link>; your current stop will not reset.</div>}
+            {offlineNote && <div className={styles.calloutAmber}>{offlineNote}</div>}
+          </div>
+          <div className={styles.landShowcase} style={{ padding: 24, height: "auto" }}><RoadmapCoverage compact /></div>
+        </div></div>
+      </header>
+
+      <section className={styles.landBlk}>
+        {stage === "setup" && <div className={styles.huntAppShell}>
+          <div className={styles.landSecHead}><div className={styles.landSecHeadL}><span className={styles.lbl}>Phase 01–02</span><h2 className={styles.landH2}>Choose the hunt path</h2></div><p>All three branches from the folder now lead into the same playable stop loop.</p></div>
+          <div className={styles.huntModeGrid}>{hunts.map((item) => <button key={item.id} className={styles.huntModeCard} aria-pressed={item.slug === selectedSlug} onClick={() => resetForMode(item.slug)}><span className={styles.lbl}>{item.mode}</span><h3>{item.name}</h3><b>{item.mode === "friendly" ? "Free" : item.mode === "race" ? "$15/team" : "$20/team"}</b><p>{productCopy[item.mode]}</p></button>)}</div>
+          <div className={styles.huntModeGrid}>{(Object.keys(branchCopy) as HuntBranch[]).map((key) => <button key={key} className={styles.huntBranchCard} aria-pressed={branch === key} onClick={() => setBranch(key)}><h3>{branchCopy[key].title}</h3><p>{branchCopy[key].body}</p><small>{branchCopy[key].steps.join(" · ")}</small></button>)}</div>
+          <div className={styles.huntSetupGrid}>
+            <div className={styles.huntPhonePanel}>
+              <span className={styles.lbl}>{branchCopy[branch].title}</span>
+              <div className={styles.grid2}>
+                <div className={styles.claimField}><label>{branch === "event" ? "Team / route name" : "Team name"}</label><div className={styles.ctl}><input ref={teamInputRef} value={teamName} onChange={(e) => setTeamName(e.target.value)} placeholder="The Sidewalk Sleuths" /></div></div>
+                <div className={styles.claimField}><label>Avatar</label><div className={styles.huntAvatarRow}>{avatarChoices.map((choice) => <button type="button" key={choice} aria-pressed={avatar === choice} onClick={() => setAvatar(choice)}>{choice}</button>)}</div></div>
+                {branch !== "event" && <div className={styles.claimField}><label>Play style</label><div className={styles.huntPills}>{playStyles.map((choice) => <button type="button" key={choice} aria-pressed={playStyle === choice} onClick={() => setPlayStyle(choice)}>{choice}</button>)}</div></div>}
+                {branch !== "event" && <div className={styles.claimField}><label>Your role</label><div className={styles.ctl}><select value={playerRole} onChange={(e) => setPlayerRole(e.target.value)}>{playerRoles.map((role) => <option key={role}>{role}</option>)}</select></div></div>}
+                {branch === "team" && <div className={styles.claimField}><label>Devices</label><div className={styles.ctl}><select value={deviceMode} onChange={(e) => setDeviceMode(e.target.value)}><option>One shared phone</option><option>Everyone on their own phone</option></select></div></div>}
+                {branch === "event" && <><div className={styles.claimField}><label>Organiser</label><div className={styles.ctl}><input value={organiserName} onChange={(e) => setOrganiserName(e.target.value)} placeholder="Organizer name" /></div></div><div className={styles.claimField}><label>Participants</label><div className={styles.ctl}><input type="number" value={participantCount} min={2} onChange={(e) => setParticipantCount(Number(e.target.value))} /></div></div><div className={styles.claimField}><label>Teams</label><div className={styles.ctl}><input type="number" value={teamCount} min={2} max={24} onChange={(e) => setTeamCount(Number(e.target.value))} /></div></div><div className={styles.claimField}><label>Route</label><div className={styles.ctl}><select value={routeStyle} onChange={(e) => setRouteStyle(e.target.value)}><option>Same route · rotated starts</option><option>Staggered start</option><option>Opposite directions</option></select></div></div><div className={styles.claimField}><label>Custom final challenge</label><div className={styles.ctl}><textarea value={customChallenge} onChange={(e) => setCustomChallenge(e.target.value)} placeholder="Optional organizer challenge" /></div></div></>}
+              </div>
+              {branch !== "solo" && <div className={styles.callout}><b>Invite code:</b> {inviteCode} · QR/share link ready. <button onClick={addPlayer}>Add waiting player</button></div>}
+              {players.length > 0 && <div className={styles.huntPlayerList}>{players.map((p) => <span key={p.id}>{p.avatar} {p.name} · {p.role} · {p.ready ? "ready" : "waiting"}</span>)}</div>}
+              <div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={openBriefing}>Review route and rules</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Browse map first</Link></div>
+            </div>
+            <div className={styles.huntPhonePanel}><MiniRouteMap stops={huntStops} current={0} progress={progress} cityName={cityName} /><div className={styles.review}><div className={styles.revRow}><span className={styles.revKey}>Distance</span><span className={styles.revVal}>{distanceLabel(hunt?.distance_m ?? 900)}</span></div><div className={styles.revRow}><span className={styles.revKey}>Stops</span><span className={styles.revVal}>{hunt?.mode === "friendly" ? "4 random" : "8 curated"}</span></div><div className={styles.revRow}><span className={styles.revKey}>Map</span><span className={styles.revVal}>Inline + full map return</span></div></div></div>
+          </div>
+          <RoadmapCoverage />
+        </div>}
+
+        {stage === "briefing" && <div className={styles.huntAppShell}>
+          <div className={styles.landSecHead}><div><span className={styles.lbl}>Phase 03 — universal pre-game</span><h2 className={styles.landH2}>Ready at the first stop?</h2></div><p>Map, walking directions, rules, arrival guidance, and final start live here before official gameplay begins.</p></div>
+          <div className={styles.huntPlayGrid}><div className={styles.huntPhonePanel}><MiniRouteMap stops={huntStops} current={0} progress={progress} cityName={cityName} /><div className={styles.huntActions}><a className={`${styles.btn} ${styles.btnGhost}`} href={mapUrl(huntStops[0])} target="_blank" rel="noreferrer">Open in maps</a><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Open Stroll map</Link></div></div><div className={styles.huntPhonePanel}><span className={styles.lbl}>How it works</span><h3 className={styles.landH3}>Clues, photos, points</h3><div className={styles.huntChecklist}><span>Read one riddle at a time.</span><span>Take up to three clues; Friendly and Full are untimed.</span><span>Take a proof photo at the doorway or inside.</span><span>The shop name reveals only after solving.</span><span>Your punch card fills in and unlocks the next riddle.</span></div><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={beginHunt}>Begin official gameplay</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setStage("setup")}>Back to setup</button></div></div></div>
+        </div>}
+
+        {stage === "playing" && <div className={styles.huntAppShell}>{currentCard}</div>}
+        {stage === "paused" && <div className={styles.huntAppShell}><div className={styles.huntPhonePanel}><span className={styles.lbl}>Phase 06 — pause / interruption</span><h2 className={styles.landH2}>Hunt paused and saved.</h2><p className={styles.landCardP}>Return exactly to stop {current + 1}. Your route, clues, photos, players and progress are saved on this phone.</p><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStage("playing")}>Resume current stop</button><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Open map</Link><button className={`${styles.btn} ${styles.btnGhost}`} onClick={clearHunt}>Restart setup</button></div></div></div>}
+        {stage === "help" && <div className={styles.huntAppShell}><div className={styles.landSecHead}><div><span className={styles.lbl}>Phase 07 — recovery / help</span><h2 className={styles.landH2}>Nobody gets stuck.</h2></div><p>These are the interruption states from the folder, kept inside the app flow.</p></div><div className={styles.huntModeGrid}>{["Continue manually / open directions", "Photo access needed — choose from library", "Cached clue + retry connection", "You may not be at the right place", "Rejoin via team code", "Join active hunt at current stop", "Confirm skip + point impact", "Alternative clue / bypass stop"].map((item) => <div className={styles.huntBranchCard} key={item}><h3>{item}</h3><p>{item.includes("skip") ? "Skipping records impact and moves on." : item.includes("Photo") ? "The camera is the arrival check; GPS never blocks progression." : "Return to the same current stop without reset."}</p></div>)}</div><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStage("playing")}>Return to current stop</button><button className={`${styles.btn} ${styles.btnGhost}`} onClick={skipStop}>Bypass this stop</button></div></div>}
+        {stage === "review" && <div className={styles.huntAppShell}><div className={styles.huntPlayGrid}><div className={styles.huntPhonePanel}><span className={styles.lbl}>Phase 05 — persistent screens</span><h2 className={styles.landH2}>Route progress</h2><div className={styles.huntChecklist}>{huntStops.map((stop, index) => <span key={stop.id}>{index + 1}. {progress[stop.id]?.state === "solved" ? "Found" : progress[stop.id]?.state === "skipped" ? "Skipped" : "Upcoming"} · {index === current ? "current stop" : `stop ${index + 1}`}</span>)}</div></div><div className={styles.huntPhonePanel}><MiniRouteMap stops={huntStops} current={current} progress={progress} cityName={cityName} /><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={() => setStage("playing")}>Return to current stop</button></div></div></div>}
+        {stage === "finished" && <div className={styles.huntAppShell}>
+          <div className={styles.landSecHead}><div><span className={styles.lbl}>Phase 08–10 — finish, memory, next action</span><h2 className={styles.landH2}>Hunt complete.</h2></div><p>Confetti moment, score summary, postcard, basket entry, sharing, rating and map return are now part of the app flow.</p></div>
+          <div className={styles.huntPlayGrid}><div className={styles.huntPhonePanel}><span className={styles.lbl}>Completion moment</span><h3 className={styles.landH3}>{avatar} {teamName || "Your team"} found {solvedCount} stops</h3><div className={styles.review}><div className={styles.revRow}><span className={styles.revKey}>Route</span><span className={styles.revVal}>{huntStops.length} stops completed</span></div><div className={styles.revRow}><span className={styles.revKey}>Hints</span><span className={styles.revVal}>{huntStops.reduce((s, stop) => s + (progress[stop.id]?.clues ?? 0), 0)}</span></div><div className={styles.revRow}><span className={styles.revKey}>Score</span><span className={styles.revVal}>{isRace ? fmt(strollSeconds) : "Untimed"}</span></div></div><div className={styles.calloutAmber}><b>Basket entry.</b> Share your postcard with @stroll_city or #StrollInglewood, or use the free email route on the rules page. No purchase necessary.</div><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={finishShare}>Share / copy caption</button><Link className={`${styles.btn} ${styles.btnGhost}`} href="/rules">Rules</Link></div></div><div className={styles.huntPhonePanel}><div className={styles.postcardArt} aria-label="Finished hunt postcard preview"><div className={styles.postcardStampBlock}>YYC</div><span className={styles.lbl}>Greetings from</span><h3>Inglewood</h3><div className={`${styles.postcardCollage} ${huntStops.length === 4 ? styles.postcardCollage4 : styles.postcardCollage8}`}>{huntStops.map((stop, index) => { const tilt = tiltFor(sessionKey, index + 20); const [a, b] = stampSwatches[index % stampSwatches.length]; const photo = progress[stop.id]?.photo; return <span key={stop.id} className={`${styles.postcardMiniStamp} ${photo ? styles.postcardMiniStampPhoto : ""}`} style={{ transform: `translate(${tilt.dx.toFixed(1)}px, ${tilt.dy.toFixed(1)}px) rotate(${tilt.rot.toFixed(2)}deg)`, background: photo ? undefined : `linear-gradient(150deg, ${a}, ${b})` }}>{photo ? <img src={photo} alt="" /> : String(index + 1).padStart(2, "0")}</span>; })}</div><div className={styles.postcardHeroFigure}><small>{isRace ? "STROLL TIME" : "INGLEWOOD"}</small><b>{isRace ? fmt(strollSeconds) : `${huntStops.length} STOPS`}</b></div><div className={styles.postcardTag}>@stroll_city<br /><b>#StrollInglewood</b></div></div><div className={styles.landHeroCta}><Link className={`${styles.btn} ${styles.btnGhost}`} href={`/${citySlug}`}>Return to Stroll map</Link><button className={`${styles.btn} ${styles.btnGhost}`} onClick={clearHunt}>Start another hunt</button></div></div></div>
+        </div>}
+      </section>
+    </div>
+  </main>;
 }
