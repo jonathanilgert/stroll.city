@@ -1038,6 +1038,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
     const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
+    const markerAvoidanceZoomMin = mobileLayout ? 16.75 : 16.35;
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 2 && r.x2 + 2 > s.x1 && r.y1 < s.y2 + 2 && r.y2 + 2 > s.y1);
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
@@ -1085,6 +1086,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
       const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
+      const allowOverlapAtThisZoom = !isSel && !walkingRoute && zoom < markerAvoidanceZoomMin;
+      if (allowOverlapAtThisZoom) {
+        const mode = desiredMode;
+        slots.push({ ...rectFor(cp, chipWidth(biz.name, mode), chipHeight(mode)), members: [biz], mode, pinned: false, offset: [0, 0] });
+        return;
+      }
       const fallbackModes: PinMode[] = desiredMode === "label" && !isSel ? ["label", "logo", "dot"] : desiredMode === "logo" ? ["logo", "dot"] : [desiredMode];
       let placed: { mode: PinMode; offset: [number, number]; rect: ReturnType<typeof rectFor> } | null = null;
       for (const mode of fallbackModes) {
