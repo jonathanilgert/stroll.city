@@ -1039,14 +1039,23 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const fullyCovers = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => (
-      a.x1 <= b.x1 + 1 && a.x2 >= b.x2 - 1 && a.y1 <= b.y1 + 1 && a.y2 >= b.y2 - 1
-    );
-    // Keep markers geographically honest: partial overlaps are acceptable. Only nudge a marker
-    // when one marker's whole visual chip would completely hide another marker/chip.
+    const overlap = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => {
+      const w = Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1));
+      const h = Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
+      return { w, h, area: w * h };
+    };
+    // Keep markers geographically honest: some overlap is fine. Nudge only when the overlap is
+    // deep enough to make one place's logo/name unreadable, like stacked label chips on mobile.
     const remainsReadable = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => {
       if (s.chrome) return false;
-      return fullyCovers(r, s) || fullyCovers(s, r);
+      const hit = overlap(r, s);
+      if (!hit.area) return false;
+      const rArea = Math.max(1, (r.x2 - r.x1) * (r.y2 - r.y1));
+      const sArea = Math.max(1, (s.x2 - s.x1) * (s.y2 - s.y1));
+      const coveredShare = hit.area / Math.min(rArea, sArea);
+      const sharedHeight = hit.h / Math.max(1, Math.min(r.y2 - r.y1, s.y2 - s.y1));
+      const sharedWidth = hit.w / Math.max(1, Math.min(r.x2 - r.x1, s.x2 - s.x1));
+      return coveredShare >= 0.34 || (sharedHeight >= 0.58 && sharedWidth >= 0.32);
     });
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
       const x = cp.x + offset[0];
