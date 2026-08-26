@@ -678,10 +678,12 @@ export type HuntSession = {
   mode: "friendly" | "full" | "race";
   team_name: string;
   email: string | null;
-  /* Solo walkers and teams get the same hunt; the split shapes copy, the postcard
-     byline, and later the leaderboard. */
-  party_type: "solo" | "team";
+  /* Solo walkers, teams and large groups get the same hunt; the split shapes copy,
+     the postcard byline, and later the leaderboard. A group splits into teams that
+     start at different stops, which is why it books the rotated-start format. */
+  party_type: "solo" | "team" | "group";
   party_size: number;
+  team_count: number;
   avatar_url: string | null;
   /* The stop order this team walks — rotated for races so two teams starting
      together don't queue at the same doorway. */
@@ -749,10 +751,15 @@ export async function createHuntSession(
     photos_consented?: boolean;
     party_type?: string;
     party_size?: number;
+    team_count?: number;
   },
 ) {
-  const partyType = payload.party_type === "solo" ? "solo" as const : "team" as const;
-  const fallbackName = partyType === "solo" ? "Solo walker" : "Anonymous team";
+  const partyType = payload.party_type === "solo"
+    ? "solo" as const
+    : payload.party_type === "group" ? "group" as const : "team" as const;
+  const fallbackName = partyType === "solo"
+    ? "Solo walker"
+    : partyType === "group" ? "Anonymous group" : "Anonymous team";
   const teamName = sanitizeString(payload.team_name, 80) || fallbackName;
   const startIndex = hunt.mode === "race" ? startOffsetFor(teamName) % Math.max(1, hunt.stop_ids.length) : 0;
   const ordered = (hunt.mode === "race" ? rotateStops(hunt.stop_ids, startIndex) : hunt.stop_ids)
@@ -768,9 +775,17 @@ export async function createHuntSession(
     team_name: teamName,
     email: payload.email ? sanitizeString(payload.email, 160) : null,
     party_type: partyType,
-    /* A solo walk is always one person; a team is clamped to something a single
-       punch card can plausibly belong to. */
-    party_size: partyType === "solo" ? 1 : Math.min(24, Math.max(2, Math.floor(Number(payload.party_size ?? 2)) || 2)),
+    /* A solo walk is always one person; a team is clamped to what one punch card can
+       plausibly belong to; a group is a booking-sized crowd. */
+    party_size: partyType === "solo"
+      ? 1
+      : partyType === "group"
+        ? Math.min(200, Math.max(6, Math.floor(Number(payload.party_size ?? 12)) || 12))
+        : Math.min(24, Math.max(2, Math.floor(Number(payload.party_size ?? 2)) || 2)),
+    /* Only a group splits into teams; everyone else is a single punch card. */
+    team_count: partyType === "group"
+      ? Math.min(12, Math.max(2, Math.floor(Number(payload.team_count ?? 2)) || 2))
+      : 1,
     avatar_url: null,
     stop_ids: ordered,
     stops: ordered.map((stopId) => ({

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
-import { Camera, Check, ChevronLeft, ChevronRight, Clock, MapPin, Minus, Plus, TrendingUp, User, Users } from "lucide-react";
+import { Camera, Check, ChevronLeft, ChevronRight, Clock, MapPin, Minus, Plus, TrendingUp, User, Users, UsersRound } from "lucide-react";
 import styles from "../hunt.module.css";
 
 export type OnboardingHunt = {
@@ -52,8 +52,10 @@ export default function HuntOnboarding({
   const [saved, setSaved] = useState(false);
   const [pickedDot, setPickedDot] = useState(0);
 
-  const [partyType, setPartyType] = useState<"solo" | "team" | null>(null);
+  const [partyType, setPartyType] = useState<"solo" | "team" | "group" | null>(null);
   const [partySize, setPartySize] = useState(2);
+  const [teamCount, setTeamCount] = useState(3);
+  const [groupSize, setGroupSize] = useState(12);
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
   const [email, setEmail] = useState("");
@@ -63,7 +65,15 @@ export default function HuntOnboarding({
   const [error, setError] = useState("");
   const nameRef = useRef<HTMLInputElement>(null);
 
-  const hunt = hunts.find((item) => item.slug === huntSlug) ?? initialHunt;
+  /* A large group needs the eight-stop rotated-start format whatever they arrived
+     on: without staggered starts, six teams meet at the same doorway. Falls back to
+     the longest hunt available if the race is not live. */
+  const groupHunt = hunts.find((item) => item.mode === "race")
+    ?? [...hunts].sort((a, b) => b.stop_count - a.stop_count)[0]
+    ?? null;
+  const chosenHunt = hunts.find((item) => item.slug === huntSlug) ?? initialHunt;
+  const hunt = partyType === "group" ? groupHunt ?? chosenHunt : chosenHunt;
+  const huntSwitched = partyType === "group" && chosenHunt !== null && hunt !== null && hunt.slug !== chosenHunt.slug;
   const stopTotal = hunt?.stop_count ?? 4;
   const dots = useMemo(() => ROUTE_DOTS.slice(0, Math.min(5, Math.max(3, stopTotal))), [stopTotal]);
   const needsAgeGate = hunt?.audience === "adult";
@@ -108,7 +118,8 @@ export default function HuntOnboarding({
           team_name: name.trim(),
           email: email.trim() || undefined,
           party_type: partyType ?? "team",
-          party_size: partyType === "solo" ? 1 : partySize,
+          party_size: partyType === "solo" ? 1 : partyType === "group" ? groupSize : partySize,
+          team_count: partyType === "group" ? teamCount : 1,
           photos_consented: photosConsented,
         }),
       });
@@ -292,6 +303,15 @@ export default function HuntOnboarding({
                           <span className={styles.choiceMeta}>Two or more. One punch card, shared between phones.</span>
                         </span>
                       </button>
+                      <button className={`${styles.choice} ${partyType === "group" ? styles.choiceOn : ""}`} onClick={() => setPartyType("group")} aria-pressed={partyType === "group"}>
+                        <span className={styles.choiceIcon}><UsersRound size={22} /></span>
+                        <span className={styles.choiceBody}>
+                          <span className={styles.choiceName}>Large group</span>
+                          <span className={styles.choiceMeta}>
+                            Birthday, staff day, class trip. Splits into teams on the eight-stop route.
+                          </span>
+                        </span>
+                      </button>
                     </div>
 
                     {partyType === "team" && (
@@ -308,18 +328,57 @@ export default function HuntOnboarding({
                         </div>
                       </div>
                     )}
+
+                    {partyType === "group" && (
+                      <>
+                        <div className={styles.field}>
+                          <span className={styles.fieldLabel}>Roughly how many people?</span>
+                          <div className={styles.counterRow}>
+                            <button className={styles.counterBtn} onClick={() => setGroupSize((n) => Math.max(6, n - 2))} disabled={groupSize <= 6} aria-label="Fewer people">
+                              <Minus size={17} />
+                            </button>
+                            <span className={styles.counterValue}>{groupSize}</span>
+                            <button className={styles.counterBtn} onClick={() => setGroupSize((n) => Math.min(200, n + 2))} disabled={groupSize >= 200} aria-label="More people">
+                              <Plus size={17} />
+                            </button>
+                          </div>
+                          <span className={styles.hintText}>Nudge it close — we only use it to size the teams.</span>
+                        </div>
+                        <div className={styles.field}>
+                          <span className={styles.fieldLabel}>Split into how many teams?</span>
+                          <div className={styles.counterRow}>
+                            <button className={styles.counterBtn} onClick={() => setTeamCount((n) => Math.max(2, n - 1))} disabled={teamCount <= 2} aria-label="Fewer teams">
+                              <Minus size={17} />
+                            </button>
+                            <span className={styles.counterValue}>{teamCount}</span>
+                            <button className={styles.counterBtn} onClick={() => setTeamCount((n) => Math.min(12, n + 1))} disabled={teamCount >= 12} aria-label="More teams">
+                              <Plus size={17} />
+                            </button>
+                          </div>
+                          <span className={styles.hintText}>
+                            About {Math.max(1, Math.round(groupSize / teamCount))} people per team. Each team starts at a
+                            different stop, so nobody queues at the same door.
+                          </span>
+                        </div>
+                        {huntSwitched && hunt && (
+                          <p className={styles.hintText}>
+                            Groups walk <strong>{hunt.name}</strong> — {hunt.stop_count} stops with rotated starts.
+                          </p>
+                        )}
+                      </>
+                    )}
                   </>
                 )}
 
                 {step === "name" && (
                   <>
                     <h1 className={`${styles.title} ${styles.titleSm}`}>
-                      {partyType === "solo" ? "What should we call you?" : "Name your team"}
+                      {partyType === "solo" ? "What should we call you?" : partyType === "group" ? "Name your group" : "Name your team"}
                     </h1>
                     <p className={styles.lede}>This goes on the punch card and the postcard at the end.</p>
                     <div className={styles.field}>
                       <label className={styles.fieldLabel} htmlFor="hunt-name">
-                        {partyType === "solo" ? "Your name" : "Team name"}
+                        {partyType === "solo" ? "Your name" : partyType === "group" ? "Group name" : "Team name"}
                       </label>
                       <input
                         id="hunt-name"
@@ -327,7 +386,7 @@ export default function HuntOnboarding({
                         className={styles.input}
                         value={name}
                         onChange={(event) => setName(event.target.value)}
-                        placeholder={partyType === "solo" ? "Alex" : "The Nine Avenue Nine"}
+                        placeholder={partyType === "solo" ? "Alex" : partyType === "group" ? "Reid’s 40th" : "The Nine Avenue Nine"}
                         maxLength={80}
                         autoComplete={partyType === "solo" ? "given-name" : "off"}
                         onKeyDown={(event) => { if (event.key === "Enter" && canContinue) goNext(); }}
@@ -407,7 +466,13 @@ export default function HuntOnboarding({
                       </div>
                       <div className={styles.summaryRow}>
                         <span className={styles.summaryKey}>Walking</span>
-                        <span className={styles.summaryVal}>{partyType === "solo" ? "Solo" : `Team of ${partySize}`}</span>
+                        <span className={styles.summaryVal}>
+                          {partyType === "solo"
+                            ? "Solo"
+                            : partyType === "group"
+                              ? `${groupSize} people in ${teamCount} teams`
+                              : `Team of ${partySize}`}
+                        </span>
                       </div>
                       <div className={styles.summaryRow}>
                         <span className={styles.summaryKey}>Name</span>

@@ -12,6 +12,7 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     photos_consented?: boolean;
     party_type?: string;
     party_size?: number;
+    team_count?: number;
   };
   const session = await createHuntSession(city, hunt, payload);
   return envelope(city, hydrateHuntSession(session, data), "runtime-overlay");
