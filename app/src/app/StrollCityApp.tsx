@@ -1016,7 +1016,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean; chrome?: boolean };
     const slots: Slot[] = [];
     if (pane) {
-      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
+      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.navigationHud}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
       chromeEls.forEach((n) => {
         const el = n as HTMLElement;
         if (!el.offsetWidth || getComputedStyle(el).display === "none") return;
@@ -1135,15 +1135,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <ExternalLink size={16} />
           </button>
         </div>
-        {walkingRoute?.target.id === biz.id && (
-          <div className={styles.routeNote}>
-            <span><strong>Navigation mode</strong> · {walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
-            <div className={styles.routeActions}>
-              <button onClick={showFullRoute}>Show full route</button>
-              <button onClick={clearWalkingRoute}>Exit navigation mode</button>
-            </div>
-          </div>
-        )}
         {geoError && <div className={styles.routeNote}>{geoError}</div>}
         <p className={styles.blurb}>{biz.blurb}</p>
         <div className={styles.kv}>
@@ -1385,6 +1376,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       <div ref={stageRef} className={`${styles.stage} ${stageTight ? styles.tight : ""} ${stageSnug ? styles.snug : ""} ${stageShort ? styles.short : ""} ${mobileLayout ? styles.mStage : ""}`}>
         <div ref={mapWrapRef} className={styles.mapWrap}>
           <div ref={mapNode} className={styles.map} />
+
+          {walkingRoute && (
+            <div className={styles.navigationHud}>
+              <div className={styles.navigationBanner}>
+                <strong>Navigation mode</strong>
+                <span>{walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
+              </div>
+              <div className={styles.navigationHudActions}>
+                <button onClick={showFullRoute}>Show full route</button>
+                <button onClick={clearWalkingRoute}>Exit navigation mode</button>
+              </div>
+            </div>
+          )}
 
           {!mobileLayout && (
           <>
