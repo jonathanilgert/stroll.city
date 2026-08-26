@@ -131,7 +131,9 @@ export default function HuntGame({
   const stop = session.stops[viewIndex];
   const point = stop ? pointsById.get(stop.stop_id) : undefined;
   const tint = TINTS[viewIndex % TINTS.length];
-  const isCurrent = viewIndex === cursor && !done;
+  /* You are "on" a stop if it is the furthest one you have reached — browsing back
+     through finished stops must not offer the camera again as if it were live. */
+  const isCurrent = viewIndex >= cursor && !done;
   const hasPhoto = Boolean(stop?.photo_url);
   const isRevealed = Boolean(stop && (revealed[stop.stop_id] || stop.state === "solved"));
 
@@ -262,8 +264,9 @@ export default function HuntGame({
   const advance = async () => {
     if (done || !stop || !hasPhoto) return;
     if (stop.state !== "solved") await post({ action: "stop_solved" });
-    /* Releasing the pin hands the view back to the next unfinished stop. */
-    setViewing(null);
+    /* Step forward by one. Handing the view back to "first incomplete" used to throw
+       you backwards onto a stop you had already walked past. */
+    setViewing(Math.min(viewIndex + 1, session.total_stops - 1));
     setGuess("");
     setVerdict("idle");
   };
@@ -280,6 +283,9 @@ export default function HuntGame({
             type: "raster",
             tiles: ["a", "b", "c", "d"].map((s) => `https://${s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png`),
             tileSize: 256,
+            /* CARTO serves "API key required" placeholders above z17. Cap the source so
+               MapLibre overzooms clean z17 tiles instead of asking for branded ones. */
+            maxzoom: 17,
             attribution: "© OpenStreetMap © CARTO",
           },
         },
@@ -379,7 +385,7 @@ export default function HuntGame({
             <span className={styles.gameHeadText}>
               <span className={`${styles.gameKicker} ${styles.mono}`}>{MODE_LABEL[session.mode]}</span>
               <strong className={styles.gameHeadline}>
-                {done ? "Hunt complete" : `Stop ${cursor + 1} of ${session.total_stops}`}
+                {done ? "Hunt complete" : `Stop ${viewIndex + 1} of ${session.total_stops}`}
               </strong>
             </span>
             <span className={styles.gameClock}><Clock size={12} />{formatClock(elapsed + session.penalty_seconds)}</span>

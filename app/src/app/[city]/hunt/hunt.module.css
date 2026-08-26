@@ -232,7 +232,9 @@
 .gamePunchOn { background: var(--brand); }
 .gamePunchNow { background: var(--brand-line); }
 
-.gameMap { position: relative; height: 252px; flex: none; background: var(--paper); border-bottom: 1px solid var(--line-3); }
+/* The riddle is the point, so the map gives way on short screens rather than
+   pushing it out of view behind the header and the sticky CTA. */
+.gameMap { position: relative; height: clamp(168px, 26vh, 252px); flex: none; background: var(--paper); border-bottom: 1px solid var(--line-3); }
 .gameMapCanvas { position: absolute; inset: 0; }
 .gameDirection { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 5; display: flex; align-items: center; gap: 10px;
   padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, .92); backdrop-filter: blur(14px);
