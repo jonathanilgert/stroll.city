@@ -10,7 +10,6 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
-  ExternalLink,
   Globe,
   Landmark,
   Layers,
@@ -1374,9 +1373,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <Globe size={16} />
             </button>
           )}
-          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Save places to a walking list from the profile panel.")}>
-            <ExternalLink size={16} />
-          </button>
         </div>
         {geoError && <div className={styles.routeNote}>{geoError}</div>}
         <p className={styles.blurb}>{biz.blurb}</p>
