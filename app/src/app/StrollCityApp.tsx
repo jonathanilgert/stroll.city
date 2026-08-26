@@ -270,11 +270,69 @@ function normalize(value: string) {
 }
 /* Search folds accents so "cafe" finds "Café" — typing é on a phone keyboard is a long-press most people won't do. */
 function foldForSearch(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 /* Every term has to appear somewhere, in any order, so "cafe 124" finds "Café on 124 Street". */
 function searchTerms(query: string) {
   return foldForSearch(query).split(/\s+/).filter(Boolean);
+}
+
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  bookstore: ["book", "books", "shop", "store"],
+  books: ["book", "bookstore", "shop", "store"],
+  book: ["books", "bookstore"],
+  store: ["shop", "shops", "retail", "boutique", "bookstore"],
+  stores: ["shop", "shops", "retail", "boutique"],
+  shop: ["store", "shops", "retail", "boutique"],
+  shops: ["shop", "store", "retail", "boutique"],
+  coffee: ["cafe", "cafes", "espresso"],
+  cafe: ["coffee", "cafes", "bakery", "bakeries"],
+  cafes: ["cafe", "coffee", "bakery", "bakeries"],
+  pub: ["bar", "bars", "taproom", "beer"],
+  bar: ["pub", "bars", "cocktail", "beer"],
+  restaurant: ["food", "dining", "kitchen", "eat", "eats"],
+  food: ["restaurant", "dining", "kitchen", "eat", "eats"],
+  art: ["arts", "gallery", "galleries", "studio"],
+  arts: ["art", "gallery", "galleries", "studio"],
+};
+function expandedSearchTerms(term: string) {
+  return [term, ...(SEARCH_SYNONYMS[term] ?? [])];
+}
+function editDistance(a: string, b: string) {
+  if (a === b) return 0;
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  const curr = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i += 1) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    for (let j = 0; j <= b.length; j += 1) prev[j] = curr[j];
+  }
+  return prev[b.length];
+}
+function fuzzyTokenMatch(term: string, tokens: string[], haystack: string) {
+  if (haystack.includes(term)) return true;
+  return expandedSearchTerms(term).some((candidate, index) => tokens.some((token) => token.includes(candidate) || (index === 0 && token.length >= 3 && candidate.includes(token)) || (index === 0 && candidate.length >= 5 && candidate[0] === token[0] && editDistance(candidate, token) <= (candidate.length >= 7 ? 2 : 1))));
+}
+function businessSearchText(b: Business) {
+  return foldForSearch(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]} ${b.blurb} ${b.highlights.map(([, text]) => text).join(" ")}`);
+}
+function businessMatchesSearch(b: Business, terms: string[]) {
+  if (!terms.length) return true;
+  const text = businessSearchText(b);
+  const tokens = text.split(/\s+/).filter(Boolean);
+  const compactText = text.replace(/\s+/g, "");
+  const compactQuery = terms.join("");
+  return compactText.includes(compactQuery) || terms.every((term) => fuzzyTokenMatch(term, tokens, text));
 }
 function streetOnly(name: string) {
   const parts = name.split("/");
@@ -576,10 +634,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!data) return [];
     const terms = searchTerms(query);
     if (!terms.length) return data.businesses;
-    return data.businesses.filter((b) => {
-      const haystack = foldForSearch(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]}`);
-      return terms.every((term) => haystack.includes(term));
-    });
+    return data.businesses.filter((b) => businessMatchesSearch(b, terms));
   }, [data, query]);
 
   const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
