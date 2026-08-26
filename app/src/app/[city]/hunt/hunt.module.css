@@ -27,8 +27,11 @@
   overflow: hidden;
 }
 @media (min-width: 520px) {
-  .app { padding: 24px 16px; align-items: flex-start; }
-  .screen { max-height: 100%; border-radius: 34px; box-shadow: 0 30px 70px rgba(20, 22, 26, .18); }
+  .app { padding: 24px 16px; }
+  /* Full height, not shrink-wrapped: the screen owns the viewport so the CTA sits
+     on the bottom edge on every step, with the slack falling between the content
+     and the button rather than under the card. */
+  .screen { height: 100%; border-radius: 34px; box-shadow: 0 30px 70px rgba(20, 22, 26, .18); }
 }
 .scroll { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 
@@ -159,7 +162,7 @@
 .summaryAvatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 
 /* ---------------- sticky footer ---------------- */
-.footer { position: sticky; bottom: 0; flex: none; padding: 12px 20px calc(20px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 32%); }
+.footer { position: sticky; bottom: 0; margin-top: auto; flex: none; padding: 12px 20px calc(20px + env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #fff 32%); }
 .cta {
   width: 100%; padding: 15px; border: 0; border-radius: 999px; background: var(--brand); color: #fff;
   font: inherit; font-weight: 500; font-size: 15.5px; display: inline-flex; align-items: center; justify-content: center;
