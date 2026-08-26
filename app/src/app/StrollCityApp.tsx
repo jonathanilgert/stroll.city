@@ -1381,7 +1381,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div className={styles.navigationHud}>
               <div className={styles.navigationBanner}>
                 <strong>Navigation mode</strong>
-                <span>{walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
               </div>
               <div className={styles.navigationHudActions}>
                 <button onClick={showFullRoute}>Show full route</button>
