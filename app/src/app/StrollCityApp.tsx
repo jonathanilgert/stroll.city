@@ -216,13 +216,15 @@ function edmontonMinutesNow() {
 }
 
 /* raw markup for vanilla-DOM markers */
-function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
+type PinMode = "dot" | "logo" | "label";
+function pinMarkup(styles_: typeof styles, biz: Business, color: string, mode: PinMode, active: boolean) {
   const hasLogo = Boolean(biz.logo_url);
-  const glyphInner = hasLogo ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
-  const fill = hasLogo ? "#fff" : "#E7E9EC";
-  const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
+  const compact = mode !== "label";
+  const glyphInner = mode === "dot" ? "" : hasLogo ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const fill = mode === "dot" ? color : hasLogo ? "#fff" : "#E7E9EC";
+  const classes = [styles_.pin, compact ? styles_.compact : "", mode === "dot" ? styles_.dotPin : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
   const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14161A;border-color:${color}">${glyphInner}</span>`;
-  if (compact) return `<div class="${classes}">${glyph}</div>`;
+  if (mode !== "label") return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
 function fallbackEvents(data: StrollData): EventItem[] {
@@ -1013,7 +1015,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
     const wrap = mapWrapRef.current;
     const pane = wrap?.getBoundingClientRect();
-    type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean; chrome?: boolean };
+    type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: PinMode; pinned: boolean; chrome?: boolean; offset?: [number, number] };
     const slots: Slot[] = [];
     if (pane) {
       const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.navigationHud}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
@@ -1029,42 +1031,79 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const bounds = map.getBounds();
     const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
     const zoom = map.getZoom();
-    const labelDensityLimit = 48; // roughly one zoom level sooner than the previous 12-place cutoff
-    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (mobileLayout && zoom >= 16.75));
+    const dotZoomMax = 16.2;
+    const logoZoomMin = 15.95;
+    const labelZoomMin = mobileLayout ? 17.15 : 16.65;
+    const labelDensityLimit = mobileLayout ? 18 : 28;
+    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
+    const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
+    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
+    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
+    const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
+      const x = cp.x + offset[0];
+      const y = cp.y + offset[1];
+      return { x1: x - w / 2, x2: x + w / 2, y1: y - h / 2, y2: y + h / 2, cx: cp.x, cy: cp.y };
+    };
+    const offsetCandidates = (max: number): [number, number][] => {
+      if (max <= 0) return [[0, 0]];
+      const base: [number, number][] = [[0, 0]];
+      const steps = [12, 24, 36, 52, 70, 90].filter((r) => r <= max);
+      steps.forEach((r) => {
+        base.push([r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r], [r, Math.round(r / 2)], [-r, Math.round(r / 2)], [r, -Math.round(r / 2)], [-r, -Math.round(r / 2)], [Math.round(r / 2), r], [-Math.round(r / 2), r], [Math.round(r / 2), -r], [-Math.round(r / 2), -r]);
+      });
+      return base;
+    };
     const measureCanvas = document.createElement("canvas").getContext("2d");
-    const chipWidth = (name: string, isSelected: boolean) => {
-      if (!forceLabels && !isSelected) return 32;
+    const chipWidth = (name: string, mode: PinMode) => {
+      if (mode === "dot") return 14;
+      if (mode === "logo") return 32;
       if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
       const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
       return 52 + Math.min(132, w);
+    };
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 14 : mode === "logo" ? 32 : 36;
+    const maxSkewFor = (mode: PinMode) => {
+      if (walkingRoute) return 0;
+      if (mode === "dot") return zoom >= 17.5 ? 0 : 10;
+      if (mode === "logo") return zoom >= 18.25 ? 0 : zoom >= 17.25 ? 8 : 20;
+      return visibleOnScreenCount <= 10 && zoom >= 18.75 ? 0 : 90;
     };
 
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
-      const wide = rectFor(cp, chipWidth(biz.name, isSel));
-      if (forceLabels || (isSel && !mobileLayout)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
-      const small = rectFor(cp, 32);
-      slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel });
+      let mode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
+      let w = chipWidth(biz.name, mode);
+      let h = chipHeight(mode);
+      let candidates = offsetCandidates(maxSkewFor(mode));
+      let offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
+      if (!offset && mode === "label" && !isSel) {
+        mode = "logo";
+        w = chipWidth(biz.name, mode);
+        h = chipHeight(mode);
+        candidates = offsetCandidates(maxSkewFor(mode));
+        offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
+      }
+      offset ??= candidates[candidates.length - 1];
+      slots.push({ ...rectFor(cp, w, h, offset), members: [biz], mode, pinned: isSel, offset });
     });
 
     slots.forEach((s) => {
       if (s.chrome || !s.members.length) return;
       if (s.pinned || s.members.length === 1) {
         const biz = s.members[0];
-        const compact = s.mode === "glyph" && biz.id !== selected?.id;
         const el = document.createElement("button");
         el.className = styles.markerHit;
-        el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
+        el.dataset.pinMode = s.mode;
+        el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), s.mode, biz.id === selected?.id);
         el.addEventListener("click", (event) => {
           event.preventDefault();
           event.stopPropagation();
           flyToBusiness(biz, { moveMap: false });
         });
         el.addEventListener("mouseenter", () => {
-          if (mobileLayout) return;
+          if (mobileLayout || s.mode === "dot") return;
           const pinEl = el.querySelector(`.${styles.pin}`);
           if (pinEl?.classList.contains(styles.compact)) { pinEl.classList.remove(styles.compact); (el as HTMLElement).dataset.wasCompact = "true"; }
           rowElsRef.current.get(biz.id)?.classList.add(styles.rowActive);
@@ -1074,7 +1113,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           if (el.dataset.wasCompact === "true") pinEl?.classList.add(styles.compact);
           if (biz.id !== selected?.id) rowElsRef.current.get(biz.id)?.classList.remove(styles.rowActive);
         });
-        const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([biz.lon, biz.lat]).addTo(map);
+        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat([biz.lon, biz.lat]).addTo(map);
         pinMarkersRef.current.push(marker);
         pinElsRef.current.set(biz.id, el);
       }
