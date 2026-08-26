@@ -1654,7 +1654,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <input
                   ref={searchRef}
                   aria-label="Search businesses"
-                  placeholder="Search cafés, shops, galleries…"
+                  placeholder="Search…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   /* type=search gives the phone keyboard a Search key; the rest stops iOS autocapitalising business names. */
