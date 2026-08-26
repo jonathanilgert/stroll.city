@@ -1039,7 +1039,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
+    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 10 && r.x2 + 10 > s.x1 && r.y1 < s.y2 + 8 && r.y2 + 8 > s.y1);
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
       const x = cp.x + offset[0];
       const y = cp.y + offset[1];
@@ -1047,46 +1047,64 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     };
     const offsetCandidates = (max: number): [number, number][] => {
       if (max <= 0) return [[0, 0]];
-      const base: [number, number][] = [[0, 0]];
-      const steps = [12, 24, 36, 52, 70, 90].filter((r) => r <= max);
-      steps.forEach((r) => {
-        base.push([r, 0], [-r, 0], [0, r], [0, -r], [r, r], [-r, r], [r, -r], [-r, -r], [r, Math.round(r / 2)], [-r, Math.round(r / 2)], [r, -Math.round(r / 2)], [-r, -Math.round(r / 2)], [Math.round(r / 2), r], [-Math.round(r / 2), r], [Math.round(r / 2), -r], [-Math.round(r / 2), -r]);
-      });
-      return base;
+      const offsets: [number, number][] = [[0, 0]];
+      const seen = new Set(["0,0"]);
+      const add = (x: number, y: number) => {
+        const key = `${x},${y}`;
+        if (!seen.has(key)) { seen.add(key); offsets.push([x, y]); }
+      };
+      for (let r = 12; r <= max; r += 12) {
+        const diagonals = Math.round(r * 0.7);
+        add(r, 0); add(-r, 0); add(0, r); add(0, -r);
+        add(diagonals, diagonals); add(-diagonals, diagonals); add(diagonals, -diagonals); add(-diagonals, -diagonals);
+        add(r, Math.round(r / 2)); add(-r, Math.round(r / 2)); add(r, -Math.round(r / 2)); add(-r, -Math.round(r / 2));
+        add(Math.round(r / 2), r); add(-Math.round(r / 2), r); add(Math.round(r / 2), -r); add(-Math.round(r / 2), -r);
+      }
+      return offsets;
     };
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, mode: PinMode) => {
-      if (mode === "dot") return 14;
+      if (mode === "dot") return 9;
       if (mode === "logo") return 32;
       if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
       const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
-      return 52 + Math.min(132, w);
+      return 66 + Math.min(140, w);
     };
-    const chipHeight = (mode: PinMode) => mode === "dot" ? 14 : mode === "logo" ? 32 : 36;
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 32 : 38;
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
-      if (mode === "dot") return zoom >= 17.5 ? 0 : 10;
-      if (mode === "logo") return zoom >= 18.25 ? 0 : zoom >= 17.25 ? 8 : 20;
-      return visibleOnScreenCount <= 10 && zoom >= 18.75 ? 0 : 90;
+      if (mode === "dot") return zoom >= 18.5 ? 0 : zoom >= 17.75 ? 24 : zoom >= 16.75 ? 48 : 96;
+      if (mode === "logo") return zoom >= 19 ? 0 : zoom >= 18.25 ? 18 : zoom >= 17.25 ? 48 : 108;
+      if (visibleOnScreenCount <= 8 && zoom >= 19) return 0;
+      if (zoom >= 18.75) return 72;
+      if (zoom >= 17.75) return 132;
+      return 204;
     };
 
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
-      let mode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
-      let w = chipWidth(biz.name, mode);
-      let h = chipHeight(mode);
-      let candidates = offsetCandidates(maxSkewFor(mode));
-      let offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
-      if (!offset && mode === "label" && !isSel) {
-        mode = "logo";
-        w = chipWidth(biz.name, mode);
-        h = chipHeight(mode);
-        candidates = offsetCandidates(maxSkewFor(mode));
-        offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
+      const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
+      const fallbackModes: PinMode[] = desiredMode === "label" && !isSel ? ["label", "logo", "dot"] : desiredMode === "logo" ? ["logo", "dot"] : [desiredMode];
+      let placed: { mode: PinMode; offset: [number, number]; rect: ReturnType<typeof rectFor> } | null = null;
+      for (const mode of fallbackModes) {
+        const w = chipWidth(biz.name, mode);
+        const h = chipHeight(mode);
+        const candidates = offsetCandidates(maxSkewFor(mode));
+        const offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
+        if (offset) {
+          placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
+          break;
+        }
       }
-      offset ??= candidates[candidates.length - 1];
-      slots.push({ ...rectFor(cp, w, h, offset), members: [biz], mode, pinned: isSel, offset });
+      if (!placed) {
+        if (!isSel) return;
+        const mode = desiredMode;
+        const candidates = offsetCandidates(maxSkewFor(mode));
+        const offset = candidates[candidates.length - 1] ?? [0, 0];
+        placed = { mode, offset, rect: rectFor(cp, chipWidth(biz.name, mode), chipHeight(mode), offset) };
+      }
+      slots.push({ ...placed.rect, members: [biz], mode: placed.mode, pinned: isSel, offset: placed.offset });
     });
 
     slots.forEach((s) => {

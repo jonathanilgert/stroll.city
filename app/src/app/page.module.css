@@ -199,7 +199,7 @@
 .edgeTabRight { left: -25px; border-radius: 12px 0 0 12px; }
 
 /* markers */
-.markerHit { background: none; border: 0; touch-action: manipulation; }
+.markerHit { display: block; margin: 0; padding: 0; line-height: 1; background: none; border: 0; touch-action: manipulation; }
 .markerHit * { pointer-events: none; }
 .pin { position: relative; display: flex; align-items: center; gap: 8px; height: 34px; padding: 3px 13px 3px 3px;
   background: rgba(255,255,255,.97); border-radius: 999px; box-shadow: 0 3px 10px rgba(20,24,26,.16); white-space: nowrap;
@@ -212,8 +212,8 @@
 .compact { padding: 0; width: 30px; height: 30px; background: none; box-shadow: none; }
 .compact .label { display: none; }
 .compact .glyph { width: 30px; height: 30px; flex: 0 0 30px; box-shadow: 0 0 0 3px rgba(255,255,255,.9), 0 3px 10px rgba(20,24,26,.2); }
-.dotPin { width: 14px; height: 14px; }
-.dotPin .glyph { width: 14px; height: 14px; flex-basis: 14px; border: 0; box-shadow: 0 0 0 2px rgba(255,255,255,.92), 0 2px 7px rgba(20,24,26,.2); }
+.dotPin { width: 9px; height: 9px; }
+.dotPin .glyph { width: 9px; height: 9px; flex-basis: 9px; border: 0; box-shadow: 0 0 0 1.5px rgba(255,255,255,.94), 0 2px 6px rgba(20,24,26,.2); }
 .dotPin:hover { transform: scale(1.28); }
 .compact:hover { transform: scale(1.12); }
 .pinActive { background: var(--black); box-shadow: 0 0 0 8px rgba(220,242,60,.42), 0 10px 26px rgba(20,24,26,.3); transform: scale(1.06); }
