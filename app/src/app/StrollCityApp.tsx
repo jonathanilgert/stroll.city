@@ -1379,8 +1379,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
           {walkingRoute && (
             <div className={styles.navigationHud}>
-              <div className={styles.navigationBanner}>
-                <strong>Navigation mode</strong>
+              <div className={styles.navigationStatus} aria-label="Navigation mode is active">
+                <span className={styles.navigationStatusDot} />
+                <span>Navigation mode</span>
               </div>
               <div className={styles.navigationHudActions}>
                 <button onClick={showFullRoute}>Show full route</button>
