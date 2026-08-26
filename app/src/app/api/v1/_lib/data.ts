@@ -239,7 +239,8 @@ type OverlayKind =
   | "business_edits"
   | "claim_codes"
   | "bia_evidence"
-  | "hunt_sessions";
+  | "hunt_sessions"
+  | "hunt_groups";
 
 async function readOverlay<T>(city: string, kind: OverlayKind): Promise<T[]> {
   try {
@@ -684,6 +685,11 @@ export type HuntSession = {
   party_type: "solo" | "team" | "group";
   party_size: number;
   team_count: number;
+  /* A team inside a large group: its own punch card, its own start, but it shares
+     the group's name and shows up on the group's board. */
+  group_id: string | null;
+  group_name: string | null;
+  team_index: number | null;
   avatar_url: string | null;
   /* The stop order this team walks — rotated for races so two teams starting
      together don't queue at the same doorway. */
@@ -775,6 +781,9 @@ export async function createHuntSession(
     team_name: teamName,
     email: payload.email ? sanitizeString(payload.email, 160) : null,
     party_type: partyType,
+    group_id: null,
+    group_name: null,
+    team_index: null,
     /* A solo walk is always one person; a team is clamped to what one punch card can
        plausibly belong to; a group is a booking-sized crowd. */
     party_size: partyType === "solo"
@@ -921,4 +930,161 @@ export async function setHuntSessionAvatar(city: string, sessionId: string, avat
   const session = await getHuntSession(city, sessionId);
   if (!session) return null;
   return saveSession(city, { ...session, avatar_url: avatarUrl, updated_at: new Date().toISOString() });
+}
+
+/* ---------------------------------------------------------------------------
+   Hunt groups
+
+   A birthday or a staff day is not one walk with twelve people on it — it is
+   several teams walking the same eight stops at once. So a group creates one
+   session per team, each with its own punch card, its own proof photos and its
+   own starting stop, tied together by a group id and shown on one board.
+--------------------------------------------------------------------------- */
+
+export type HuntGroup = {
+  id: string;
+  city: string;
+  hunt_id: string;
+  hunt_slug: string;
+  hunt_name: string;
+  group_name: string;
+  party_size: number;
+  team_count: number;
+  session_ids: string[];
+  email: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+const GROUP_LIMIT = 200;
+
+function newGroupId() {
+  return `grp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export async function getHuntGroup(city: string, id: string) {
+  const rows = await readOverlay<HuntGroup>(city, "hunt_groups");
+  return rows.find((row) => row.id === id) ?? null;
+}
+
+export async function createHuntGroup(
+  city: string,
+  hunt: Hunt,
+  payload: {
+    group_name?: string;
+    team_names?: unknown;
+    party_size?: number;
+    email?: string;
+    photos_consented?: boolean;
+  },
+) {
+  const groupName = sanitizeString(payload.group_name, 80) || "Anonymous group";
+  const rawNames = Array.isArray(payload.team_names) ? payload.team_names : [];
+  const names = rawNames
+    .slice(0, 12)
+    .map((value, index) => sanitizeString(value, 80) || `Team ${index + 1}`);
+  const teamNames = names.length >= 2 ? names : ["Team 1", "Team 2"];
+  const stops = STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length;
+  const groupId = newGroupId();
+  const now = new Date().toISOString();
+
+  const sessions: HuntSession[] = teamNames.map((teamName, index) => {
+    /* Even spacing rather than a name hash: with six teams you want them a stop
+       or two apart on purpose, not wherever the letters happen to land. */
+    const startIndex = Math.floor((index * stops) / teamNames.length) % Math.max(1, hunt.stop_ids.length);
+    const ordered = rotateStops(hunt.stop_ids, startIndex).slice(0, stops);
+    return {
+      id: `${newSessionId()}-t${index + 1}`,
+      city,
+      hunt_id: hunt.id,
+      hunt_slug: hunt.slug,
+      hunt_name: hunt.name,
+      mode: hunt.mode,
+      team_name: teamName,
+      email: payload.email ? sanitizeString(payload.email, 160) : null,
+      party_type: "group",
+      party_size: Math.min(200, Math.max(6, Math.floor(Number(payload.party_size ?? 12)) || 12)),
+      team_count: teamNames.length,
+      group_id: groupId,
+      group_name: groupName,
+      team_index: index,
+      stop_ids: ordered,
+      stops: ordered.map((stopId) => ({
+        stop_id: stopId,
+        state: "pending" as const,
+        clues_used: 0,
+        solved_at: null,
+        seconds: 0,
+        photo_url: null,
+        photo_id: null,
+      })),
+      start_index: startIndex,
+      status: "active" as const,
+      paid: hunt.mode === "friendly",
+      stripe_payment_id: null,
+      photos_consented: Boolean(payload.photos_consented),
+      penalty_seconds: 0,
+      elapsed_seconds: 0,
+      started_at: now,
+      finished_at: null,
+      updated_at: now,
+      avatar_url: null,
+    };
+  });
+
+  const existing = await readSessions(city);
+  await writeOverlay(city, "hunt_sessions", [...sessions, ...existing].slice(0, SESSION_LIMIT));
+
+  const group: HuntGroup = {
+    id: groupId,
+    city,
+    hunt_id: hunt.id,
+    hunt_slug: hunt.slug,
+    hunt_name: hunt.name,
+    group_name: groupName,
+    party_size: sessions[0]?.party_size ?? 12,
+    team_count: teamNames.length,
+    session_ids: sessions.map((session) => session.id),
+    email: payload.email ? sanitizeString(payload.email, 160) : null,
+    created_at: now,
+    updated_at: now,
+  };
+  const groups = await readOverlay<HuntGroup>(city, "hunt_groups");
+  await writeOverlay(city, "hunt_groups", [group, ...groups.filter((row) => row.id !== group.id)].slice(0, GROUP_LIMIT));
+  return { group, sessions };
+}
+
+/* The group board: every team's punch card at a glance, ordered by who is ahead. */
+export async function hydrateHuntGroup(city: string, group: HuntGroup) {
+  const all = await readSessions(city);
+  const byId = new Map(all.map((session) => [session.id, session]));
+  const teams = group.session_ids
+    .map((id) => byId.get(id))
+    .filter(Boolean)
+    .map((session) => {
+      const row = session as HuntSession;
+      const solved = row.stops.filter((stop) => stop.state === "solved").length;
+      return {
+        session_id: row.id,
+        team_index: row.team_index ?? 0,
+        team_name: row.team_name,
+        solved_count: solved,
+        photo_count: row.stops.filter((stop) => Boolean(stop.photo_url)).length,
+        total_stops: row.stops.length,
+        status: row.status,
+        start_index: row.start_index,
+        stroll_seconds: row.elapsed_seconds + row.penalty_seconds,
+        finished_at: row.finished_at,
+      };
+    });
+  const ranked = [...teams].sort((a, b) => (
+    b.solved_count - a.solved_count || a.stroll_seconds - b.stroll_seconds || a.team_index - b.team_index
+  ));
+  return {
+    ...group,
+    teams: teams.sort((a, b) => a.team_index - b.team_index),
+    leader: ranked[0] ?? null,
+    solved_total: teams.reduce((sum, team) => sum + team.solved_count, 0),
+    stops_total: teams.reduce((sum, team) => sum + team.total_stops, 0),
+  };
 }

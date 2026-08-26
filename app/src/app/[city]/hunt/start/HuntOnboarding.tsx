@@ -56,6 +56,9 @@ export default function HuntOnboarding({
   const [partySize, setPartySize] = useState(2);
   const [teamCount, setTeamCount] = useState(3);
   const [groupSize, setGroupSize] = useState(12);
+  /* Sparse on purpose: a blank entry falls back to "Team 3" server-side, so nobody
+     has to name every team to get walking. */
+  const [teamNames, setTeamNames] = useState<string[]>([]);
   const [name, setName] = useState("");
   const [photo, setPhoto] = useState<{ file: File; url: string } | null>(null);
   const [email, setEmail] = useState("");
@@ -111,15 +114,39 @@ export default function HuntOnboarding({
     setBusy(true);
     setError("");
     try {
+      /* A group is several walks, not one: it posts to /groups, gets a session per
+         team back, and lands on the board that hands out the team links. */
+      if (partyType === "group") {
+        const response = await fetch(`/api/v1/${citySlug}/hunts/${hunt.slug}/groups`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            group_name: name.trim(),
+            team_names: Array.from({ length: teamCount }, (_, index) => teamNames[index]?.trim() || ""),
+            party_size: groupSize,
+            email: email.trim() || undefined,
+            photos_consented: photosConsented,
+          }),
+        });
+        const payload = await response.json().catch(() => null) as { ok?: boolean; data?: { id?: string }; error?: string } | null;
+        if (!response.ok || !payload?.ok || !payload.data?.id) {
+          setError(payload?.error ?? "Could not start the hunt. Please try again.");
+          setBusy(false);
+          return;
+        }
+        router.push(`/${citySlug}/hunt/group/${payload.data.id}`);
+        return;
+      }
+
       const response = await fetch(`/api/v1/${citySlug}/hunts/${hunt.slug}/sessions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           team_name: name.trim(),
           email: email.trim() || undefined,
+          /* Groups returned above, so this is solo or a single team. */
           party_type: partyType ?? "team",
-          party_size: partyType === "solo" ? 1 : partyType === "group" ? groupSize : partySize,
-          team_count: partyType === "group" ? teamCount : 1,
+          party_size: partyType === "solo" ? 1 : partySize,
           photos_consented: photosConsented,
         }),
       });
@@ -375,7 +402,11 @@ export default function HuntOnboarding({
                     <h1 className={`${styles.title} ${styles.titleSm}`}>
                       {partyType === "solo" ? "What should we call you?" : partyType === "group" ? "Name your group" : "Name your team"}
                     </h1>
-                    <p className={styles.lede}>This goes on the punch card and the postcard at the end.</p>
+                    <p className={styles.lede}>
+                      {partyType === "group"
+                        ? "Every team walks its own punch card, so each one needs a name to sign it."
+                        : "This goes on the punch card and the postcard at the end."}
+                    </p>
                     <div className={styles.field}>
                       <label className={styles.fieldLabel} htmlFor="hunt-name">
                         {partyType === "solo" ? "Your name" : partyType === "group" ? "Group name" : "Team name"}
@@ -393,13 +424,42 @@ export default function HuntOnboarding({
                       />
                       <span className={styles.hintText}>You can be anyone. Nothing here is checked.</span>
                     </div>
+
+                    {partyType === "group" && (
+                      <>
+                        <strong className={styles.sectionLabel}>The {teamCount} teams</strong>
+                        <div className={styles.teamList}>
+                          {Array.from({ length: teamCount }, (_, index) => (
+                            <label className={styles.teamRow} key={index}>
+                              <span className={styles.teamRowN}>{index + 1}</span>
+                              <input
+                                className={styles.teamInput}
+                                value={teamNames[index] ?? ""}
+                                onChange={(event) => setTeamNames((rows) => {
+                                  const next = [...rows];
+                                  next[index] = event.target.value;
+                                  return next;
+                                })}
+                                placeholder={`Team ${index + 1}`}
+                                maxLength={80}
+                                aria-label={`Name for team ${index + 1}`}
+                              />
+                            </label>
+                          ))}
+                        </div>
+                        <span className={styles.hintText}>
+                          Leave one blank and it walks as “Team {teamNames.findIndex((entry) => !entry?.trim()) + 1 || teamCount}”.
+                          Each team gets its own link on the next screen.
+                        </span>
+                      </>
+                    )}
                   </>
                 )}
 
                 {step === "photo" && (
                   <>
                     <h1 className={`${styles.title} ${styles.titleSm}`}>Add a photo</h1>
-                    <p className={styles.lede}>It sits on your punch card and the finished postcard. Skip it if you would rather not.</p>
+                    <p className={styles.lede}>{partyType === "group" ? "One photo for the whole group — it sits on every team’s punch card." : "It sits on your punch card and the finished postcard. Skip it if you would rather not."}</p>
                     <div className={styles.avatarWrap}>
                       <label className={`${styles.avatar} ${photo ? styles.avatarFilled : ""}`}>
                         {photo
@@ -485,6 +545,14 @@ export default function HuntOnboarding({
                           ? <img className={styles.summaryAvatar} src={photo.url} alt="" />
                           : <span className={styles.summaryVal}>Not added</span>}
                       </div>
+                      {partyType === "group" && (
+                        <div className={styles.summaryRow}>
+                          <span className={styles.summaryKey}>Teams</span>
+                          <span className={styles.summaryVal}>
+                            {Array.from({ length: teamCount }, (_, i) => teamNames[i]?.trim() || `Team ${i + 1}`).join(", ")}
+                          </span>
+                        </div>
+                      )}
                       {email.trim() && (
                         <div className={styles.summaryRow}>
                           <span className={styles.summaryKey}>Email</span>

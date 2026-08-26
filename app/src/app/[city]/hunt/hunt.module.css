@@ -183,3 +183,31 @@
   .routeStop:hover { border-color: var(--brand); color: var(--brand); }
   .routeStopOn:hover { color: #fff; }
 }
+
+/* team naming — one row per team in a large group */
+.teamList { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.teamRow { display: flex; align-items: center; gap: 10px; }
+.teamRowN { width: 26px; height: 26px; flex: none; border-radius: 999px; background: var(--paper); color: var(--ink-3);
+  display: grid; place-items: center; font-size: 12px; font-weight: 500; }
+.teamInput { flex: 1; min-width: 0; height: 46px; padding: 0 14px; font: inherit; font-size: 15px; color: var(--ink);
+  background: #fff; border: 1.5px solid var(--line-strong); border-radius: 13px; outline: 0; transition: border-color .16s, box-shadow .16s; }
+.teamInput:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(11, 71, 232, .12); }
+.teamInput::placeholder { color: var(--ink-3); }
+
+/* group board */
+.leaderRow { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px;
+  background: var(--accent-soft); border: 1px solid var(--accent-line); font-size: 13.5px; color: var(--ink); margin-bottom: 16px; }
+.leaderIcon { width: 28px; height: 28px; flex: none; border-radius: 999px; background: var(--accent); color: var(--ink); display: grid; place-items: center; }
+.teamCards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.teamCard { border: 1.5px solid var(--line-strong); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: #fff; }
+.teamCardDone { border-color: var(--accent); background: var(--accent-soft); }
+.teamCardTop { display: flex; align-items: center; gap: 10px; }
+.teamCardName { flex: 1; min-width: 0; font-size: 15.5px; font-weight: 600; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.teamCardScore { font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.teamBar { height: 6px; border-radius: 99px; background: var(--paper-2); overflow: hidden; }
+.teamBar span { display: block; height: 100%; background: var(--brand); border-radius: 99px; transition: width .4s; }
+.teamCardActions { display: flex; align-items: center; gap: 10px; }
+.teamOpen { display: inline-flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 500; color: var(--brand); }
+.teamCopy { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2);
+  border: 1px solid var(--line-strong); border-radius: 999px; padding: 7px 13px; background: #fff; }
+.teamCopy:hover { color: var(--ink); border-color: var(--ink-3); }
