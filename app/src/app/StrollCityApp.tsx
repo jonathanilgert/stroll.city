@@ -1262,12 +1262,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, mode: PinMode) => {
       if (mode === "dot") return 9;
-      if (mode === "logo") return 32;
-      if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
-      const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
-      return 66 + Math.min(140, w);
+      if (mode === "logo") return 26;
+      if (measureCanvas) measureCanvas.font = "500 10.5px Outfit, sans-serif";
+      const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 6;
+      return 43 + Math.min(100, w);
     };
-    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 32 : 38;
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 26 : 30;
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
       if (mode === "dot") return 16;
