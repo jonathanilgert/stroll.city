@@ -333,3 +333,40 @@
 .solvedBanner { display: flex; align-items: center; gap: 10px; padding: 13px 14px; border-radius: 16px;
   background: #EDF5E9; border: 1px solid #D8E8D0; font-size: 13.5px; line-height: 1.45; color: var(--ink); }
 .solvedTick { width: 24px; height: 24px; flex: none; border-radius: 999px; background: #3D6B2A; color: #fff; display: grid; place-items: center; }
+
+/* ---------------------------------------------------------------------------
+   The finish: congratulations, the postcard with the real photos in it, and
+   somewhere to go next.
+--------------------------------------------------------------------------- */
+.finishBody { padding: 26px 20px 24px; display: flex; flex-direction: column; gap: 14px; align-items: flex-start; }
+.finishCrest { width: 54px; height: 54px; border-radius: 999px; display: grid; place-items: center;
+  background: var(--accent); color: var(--ink); box-shadow: 0 8px 22px rgba(220, 242, 60, .5); margin-bottom: 2px; }
+.finishStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; margin: 4px 0 8px; }
+.finishStat { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 12px;
+  display: flex; flex-direction: column; gap: 4px; }
+.finishStatV { font-size: 21px; font-weight: 600; letter-spacing: -.03em; }
+.finishStatK { font-size: 11.5px; line-height: 1.3; color: var(--ink-3); }
+.finishNote { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--accent-ink); }
+.finishBack { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 12px;
+  font-size: 14px; font-weight: 500; color: var(--ink-2); }
+.finishBack:hover { color: var(--ink); }
+
+/* the printed card itself */
+.pcard { width: 100%; background: #F3F1E9; border-radius: 22px; padding: 12px; box-shadow: 0 10px 30px rgba(20, 22, 26, .1); }
+.pcardInner { position: relative; background: #FAF9F4; border: 1px solid #E4E2D8; border-radius: 18px; padding: 18px 18px 20px 54px; }
+.pcardSpine { position: absolute; left: 38px; top: 16px; bottom: 16px; border-left: 1px dashed #DFDDD2; }
+.pcardVert { position: absolute; left: 10px; bottom: 22px; font-size: 9.5px; letter-spacing: .3em; color: #8A8E96;
+  writing-mode: vertical-rl; transform: rotate(180deg); }
+.pcardTop { display: flex; align-items: baseline; gap: 10px; font-size: 10px; letter-spacing: .24em;
+  text-transform: uppercase; color: #767A82; }
+.pcardSerial { margin-left: auto; letter-spacing: .1em; }
+.pcardTitle { margin: 10px 0 14px; font-size: 19px; font-weight: 600; letter-spacing: -.03em; line-height: 1.24; color: var(--ink); }
+.pcardSlots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.pcardSlot { position: relative; margin: 0; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #EFEDE5;
+  border: 1.5px dashed #DDDACD; display: grid; place-items: center; }
+.pcardSlotFilled { border: 0; box-shadow: 0 4px 12px rgba(20, 22, 26, .16); }
+.pcardSlot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcardSlotN { font-size: 13px; color: #C9CCD3; }
+.pcardFound { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); padding: 3px 9px; border-radius: 999px;
+  background: rgba(255, 255, 255, .96); border: 1.2px solid var(--brand); color: var(--brand); font-size: 8.5px; letter-spacing: .1em; }
+.pcardFoot { margin: 12px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); }

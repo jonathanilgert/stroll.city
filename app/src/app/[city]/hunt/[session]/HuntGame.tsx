@@ -550,7 +550,7 @@ export default function HuntGame({
 
         <div className={styles.footer}>
           {done ? (
-            <Link className={styles.cta} href={`/api/v1/${citySlug}/sessions/${session.id}/postcard?format=svg`}>
+            <Link className={styles.cta} href={`/${citySlug}/hunt/${session.id}/postcard`}>
               See your postcard <ChevronRight size={15} />
             </Link>
           ) : (
