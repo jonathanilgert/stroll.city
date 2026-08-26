@@ -1120,16 +1120,18 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
 
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
-    const bounds = map.getBounds();
-    const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
     const zoom = map.getZoom();
     const dotZoomMax = 16.2;
     const logoZoomMin = 15.95;
     const labelZoomMin = mobileLayout ? 17.15 : 16.65;
     const labelDensityLimit = mobileLayout ? 18 : 28;
-    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
-    const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
-    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
+    // Keep the pin presentation stable while panning. Using the current map bounds here made
+    // labels appear/disappear at the same zoom as businesses crossed the viewport edge, which
+    // shuffled nearby logos even though the user had only dragged the map.
+    const filteredBusinessCount = items.length;
+    const forceLabels = showNames && Boolean(walkingRoute || filteredBusinessCount <= labelDensityLimit || zoom >= labelZoomMin);
+    const forceLogos = forceLabels || zoom >= logoZoomMin || filteredBusinessCount <= 64;
+    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && filteredBusinessCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const overlap = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => {
       const w = Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1));
