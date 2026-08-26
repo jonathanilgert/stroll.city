@@ -699,14 +699,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     sheetDragRef.current = null;
   };
 
-  const flyToBusiness = (business: Business) => {
+  const flyToBusiness = (business: Business, options: { moveMap?: boolean } = {}) => {
     searchRef.current?.blur();
     setSelectedAttraction(null);
     clearWalkingRoute();
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
-    mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
+    if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
   };
   const goFeatured = (attraction: Attraction) => {
@@ -976,8 +976,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
     const bounds = map.getBounds();
     const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
+    const zoom = map.getZoom();
     const labelDensityLimit = 48; // roughly one zoom level sooner than the previous 12-place cutoff
-    const forceLabels = showNames && !mobileLayout && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit);
+    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (mobileLayout && zoom >= 16.75));
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
     const measureCanvas = document.createElement("canvas").getContext("2d");
@@ -1001,10 +1002,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       if (s.chrome || !s.members.length) return;
       if (s.pinned || s.members.length === 1) {
         const biz = s.members[0];
-        const compact = mobileLayout ? true : s.mode === "glyph" && biz.id !== selected?.id;
+        const compact = s.mode === "glyph" && biz.id !== selected?.id;
         const el = document.createElement("button");
         el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
-        el.addEventListener("click", () => flyToBusiness(biz));
+        el.addEventListener("click", () => flyToBusiness(biz, { moveMap: false }));
         el.addEventListener("mouseenter", () => {
           if (mobileLayout) return;
           const pinEl = el.querySelector(`.${styles.pin}`);
@@ -1046,7 +1047,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     <>
       <div className={styles.hero}>
         <img src={biz.photo} alt="" />
-        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
           {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
@@ -1104,7 +1105,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     <>
       <div className={styles.hero}>
         {attraction.photo_url ? <img src={attraction.photo_url} alt="" /> : null}
-        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
         <div className={styles.glyphLg} style={{ background: city.theme.green }}><Landmark size={24} /></div>
       </div>
       <div className={styles.dBody}>
@@ -1472,8 +1473,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.mSheetHead}>
             {selected ? (
               <>
-                <button className={styles.back} onClick={closeSelected} title="Back"><ChevronLeft size={16} /></button>
-                <span className={styles.mSheetTitle}>All places</span>
+                <button className={styles.backToStreet} onClick={closeSelected} title="Back to the street">Back to the street</button>
+                <span className={styles.mSheetTitle}>Profile</span>
               </>
             ) : tab === "events" ? (
               <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
