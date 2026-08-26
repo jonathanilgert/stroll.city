@@ -217,9 +217,9 @@ function edmontonMinutesNow() {
 
 /* raw markup for vanilla-DOM markers */
 function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
-  const isStroll = biz.plan_tier === "stroll" || biz.plan_tier === "stroll_plus";
-  const glyphInner = isStroll && biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
-  const fill = isStroll && biz.logo_url ? "#fff" : "#E7E9EC";
+  const hasLogo = Boolean(biz.logo_url);
+  const glyphInner = hasLogo ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const fill = hasLogo ? "#fff" : "#E7E9EC";
   const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
   const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14161A;border-color:${color}">${glyphInner}</span>`;
   if (compact) return `<div class="${classes}">${glyph}</div>`;
@@ -1047,7 +1047,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <img src={biz.photo} alt="" />
         <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
-          {biz.plan_tier === "stroll" && biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
+          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
       </div>
       <div className={styles.dBody}>
