@@ -304,6 +304,41 @@ function strollMapSources(data: StrollData): Record<string, unknown> {
   };
 }
 
+function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
+  return [
+    {
+      id: "main-street-watercolour-wash",
+      type: "line",
+      source: "openmaptiles",
+      "source-layer": "transportation",
+      minzoom: 11,
+      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#D94848",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.04, 14, 0.07, 17, 0.11, 20, 0.13],
+        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 8, 14, 16, 17, 34, 20, 66],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 3, 16, 7, 20, 11],
+      },
+    },
+    {
+      id: "main-street-watercolour-core",
+      type: "line",
+      source: "openmaptiles",
+      "source-layer": "transportation",
+      minzoom: 12,
+      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#E25D5D",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.03, 15, 0.055, 18, 0.08, 20, 0.09],
+        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 4, 15, 11, 18, 24, 20, 42],
+        "line-blur": 4,
+      },
+    },
+  ];
+}
+
 function strollOverlayLayers(): Array<Record<string, unknown>> {
   return [
     { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
@@ -322,11 +357,13 @@ async function buildCrispNoLabelMapStyle(data: StrollData): Promise<StyleSpecifi
   const response = await fetch(OPENFREEMAP_POSITRON_STYLE_URL, { cache: "force-cache" });
   if (!response.ok) throw new Error(`OpenFreeMap style failed: ${response.status}`);
   const base = await response.json() as MutableStyle;
-  const nonLabelLayers = (base.layers ?? []).filter((layer) => layer.type !== "symbol");
+  const layers = base.layers ?? [];
+  const baseMapLayers = layers.filter((layer) => layer.type !== "symbol");
+  const streetNameLayers = layers.filter((layer) => typeof layer.id === "string" && ["highway-name-major", "highway-name-minor", "highway-name-path"].includes(layer.id));
   return {
     ...base,
     sources: { ...base.sources, ...strollMapSources(data) },
-    layers: [...nonLabelLayers, ...strollOverlayLayers()],
+    layers: [...baseMapLayers, ...strollMainStreetWatercolourLayers(), ...strollOverlayLayers(), ...streetNameLayers],
   } as StyleSpecification;
 }
 
