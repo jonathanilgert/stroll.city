@@ -35,13 +35,12 @@
 /* Preview shell. On a phone this is one column with the sheet riding 24px up over
    the hero, exactly as designed; the desktop rules below turn it into two. */
 .previewLayout { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.heroPane { flex: none; }
+.heroPane { position: relative; height: 296px; flex: none; background: linear-gradient(160deg, var(--brand-line), var(--brand)); }
+.heroPane img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .previewMain { flex: 1; min-height: 0; display: flex; flex-direction: column; margin-top: -24px; position: relative; z-index: 1; }
 .mono { font-family: var(--font-jetbrains), var(--font-mono), ui-monospace, monospace; }
 
 /* ---------------- hero ---------------- */
-.hero { position: relative; height: 296px; flex: none; background: linear-gradient(160deg, var(--brand-line), var(--brand)); }
-.hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
 .heroShade { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(12, 14, 18, .42) 0%, rgba(12, 14, 18, 0) 34%); }
 .heroBar { position: absolute; top: 18px; left: 16px; right: 16px; display: flex; align-items: center; gap: 10px; }
 .circleBtn {
@@ -175,38 +174,6 @@
 .ctaRow .cta { flex: 1; }
 .errorNote { display: block; text-align: center; font-size: 13px; color: var(--err); margin-top: 9px; }
 
-
-/* ---------------------------------------------------------------------------
-   Desktop. Not the phone stretched wide: the preview splits into a fixed hero
-   beside a scrolling column, and the onboarding steps become a centred card.
---------------------------------------------------------------------------- */
-@media (min-width: 900px) {
-  .app { align-items: center; padding: 32px; }
-  .screen { max-width: 1080px; height: 100%; max-height: 780px; border-radius: 28px; box-shadow: 0 30px 80px rgba(20, 22, 26, .2); }
-
-  .previewLayout { flex-direction: row; }
-  .heroPane { flex: 0 0 46%; position: relative; }
-  .hero { height: 100%; }
-  .hero img { border-radius: 0; }
-  .heroBar { top: 20px; }
-  .heroTag { bottom: 22px; }
-  .previewMain { margin-top: 0; }
-  .sheet { border-radius: 0; padding: 34px 38px 30px; }
-  .title { font-size: 36px; }
-  .lede { font-size: 15.5px; max-width: 52ch; }
-  .footer { padding: 14px 38px 26px; background: #fff; border-top: 1px solid var(--line); }
-  .cta { max-width: 320px; margin: 0 auto; }
-  .ctaRow { max-width: 420px; margin: 0 auto; }
-
-  /* steps: a card, not a full-height phone column */
-  .stepScreen { max-width: 620px; }
-  .stepScreen .sheet { padding: 30px 44px 34px; }
-  .stepScreen .progress { padding: 22px 44px 0; }
-  .stepScreen .stepHead { padding: 14px 44px 0; }
-  .stepScreen .footer { padding: 16px 44px 30px; }
-  .stepScreen .choice { padding: 20px; }
-  .stepScreen .title { font-size: 30px; }
-}
 
 /* A pointer with a keyboard deserves the hover states a phone never shows. */
 @media (hover: hover) {

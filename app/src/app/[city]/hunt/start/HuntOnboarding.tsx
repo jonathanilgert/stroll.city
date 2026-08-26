@@ -150,12 +150,14 @@ export default function HuntOnboarding({
 
   return (
     <main className={styles.app}>
-      <div className={`${styles.screen} ${step === "preview" ? "" : styles.stepScreen}`}>
+      <div className={styles.screen}>
         {step === "preview" ? (
           <div className={styles.previewLayout}>
+            {/* No photo here yet: the only street images we hold are hunt stops, and
+                putting one on the cover would answer a riddle. stroll-main-map.jpg is
+                a screenshot of the map app itself, which read as a broken duplicate.
+                The brand gradient carries it until there is a neutral photo. */}
             <div className={styles.heroPane}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- static export, as everywhere else here */}
-                <img src="/brand/stroll-main-map.jpg" alt="Inglewood’s brick storefronts along 9 Ave SE" />
                 <span className={styles.heroShade} aria-hidden />
                 <div className={styles.heroBar}>
                   <button className={styles.circleBtn} onClick={goBack} aria-label="Back to the map">
