@@ -1121,9 +1121,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           </div>
         </div>
         <div className={styles.dActions}>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
-            <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
-          </button>
+          {walkingRoute?.target.id !== biz.id && (
+            <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
+              <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
+            </button>
+          )}
           {biz.website && (
             <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
               <Globe size={16} />
@@ -1135,10 +1137,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         </div>
         {walkingRoute?.target.id === biz.id && (
           <div className={styles.routeNote}>
-            <span>{walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
+            <span><strong>Navigation mode</strong> · {walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
             <div className={styles.routeActions}>
               <button onClick={showFullRoute}>Show full route</button>
-              <button onClick={clearWalkingRoute}>Clear</button>
+              <button onClick={clearWalkingRoute}>Exit navigation mode</button>
             </div>
           </div>
         )}

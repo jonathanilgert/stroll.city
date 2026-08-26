@@ -220,8 +220,8 @@
 .youAreHere::before { content: ""; position: absolute; inset: -16px; border-radius: 999px; background: rgba(22,119,255,.22); animation: locationPulse 1.8s ease-out infinite; }
 .youAreHere span { position: absolute; inset: 3px; border-radius: 999px; background: #0b5ed7; }
 @keyframes locationPulse { 0% { transform: scale(.45); opacity: .9; } 70%, 100% { transform: scale(1.25); opacity: 0; } }
-.routeNote { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); background: rgba(227,52,47,.08); border: 1px solid rgba(227,52,47,.18); color: var(--ink-2); font-size: 12.5px; line-height: 1.35; }
-.routeActions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.routeNote { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 10px 12px; border-radius: var(--r-md); background: rgba(227,52,47,.08); border: 1px solid rgba(227,52,47,.18); color: var(--ink-2); font-size: 12.5px; line-height: 1.35; }
+.routeActions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; flex-wrap: wrap; }
 .routeNote button { flex: 0 0 auto; color: #B3261E; font-weight: 600; white-space: nowrap; }
 
 /* ---------- drawer ---------- */
