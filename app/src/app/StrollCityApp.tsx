@@ -1453,7 +1453,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           </>
           )}
 
-          {mobileLayout && tab === "explore" && (
+          {mobileLayout && tab === "explore" && !walkingRoute && (
             <div ref={mobileTopRef} className={styles.mTop}>
               <label className={`${styles.mSearch} ${styles.glass}`}>
                 <Search size={16} color="var(--ink-3)" />
