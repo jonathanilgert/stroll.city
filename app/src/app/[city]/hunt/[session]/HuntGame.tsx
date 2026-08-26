@@ -122,7 +122,10 @@ export default function HuntGame({
 
   const pointsById = useMemo(() => new Map(points.map((point) => [point.stop_id, point])), [points]);
   const done = session.status === "finished";
-  const currentIndex = session.stops.findIndex((stop) => stop.state !== "solved");
+  /* A stop is done when it is both answered and photographed. Tracking "not solved"
+     here would move the cursor the moment the riddle was answered, skipping straight
+     to the next one and letting the photo — the proof you were there — go unasked. */
+  const currentIndex = session.stops.findIndex((stop) => stop.state !== "solved" || !stop.photo_url);
   const cursor = currentIndex === -1 ? session.total_stops - 1 : currentIndex;
   const viewIndex = Math.min(viewing ?? cursor, session.total_stops - 1);
   const stop = session.stops[viewIndex];
@@ -204,7 +207,12 @@ export default function HuntGame({
         return;
       }
       const fresh = await fetch(`/api/v1/${citySlug}/sessions/${session.id}`).then((r) => r.json()).catch(() => null);
-      if (fresh?.ok && fresh.data) setSession(fresh.data);
+      if (fresh?.ok && fresh.data) {
+        setSession(fresh.data);
+        /* The stop is complete now, but moving on is the player's call — that is what
+           the button at the bottom is for. */
+        setViewing(viewIndex);
+      }
     } finally {
       setBusy(false);
     }
@@ -236,7 +244,11 @@ export default function HuntGame({
       }
       setSession(payload.data.session);
       setVerdict(payload.data.correct ? "right" : "wrong");
-      if (payload.data.correct) setGuess("");
+      if (payload.data.correct) {
+        setGuess("");
+        /* Stay on this stop: solving it is only half of it, the photo is the rest. */
+        setViewing(viewIndex);
+      }
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
     } finally {
@@ -250,6 +262,7 @@ export default function HuntGame({
   const advance = async () => {
     if (done || !stop || !hasPhoto) return;
     if (stop.state !== "solved") await post({ action: "stop_solved" });
+    /* Releasing the pin hands the view back to the next unfinished stop. */
     setViewing(null);
     setGuess("");
     setVerdict("idle");
@@ -509,13 +522,13 @@ export default function HuntGame({
                   ? <img src={stop.photo_url} alt={`Your photo at stop ${viewIndex + 1}`} />
                   : <span className={styles.photoEmpty}><Camera size={26} /><span>{isCurrent ? "Take a photo at the door" : "Unlocks when you get here"}</span></span>}
                 {hasPhoto && <span className={styles.photoBadge}><Check size={12} strokeWidth={3} />Photo added</span>}
-                {isCurrent && <input type="file" accept="image/*" capture="environment" onChange={(event) => void uploadPhoto(event.target.files?.[0])} disabled={busy} aria-label="Take a photo at the door" />}
+                {(isCurrent || hasPhoto) && <input type="file" accept="image/*" capture="environment" onChange={(event) => void uploadPhoto(event.target.files?.[0])} disabled={busy} aria-label="Take a photo at the door" />}
               </label>
               {error && <span className={styles.errorNote}>{error}</span>}
               <div className={styles.photoActions}>
-                <label className={`${styles.photoBtn} ${!isCurrent ? styles.photoBtnMuted : ""}`}>
+                <label className={`${styles.photoBtn} ${!isCurrent && !hasPhoto ? styles.photoBtnMuted : ""}`}>
                   <Camera size={15} />{hasPhoto ? "Retake photo" : "Take photo"}
-                  {isCurrent && <input type="file" accept="image/*" capture="environment" onChange={(event) => void uploadPhoto(event.target.files?.[0])} disabled={busy} />}
+                  {(isCurrent || hasPhoto) && <input type="file" accept="image/*" capture="environment" onChange={(event) => void uploadPhoto(event.target.files?.[0])} disabled={busy} />}
                 </label>
                 <button
                   className={`${styles.photoBtn} ${styles.stuckBtn} ${isRevealed && !hasPhoto ? styles.stuckOn : ""}`}
@@ -536,7 +549,9 @@ export default function HuntGame({
             </Link>
           ) : (
             <button className={styles.cta} onClick={() => void advance()} disabled={!hasPhoto || busy}>
-              {hasPhoto ? (cursor === session.total_stops - 1 ? "Finish the hunt" : "Unlock next riddle") : "Add a photo to continue"}
+              {hasPhoto
+                ? viewIndex === session.total_stops - 1 ? "Finish the hunt" : "Unlock next riddle"
+                : stop.state === "solved" ? "Photo at the door to continue" : "Answer the riddle to continue"}
               <ChevronRight size={15} />
             </button>
           )}
