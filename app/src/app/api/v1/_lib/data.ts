@@ -625,6 +625,11 @@ export type HuntSession = {
   mode: "friendly" | "full" | "race";
   team_name: string;
   email: string | null;
+  /* Solo walkers and teams get the same hunt; the split shapes copy, the postcard
+     byline, and later the leaderboard. */
+  party_type: "solo" | "team";
+  party_size: number;
+  avatar_url: string | null;
   /* The stop order this team walks — rotated for races so two teams starting
      together don't queue at the same doorway. */
   stop_ids: string[];
@@ -685,9 +690,17 @@ export async function getHuntSession(city: string, id: string) {
 export async function createHuntSession(
   city: string,
   hunt: Hunt,
-  payload: { team_name?: string; email?: string; photos_consented?: boolean },
+  payload: {
+    team_name?: string;
+    email?: string;
+    photos_consented?: boolean;
+    party_type?: string;
+    party_size?: number;
+  },
 ) {
-  const teamName = sanitizeString(payload.team_name, 80) || "Anonymous team";
+  const partyType = payload.party_type === "solo" ? "solo" as const : "team" as const;
+  const fallbackName = partyType === "solo" ? "Solo walker" : "Anonymous team";
+  const teamName = sanitizeString(payload.team_name, 80) || fallbackName;
   const startIndex = hunt.mode === "race" ? startOffsetFor(teamName) % Math.max(1, hunt.stop_ids.length) : 0;
   const ordered = (hunt.mode === "race" ? rotateStops(hunt.stop_ids, startIndex) : hunt.stop_ids)
     .slice(0, STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length);
@@ -701,6 +714,11 @@ export async function createHuntSession(
     mode: hunt.mode,
     team_name: teamName,
     email: payload.email ? sanitizeString(payload.email, 160) : null,
+    party_type: partyType,
+    /* A solo walk is always one person; a team is clamped to something a single
+       punch card can plausibly belong to. */
+    party_size: partyType === "solo" ? 1 : Math.min(24, Math.max(2, Math.floor(Number(payload.party_size ?? 2)) || 2)),
+    avatar_url: null,
     stop_ids: ordered,
     stops: ordered.map((stopId) => ({
       stop_id: stopId,
@@ -828,4 +846,11 @@ export function hydrateHuntSession(session: HuntSession, data: StrollData, optio
       };
     }),
   };
+}
+
+/* The team photo, uploaded during onboarding once the session exists. */
+export async function setHuntSessionAvatar(city: string, sessionId: string, avatarUrl: string) {
+  const session = await getHuntSession(city, sessionId);
+  if (!session) return null;
+  return saveSession(city, { ...session, avatar_url: avatarUrl, updated_at: new Date().toISOString() });
 }
