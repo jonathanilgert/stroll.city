@@ -3,7 +3,7 @@
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Sparkles } from "lucide-react";
+import { ArrowRight, Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Lightbulb, Sparkles } from "lucide-react";
 import styles from "../hunt.module.css";
 
 export type GameStop = {
@@ -111,6 +111,8 @@ export default function HuntGame({
   const [locationDenied, setLocationDenied] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [guess, setGuess] = useState("");
+  const [verdict, setVerdict] = useState<"idle" | "wrong" | "right">("idle");
   const [now, setNow] = useState(() => Date.now());
 
   const mapNode = useRef<HTMLDivElement>(null);
@@ -208,11 +210,49 @@ export default function HuntGame({
     }
   };
 
+  /* Changing which stop you are looking at clears the guess box — done here rather
+     than in an effect, which would cascade a second render on every move. */
+  const showStop = (index: number) => {
+    setViewing(index);
+    setGuess("");
+    setVerdict("idle");
+  };
+
+  const submitGuess = async () => {
+    if (!stop || !guess.trim() || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/v1/${citySlug}/sessions/${session.id}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stop_id: stop.stop_id, guess: guess.trim() }),
+      });
+      const payload = await response.json().catch(() => null) as
+        { ok?: boolean; data?: { correct?: boolean; session?: GameSession }; error?: string } | null;
+      if (!response.ok || !payload?.ok || !payload.data?.session) {
+        setError(payload?.error ?? "Could not check that. Please try again.");
+        return;
+      }
+      setSession(payload.data.session);
+      setVerdict(payload.data.correct ? "right" : "wrong");
+      if (payload.data.correct) setGuess("");
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const takeClue = () => post({ action: "clue_revealed", clues_used: (stop?.clues_used ?? 0) + 1 });
+
   /* The photo is the proof, so it is also what marks the stop solved. */
   const advance = async () => {
     if (done || !stop || !hasPhoto) return;
     if (stop.state !== "solved") await post({ action: "stop_solved" });
     setViewing(null);
+    setGuess("");
+    setVerdict("idle");
   };
 
   /* ---------------- map ---------------- */
@@ -360,7 +400,7 @@ export default function HuntGame({
                 <button
                   className={styles.riddleNav}
                   style={{ borderColor: tint.border }}
-                  onClick={() => setViewing(Math.max(0, viewIndex - 1))}
+                  onClick={() => showStop(Math.max(0, viewIndex - 1))}
                   disabled={viewIndex === 0}
                   aria-label="Previous stop"
                 >
@@ -372,7 +412,7 @@ export default function HuntGame({
                 <button
                   className={styles.riddleNav}
                   style={{ borderColor: tint.border }}
-                  onClick={() => setViewing(Math.min(cursor, viewIndex + 1))}
+                  onClick={() => showStop(Math.min(cursor, viewIndex + 1))}
                   disabled={viewIndex >= cursor}
                   aria-label="Next unlocked stop"
                 >
@@ -381,11 +421,11 @@ export default function HuntGame({
               </div>
               <div className={styles.riddleCardBody}>
                 <p className={styles.riddleText}>{stop.riddle}</p>
-                {stop.clues[0] && (
-                  <span className={styles.riddleHintChip} style={{ borderColor: tint.border }}>
-                    <Info size={13} />{stop.clues[0]}
+                {stop.clues.map((clue, i) => (
+                  <span className={styles.riddleHintChip} style={{ borderColor: tint.border }} key={clue}>
+                    <Info size={13} /><span><strong>Clue {i + 1}.</strong> {clue}</span>
                   </span>
-                )}
+                ))}
                 {isRevealed && (
                   <span className={styles.riddleReveal} style={{ borderColor: tint.border }}>
                     <Sparkles size={14} />
@@ -395,6 +435,66 @@ export default function HuntGame({
               </div>
               <span className={styles.riddleNotch} style={{ borderColor: tint.border }} aria-hidden />
             </div>
+
+            {isCurrent && stop.state !== "solved" && (
+              <div className={styles.solveSteps}>
+                <div className={styles.solveStep} style={{ borderColor: tint.border }}>
+                  <span className={styles.solveStepN}>1</span>
+                  <div className={styles.solveStepBody}>
+                    <strong className={styles.solveStepTitle}>Enter your answer</strong>
+                    <div className={`${styles.answerField} ${verdict === "wrong" ? styles.answerFieldWrong : ""}`} style={verdict === "idle" ? { borderColor: tint.border } : undefined}>
+                      <input
+                        className={styles.answerInput}
+                        value={guess}
+                        onChange={(event) => { setGuess(event.target.value); if (verdict !== "idle") setVerdict("idle"); }}
+                        onKeyDown={(event) => { if (event.key === "Enter") void submitGuess(); }}
+                        placeholder="Type your answer"
+                        maxLength={120}
+                        aria-label="Your answer for this stop"
+                        autoComplete="off"
+                      />
+                      <button className={styles.answerCheck} onClick={() => void submitGuess()} disabled={!guess.trim() || busy}>
+                        Check your guess
+                      </button>
+                    </div>
+                    {verdict === "wrong" && (
+                      <span className={styles.answerWrong}>
+                        Not this one. Walk a little further, or take a clue below.
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className={styles.solveStep} style={{ borderColor: tint.border }}>
+                  <span className={styles.solveStepN}>2</span>
+                  <div className={styles.solveStepBody}>
+                    <strong className={styles.solveStepTitle}>Need a clue?</strong>
+                    {stop.clues_used >= 3 ? (
+                      <span className={styles.solveStepNote}>
+                        All three clues are open. Still stuck? Use <em>Stuck?</em> below to see the answer — the stop still counts.
+                      </span>
+                    ) : (
+                      <>
+                        <button className={styles.clueBtn} onClick={() => void takeClue()} disabled={busy}>
+                          Give me a clue <ArrowRight size={15} />
+                        </button>
+                        <span className={styles.solveStepNote}>
+                          <Lightbulb size={12} />
+                          {3 - stop.clues_used} left{session.mode === "race" ? ` · adds ${[2, 5, 10][stop.clues_used]} min` : ""}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {stop.state === "solved" && !hasPhoto && (
+              <div className={styles.solvedBanner}>
+                <span className={styles.solvedTick}><Check size={13} strokeWidth={3} /></span>
+                <span>Solved — it&rsquo;s <strong>{stop.name}</strong>. Now the photo at the door.</span>
+              </div>
+            )}
 
             <div className={styles.photoBlock}>
               <div className={styles.photoHead}>

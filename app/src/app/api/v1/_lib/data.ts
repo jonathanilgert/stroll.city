@@ -1088,3 +1088,82 @@ export async function hydrateHuntGroup(city: string, group: HuntGroup) {
     stops_total: teams.reduce((sum, team) => sum + team.total_stops, 0),
   };
 }
+
+/* ---------------------------------------------------------------------------
+   Answer checking
+
+   The client never holds the answer — it posts a guess and the server says yes or
+   no. Matching is deliberately forgiving: people type what is on the awning, not
+   what is on the licence, so "fairs fair" has to clear "Fair's Fair (For Book
+   Lovers)" while "the bakery" still does not.
+--------------------------------------------------------------------------- */
+
+function normalizeGuess(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/\b(the|a|an|and|of|inc|ltd|llc|co|company|calgary|inglewood)\b/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/* Levenshtein, capped: we only care whether it is within a couple of typos. */
+function editDistance(a: string, b: string) {
+  if (Math.abs(a.length - b.length) > 4) return 99;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i += 1) {
+    let last = prev[0];
+    prev[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      const temp = prev[j];
+      prev[j] = Math.min(
+        prev[j] + 1,
+        prev[j - 1] + 1,
+        last + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+      last = temp;
+    }
+  }
+  return prev[b.length];
+}
+
+export function guessMatchesName(guess: string, name: string) {
+  const g = normalizeGuess(guess);
+  /* The bit before any bracket is what a sign actually says. */
+  const core = normalizeGuess(name.replace(/\(.*?\)/g, ""));
+  const full = normalizeGuess(name);
+  if (g.length < 3 || !core) return false;
+  if (g === core || g === full) return true;
+  /* A guess that is most of the name, or the name with a typo or two. */
+  if (core.startsWith(g) && g.length >= Math.max(4, Math.floor(core.length * 0.6))) return true;
+  if (editDistance(g, core) <= Math.max(1, Math.floor(core.length * 0.15))) return true;
+  /* Distinctive words carry it: "blackfoot" for "The Blackfoot Room". */
+  const words = core.split(" ").filter((word) => word.length >= 5);
+  if (words.length > 0 && words.some((word) => g === word)) return true;
+  /* Same tests without spaces, because people type "fairsfair" and "black foot". */
+  const gs = g.replace(/\s/g, "");
+  const cs = core.replace(/\s/g, "");
+  if (!gs || !cs) return false;
+  if (gs === cs) return true;
+  if (cs.startsWith(gs) && gs.length >= Math.max(4, Math.floor(cs.length * 0.6))) return true;
+  return editDistance(gs, cs) <= Math.max(1, Math.floor(cs.length * 0.15));
+}
+
+export async function checkHuntAnswer(city: string, sessionId: string, stopId: string, guess: string, data: StrollData) {
+  const session = await getHuntSession(city, sessionId);
+  if (!session) return null;
+  const entry = session.stops.find((stop) => stop.stop_id === stopId);
+  if (!entry) return null;
+  const content = (data.huntStops ?? []).find((stop) => stop.id === stopId);
+  const correct = Boolean(content && guessMatchesName(guess, content.name));
+  if (!correct) return { correct: false, session };
+  const stops = session.stops.map((stop) => (
+    stop.stop_id === stopId
+      ? { ...stop, state: "solved" as const, solved_at: stop.solved_at ?? new Date().toISOString() }
+      : stop
+  ));
+  const saved = await saveSession(city, recomputeSession({ ...session, stops }));
+  return { correct: true, session: saved };
+}
