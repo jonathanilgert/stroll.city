@@ -48,6 +48,9 @@ type Business = {
   domain?: string | null;
   website?: string | null;
   phone?: string | null;
+  licence_category?: string;
+  category_note?: string | null;
+  sensory_tags?: string[];
   source: string;
   needsReview: boolean;
 };
@@ -319,20 +322,42 @@ function editDistance(a: string, b: string) {
   }
   return prev[b.length];
 }
-function fuzzyTokenMatch(term: string, tokens: string[], haystack: string) {
-  if (haystack.includes(term)) return true;
-  return expandedSearchTerms(term).some((candidate, index) => tokens.some((token) => token.includes(candidate) || (index === 0 && token.length >= 3 && candidate.includes(token)) || (index === 0 && candidate.length >= 5 && candidate[0] === token[0] && editDistance(candidate, token) <= (candidate.length >= 7 ? 2 : 1))));
+function tokenMatchesCandidate(token: string, candidate: string, allowTypo: boolean) {
+  return token.includes(candidate) || (allowTypo && token.length >= 3 && candidate.includes(token)) || (allowTypo && ((candidate.length >= 5 && candidate[0] === token[0] && editDistance(candidate, token) <= (candidate.length >= 7 ? 2 : 1)) || (candidate.length >= 3 && token.length >= 4 && candidate[0] === token[0] && editDistance(candidate, token) <= 1)));
 }
-function businessSearchText(b: Business) {
-  return foldForSearch(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]} ${b.blurb} ${b.highlights.map(([, text]) => text).join(" ")}`);
+function searchFieldTokens(value: string) {
+  return foldForSearch(value).split(/\s+/).filter(Boolean);
 }
-function businessMatchesSearch(b: Business, terms: string[]) {
-  if (!terms.length) return true;
-  const text = businessSearchText(b);
-  const tokens = text.split(/\s+/).filter(Boolean);
-  const compactText = text.replace(/\s+/g, "");
+function businessSearchFields(b: Business) {
+  return {
+    name: searchFieldTokens(b.name),
+    primary: searchFieldTokens(`${b.name} ${b.category} ${CAT_LABEL[b.category]} ${b.blurb} ${b.category_note ?? ""} ${(b.sensory_tags ?? []).join(" ")}`),
+    all: searchFieldTokens(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]} ${b.licence_category ?? ""} ${b.category_note ?? ""} ${b.blurb} ${b.highlights.map(([, text]) => text).join(" ")} ${(b.sensory_tags ?? []).join(" ")}`),
+  };
+}
+function businessSearchScore(b: Business, terms: string[]) {
+  if (!terms.length) return 1;
+  const fields = businessSearchFields(b);
+  const compactName = fields.name.join("");
+  const compactPrimary = fields.primary.join("");
+  const compactAll = fields.all.join("");
   const compactQuery = terms.join("");
-  return compactText.includes(compactQuery) || terms.every((term) => fuzzyTokenMatch(term, tokens, text));
+  let score = 0;
+  if (compactName.includes(compactQuery)) score += 80;
+  else if (compactPrimary.includes(compactQuery)) score += 55;
+  else if (compactAll.includes(compactQuery)) score += 30;
+
+  for (const term of terms) {
+    const synonymTerms = expandedSearchTerms(term);
+    const directName = fields.name.some((token) => tokenMatchesCandidate(token, term, true));
+    const directPrimary = fields.primary.some((token) => tokenMatchesCandidate(token, term, true));
+    const synonymPrimary = synonymTerms.slice(1).some((candidate) => fields.primary.some((token) => tokenMatchesCandidate(token, candidate, false)));
+    const directAll = fields.all.some((token) => tokenMatchesCandidate(token, term, true));
+    const synonymAll = synonymTerms.slice(1).some((candidate) => fields.all.some((token) => tokenMatchesCandidate(token, candidate, false)));
+    if (!directName && !directPrimary && !synonymPrimary && !directAll && !synonymAll) return 0;
+    score += directName ? 18 : directPrimary ? 12 : synonymPrimary ? 8 : directAll ? 5 : synonymAll ? 3 : 0;
+  }
+  return score;
 }
 function streetOnly(name: string) {
   const parts = name.split("/");
@@ -634,7 +659,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!data) return [];
     const terms = searchTerms(query);
     if (!terms.length) return data.businesses;
-    return data.businesses.filter((b) => businessMatchesSearch(b, terms));
+    const scored = data.businesses
+      .map((business) => ({ business, score: businessSearchScore(business, terms) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || a.business.name.localeCompare(b.business.name));
+    const topScore = scored[0]?.score ?? 0;
+    const relevanceFloor = Math.max(1, topScore * 0.45);
+    return scored.filter(({ score }) => score >= relevanceFloor).map(({ business }) => business);
   }, [data, query]);
 
   const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
@@ -647,14 +678,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
     const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)));
-    /* While searching, rank by how well the name matches — an exact prefix hit should not sit below an address hit. */
-    const rank = (b: Business) => {
-      if (!terms.length) return 0;
-      const name = foldForSearch(b.name);
-      if (terms.every((term) => name.startsWith(term))) return 0;
-      if (terms.every((term) => name.includes(term))) return 1;
-      return 2;
-    };
+    /* While searching, keep the best semantic matches first; otherwise use the requested browse sort. */
+    const rank = (b: Business) => (terms.length ? -businessSearchScore(b, terms) : 0);
     return [...list].sort((a, b) => {
       const ra = rank(a), rb = rank(b);
       if (ra !== rb) return ra - rb;
