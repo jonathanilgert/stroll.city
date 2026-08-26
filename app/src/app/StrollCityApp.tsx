@@ -1719,6 +1719,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
           {mobileLayout && tab === "explore" && !walkingRoute && (
             <div ref={mobileTopRef} className={styles.mTop}>
+              <div className={styles.mStripPrompt}>
+                <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
+                  The strip in Inglewood
+                </button>
+                <p>zoom into the map to explore the doors on the street</p>
+              </div>
               <label className={`${styles.mSearch} ${styles.glass}`}>
                 <Search size={16} color="var(--ink-3)" />
                 <input
@@ -1799,21 +1805,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           >
             <i />
           </button>
-
-          {!selected && (
-            <div className={styles.mSheetHead}>
-              {tab === "events" ? (
-                <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
-              ) : (
-                <>
-                  <span className={styles.mSheetTitle}>{visibleBusinesses.length} place{visibleBusinesses.length === 1 ? "" : "s"}</span>
-                  <button className={styles.mSort} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>
-                    {sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={11} />
-                  </button>
-                </>
-              )}
-            </div>
-          )}
 
           <div className={styles.mSheetBody}>
             {selected ? (
