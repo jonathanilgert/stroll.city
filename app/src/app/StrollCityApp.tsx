@@ -852,7 +852,20 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       style: {
         version: 8,
         sources: {
-          carto: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap © CARTO" },
+          carto: {
+            type: "raster",
+            tiles: [
+              "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+            ],
+            tileSize: 256,
+            // CARTO returns "API key required" placeholder tiles above z17.
+            // Cap source zoom so MapLibre overzooms clean z17 tiles instead of requesting branded error tiles.
+            maxzoom: 17,
+            attribution: "© OpenStreetMap © CARTO",
+          },
 
           streets: { type: "geojson", data: data.streets },
           biz: { type: "geojson", data: data.businessBuildings },
