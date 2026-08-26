@@ -271,24 +271,25 @@
 .mStage { padding: 10px 10px 0; }
 .mStage .mapWrap { border-radius: var(--r-xl); }
 
-.mTop { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 520; display: flex; flex-direction: column; gap: 8px; }
+.mTop { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 520; min-height: 174px; pointer-events: none; }
 .mStage .navigationHud { top: 10px; right: 10px; left: auto; width: auto; max-width: calc(100% - 20px); gap: 8px; align-items: flex-start; justify-content: flex-end; }
 .mStage .navigationStatus { font-size: 11.5px; }
 .mStage .navigationHudActions { flex: 0 0 auto; flex-direction: column; align-items: stretch; gap: 5px; padding: 0; }
 .mStage .navigationHudActions button { width: 112px; height: 28px; padding: 0 8px; font-size: 10.5px; border-radius: 8px; }
-.mSearch { display: flex; align-items: center; gap: 9px; height: 50px; padding: 0 6px 0 15px; color: var(--ink-2); }
+.mSearch { pointer-events: auto; position: absolute; top: 0; right: 0; width: 126px; max-width: calc(100% - 84px); display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 4px 0 9px; color: var(--ink-2); transition: width .18s ease, box-shadow .18s ease; }
+.mSearch:focus-within { width: min(252px, calc(100% - 84px)); }
 /* 16px is load-bearing: iOS Safari zooms the whole page when you focus an input smaller than this. */
 .mSearch input { border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); width: 100%; min-width: 0; }
-.mSearch input::placeholder { color: var(--ink-3); font-size: 14.5px; }
+.mSearch input::placeholder { color: var(--ink-3); font-size: 12.5px; }
 .mSearch input::-webkit-search-cancel-button { display: none; }
-.mSearchClear { flex: 0 0 auto; width: 38px; height: 38px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-3); }
+.mSearchClear { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-3); }
 .mSearchClear:active { background: var(--paper); color: var(--ink); }
-.mChipRow { display: flex; gap: 7px; overflow-x: auto; padding: 1px 2px 4px; }
-.mChipRow::-webkit-scrollbar { height: 0; }
-.mChip { flex: 0 0 auto; height: 32px; padding: 0 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 7px;
-  font-size: 12.5px; color: var(--ink-2); white-space: nowrap; background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+.mChipRow { pointer-events: auto; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; overflow: visible; padding: 0; }
+.mChipRow::-webkit-scrollbar { display: none; }
+.mChip { flex: 0 0 auto; min-width: 0; width: auto; height: 25px; padding: 0 6px; border-radius: 999px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 4px;
+  font-size: 11px; color: var(--ink-2); white-space: nowrap; background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
   box-shadow: var(--sh-1); transition: background .16s, color .16s, opacity .16s; }
-.mChip i { width: 7px; height: 7px; border-radius: 999px; display: block; }
+.mChip i { flex: 0 0 auto; width: 5px; height: 5px; border-radius: 999px; display: block; }
 .mChip[aria-pressed="false"] { background: rgba(255,255,255,.6); color: var(--ink-3); opacity: .65; }
 
 .mLocate { position: absolute; right: 12px; bottom: 146px; z-index: 520; width: 44px; height: 44px; border-radius: 999px;

@@ -382,35 +382,35 @@
       "lon": -114.035816,
       "lat": 51.041581,
       "address": "1217A 9 Av Se",
-      "blurb": "Next Page (The) — restaurant on 9 Ave SE in Inglewood.",
-      "hours": "11am–10pm",
+      "blurb": "Independent bookstore with an espresso bar on 9 Ave SE.",
+      "hours": "10am–6pm",
       "highlights": [
         [
-          "🍴",
-          "Local kitchen"
+          "📚",
+          "New & used books"
         ],
         [
-          "🪑",
-          "Dine-in"
+          "☕",
+          "Espresso bar"
         ],
         [
-          "📍",
-          "On the strip"
+          "🎁",
+          "Cards and gifts"
         ]
       ],
       "photo": "/media/businesses/heroes/next-page-the-236192258ad8-hero.jpg",
       "domain": "nextpageyyc.ca",
       "source": "City of Calgary business licence",
-      "needsReview": true,
+      "needsReview": false,
       "google_place_url": "https://maps.google.com/?cid=4128811413711861723",
       "phone": "+1 403-452-6550",
       "website": "http://nextpageyyc.ca/",
       "media_source": "google-places-enrichment",
       "media_review": "needs-review",
       "media_confidence": 1,
-      "licence_category": "restaurant",
+      "licence_category": "bookstore",
       "category_corrected": true,
-      "category_note": "Bookstore with espresso bar, not a restaurant",
+      "category_note": "Bookstore with espresso bar.",
       "age_restricted": false,
       "walk_up": true,
       "confidence": "licence",
@@ -478,20 +478,20 @@
       "lon": -114.035072,
       "lat": 51.041821,
       "address": "1226B 9 Av Se",
-      "blurb": "Beloved sprawling used & rare bookstore.",
+      "blurb": "Home furnishings, lifestyle goods, and interior design studio.",
       "hours": "10am–6pm",
       "highlights": [
         [
-          "📚",
-          "Stacks of used books"
-        ],
-        [
-          "🔎",
-          "Rare finds"
-        ],
-        [
           "🛋️",
-          "Cozy nooks"
+          "Home furnishings"
+        ],
+        [
+          "✨",
+          "Lifestyle goods"
+        ],
+        [
+          "🏡",
+          "Interior design"
         ]
       ],
       "photo": "/media/businesses/heroes/faire-living-group-16e779e13027-hero.jpg",
@@ -507,7 +507,13 @@
       "walk_up": true,
       "confidence": "licence",
       "plan_tier": "free",
-      "claim_status": "unclaimed"
+      "claim_status": "unclaimed",
+      "licence_category": "home goods",
+      "category_note": "Home and lifestyle shop.",
+      "sensory_tags": [
+        "Curated",
+        "Design"
+      ]
     },
     {
       "id": "2412ea4b78e2",

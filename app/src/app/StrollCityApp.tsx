@@ -48,6 +48,9 @@ type Business = {
   domain?: string | null;
   website?: string | null;
   phone?: string | null;
+  licence_category?: string;
+  category_note?: string | null;
+  sensory_tags?: string[];
   source: string;
   needsReview: boolean;
 };
@@ -132,6 +135,14 @@ export const CAT_LABEL: Record<Category, string> = {
   shop: "Shops",
   services: "Studios & services",
   gallery: "Arts & galleries",
+};
+const MOBILE_CAT_LABEL: Record<Category, string> = {
+  restaurant: "Food",
+  cafe: "Cafés",
+  bar: "Bars",
+  shop: "Shops",
+  services: "Services",
+  gallery: "Arts",
 };
 export const CAT_BLURB: Record<Category, string> = {
   restaurant: "Dining rooms, patios, counters",
@@ -262,11 +273,91 @@ function normalize(value: string) {
 }
 /* Search folds accents so "cafe" finds "Café" — typing é on a phone keyboard is a long-press most people won't do. */
 function foldForSearch(value: string) {
-  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[’']/g, "")
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 /* Every term has to appear somewhere, in any order, so "cafe 124" finds "Café on 124 Street". */
 function searchTerms(query: string) {
   return foldForSearch(query).split(/\s+/).filter(Boolean);
+}
+
+const SEARCH_SYNONYMS: Record<string, string[]> = {
+  bookstore: ["book", "books", "shop", "store"],
+  books: ["book", "bookstore", "shop", "store"],
+  book: ["books", "bookstore"],
+  store: ["shop", "shops", "retail", "boutique", "bookstore"],
+  stores: ["shop", "shops", "retail", "boutique"],
+  shop: ["store", "shops", "retail", "boutique"],
+  shops: ["shop", "store", "retail", "boutique"],
+  coffee: ["cafe", "cafes", "espresso"],
+  cafe: ["coffee", "cafes", "bakery", "bakeries"],
+  cafes: ["cafe", "coffee", "bakery", "bakeries"],
+  pub: ["bar", "bars", "taproom", "beer"],
+  bar: ["pub", "bars", "cocktail", "beer"],
+  restaurant: ["food", "dining", "kitchen", "eat", "eats"],
+  food: ["restaurant", "dining", "kitchen", "eat", "eats"],
+  art: ["arts", "gallery", "galleries", "studio"],
+  arts: ["art", "gallery", "galleries", "studio"],
+};
+function expandedSearchTerms(term: string) {
+  return [term, ...(SEARCH_SYNONYMS[term] ?? [])];
+}
+function editDistance(a: string, b: string) {
+  if (a === b) return 0;
+  if (Math.abs(a.length - b.length) > 2) return 3;
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  const curr = new Array(b.length + 1).fill(0);
+  for (let i = 1; i <= a.length; i += 1) {
+    curr[0] = i;
+    for (let j = 1; j <= b.length; j += 1) {
+      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+    }
+    for (let j = 0; j <= b.length; j += 1) prev[j] = curr[j];
+  }
+  return prev[b.length];
+}
+function tokenMatchesCandidate(token: string, candidate: string, allowTypo: boolean) {
+  return token.includes(candidate) || (allowTypo && token.length >= 3 && candidate.includes(token)) || (allowTypo && ((candidate.length >= 5 && candidate[0] === token[0] && editDistance(candidate, token) <= (candidate.length >= 7 ? 2 : 1)) || (candidate.length >= 3 && token.length >= 4 && candidate[0] === token[0] && editDistance(candidate, token) <= 1)));
+}
+function searchFieldTokens(value: string) {
+  return foldForSearch(value).split(/\s+/).filter(Boolean);
+}
+function businessSearchFields(b: Business) {
+  return {
+    name: searchFieldTokens(b.name),
+    primary: searchFieldTokens(`${b.name} ${b.category} ${CAT_LABEL[b.category]} ${b.blurb} ${b.category_note ?? ""} ${(b.sensory_tags ?? []).join(" ")}`),
+    all: searchFieldTokens(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]} ${b.licence_category ?? ""} ${b.category_note ?? ""} ${b.blurb} ${b.highlights.map(([, text]) => text).join(" ")} ${(b.sensory_tags ?? []).join(" ")}`),
+  };
+}
+function businessSearchScore(b: Business, terms: string[]) {
+  if (!terms.length) return 1;
+  const fields = businessSearchFields(b);
+  const compactName = fields.name.join("");
+  const compactPrimary = fields.primary.join("");
+  const compactAll = fields.all.join("");
+  const compactQuery = terms.join("");
+  let score = 0;
+  if (compactName.includes(compactQuery)) score += 80;
+  else if (compactPrimary.includes(compactQuery)) score += 55;
+  else if (compactAll.includes(compactQuery)) score += 30;
+
+  for (const term of terms) {
+    const synonymTerms = expandedSearchTerms(term);
+    const directName = fields.name.some((token) => tokenMatchesCandidate(token, term, true));
+    const directPrimary = fields.primary.some((token) => tokenMatchesCandidate(token, term, true));
+    const synonymPrimary = synonymTerms.slice(1).some((candidate) => fields.primary.some((token) => tokenMatchesCandidate(token, candidate, false)));
+    const directAll = fields.all.some((token) => tokenMatchesCandidate(token, term, true));
+    const synonymAll = synonymTerms.slice(1).some((candidate) => fields.all.some((token) => tokenMatchesCandidate(token, candidate, false)));
+    if (!directName && !directPrimary && !synonymPrimary && !directAll && !synonymAll) return 0;
+    score += directName ? 18 : directPrimary ? 12 : synonymPrimary ? 8 : directAll ? 5 : synonymAll ? 3 : 0;
+  }
+  return score;
 }
 function streetOnly(name: string) {
   const parts = name.split("/");
@@ -568,10 +659,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!data) return [];
     const terms = searchTerms(query);
     if (!terms.length) return data.businesses;
-    return data.businesses.filter((b) => {
-      const haystack = foldForSearch(`${b.name} ${b.address} ${b.category} ${CAT_LABEL[b.category]}`);
-      return terms.every((term) => haystack.includes(term));
-    });
+    const scored = data.businesses
+      .map((business) => ({ business, score: businessSearchScore(business, terms) }))
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score || a.business.name.localeCompare(b.business.name));
+    const topScore = scored[0]?.score ?? 0;
+    const relevanceFloor = Math.max(1, topScore * 0.45);
+    return scored.filter(({ score }) => score >= relevanceFloor).map(({ business }) => business);
   }, [data, query]);
 
   const nowMinutes = useMemo(() => edmontonMinutesNow(), []);
@@ -584,14 +678,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
     const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)));
-    /* While searching, rank by how well the name matches — an exact prefix hit should not sit below an address hit. */
-    const rank = (b: Business) => {
-      if (!terms.length) return 0;
-      const name = foldForSearch(b.name);
-      if (terms.every((term) => name.startsWith(term))) return 0;
-      if (terms.every((term) => name.includes(term))) return 1;
-      return 2;
-    };
+    /* While searching, keep the best semantic matches first; otherwise use the requested browse sort. */
+    const rank = (b: Business) => (terms.length ? -businessSearchScore(b, terms) : 0);
     return [...list].sort((a, b) => {
       const ra = rank(a), rb = rank(b);
       if (ra !== rb) return ra - rb;
@@ -1646,7 +1734,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <input
                   ref={searchRef}
                   aria-label="Search businesses"
-                  placeholder="Search cafés, shops, galleries…"
+                  placeholder="Search…"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   /* type=search gives the phone keyboard a Search key; the rest stops iOS autocapitalising business names. */
@@ -1672,7 +1760,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <div className={styles.mChipRow}>
                   {allCategories.map((key) => (
                     <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
-                      <i style={{ background: categoryColor(city, key) }} />{CAT_LABEL[key]}
+                      <i style={{ background: categoryColor(city, key) }} />{MOBILE_CAT_LABEL[key]}
                     </button>
                   ))}
                 </div>
