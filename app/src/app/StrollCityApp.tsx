@@ -133,6 +133,14 @@ export const CAT_LABEL: Record<Category, string> = {
   services: "Studios & services",
   gallery: "Arts & galleries",
 };
+const MOBILE_CAT_LABEL: Record<Category, string> = {
+  restaurant: "Food",
+  cafe: "Cafés",
+  bar: "Bars",
+  shop: "Shops",
+  services: "Services",
+  gallery: "Arts",
+};
 export const CAT_BLURB: Record<Category, string> = {
   restaurant: "Dining rooms, patios, counters",
   cafe: "Coffee, bakeries, ice cream",
@@ -1672,7 +1680,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 <div className={styles.mChipRow}>
                   {allCategories.map((key) => (
                     <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
-                      <i style={{ background: categoryColor(city, key) }} />{CAT_LABEL[key]}
+                      <i style={{ background: categoryColor(city, key) }} />{MOBILE_CAT_LABEL[key]}
                     </button>
                   ))}
                 </div>
