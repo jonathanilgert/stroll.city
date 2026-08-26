@@ -199,7 +199,8 @@
 .edgeTabRight { left: -25px; border-radius: 12px 0 0 12px; }
 
 /* markers */
-.markerHit { background: none; border: 0; }
+.markerHit { background: none; border: 0; touch-action: manipulation; }
+.markerHit * { pointer-events: none; }
 .pin { position: relative; display: flex; align-items: center; gap: 8px; height: 34px; padding: 3px 13px 3px 3px;
   background: rgba(255,255,255,.97); border-radius: 999px; box-shadow: 0 3px 10px rgba(20,24,26,.16); white-space: nowrap;
   transition: transform .16s ease, box-shadow .16s ease; transform-origin: center bottom; cursor: pointer; }

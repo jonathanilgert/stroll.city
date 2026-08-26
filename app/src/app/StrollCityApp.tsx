@@ -401,6 +401,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const locateRef = useRef<HTMLButtonElement | null>(null);
   const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
   const sheetHeightRef = useRef(132);
+  const suppressStripRefitCountRef = useRef(0);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -701,6 +702,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const flyToBusiness = (business: Business, options: { moveMap?: boolean } = {}) => {
     searchRef.current?.blur();
+    if (options.moveMap === false) suppressStripRefitCountRef.current = 3;
     setSelectedAttraction(null);
     clearWalkingRoute();
     setSelected(business);
@@ -874,7 +876,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const key = `${wrap.clientWidth}x${wrap.clientHeight}`;
       if (key === lastFitKeyRef.current) return;
       lastFitKeyRef.current = key;
-      if (extent === "strip" && !selected) fitStrip(false);
+      if (extent === "strip" && !selected) {
+        if (suppressStripRefitCountRef.current > 0) {
+          suppressStripRefitCountRef.current -= 1;
+        } else {
+          fitStrip(false);
+        }
+      }
     };
     const ro = new ResizeObserver(onResize);
     ro.observe(wrap);
@@ -1004,8 +1012,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const biz = s.members[0];
         const compact = s.mode === "glyph" && biz.id !== selected?.id;
         const el = document.createElement("button");
+        el.className = styles.markerHit;
         el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
-        el.addEventListener("click", () => flyToBusiness(biz, { moveMap: false }));
+        el.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          flyToBusiness(biz, { moveMap: false });
+        });
         el.addEventListener("mouseenter", () => {
           if (mobileLayout) return;
           const pinEl = el.querySelector(`.${styles.pin}`);
