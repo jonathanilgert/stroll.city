@@ -702,7 +702,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const flyToBusiness = (business: Business, options: { moveMap?: boolean } = {}) => {
     searchRef.current?.blur();
-    if (options.moveMap === false) suppressStripRefitCountRef.current = 3;
+    const preserveCamera = options.moveMap === false;
+    const map = mapRef.current;
+    const camera = preserveCamera && map ? (() => {
+      const center = map.getCenter();
+      return { center: [center.lng, center.lat] as [number, number], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
+    })() : null;
+    if (preserveCamera) suppressStripRefitCountRef.current = 3;
     setSelectedAttraction(null);
     clearWalkingRoute();
     setSelected(business);
@@ -710,6 +716,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     window.history.replaceState(null, "", `?biz=${slug}`);
     if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
+    if (camera && map) {
+      const restoreCamera = () => {
+        map.jumpTo(camera);
+        forceTick((t) => t + 1);
+      };
+      window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
+      window.setTimeout(restoreCamera, 350);
+      window.setTimeout(restoreCamera, 900);
+    }
   };
   const goFeatured = (attraction: Attraction) => {
     setSelected(null);
