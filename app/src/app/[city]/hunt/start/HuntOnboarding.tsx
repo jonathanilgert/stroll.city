@@ -47,7 +47,7 @@ export default function HuntOnboarding({
 }) {
   const router = useRouter();
   const initialHunt = hunts.find((hunt) => hunt.mode === initialType) ?? hunts[0] ?? null;
-  const [huntSlug, setHuntSlug] = useState(initialHunt?.slug ?? "");
+  const [huntSlug] = useState(initialHunt?.slug ?? "");
   const [step, setStep] = useState<Step>("preview");
   const [saved, setSaved] = useState(false);
   const [pickedDot, setPickedDot] = useState(0);
@@ -150,11 +150,10 @@ export default function HuntOnboarding({
 
   return (
     <main className={styles.app}>
-      <div className={styles.screen}>
+      <div className={`${styles.screen} ${step === "preview" ? "" : styles.stepScreen}`}>
         {step === "preview" ? (
-          <>
-            <div className={styles.scroll}>
-              <div className={styles.hero}>
+          <div className={styles.previewLayout}>
+            <div className={styles.heroPane}>
                 {/* eslint-disable-next-line @next/next/no-img-element -- static export, as everywhere else here */}
                 <img src="/brand/stroll-main-map.jpg" alt="Inglewood’s brick storefronts along 9 Ave SE" />
                 <span className={styles.heroShade} aria-hidden />
@@ -179,10 +178,12 @@ export default function HuntOnboarding({
                     </svg>
                   </button>
                 </div>
-                <span className={`${styles.heroTag} ${styles.mono}`}><i />Inglewood · 9 Ave SE</span>
-              </div>
+              <span className={`${styles.heroTag} ${styles.mono}`}><i />Inglewood · 9 Ave SE</span>
+            </div>
 
-              <div className={styles.sheet}>
+            <div className={styles.previewMain}>
+              <div className={styles.scroll}>
+                <div className={styles.sheet}>
                 <span className={`${styles.kicker} ${styles.mono}`}>
                   {hunt.name} · {isFree ? "Free" : "$20 per team"}
                 </span>
@@ -240,19 +241,20 @@ export default function HuntOnboarding({
                   <span className={styles.routeCardHint}>
                     Each stop opens with a riddle. Solve it, walk to the door, take a photo — then the next one unlocks.
                   </span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className={styles.footer}>
-              <button className={styles.cta} onClick={goNext}>
-                Start hunt <ChevronRight size={15} />
-              </button>
-              <span className={styles.ctaNote}>
-                {isFree ? "No account, no app — opens in your browser" : "Your first Full Hunt is free"}
-              </span>
+              <div className={styles.footer}>
+                <button className={styles.cta} onClick={goNext}>
+                  Start hunt <ChevronRight size={15} />
+                </button>
+                <span className={styles.ctaNote}>
+                  {isFree ? "No account, no app — opens in your browser" : "Your first Full Hunt is free"}
+                </span>
+              </div>
             </div>
-          </>
+          </div>
         ) : (
           <>
             <div className={styles.progress} aria-hidden>

@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker } from "maplibre-gl";
 import {
@@ -398,13 +397,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showEvents, setShowEvents] = useState(true);
   const [showOpenNow, setShowOpenNow] = useState(true);
   const [showTrees, setShowTrees] = useState(true);
-  /* Scavenger hunt launcher: pick a mode, name the team, and the session the API
-     hands back becomes the dashboard URL. */
-  const [huntPickerOpen, setHuntPickerOpen] = useState(false);
-  const [huntMode, setHuntMode] = useState<string | null>(null);
-  const [huntTeam, setHuntTeam] = useState("");
-  const [huntStarting, setHuntStarting] = useState(false);
-  const [huntError, setHuntError] = useState("");
   const [neighbourhoodSaved, setNeighbourhoodSaved] = useState(true);
   const [welcome, setWelcome] = useState(false);
   const [hint, setHint] = useState<string | null>("Hover a chip to preview it; click to open the profile without leaving the map.");
@@ -721,39 +713,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     sheetDragRef.current = null;
   };
 
-  /* ---------------- scavenger hunt ---------------- */
-  const router = useRouter();
-  const hunts = useMemo(() => (data?.hunts ?? []).filter((hunt) => hunt.status === "live"), [data]);
-  const openHuntPicker = () => {
-    setHuntError("");
-    setHuntMode((current) => current ?? hunts[0]?.slug ?? null);
-    setHuntPickerOpen(true);
-  };
-  const startHunt = async () => {
-    const slug = huntMode ?? hunts[0]?.slug;
-    if (!slug || huntStarting) return;
-    setHuntStarting(true);
-    setHuntError("");
-    try {
-      const response = await fetch(`/api/v1/${city.slug}/hunts/${slug}/sessions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ team_name: huntTeam.trim() || "Anonymous team" }),
-      });
-      const payload = await response.json().catch(() => null) as { ok?: boolean; data?: { id?: string }; error?: string } | null;
-      if (!response.ok || !payload?.ok || !payload.data?.id) {
-        setHuntError(payload?.error ?? "Could not start the hunt. Please try again.");
-        setHuntStarting(false);
-        return;
-      }
-      /* The session id is the walk: the dashboard reads it back on load, so this URL
-         is shareable between the phones in one team. */
-      router.push(`/${city.slug}/hunt/${payload.data.id}`);
-    } catch {
-      setHuntError("Could not reach the server. Check your connection and try again.");
-      setHuntStarting(false);
-    }
-  };
+  /* The hunt opens as its own page rather than a dialog: onboarding is five steps
+     and a photo, which a popover over the map cannot hold. */
+  const huntHref = `/${city.slug}/hunt/start`;
 
   const flyToBusiness = (business: Business) => {
     searchRef.current?.blur();
@@ -1223,7 +1185,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       <nav className={styles.rail}>
         <img className={styles.railLogo} src="/brand/stroll-mark.png" alt="Stroll City" />
         <button className={`${styles.railBtn} ${tab === "explore" ? styles.railOn : ""}`} title="Explore" onClick={() => { setTab("explore"); backToBrowse(); }}><IconExplore /></button>
-        <button className={styles.railBtn} title="Start a scavenger hunt" onClick={openHuntPicker}><Route size={18} /></button>
+        <Link className={styles.railBtn} title="Start a scavenger hunt" href={huntHref}><Route size={18} /></Link>
         <Link className={`${styles.railBtn} ${styles.railGhost}`} title="Add a place" href="/portal"><IconAdd /></Link>
         <button className={`${styles.railBtn} ${tab === "events" ? styles.railOn : ""}`} title="Events" onClick={() => setTab("events")}><IconEvents /></button>
         <button className={styles.railBtn} title="Saved" onClick={() => setHint("Save places to a walking list from the profile panel.")}><IconSaved /></button>
@@ -1279,7 +1241,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
                 {/* The hunt is the headline feature, so it sits under the area card
                     rather than waiting behind a button nobody scrolls to. */}
-                <button className={styles.huntBanner} onClick={openHuntPicker}>
+                <Link className={styles.huntBanner} href={huntHref}>
                   <span className={styles.huntBannerIc}><Route size={19} /></span>
                   <span className={styles.huntBannerBody}>
                     <span className={styles.huntBannerTitle}>
@@ -1289,7 +1251,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     <span className={styles.huntBannerMeta}>Four clues, four doors, one walk down the strip.</span>
                   </span>
                   <ChevronRight size={16} color="var(--ink-3)" />
-                </button>
+                </Link>
               </div>
 
               <div className={styles.catControls}>
@@ -1413,10 +1375,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <button className={extent === "city" ? styles.segActive : ""} onClick={() => { setExtent("city"); flyCity(); }}>Whole city</button>
             </div>
             <span className={styles.spacer} />
-            <button className={`${styles.btn} ${styles.huntCta}`} onClick={openHuntPicker}>
+            <Link className={`${styles.btn} ${styles.huntCta}`} href={huntHref}>
               <Route size={15} />
               <span className={styles.ctaFull}>Start a scavenger hunt</span><span className={styles.ctaShort}>Hunt</span>
-            </button>
+            </Link>
             <Link className={`${styles.btn} ${styles.btnClaim}`} href="/portal">
               <span className={styles.ctaFull}>Claim your business</span><span className={styles.ctaShort}>Claim</span>
               <ChevronRight size={15} />
@@ -1612,79 +1574,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <button className={tab === "events" ? styles.mTabOn : ""} onClick={() => { setTab("events"); closeSelected(); }}>
             <IconEvents />Events
           </button>
-          <button title="Start a scavenger hunt" onClick={openHuntPicker}>
+          <Link href={huntHref}>
             <Route size={17} />Hunt
-          </button>
+          </Link>
           <Link href="/portal">
             <IconAdd />Claim
           </Link>
         </nav>
-      )}
-
-      {huntPickerOpen && (
-        <div className={styles.huntScrim} role="dialog" aria-modal="true" aria-label="Start a scavenger hunt" onClick={() => setHuntPickerOpen(false)}>
-          <div className={styles.huntDialog} onClick={(event) => event.stopPropagation()}>
-            <div className={styles.huntDialogHead}>
-              <div>
-                <span className={styles.lbl}>Scavenger hunt</span>
-                <h2 className={styles.huntDialogTitle}>Pick the size of the walk</h2>
-                <p className={styles.huntDialogSub}>
-                  A riddle points at a real storefront on the strip. Work it out, walk there, take a photo at the door.
-                </p>
-              </div>
-              <button className={styles.huntDialogClose} onClick={() => setHuntPickerOpen(false)} title="Close"><X size={15} /></button>
-            </div>
-
-            <div className={styles.huntOptions}>
-              {hunts.map((item) => {
-                const chosen = (huntMode ?? hunts[0]?.slug) === item.slug;
-                const stops = item.mode === "friendly" ? 4 : 8;
-                return (
-                  <button key={item.slug} className={styles.huntOption} aria-pressed={chosen} onClick={() => setHuntMode(item.slug)}>
-                    <span className={styles.radio} />
-                    <span className={styles.huntOptionBody}>
-                      <span className={styles.huntOptionTop}>
-                        <span className={styles.huntOptionName}>{item.name}</span>
-                        <span className={`${styles.huntOptionPrice} ${item.mode === "friendly" ? styles.huntOptionFree : ""}`}>
-                          {item.mode === "friendly" ? "Free" : "$20 /team"}
-                        </span>
-                      </span>
-                      <span className={styles.huntOptionMeta}>{item.blurb}</span>
-                      <span className={styles.huntOptionStops}>
-                        {stops} stops · about {item.est_minutes} min · {(item.distance_m / 1000).toFixed(1)} km
-                      </span>
-                    </span>
-                  </button>
-                );
-              })}
-              {!hunts.length && <p className={styles.huntDialogSub}>Hunts are still loading…</p>}
-            </div>
-
-            <label className={styles.claimField}>
-              <span className={styles.claimFieldLabel}>Team name <span className={styles.optional}>(optional)</span></span>
-              <span className={styles.ctl}>
-                <input
-                  value={huntTeam}
-                  onChange={(event) => setHuntTeam(event.target.value)}
-                  placeholder="The Testers"
-                  maxLength={80}
-                  aria-label="Team name"
-                />
-              </span>
-            </label>
-
-            {huntError && <p className={styles.huntDialogError}>{huntError}</p>}
-
-            <div className={styles.huntDialogActions}>
-              <button className={`${styles.btn} ${styles.btnGhost}`} onClick={() => setHuntPickerOpen(false)}>Cancel</button>
-              <span className={styles.spacer} />
-              <button className={`${styles.btn} ${styles.huntCta}`} onClick={startHunt} disabled={huntStarting || !hunts.length}>
-                {huntStarting ? "Starting…" : "Start the hunt"}
-                <ChevronRight size={15} />
-              </button>
-            </div>
-          </div>
-        </div>
       )}
 
       {welcome && (
