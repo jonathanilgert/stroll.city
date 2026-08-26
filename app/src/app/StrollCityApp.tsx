@@ -974,14 +974,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
 
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
-    const zoom = map.getZoom();
-    const forceEveryMarker = zoom >= 19.75;
+    const bounds = map.getBounds();
+    const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
+    const forceLabels = showNames && !mobileLayout && Boolean(walkingRoute || visibleOnScreenCount <= 12);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
     const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, isSelected: boolean) => {
-      if (!showNames && !isSelected) return 32;
+      if (!forceLabels && !isSelected) return 32;
       if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
       const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
       return 52 + Math.min(132, w);
@@ -991,9 +991,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
       const wide = rectFor(cp, chipWidth(biz.name, isSel));
-      if (!mobileLayout && showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
+      if (forceLabels || (isSel && !mobileLayout)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
       const small = rectFor(cp, 32);
-      slots.push({ ...small, members: [biz], mode: isSel ? "label" : "glyph", pinned: isSel });
+      slots.push({ ...small, members: [biz], mode: "glyph", pinned: isSel });
     });
 
     slots.forEach((s) => {
