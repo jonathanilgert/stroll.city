@@ -1543,7 +1543,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`}
                     onClick={() => toggleActiveCategory(key)}
                     aria-pressed={on}
-                    style={{ background: wash(color, on ? 58 : 38, on ? 24 : 14), borderColor: `${color}${on ? "8a" : "45"}` }}
+                    style={{ background: wash(color, on ? 96 : 48, on ? 38 : 18), borderColor: `${color}${on ? "b0" : "65"}` }}
                   >
                     <span className={styles.catCheck} style={on ? { background: color } : undefined}>{on ? "✓" : ""}</span>
                     <span className={styles.ccTile} style={{ color: ink }}>
@@ -1754,11 +1754,21 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               {/* The chip row is noise once you are typing, and it costs the results list a row of height. */}
               {!query.trim() && (
                 <div className={styles.mChipRow}>
-                  {allCategories.map((key) => (
-                    <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
-                      <i style={{ background: categoryColor(city, key) }} />{MOBILE_CAT_LABEL[key]}
-                    </button>
-                  ))}
+                  {allCategories.map((key) => {
+                    const on = activeCategories.has(key);
+                    const color = categoryColor(city, key);
+                    return (
+                      <button
+                        key={key}
+                        className={styles.mChip}
+                        aria-pressed={on}
+                        onClick={() => toggleActiveCategory(key)}
+                        style={{ background: wash(color, on ? 108 : 52, on ? 46 : 20), borderColor: `${color}${on ? "bf" : "70"}`, color: categoryInk(city, key) }}
+                      >
+                        {on ? <span className={styles.mChipCheck}>✓</span> : null}{MOBILE_CAT_LABEL[key]}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
