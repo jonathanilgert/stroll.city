@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker } from "maplibre-gl";
+import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker, type StyleSpecification } from "maplibre-gl";
 import {
   Bike,
   Briefcase,
@@ -284,6 +284,87 @@ function routeFeature(coords: [number, number][]): GeoJSON.FeatureCollection<Geo
   return coords.length >= 2
     ? { type: "FeatureCollection", features: [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: coords } }] }
     : emptyRouteFeature();
+}
+
+type MutableStyle = Omit<StyleSpecification, "sources" | "layers"> & {
+  sources: Record<string, unknown>;
+  layers: Array<Record<string, unknown>>;
+};
+
+const OPENFREEMAP_POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+
+function strollMapSources(data: StrollData): Record<string, unknown> {
+  return {
+    streets: { type: "geojson", data: data.streets },
+    biz: { type: "geojson", data: data.businessBuildings },
+    bike: { type: "geojson", data: data.bike },
+    pathways: { type: "geojson", data: data.pathways },
+    walkingRoute: { type: "geojson", data: emptyRouteFeature() },
+    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[51.03755, -114.03430], [51.03720, -114.01560]] } } },
+  };
+}
+
+function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
+  return [
+    {
+      id: "main-street-watercolour-wash",
+      type: "line",
+      source: "openmaptiles",
+      "source-layer": "transportation",
+      minzoom: 11,
+      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#D94848",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.06, 14, 0.095, 17, 0.15, 20, 0.18],
+        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 11, 14, 23, 17, 48, 20, 92],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 9, 20, 14],
+      },
+    },
+    {
+      id: "main-street-watercolour-core",
+      type: "line",
+      source: "openmaptiles",
+      "source-layer": "transportation",
+      minzoom: 12,
+      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
+      layout: { "line-cap": "round", "line-join": "round" },
+      paint: {
+        "line-color": "#E45252",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.045, 15, 0.08, 18, 0.12, 20, 0.135],
+        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 6, 15, 16, 18, 35, 20, 60],
+        "line-blur": 5,
+      },
+    },
+  ];
+}
+
+function strollOverlayLayers(): Array<Record<string, unknown>> {
+  return [
+    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
+    { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
+    { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
+    { id: "walking-route-halo", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 18, 10], "line-opacity": 0.95 } },
+    { id: "walking-route", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#E3342F", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 3, 18, 6], "line-opacity": 0.96 } },
+    { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#E2E4E8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
+    { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
+    { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
+    { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
+  ];
+}
+
+async function buildCrispNoLabelMapStyle(data: StrollData): Promise<StyleSpecification> {
+  const response = await fetch(OPENFREEMAP_POSITRON_STYLE_URL, { cache: "force-cache" });
+  if (!response.ok) throw new Error(`OpenFreeMap style failed: ${response.status}`);
+  const base = await response.json() as MutableStyle;
+  const layers = base.layers ?? [];
+  const baseMapLayers = layers.filter((layer) => layer.type !== "symbol");
+  const streetNameLayers = layers.filter((layer) => typeof layer.id === "string" && ["highway-name-major", "highway-name-minor", "highway-name-path"].includes(layer.id));
+  return {
+    ...base,
+    sources: { ...base.sources, ...strollMapSources(data) },
+    layers: [...baseMapLayers, ...strollMainStreetWatercolourLayers(), ...strollOverlayLayers(), ...streetNameLayers],
+  } as StyleSpecification;
 }
 
 function metersBetween(a: [number, number], b: [number, number]) {
@@ -865,82 +946,62 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   /* ---------------- map init ---------------- */
   useEffect(() => {
     if (!data || !mapNode.current || mapRef.current) return;
-    const map = new maplibregl.Map({
-      container: mapNode.current,
-      style: {
-        version: 8,
-        sources: {
-          carto: {
-            type: "raster",
-            tiles: [
-              "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-              "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-              "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-              "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
-            ],
-            tileSize: 256,
-            // CARTO returns "API key required" placeholder tiles above z17.
-            // Cap source zoom so MapLibre overzooms clean z17 tiles instead of requesting branded error tiles.
-            maxzoom: 17,
-            attribution: "© OpenStreetMap © CARTO",
-          },
 
-          streets: { type: "geojson", data: data.streets },
-          biz: { type: "geojson", data: data.businessBuildings },
-          bike: { type: "geojson", data: data.bike },
-          pathways: { type: "geojson", data: data.pathways },
-          walkingRoute: { type: "geojson", data: emptyRouteFeature() },
-          stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[51.03755, -114.03430], [51.03720, -114.01560]] } } },
-        },
-        layers: [
-          { id: "carto", type: "raster", source: "carto" },
-          { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
-          { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
-          { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
-          { id: "walking-route-halo", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 18, 10], "line-opacity": 0.95 } },
-          { id: "walking-route", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#E3342F", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 3, 18, 6], "line-opacity": 0.96 } },
-          { id: "street-ink", type: "line", source: "streets", paint: { "line-color": "#E2E4E8", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 0.4, 16, 1.2, 18, 2.8], "line-opacity": 0.6 } },
-          { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
-          { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
-          { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
+    let cancelled = false;
+    let cleanup = () => {};
 
-        ],
-      },
-      center: data.center,
-      zoom: 16.25,
-      pitch: 0,
-      minZoom: 10,
-      maxZoom: 21,
-      attributionControl: false,
+    const initMap = async () => {
+      const style = await buildCrispNoLabelMapStyle(data);
+      if (cancelled || !mapNode.current || mapRef.current) return;
+
+      const map = new maplibregl.Map({
+        container: mapNode.current,
+        style,
+        center: data.center,
+        zoom: 16.25,
+        pitch: 0,
+        minZoom: 10,
+        maxZoom: 21,
+        attributionControl: false,
+      });
+      mapRef.current = map;
+      map.addControl(new maplibregl.AttributionControl({ customAttribution: "Businesses, trees, bikeways & pathways © City of Calgary Open Data" }), "bottom-left");
+
+      map.on("load", () => {
+        map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
+        map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#57C07A", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
+        fitStrip(false);
+      });
+
+      map.on("moveend", () => setPinLayoutTick((t) => t + 1));
+      map.on("zoomend", () => setPinLayoutTick((t) => t + 1));
+      const onResize = () => { map.resize(); setPinLayoutTick((t) => t + 1); };
+      window.addEventListener("resize", onResize);
+
+      cleanup = () => {
+        window.removeEventListener("resize", onResize);
+        pinMarkersRef.current.forEach((m) => m.remove());
+        eventMarkersRef.current.forEach((m) => m.remove());
+        featMarkersRef.current.forEach(({ marker }) => marker.remove());
+        userMarkerRef.current?.remove();
+        if (geoWatchRef.current !== null && typeof navigator !== "undefined" && navigator.geolocation) navigator.geolocation.clearWatch(geoWatchRef.current);
+        pinMarkersRef.current = [];
+        eventMarkersRef.current = [];
+        featMarkersRef.current = [];
+        userMarkerRef.current = null;
+        geoWatchRef.current = null;
+        map.remove();
+        mapRef.current = null;
+      };
+    };
+
+    initMap().catch((error: unknown) => {
+      console.error("Failed to initialise Stroll map", error);
     });
-    mapRef.current = map;
-    map.addControl(new maplibregl.AttributionControl({ customAttribution: "Businesses, trees, bikeways & pathways © City of Calgary Open Data" }), "bottom-left");
-
-    map.on("load", () => {
-      map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
-      map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#57C07A", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
-      fitStrip(false);
-    });
-
-    map.on("moveend", () => setPinLayoutTick((t) => t + 1));
-    map.on("zoomend", () => setPinLayoutTick((t) => t + 1));
-    const onResize = () => { map.resize(); setPinLayoutTick((t) => t + 1); };
-    window.addEventListener("resize", onResize);
 
     return () => {
-      window.removeEventListener("resize", onResize);
-      pinMarkersRef.current.forEach((m) => m.remove());
-      eventMarkersRef.current.forEach((m) => m.remove());
-      featMarkersRef.current.forEach(({ marker }) => marker.remove());
-      userMarkerRef.current?.remove();
-      if (geoWatchRef.current !== null && typeof navigator !== "undefined" && navigator.geolocation) navigator.geolocation.clearWatch(geoWatchRef.current);
-      pinMarkersRef.current = [];
-      eventMarkersRef.current = [];
-      featMarkersRef.current = [];
-      userMarkerRef.current = null;
-      geoWatchRef.current = null;
-      map.remove();
-      mapRef.current = null;
+      cancelled = true;
+      cleanup();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
@@ -1059,16 +1120,18 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
 
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
-    const bounds = map.getBounds();
-    const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
     const zoom = map.getZoom();
     const dotZoomMax = 16.2;
     const logoZoomMin = 15.95;
     const labelZoomMin = mobileLayout ? 17.15 : 16.65;
     const labelDensityLimit = mobileLayout ? 18 : 28;
-    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
-    const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
-    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
+    // Keep the pin presentation stable while panning. Using the current map bounds here made
+    // labels appear/disappear at the same zoom as businesses crossed the viewport edge, which
+    // shuffled nearby logos even though the user had only dragged the map.
+    const filteredBusinessCount = items.length;
+    const forceLabels = showNames && Boolean(walkingRoute || filteredBusinessCount <= labelDensityLimit || zoom >= labelZoomMin);
+    const forceLogos = forceLabels || zoom >= logoZoomMin || filteredBusinessCount <= 64;
+    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && filteredBusinessCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const overlap = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => {
       const w = Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1));
