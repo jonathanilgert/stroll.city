@@ -316,9 +316,9 @@ function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
         "line-color": "#D94848",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.04, 14, 0.07, 17, 0.11, 20, 0.13],
-        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 8, 14, 16, 17, 34, 20, 66],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 3, 16, 7, 20, 11],
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.06, 14, 0.095, 17, 0.15, 20, 0.18],
+        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 11, 14, 23, 17, 48, 20, 92],
+        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 9, 20, 14],
       },
     },
     {
@@ -330,10 +330,10 @@ function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
       filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
       layout: { "line-cap": "round", "line-join": "round" },
       paint: {
-        "line-color": "#E25D5D",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.03, 15, 0.055, 18, 0.08, 20, 0.09],
-        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 4, 15, 11, 18, 24, 20, 42],
-        "line-blur": 4,
+        "line-color": "#E45252",
+        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.045, 15, 0.08, 18, 0.12, 20, 0.135],
+        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 6, 15, 16, 18, 35, 20, 60],
+        "line-blur": 5,
       },
     },
   ];
