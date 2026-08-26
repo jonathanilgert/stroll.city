@@ -393,7 +393,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [stageTight, setStageTight] = useState(false);
   const [stageSnug, setStageSnug] = useState(false);
   const [stageShort, setStageShort] = useState(false);
-  const [, forceTick] = useState(0);
+  const [pinLayoutTick, setPinLayoutTick] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => categoriesFromUrl());
   const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
@@ -542,7 +542,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!camera || !map) return;
     const restoreCamera = () => {
       map.jumpTo(camera);
-      forceTick((t) => t + 1);
+      setPinLayoutTick((t) => t + 1);
     };
     window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
     window.setTimeout(restoreCamera, 350);
@@ -694,11 +694,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     window.setTimeout(() => {
       if (suppressStripRefitCountRef.current > 0) {
         suppressStripRefitCountRef.current -= 1;
-        forceTick((t) => t + 1);
+        setPinLayoutTick((t) => t + 1);
         return;
       }
       fitStrip(true);
-      forceTick((t) => t + 1);
+      setPinLayoutTick((t) => t + 1);
     }, animate ? 340 : 0);
   };
   const snapSheet = (stop: "peek" | "half" | "full") => {
@@ -891,9 +891,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       fitStrip(false);
     });
 
-    map.on("moveend", () => forceTick((t) => t + 1));
-    map.on("zoomend", () => forceTick((t) => t + 1));
-    const onResize = () => { map.resize(); forceTick((t) => t + 1); };
+    map.on("moveend", () => setPinLayoutTick((t) => t + 1));
+    map.on("zoomend", () => setPinLayoutTick((t) => t + 1));
+    const onResize = () => { map.resize(); setPinLayoutTick((t) => t + 1); };
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -1039,7 +1039,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 10 && r.x2 + 10 > s.x1 && r.y1 < s.y2 + 8 && r.y2 + 8 > s.y1);
+    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 2 && r.x2 + 2 > s.x1 && r.y1 < s.y2 + 2 && r.y2 + 2 > s.y1);
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
       const x = cp.x + offset[0];
       const y = cp.y + offset[1];
@@ -1053,7 +1053,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const key = `${x},${y}`;
         if (!seen.has(key)) { seen.add(key); offsets.push([x, y]); }
       };
-      for (let r = 12; r <= max; r += 12) {
+      for (let r = 8; r <= max; r += 8) {
         const diagonals = Math.round(r * 0.7);
         add(r, 0); add(-r, 0); add(0, r); add(0, -r);
         add(diagonals, diagonals); add(-diagonals, diagonals); add(diagonals, -diagonals); add(-diagonals, -diagonals);
@@ -1136,7 +1136,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         pinElsRef.current.set(biz.id, el);
       }
     });
-  });
+    // Re-place marker offsets only on deliberate layout inputs and MapLibre moveend/zoomend.
+    // Keeping this off generic renders prevents mobile pan/URL-bar changes from making logos bounce mid-drag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, data, mobileLayout, pinLayoutTick, selected, showNames, visibleBusinesses, walkingRoute]);
 
   useEffect(() => {
     if (!data || typeof window === "undefined") return;
