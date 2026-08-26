@@ -5,7 +5,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker, type StyleSpecification } from "maplibre-gl";
 import {
   Bike,
-  Briefcase,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
@@ -961,7 +960,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       setHint(`${n.name} will be added to stroll.city after Inglewood.`);
     }
   };
-  const openPortal = (business: Business) => { window.location.href = `/portal?business=${encodeURIComponent(business.id)}`; };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null); };
@@ -1357,24 +1355,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   /* shared between the desktop drawer and the mobile bottom sheet's detail state */
   const renderDetail = (biz: Business) => (
     <>
+      <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
       <div className={styles.hero}>
         <img src={biz.photo} alt="" />
-        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
           {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
       </div>
       <div className={styles.dBody}>
-        <div>
-          <div className={styles.dTitle}>{biz.name}</div>
-          <div className={styles.dSub}>
-            <span className={styles.pill} style={{ color: categoryInk(city, biz.category), borderColor: `${categoryInk(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}1A` }}>
-              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryInk(city, biz.category)} /> {CAT_LABEL[biz.category]}
-            </span>
-            {(() => { const open = isOpenNow(biz.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
-            {biz.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
-          </div>
-        </div>
         <div className={styles.dActions}>
           {walkingRoute?.target.id !== biz.id && (
             <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
@@ -1395,16 +1383,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <div className={styles.kv}>
           <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
           <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
-          <div className={styles.kvRow}><span className={styles.k}>Source</span><span className={`${styles.v} ${styles.mono}`} style={{ fontSize: 11.5, color: "var(--ink-2)" }}>{biz.source}</span></div>
         </div>
-        <div>
-          <div className={styles.lbl} style={{ marginBottom: 8 }}>Good for</div>
-          <div className={styles.rowTags}>{biz.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
-        </div>
-        <button className={styles.claimcard} onClick={() => openPortal(biz)}>
-          <Briefcase size={20} color="var(--accent-ink)" style={{ flex: "0 0 auto" }} />
-          <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
-        </button>
       </div>
     </>
   );
@@ -1810,23 +1789,20 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <i />
           </button>
 
-          <div className={styles.mSheetHead}>
-            {selected ? (
-              <>
-                <button className={styles.backToStreet} onClick={closeSelected} title="Back to the street">Back to the street</button>
-                <span className={styles.mSheetTitle}>Profile</span>
-              </>
-            ) : tab === "events" ? (
-              <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
-            ) : (
-              <>
-                <span className={styles.mSheetTitle}>{visibleBusinesses.length} place{visibleBusinesses.length === 1 ? "" : "s"}</span>
-                <button className={styles.mSort} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>
-                  {sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={11} />
-                </button>
-              </>
-            )}
-          </div>
+          {!selected && (
+            <div className={styles.mSheetHead}>
+              {tab === "events" ? (
+                <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
+              ) : (
+                <>
+                  <span className={styles.mSheetTitle}>{visibleBusinesses.length} place{visibleBusinesses.length === 1 ? "" : "s"}</span>
+                  <button className={styles.mSort} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>
+                    {sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={11} />
+                  </button>
+                </>
+              )}
+            </div>
+          )}
 
           <div className={styles.mSheetBody}>
             {selected ? (
