@@ -976,7 +976,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
     const bounds = map.getBounds();
     const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
-    const forceLabels = showNames && !mobileLayout && Boolean(walkingRoute || visibleOnScreenCount <= 12);
+    const labelDensityLimit = 48; // roughly one zoom level sooner than the previous 12-place cutoff
+    const forceLabels = showNames && !mobileLayout && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
     const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
     const measureCanvas = document.createElement("canvas").getContext("2d");
