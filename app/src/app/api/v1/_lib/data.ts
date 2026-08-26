@@ -34,7 +34,29 @@ export type Business = {
   finisher_days?: string[];
   donates_to_basket?: boolean;
   basket_item?: string;
+  hosts_group_finish?: boolean;
+  group_finish_biggest_group?: string;
+  group_finish_windows?: string[];
+  group_finish_notice?: string;
+  group_finish_holds?: string;
+  group_finish_monthly_cap?: number;
   notes?: string;
+};
+
+export type MemberSwitchPayload = {
+  enabled?: boolean;
+  type?: string;
+  offer?: string;
+  weekly_cap?: number;
+  note?: string;
+  item?: string;
+  approximate_value?: string;
+  months?: string;
+  biggest_group?: string;
+  windows?: string[];
+  notice?: string;
+  holds?: string;
+  monthly_cap?: number;
 };
 
 export type StrollEvent = {
@@ -72,6 +94,9 @@ export type ClaimPayload = {
   plan_tier: "free" | "stroll" | "stroll_plus";
   logo_data_url?: string;
   logo_name?: string;
+  finisher_offer?: MemberSwitchPayload;
+  basket?: MemberSwitchPayload;
+  finish_venue?: MemberSwitchPayload;
 };
 
 export type BusinessClaim = ClaimPayload & {
@@ -294,6 +319,12 @@ export function sanitizeBusinessPatch(payload: Partial<Business>): Partial<Busin
   if (payload.finisher_days !== undefined && Array.isArray(payload.finisher_days)) patch.finisher_days = payload.finisher_days.slice(0, 7).map((day) => sanitizeString(day, 16));
   if (payload.donates_to_basket !== undefined) patch.donates_to_basket = Boolean(payload.donates_to_basket);
   if (payload.basket_item !== undefined) patch.basket_item = sanitizeString(payload.basket_item, 180);
+  if (payload.hosts_group_finish !== undefined) patch.hosts_group_finish = Boolean(payload.hosts_group_finish);
+  if (payload.group_finish_biggest_group !== undefined) patch.group_finish_biggest_group = sanitizeString(payload.group_finish_biggest_group, 40);
+  if (payload.group_finish_windows !== undefined && Array.isArray(payload.group_finish_windows)) patch.group_finish_windows = payload.group_finish_windows.slice(0, 12).map((window) => sanitizeString(window, 40));
+  if (payload.group_finish_notice !== undefined) patch.group_finish_notice = sanitizeString(payload.group_finish_notice, 40);
+  if (payload.group_finish_holds !== undefined) patch.group_finish_holds = sanitizeString(payload.group_finish_holds, 240);
+  if (payload.group_finish_monthly_cap !== undefined) patch.group_finish_monthly_cap = Math.max(0, Math.min(40, Number(payload.group_finish_monthly_cap) || 2));
   if (payload.notes !== undefined) patch.notes = sanitizeString(payload.notes, 1000);
   if (payload.needsReview !== undefined) patch.needsReview = Boolean(payload.needsReview);
   if (payload.source !== undefined) patch.source = sanitizeString(payload.source, 180);
@@ -436,16 +467,38 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
     created_at: new Date().toISOString(),
   };
 
-  const claims = await readOverlay<BusinessClaim>(city, "claims");
-  await writeOverlay(city, "claims", [claim, ...claims]);
-
-  await patchBusiness(city, businessId, {
+  const businessPatch: Partial<Business> = {
     logo_url: logo,
     plan_tier: tier,
     claim_status: "pending",
     needsReview: false,
     source: `${business.source} · claim pending`,
-  });
+  };
+
+  if (tier === "stroll" || tier === "stroll_plus") {
+    if (payload.finisher_offer) {
+      businessPatch.offers_finisher_item = Boolean(payload.finisher_offer.enabled);
+      businessPatch.finisher_item = [payload.finisher_offer.type, payload.finisher_offer.offer].filter(Boolean).join(": ");
+      businessPatch.finisher_cap_weekly = payload.finisher_offer.weekly_cap;
+    }
+    if (payload.basket) {
+      businessPatch.donates_to_basket = Boolean(payload.basket.enabled);
+      businessPatch.basket_item = [payload.basket.item, payload.basket.approximate_value, payload.basket.months].filter(Boolean).join(" · ");
+    }
+    if (payload.finish_venue) {
+      businessPatch.hosts_group_finish = Boolean(payload.finish_venue.enabled);
+      businessPatch.group_finish_biggest_group = payload.finish_venue.biggest_group;
+      businessPatch.group_finish_windows = Array.isArray(payload.finish_venue.windows) ? payload.finish_venue.windows : [];
+      businessPatch.group_finish_notice = payload.finish_venue.notice;
+      businessPatch.group_finish_holds = payload.finish_venue.holds;
+      businessPatch.group_finish_monthly_cap = payload.finish_venue.monthly_cap;
+    }
+  }
+
+  const claims = await readOverlay<BusinessClaim>(city, "claims");
+  await writeOverlay(city, "claims", [claim, ...claims]);
+
+  await patchBusiness(city, businessId, sanitizeBusinessPatch(businessPatch));
 
   return claim;
 }

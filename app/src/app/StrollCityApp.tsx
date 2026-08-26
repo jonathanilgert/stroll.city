@@ -230,13 +230,15 @@ function edmontonMinutesNow() {
 }
 
 /* raw markup for vanilla-DOM markers */
-function pinMarkup(styles_: typeof styles, biz: Business, color: string, compact: boolean, active: boolean) {
-  const isStroll = biz.plan_tier === "stroll" || biz.plan_tier === "stroll_plus";
-  const glyphInner = isStroll && biz.logo_url ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
-  const fill = isStroll && biz.logo_url ? "#fff" : "#E7E9EC";
-  const classes = [styles_.pin, compact ? styles_.compact : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
+type PinMode = "dot" | "logo" | "label";
+function pinMarkup(styles_: typeof styles, biz: Business, color: string, mode: PinMode, active: boolean) {
+  const hasLogo = Boolean(biz.logo_url);
+  const compact = mode !== "label";
+  const glyphInner = mode === "dot" ? "" : hasLogo ? `<img src="${biz.logo_url}" alt="" />` : biz.mono;
+  const fill = mode === "dot" ? color : hasLogo ? "#fff" : "#E7E9EC";
+  const classes = [styles_.pin, compact ? styles_.compact : "", mode === "dot" ? styles_.dotPin : "", active ? styles_.pinActive : ""].filter(Boolean).join(" ");
   const glyph = `<span class="${styles_.glyph}" style="background:${fill};color:#14161A;border-color:${color}">${glyphInner}</span>`;
-  if (compact) return `<div class="${classes}">${glyph}</div>`;
+  if (mode !== "label") return `<div class="${classes}">${glyph}</div>`;
   return `<div class="${classes}">${glyph}<span class="${styles_.label}">${biz.name}</span></div>`;
 }
 function fallbackEvents(data: StrollData): EventItem[] {
@@ -405,7 +407,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [stageTight, setStageTight] = useState(false);
   const [stageSnug, setStageSnug] = useState(false);
   const [stageShort, setStageShort] = useState(false);
-  const [, forceTick] = useState(0);
+  const [pinLayoutTick, setPinLayoutTick] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => categoriesFromUrl());
   const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
@@ -415,6 +417,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const locateRef = useRef<HTMLButtonElement | null>(null);
   const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
   const sheetHeightRef = useRef(132);
+  const suppressStripRefitCountRef = useRef(0);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -548,11 +551,33 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       return next;
     });
   };
+  const restoreCameraAfterLayout = (camera: { center: [number, number]; zoom: number; bearing: number; pitch: number } | null) => {
+    const map = mapRef.current;
+    if (!camera || !map) return;
+    const restoreCamera = () => {
+      map.jumpTo(camera);
+      setPinLayoutTick((t) => t + 1);
+    };
+    window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
+    window.setTimeout(restoreCamera, 350);
+    window.setTimeout(restoreCamera, 900);
+  };
+
+  const snapshotCamera = () => {
+    const map = mapRef.current;
+    if (!map) return null;
+    const center = map.getCenter();
+    return { center: [center.lng, center.lat] as [number, number], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
+  };
+
   const closeSelected = () => {
+    const camera = snapshotCamera();
+    suppressStripRefitCountRef.current = 3;
     setSelected(null);
     setSelectedAttraction(null);
     clearWalkingRoute();
     if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
+    restoreCameraAfterLayout(camera);
   };
 
   /* ---------------- padding-aware fit, matching the design's fitPad()/fitStrip() ---------------- */
@@ -602,7 +627,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setWalkingRoute(null);
     setRouteSource([]);
   };
-  const drawWalkingRoute = (location: UserLocation, target: Business) => {
+  const drawWalkingRoute = (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
     const start: [number, number] = [location.lon, location.lat];
     const finish: [number, number] = [target.lon, target.lat];
@@ -611,8 +636,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const distanceM = coords.reduce((total, coord, index) => index === 0 ? total : total + metersBetween(coords[index - 1], coord), 0);
     setWalkingRoute({ target, coords, distanceM, network: Boolean(networkCoords) });
     setRouteSource(coords);
-    fitRoute(coords);
+    if (options.fitMap !== false) fitRoute(coords);
     setHint(`${target.name} route is highlighted. Only your blue location dot and the destination logo stay on the map.`);
+  };
+  const showFullRoute = () => {
+    if (walkingRoute?.coords.length) fitRoute(walkingRoute.coords);
   };
   const startLocationWatch = (onLocated?: (location: UserLocation) => void) => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -623,12 +651,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setLocating(true);
     setGeoError(null);
     if (geoWatchRef.current !== null) navigator.geolocation.clearWatch(geoWatchRef.current);
+    let handledInitialLocation = false;
     geoWatchRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const next = { lon: position.coords.longitude, lat: position.coords.latitude, accuracy: position.coords.accuracy };
         setUserLocation(next);
         setLocating(false);
-        onLocated?.(next);
+        if (onLocated && !handledInitialLocation) {
+          handledInitialLocation = true;
+          onLocated(next);
+        }
       },
       () => {
         setLocating(false);
@@ -673,7 +705,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     el.style.height = `${px}px`;
     sheetHeightRef.current = px;
     if (locateRef.current) locateRef.current.style.bottom = `${px + 14}px`;
-    window.setTimeout(() => { fitStrip(true); forceTick((t) => t + 1); }, animate ? 340 : 0);
+    window.setTimeout(() => {
+      if (suppressStripRefitCountRef.current > 0) {
+        suppressStripRefitCountRef.current -= 1;
+        setPinLayoutTick((t) => t + 1);
+        return;
+      }
+      fitStrip(true);
+      setPinLayoutTick((t) => t + 1);
+    }, animate ? 340 : 0);
   };
   const snapSheet = (stop: "peek" | "half" | "full") => {
     setSheetStop(stop);
@@ -717,15 +757,23 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
      and a photo, which a popover over the map cannot hold. */
   const huntHref = `/${city.slug}/hunt/start`;
 
-  const flyToBusiness = (business: Business) => {
+  const flyToBusiness = (business: Business, options: { moveMap?: boolean } = {}) => {
     searchRef.current?.blur();
+    const preserveCamera = options.moveMap === false;
+    const map = mapRef.current;
+    const camera = preserveCamera && map ? (() => {
+      const center = map.getCenter();
+      return { center: [center.lng, center.lat] as [number, number], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
+    })() : null;
+    if (preserveCamera) suppressStripRefitCountRef.current = 3;
     setSelectedAttraction(null);
     clearWalkingRoute();
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
-    mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
+    if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
+    if (camera && map) restoreCameraAfterLayout(camera);
   };
   const goFeatured = (attraction: Attraction) => {
     setSelected(null);
@@ -822,8 +870,21 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       style: {
         version: 8,
         sources: {
-          carto: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap © CARTO" },
-          cartoLabels: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"], tileSize: 256 },
+          carto: {
+            type: "raster",
+            tiles: [
+              "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+              "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png",
+            ],
+            tileSize: 256,
+            // CARTO returns "API key required" placeholder tiles above z17.
+            // Cap source zoom so MapLibre overzooms clean z17 tiles instead of requesting branded error tiles.
+            maxzoom: 17,
+            attribution: "© OpenStreetMap © CARTO",
+          },
+
           streets: { type: "geojson", data: data.streets },
           biz: { type: "geojson", data: data.businessBuildings },
           bike: { type: "geojson", data: data.bike },
@@ -842,7 +903,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
           { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
           { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
-          { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
+
         ],
       },
       center: data.center,
@@ -861,9 +922,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       fitStrip(false);
     });
 
-    map.on("moveend", () => forceTick((t) => t + 1));
-    map.on("zoomend", () => forceTick((t) => t + 1));
-    const onResize = () => { map.resize(); forceTick((t) => t + 1); };
+    map.on("moveend", () => setPinLayoutTick((t) => t + 1));
+    map.on("zoomend", () => setPinLayoutTick((t) => t + 1));
+    const onResize = () => { map.resize(); setPinLayoutTick((t) => t + 1); };
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -892,7 +953,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const key = `${wrap.clientWidth}x${wrap.clientHeight}`;
       if (key === lastFitKeyRef.current) return;
       lastFitKeyRef.current = key;
-      if (extent === "strip" && !selected) fitStrip(false);
+      if (extent === "strip" && !selected) {
+        if (suppressStripRefitCountRef.current > 0) {
+          suppressStripRefitCountRef.current -= 1;
+        } else {
+          fitStrip(false);
+        }
+      }
     };
     const ro = new ResizeObserver(onResize);
     ro.observe(wrap);
@@ -979,10 +1046,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
     const wrap = mapWrapRef.current;
     const pane = wrap?.getBoundingClientRect();
-    type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: "label" | "glyph"; pinned: boolean; chrome?: boolean };
+    type Slot = { x1: number; x2: number; y1: number; y2: number; cx: number; cy: number; members: Business[]; mode: PinMode; pinned: boolean; chrome?: boolean; offset?: [number, number] };
     const slots: Slot[] = [];
     if (pane) {
-      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
+      const chromeEls = wrap!.querySelectorAll(`.${styles.cardUi}, .${styles.glass}, .${styles.stat}, .${styles.drawerOpen}, .${styles.edgeTab}, .${styles.btnPrimary}, .${styles.navigationHud}, .${styles.mTop}, .${styles.mSheet}, .${styles.mLocate}`);
       chromeEls.forEach((n) => {
         const el = n as HTMLElement;
         if (!el.offsetWidth || getComputedStyle(el).display === "none") return;
@@ -992,38 +1059,113 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
 
     const items = walkingRoute ? [walkingRoute.target] : visibleBusinesses;
+    const bounds = map.getBounds();
+    const visibleOnScreenCount = items.filter((biz) => bounds.contains([biz.lon, biz.lat])).length;
     const zoom = map.getZoom();
-    const forceEveryMarker = zoom >= 19.75;
+    const dotZoomMax = 16.2;
+    const logoZoomMin = 15.95;
+    const labelZoomMin = mobileLayout ? 17.15 : 16.65;
+    const labelDensityLimit = mobileLayout ? 18 : 28;
+    const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
+    const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
+    const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 8 && r.x2 + 8 > s.x1 && r.y1 < s.y2 + 6 && r.y2 + 6 > s.y1);
-    const rectFor = (cp: { x: number; y: number }, w: number) => ({ x1: cp.x - 16, x2: cp.x - 16 + w, y1: cp.y - 17, y2: cp.y + 19, cx: cp.x, cy: cp.y });
+    const overlap = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => {
+      const w = Math.max(0, Math.min(a.x2, b.x2) - Math.max(a.x1, b.x1));
+      const h = Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
+      return { w, h, area: w * h };
+    };
+    // Keep markers geographically honest, but don't let visible buttons stack over each other.
+    // Logos may touch/overlap slightly; name labels need more breathing room so every place stays readable.
+    const remainsReadable = (r: { x1: number; x2: number; y1: number; y2: number }, mode: PinMode) => !slots.some((s) => {
+      if (s.chrome) return false;
+      const hit = overlap(r, s);
+      if (!hit.area) return false;
+      if (mode === "label" || s.mode === "label") return hit.h > 4 && hit.w > 4;
+      const rArea = Math.max(1, (r.x2 - r.x1) * (r.y2 - r.y1));
+      const sArea = Math.max(1, (s.x2 - s.x1) * (s.y2 - s.y1));
+      const coveredShare = hit.area / Math.min(rArea, sArea);
+      const sharedHeight = hit.h / Math.max(1, Math.min(r.y2 - r.y1, s.y2 - s.y1));
+      const sharedWidth = hit.w / Math.max(1, Math.min(r.x2 - r.x1, s.x2 - s.x1));
+      return coveredShare >= 0.18 || (sharedHeight >= 0.45 && sharedWidth >= 0.25);
+    });
+    const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
+      const x = cp.x + offset[0];
+      const y = cp.y + offset[1];
+      return { x1: x - w / 2, x2: x + w / 2, y1: y - h / 2, y2: y + h / 2, cx: cp.x, cy: cp.y };
+    };
+    const offsetCandidates = (max: number): [number, number][] => {
+      if (max <= 0) return [[0, 0]];
+      const offsets: [number, number][] = [[0, 0]];
+      const seen = new Set(["0,0"]);
+      const add = (x: number, y: number) => {
+        const key = `${x},${y}`;
+        if (!seen.has(key)) { seen.add(key); offsets.push([x, y]); }
+      };
+      for (let r = 8; r <= max; r += 8) {
+        const diagonals = Math.round(r * 0.7);
+        add(r, 0); add(-r, 0); add(0, r); add(0, -r);
+        add(diagonals, diagonals); add(-diagonals, diagonals); add(diagonals, -diagonals); add(-diagonals, -diagonals);
+        add(r, Math.round(r / 2)); add(-r, Math.round(r / 2)); add(r, -Math.round(r / 2)); add(-r, -Math.round(r / 2));
+        add(Math.round(r / 2), r); add(-Math.round(r / 2), r); add(Math.round(r / 2), -r); add(-Math.round(r / 2), -r);
+      }
+      return offsets;
+    };
     const measureCanvas = document.createElement("canvas").getContext("2d");
-    const chipWidth = (name: string, isSelected: boolean) => {
-      if (!showNames && !isSelected) return 32;
+    const chipWidth = (name: string, mode: PinMode) => {
+      if (mode === "dot") return 9;
+      if (mode === "logo") return 32;
       if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
       const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
-      return 52 + Math.min(132, w);
+      return 66 + Math.min(140, w);
+    };
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 32 : 38;
+    const maxSkewFor = (mode: PinMode) => {
+      if (walkingRoute) return 0;
+      if (mode === "dot") return 16;
+      if (mode === "logo") return 44;
+      return 96;
     };
 
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
-      const wide = rectFor(cp, chipWidth(biz.name, isSel));
-      if (!mobileLayout && showNames && clears(wide)) { slots.push({ ...wide, members: [biz], mode: "label", pinned: isSel }); return; }
-      const small = rectFor(cp, 32);
-      slots.push({ ...small, members: [biz], mode: isSel ? "label" : "glyph", pinned: isSel });
+      const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
+      const fallbackModes: PinMode[] = [desiredMode];
+      let placed: { mode: PinMode; offset: [number, number]; rect: ReturnType<typeof rectFor> } | null = null;
+      for (const mode of fallbackModes) {
+        const w = chipWidth(biz.name, mode);
+        const h = chipHeight(mode);
+        const candidates = offsetCandidates(maxSkewFor(mode));
+        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate), mode));
+        if (offset) {
+          placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
+          break;
+        }
+      }
+      if (!placed) {
+        const mode = desiredMode;
+        const offset: [number, number] = [0, 0];
+        placed = { mode, offset, rect: rectFor(cp, chipWidth(biz.name, mode), chipHeight(mode), offset) };
+      }
+      slots.push({ ...placed.rect, members: [biz], mode: placed.mode, pinned: isSel, offset: placed.offset });
     });
 
     slots.forEach((s) => {
       if (s.chrome || !s.members.length) return;
       if (s.pinned || s.members.length === 1) {
         const biz = s.members[0];
-        const compact = mobileLayout ? true : s.mode === "glyph" && biz.id !== selected?.id;
         const el = document.createElement("button");
-        el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), compact, biz.id === selected?.id);
-        el.addEventListener("click", () => flyToBusiness(biz));
+        el.className = styles.markerHit;
+        el.dataset.pinMode = s.mode;
+        el.innerHTML = pinMarkup(styles, biz, categoryColor(city, biz.category), s.mode, biz.id === selected?.id);
+        el.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          flyToBusiness(biz, { moveMap: false });
+        });
         el.addEventListener("mouseenter", () => {
-          if (mobileLayout) return;
+          if (mobileLayout || s.mode === "dot") return;
           const pinEl = el.querySelector(`.${styles.pin}`);
           if (pinEl?.classList.contains(styles.compact)) { pinEl.classList.remove(styles.compact); (el as HTMLElement).dataset.wasCompact = "true"; }
           rowElsRef.current.get(biz.id)?.classList.add(styles.rowActive);
@@ -1033,12 +1175,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           if (el.dataset.wasCompact === "true") pinEl?.classList.add(styles.compact);
           if (biz.id !== selected?.id) rowElsRef.current.get(biz.id)?.classList.remove(styles.rowActive);
         });
-        const marker = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([biz.lon, biz.lat]).addTo(map);
+        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat([biz.lon, biz.lat]).addTo(map);
         pinMarkersRef.current.push(marker);
         pinElsRef.current.set(biz.id, el);
       }
     });
-  });
+    // Re-place marker offsets only on deliberate layout inputs and MapLibre moveend/zoomend.
+    // Keeping this off generic renders prevents mobile pan/URL-bar changes from making logos bounce mid-drag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city, data, mobileLayout, pinLayoutTick, selected, showNames, visibleBusinesses, walkingRoute]);
 
   useEffect(() => {
     if (!data || typeof window === "undefined") return;
@@ -1063,9 +1208,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     <>
       <div className={styles.hero}>
         <img src={biz.photo} alt="" />
-        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
         <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
-          {biz.plan_tier === "stroll" && biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
+          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
         </div>
       </div>
       <div className={styles.dBody}>
@@ -1080,9 +1225,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           </div>
         </div>
         <div className={styles.dActions}>
-          <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
-            <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
-          </button>
+          {walkingRoute?.target.id !== biz.id && (
+            <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
+              <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
+            </button>
+          )}
           {biz.website && (
             <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
               <Globe size={16} />
@@ -1092,12 +1239,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <ExternalLink size={16} />
           </button>
         </div>
-        {walkingRoute?.target.id === biz.id && (
-          <div className={styles.routeNote}>
-            <span>{walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
-            <button onClick={clearWalkingRoute}>Clear</button>
-          </div>
-        )}
         {geoError && <div className={styles.routeNote}>{geoError}</div>}
         <p className={styles.blurb}>{biz.blurb}</p>
         <div className={styles.kv}>
@@ -1121,7 +1262,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     <>
       <div className={styles.hero}>
         {attraction.photo_url ? <img src={attraction.photo_url} alt="" /> : null}
-        <button className={styles.heroClose} onClick={closeSelected}><X size={15} /></button>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
         <div className={styles.glyphLg} style={{ background: city.theme.green }}><Landmark size={24} /></div>
       </div>
       <div className={styles.dBody}>
@@ -1355,6 +1496,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         <div ref={mapWrapRef} className={styles.mapWrap}>
           <div ref={mapNode} className={styles.map} />
 
+          {walkingRoute && (
+            <div className={styles.navigationHud}>
+              <div className={styles.navigationStatus} aria-label="Navigation mode is active">
+                <span className={styles.navigationStatusDot} />
+                <span>Navigation mode</span>
+              </div>
+              <div className={styles.navigationHudActions}>
+                <button onClick={showFullRoute}>Show full route</button>
+                <button onClick={clearWalkingRoute}>Exit navigation mode</button>
+              </div>
+            </div>
+          )}
+
           {!mobileLayout && (
           <>
           <div ref={toolbarRef} className={styles.toolbar}>
@@ -1422,7 +1576,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           </>
           )}
 
-          {mobileLayout && tab === "explore" && (
+          {mobileLayout && tab === "explore" && !walkingRoute && (
             <div ref={mobileTopRef} className={styles.mTop}>
               <label className={`${styles.mSearch} ${styles.glass}`}>
                 <Search size={16} color="var(--ink-3)" />
@@ -1508,8 +1662,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.mSheetHead}>
             {selected ? (
               <>
-                <button className={styles.back} onClick={closeSelected} title="Back"><ChevronLeft size={16} /></button>
-                <span className={styles.mSheetTitle}>All places</span>
+                <button className={styles.backToStreet} onClick={closeSelected} title="Back to the street">Back to the street</button>
+                <span className={styles.mSheetTitle}>Profile</span>
               </>
             ) : tab === "events" ? (
               <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>

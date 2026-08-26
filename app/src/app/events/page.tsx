@@ -1,8 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import styles from "../page.module.css";
+
+type FinishVenue = {
+  hosts_group_finish?: boolean;
+  group_finish_biggest_group?: string;
+};
 
 const products = [
   ["group", "Group booking", "$9 per person", "Booked date, your logo on every postcard, one leaderboard, a results page to send round after. $199 minimum."],
@@ -11,12 +16,29 @@ const products = [
 ] as const;
 
 export default function EventsPage() {
-  const [form, setForm] = useState({ product: "group", email: "", date: "", time: "13:00", groupSize: "24", audience: "adult", finishPreference: "snacks / coffee" });
+  const [form, setForm] = useState({ product: "group", email: "", date: "", time: "13:00", groupSize: "24", audience: "adult", finishPreference: "snacks / coffee", finishVenueRequested: false });
+  const [businesses, setBusinesses] = useState<FinishVenue[]>([]);
   const [status, setStatus] = useState("Send the booking details and we’ll confirm the date by email within one business day.");
+
+  useEffect(() => {
+    fetch("/api/v1/calgary/businesses")
+      .then((response) => response.json())
+      .then((json) => setBusinesses(Array.isArray(json.data) ? json.data : []))
+      .catch(() => setBusinesses([]));
+  }, []);
+
+  const groupSize = Math.max(1, Number(form.groupSize) || 1);
+  const hasFinishVenue = useMemo(() => businesses.some((business) => {
+    if (!business.hosts_group_finish) return false;
+    const capacity = business.group_finish_biggest_group ?? "";
+    if (capacity.includes("more")) return true;
+    const match = capacity.match(/\d+/);
+    return match ? Number(match[0]) >= groupSize : true;
+  }), [businesses, groupSize]);
 
   const submit = async () => {
     setStatus("Sending request…");
-    const response = await fetch("/api/v1/calgary/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, groupSize: Number(form.groupSize) }) });
+    const response = await fetch("/api/v1/calgary/bookings", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, groupSize, finishVenueRequested: hasFinishVenue && form.finishVenueRequested }) });
     const json = await response.json();
     if (!response.ok) return setStatus(json.error ?? "Booking failed");
     setStatus(`${json.data.label}: request received. We’ll confirm by email.`);
@@ -41,6 +63,7 @@ export default function EventsPage() {
             <Field label="Group size" type="number" value={form.groupSize} onChange={(v) => setForm({ ...form, groupSize: v })} />
             <div className={styles.claimField}><label>Audience</label><div className={styles.ctl}><select value={form.audience} onChange={(e) => setForm({ ...form, audience: e.target.value })}><option value="family">Family</option><option value="adult">Adult</option></select></div></div>
             <Field label="Finish preference" value={form.finishPreference} onChange={(v) => setForm({ ...form, finishPreference: v })} />
+            {hasFinishVenue && <label className={styles.switchLine}><input type="checkbox" checked={form.finishVenueRequested} onChange={(e) => setForm({ ...form, finishVenueRequested: e.target.checked })} /><span>Ask for a restaurant or pub finish</span></label>}
           </div><div className={styles.landHeroCta}><button className={`${styles.btn} ${styles.btnPrimary}`} onClick={submit}>Send booking request</button><Link className={`${styles.btn} ${styles.btnGhost}`} href="/calgary/hunt">Try a hunt first</Link></div><p className={styles.landCardP}>{status}</p></div>
         </div></section>
       </div>
