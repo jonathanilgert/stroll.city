@@ -211,3 +211,92 @@
 .teamCopy { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2);
   border: 1px solid var(--line-strong); border-radius: 999px; padding: 7px 13px; background: #fff; }
 .teamCopy:hover { color: var(--ink); border-color: var(--ink-3); }
+
+/* ---------------------------------------------------------------------------
+   The game screen: header with the punch bar, live map, riddle card, photo,
+   sticky CTA. Built from the Stroll Hunt Game design.
+--------------------------------------------------------------------------- */
+.gameHead { position: sticky; top: 0; z-index: 20; flex: none; padding: 16px 16px 12px; background: rgba(255, 255, 255, .92);
+  backdrop-filter: blur(16px); border-bottom: 1px solid var(--line-3); }
+.gameHeadRow { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.gameBack { width: 34px; height: 34px; flex: none; border-radius: 50%; border: 1px solid var(--line-2); background: #fff;
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ink); }
+.gameBack:hover { background: var(--paper); color: var(--ink); }
+.gameHeadText { display: flex; flex-direction: column; min-width: 0; }
+.gameKicker { font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); }
+.gameHeadline { font-size: 14.5px; font-weight: 600; letter-spacing: -.025em; }
+.gameClock { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 6px 11px; border-radius: 999px;
+  background: var(--brand-tint); font-size: 12px; font-weight: 500; color: var(--brand); white-space: nowrap; }
+.gamePunches { display: flex; gap: 5px; }
+.gamePunch { flex: 1; height: 5px; border-radius: 99px; background: var(--line); transition: background .3s; }
+.gamePunchOn { background: var(--brand); }
+.gamePunchNow { background: var(--brand-line); }
+
+.gameMap { position: relative; height: 252px; flex: none; background: var(--paper); border-bottom: 1px solid var(--line-3); }
+.gameMapCanvas { position: absolute; inset: 0; }
+.gameDirection { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 5; display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px; border-radius: 14px; background: rgba(255, 255, 255, .92); backdrop-filter: blur(14px);
+  border: 1px solid var(--line); box-shadow: 0 6px 18px rgba(12, 14, 18, .1); }
+.gameDirectionIcon { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--brand-tint); color: var(--brand);
+  display: inline-flex; align-items: center; justify-content: center; }
+.gameDirectionText { min-width: 0; display: flex; flex-direction: column; }
+.gameDirectionMain { font-size: 14px; font-weight: 600; letter-spacing: -.025em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gameDirectionNote { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-3); }
+.gameRecentre { margin-left: auto; flex: none; padding: 8px 13px; border-radius: 999px; border: 1px solid var(--line-2);
+  background: #fff; font-size: 12.5px; font-weight: 500; color: var(--ink); }
+.gameRecentre:hover { background: var(--paper); }
+
+/* the pulsing "you are here" dot and a solved stop's pin */
+@keyframes herePulse {
+  0% { box-shadow: 0 0 0 0 rgba(11, 71, 232, .45); }
+  70% { box-shadow: 0 0 0 14px rgba(11, 71, 232, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(11, 71, 232, 0); }
+}
+.hereDot { display: block; width: 16px; height: 16px; border-radius: 50%; background: var(--brand); border: 3px solid #fff;
+  animation: herePulse 2.4s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .hereDot { animation: none; } }
+.stopPin { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 50%;
+  border: 2px solid #fff; color: #fff; font-size: 12.5px; font-weight: 600; box-shadow: 0 6px 16px rgba(12, 14, 18, .24); }
+
+.gameBody { padding: 16px 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+.riddleCard { position: relative; border-radius: 18px; border: 1px solid; transition: background .3s, border-color .3s; }
+.riddleCardHead { display: flex; align-items: center; gap: 8px; padding: 12px 14px; border-bottom: 1px dashed; }
+.riddleNav { width: 30px; height: 30px; flex: none; border-radius: 50%; border: 1px solid; background: rgba(255, 255, 255, .8);
+  display: inline-flex; align-items: center; justify-content: center; color: var(--ink); }
+.riddleNav:disabled { opacity: .4; }
+.riddleKicker { flex: 1; text-align: center; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+.riddleCardBody { padding: 16px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.riddleText { margin: 0; font-size: 18.5px; font-weight: 500; letter-spacing: -.03em; line-height: 1.32; color: var(--ink); white-space: pre-line; }
+.riddleHintChip { display: inline-flex; align-self: flex-start; align-items: center; gap: 7px; padding: 6px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, .86); border: 1px solid; font-size: 12.5px; color: var(--ink-2); }
+.riddleHintChip svg { flex: none; color: var(--ink-3); }
+.riddleReveal { display: flex; align-items: center; gap: 9px; padding: 10px 12px; border-radius: 12px;
+  background: rgba(255, 255, 255, .9); border: 1px solid; font-size: 13px; color: var(--ink); }
+.riddleReveal svg { flex: none; color: var(--amber-ink, #8A6410); }
+.riddleNotch { position: absolute; top: -9px; right: -9px; width: 34px; height: 34px; border-radius: 50%; background: #fff; border: 1px solid; }
+
+.photoBlock { display: flex; flex-direction: column; gap: 10px; }
+.photoHead { display: flex; align-items: baseline; gap: 10px; }
+.photoTitle { font-size: 14.5px; font-weight: 600; letter-spacing: -.025em; }
+.photoState { margin-left: auto; font-size: 10.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.photoState[data-state="added"] { color: #3D6B2A; }
+.photoState[data-state="required"] { color: var(--warm-ink); }
+.photoSlot { position: relative; display: block; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 3; background: var(--paper);
+  border: 1.5px dashed var(--line-2); transition: border-color .3s; cursor: pointer; }
+.photoSlotFilled { border: 1.5px solid #B6D6A8; }
+.photoSlot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photoSlot input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photoEmpty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+  color: var(--ink-3); font-size: 13px; text-align: center; padding: 0 20px; }
+.photoBadge { position: absolute; left: 10px; bottom: 10px; display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px;
+  border-radius: 999px; background: #E4F0DE; color: #3D6B2A; font-size: 12px; font-weight: 500; }
+.photoActions { display: flex; gap: 8px; }
+.photoBtn { position: relative; overflow: hidden; flex: 1; padding: 12px; border-radius: 999px; border: 1px solid var(--line-2);
+  background: #fff; font: inherit; font-weight: 500; font-size: 14px; color: var(--ink); display: inline-flex; align-items: center;
+  justify-content: center; gap: 8px; cursor: pointer; }
+.photoBtn:hover { background: var(--paper); }
+.photoBtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.photoBtnMuted { color: var(--ink-3); cursor: default; }
+.stuckBtn { flex: 0 0 auto; padding: 12px 16px; color: var(--ink-3); }
+.stuckBtn:disabled { opacity: .5; }
+.stuckOn { background: #FDF6E4; border-color: #F5E7C0; color: #8A6410; }
