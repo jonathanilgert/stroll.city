@@ -535,11 +535,33 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       return next;
     });
   };
+  const restoreCameraAfterLayout = (camera: { center: [number, number]; zoom: number; bearing: number; pitch: number } | null) => {
+    const map = mapRef.current;
+    if (!camera || !map) return;
+    const restoreCamera = () => {
+      map.jumpTo(camera);
+      forceTick((t) => t + 1);
+    };
+    window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
+    window.setTimeout(restoreCamera, 350);
+    window.setTimeout(restoreCamera, 900);
+  };
+
+  const snapshotCamera = () => {
+    const map = mapRef.current;
+    if (!map) return null;
+    const center = map.getCenter();
+    return { center: [center.lng, center.lat] as [number, number], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
+  };
+
   const closeSelected = () => {
+    const camera = snapshotCamera();
+    suppressStripRefitCountRef.current = 3;
     setSelected(null);
     setSelectedAttraction(null);
     clearWalkingRoute();
     if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
+    restoreCameraAfterLayout(camera);
   };
 
   /* ---------------- padding-aware fit, matching the design's fitPad()/fitStrip() ---------------- */
@@ -660,7 +682,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     el.style.height = `${px}px`;
     sheetHeightRef.current = px;
     if (locateRef.current) locateRef.current.style.bottom = `${px + 14}px`;
-    window.setTimeout(() => { fitStrip(true); forceTick((t) => t + 1); }, animate ? 340 : 0);
+    window.setTimeout(() => {
+      if (suppressStripRefitCountRef.current > 0) {
+        suppressStripRefitCountRef.current -= 1;
+        forceTick((t) => t + 1);
+        return;
+      }
+      fitStrip(true);
+      forceTick((t) => t + 1);
+    }, animate ? 340 : 0);
   };
   const snapSheet = (stop: "peek" | "half" | "full") => {
     setSheetStop(stop);
@@ -716,15 +746,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     window.history.replaceState(null, "", `?biz=${slug}`);
     if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
-    if (camera && map) {
-      const restoreCamera = () => {
-        map.jumpTo(camera);
-        forceTick((t) => t + 1);
-      };
-      window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
-      window.setTimeout(restoreCamera, 350);
-      window.setTimeout(restoreCamera, 900);
-    }
+    if (camera && map) restoreCameraAfterLayout(camera);
   };
   const goFeatured = (attraction: Attraction) => {
     setSelected(null);
