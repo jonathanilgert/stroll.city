@@ -611,7 +611,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setWalkingRoute(null);
     setRouteSource([]);
   };
-  const drawWalkingRoute = (location: UserLocation, target: Business) => {
+  const drawWalkingRoute = (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
     const start: [number, number] = [location.lon, location.lat];
     const finish: [number, number] = [target.lon, target.lat];
@@ -620,8 +620,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const distanceM = coords.reduce((total, coord, index) => index === 0 ? total : total + metersBetween(coords[index - 1], coord), 0);
     setWalkingRoute({ target, coords, distanceM, network: Boolean(networkCoords) });
     setRouteSource(coords);
-    fitRoute(coords);
+    if (options.fitMap !== false) fitRoute(coords);
     setHint(`${target.name} route is highlighted. Only your blue location dot and the destination logo stay on the map.`);
+  };
+  const showFullRoute = () => {
+    if (walkingRoute?.coords.length) fitRoute(walkingRoute.coords);
   };
   const startLocationWatch = (onLocated?: (location: UserLocation) => void) => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -632,12 +635,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setLocating(true);
     setGeoError(null);
     if (geoWatchRef.current !== null) navigator.geolocation.clearWatch(geoWatchRef.current);
+    let handledInitialLocation = false;
     geoWatchRef.current = navigator.geolocation.watchPosition(
       (position) => {
         const next = { lon: position.coords.longitude, lat: position.coords.latitude, accuracy: position.coords.accuracy };
         setUserLocation(next);
         setLocating(false);
-        onLocated?.(next);
+        if (onLocated && !handledInitialLocation) {
+          handledInitialLocation = true;
+          onLocated(next);
+        }
       },
       () => {
         setLocating(false);
@@ -1129,7 +1136,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         {walkingRoute?.target.id === biz.id && (
           <div className={styles.routeNote}>
             <span>{walkingRoute.network ? "Sidewalk-style route" : "Direct route"} · about {walkingRoute.distanceM >= 1000 ? `${(walkingRoute.distanceM / 1000).toFixed(1)} km` : `${Math.round(walkingRoute.distanceM)} m`}</span>
-            <button onClick={clearWalkingRoute}>Clear</button>
+            <div className={styles.routeActions}>
+              <button onClick={showFullRoute}>Show full route</button>
+              <button onClick={clearWalkingRoute}>Clear</button>
+            </div>
           </div>
         )}
         {geoError && <div className={styles.routeNote}>{geoError}</div>}
