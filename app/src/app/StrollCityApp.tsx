@@ -853,7 +853,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         version: 8,
         sources: {
           carto: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png"], tileSize: 256, attribution: "© OpenStreetMap © CARTO" },
-          cartoLabels: { type: "raster", tiles: ["https://a.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://b.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://c.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png", "https://d.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png"], tileSize: 256 },
+
           streets: { type: "geojson", data: data.streets },
           biz: { type: "geojson", data: data.businessBuildings },
           bike: { type: "geojson", data: data.bike },
@@ -872,7 +872,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           { id: "biz-shadow", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#14161A", "fill-opacity": 0.05, "fill-translate": [2, 3] } },
           { id: "biz-roof", type: "fill", source: "biz", minzoom: 15, paint: { "fill-color": "#FAFAFB", "fill-opacity": 0.6 } },
           { id: "biz-edge", type: "line", source: "biz", minzoom: 15, paint: { "line-color": "#E7E9EC", "line-width": 1, "line-opacity": 0.85 } },
-          { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
+
         ],
       },
       center: data.center,
@@ -1044,18 +1044,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const h = Math.max(0, Math.min(a.y2, b.y2) - Math.max(a.y1, b.y1));
       return { w, h, area: w * h };
     };
-    // Keep markers geographically honest: some overlap is fine. Nudge only when the overlap is
-    // deep enough to make one place's logo/name unreadable, like stacked label chips on mobile.
-    const remainsReadable = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => {
+    // Keep markers geographically honest, but don't let visible buttons stack over each other.
+    // Logos may touch/overlap slightly; name labels need more breathing room so every place stays readable.
+    const remainsReadable = (r: { x1: number; x2: number; y1: number; y2: number }, mode: PinMode) => !slots.some((s) => {
       if (s.chrome) return false;
       const hit = overlap(r, s);
       if (!hit.area) return false;
+      if (mode === "label" || s.mode === "label") return hit.h > 4 && hit.w > 4;
       const rArea = Math.max(1, (r.x2 - r.x1) * (r.y2 - r.y1));
       const sArea = Math.max(1, (s.x2 - s.x1) * (s.y2 - s.y1));
       const coveredShare = hit.area / Math.min(rArea, sArea);
       const sharedHeight = hit.h / Math.max(1, Math.min(r.y2 - r.y1, s.y2 - s.y1));
       const sharedWidth = hit.w / Math.max(1, Math.min(r.x2 - r.x1, s.x2 - s.x1));
-      return coveredShare >= 0.34 || (sharedHeight >= 0.58 && sharedWidth >= 0.32);
+      return coveredShare >= 0.18 || (sharedHeight >= 0.45 && sharedWidth >= 0.25);
     });
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
       const x = cp.x + offset[0];
@@ -1091,8 +1092,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
       if (mode === "dot") return 16;
-      if (mode === "logo") return 24;
-      return 48;
+      if (mode === "logo") return 44;
+      return 96;
     };
 
     order.forEach((biz) => {
@@ -1105,7 +1106,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const w = chipWidth(biz.name, mode);
         const h = chipHeight(mode);
         const candidates = offsetCandidates(maxSkewFor(mode));
-        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate)));
+        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate), mode));
         if (offset) {
           placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
           break;
