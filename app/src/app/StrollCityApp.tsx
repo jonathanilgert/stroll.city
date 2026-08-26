@@ -1038,9 +1038,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const forceLabels = showNames && Boolean(walkingRoute || visibleOnScreenCount <= labelDensityLimit || (zoom >= labelZoomMin && visibleOnScreenCount <= 64));
     const forceLogos = forceLabels || zoom >= logoZoomMin || visibleOnScreenCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && visibleOnScreenCount > 64 && !walkingRoute && !selected);
-    const markerAvoidanceZoomMin = mobileLayout ? 16.75 : 16.35;
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
-    const clears = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => r.x1 < s.x2 + 2 && r.x2 + 2 > s.x1 && r.y1 < s.y2 + 2 && r.y2 + 2 > s.y1);
+    const fullyCovers = (a: { x1: number; x2: number; y1: number; y2: number }, b: { x1: number; x2: number; y1: number; y2: number }) => (
+      a.x1 <= b.x1 + 1 && a.x2 >= b.x2 - 1 && a.y1 <= b.y1 + 1 && a.y2 >= b.y2 - 1
+    );
+    // Keep markers geographically honest: partial overlaps are acceptable. Only nudge a marker
+    // when one marker's whole visual chip would completely hide another marker/chip.
+    const remainsReadable = (r: { x1: number; x2: number; y1: number; y2: number }) => !slots.some((s) => {
+      if (s.chrome) return false;
+      return fullyCovers(r, s) || fullyCovers(s, r);
+    });
     const rectFor = (cp: { x: number; y: number }, w: number, h: number, offset: [number, number] = [0, 0]) => {
       const x = cp.x + offset[0];
       const y = cp.y + offset[1];
@@ -1074,41 +1081,30 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 32 : 38;
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
-      if (mode === "dot") return zoom >= 18.5 ? 0 : zoom >= 17.75 ? 24 : zoom >= 16.75 ? 48 : 96;
-      if (mode === "logo") return zoom >= 19 ? 0 : zoom >= 18.25 ? 18 : zoom >= 17.25 ? 48 : 108;
-      if (visibleOnScreenCount <= 8 && zoom >= 19) return 0;
-      if (zoom >= 18.75) return 72;
-      if (zoom >= 17.75) return 132;
-      return 204;
+      if (mode === "dot") return 16;
+      if (mode === "logo") return 24;
+      return 48;
     };
 
     order.forEach((biz) => {
       const cp = map.project([biz.lon, biz.lat]);
       const isSel = biz.id === selected?.id;
       const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
-      const allowOverlapAtThisZoom = !isSel && !walkingRoute && zoom < markerAvoidanceZoomMin;
-      if (allowOverlapAtThisZoom) {
-        const mode = desiredMode;
-        slots.push({ ...rectFor(cp, chipWidth(biz.name, mode), chipHeight(mode)), members: [biz], mode, pinned: false, offset: [0, 0] });
-        return;
-      }
-      const fallbackModes: PinMode[] = desiredMode === "label" && !isSel ? ["label", "logo", "dot"] : desiredMode === "logo" ? ["logo", "dot"] : [desiredMode];
+      const fallbackModes: PinMode[] = [desiredMode];
       let placed: { mode: PinMode; offset: [number, number]; rect: ReturnType<typeof rectFor> } | null = null;
       for (const mode of fallbackModes) {
         const w = chipWidth(biz.name, mode);
         const h = chipHeight(mode);
         const candidates = offsetCandidates(maxSkewFor(mode));
-        const offset = candidates.find((candidate) => clears(rectFor(cp, w, h, candidate)));
+        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate)));
         if (offset) {
           placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
           break;
         }
       }
       if (!placed) {
-        if (!isSel) return;
         const mode = desiredMode;
-        const candidates = offsetCandidates(maxSkewFor(mode));
-        const offset = candidates[candidates.length - 1] ?? [0, 0];
+        const offset: [number, number] = [0, 0];
         placed = { mode, offset, rect: rectFor(cp, chipWidth(biz.name, mode), chipHeight(mode), offset) };
       }
       slots.push({ ...placed.rect, members: [biz], mode: placed.mode, pinned: isSel, offset: placed.offset });
