@@ -1521,6 +1521,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 </Link>
               </div>
 
+              <div className={styles.stripPrompt}>
+                <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
+                  The strip in Inglewood
+                </button>
+                <p>zoom into the map to explore the doors on the street</p>
+              </div>
+
               <div className={styles.catControls}>
                 <button className={styles.catControl} onClick={() => setCategories(new Set(allCategories))}>All</button>
                 <button className={styles.catControl} onClick={() => setCategories(new Set())}>None</button>
@@ -1528,11 +1535,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <div className={styles.catlist}>
                 {allCategories.map((key) => {
                   const on = activeCategories.has(key);
+                  const color = categoryColor(city, key);
+                  const ink = categoryInk(city, key);
                   return (
-                  <button key={key} className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`} onClick={() => toggleActiveCategory(key)} aria-pressed={on}>
-                    <span className={styles.catCheck} style={on ? { background: categoryColor(city, key) } : undefined}>{on ? "✓" : ""}</span>
-                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryInk(city, key) }}>
-                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryInk(city, key)} />
+                  <button
+                    key={key}
+                    className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`}
+                    onClick={() => toggleActiveCategory(key)}
+                    aria-pressed={on}
+                    style={{ background: wash(color, on ? 58 : 38, on ? 24 : 14), borderColor: `${color}${on ? "8a" : "45"}` }}
+                  >
+                    <span className={styles.catCheck} style={on ? { background: color } : undefined}>{on ? "✓" : ""}</span>
+                    <span className={styles.ccTile} style={{ color: ink }}>
+                      <CatIcon d={CAT_ICON[key]} size={20} color={ink} />
                     </span>
                     <span className={styles.ccBody}>
                       <span className={styles.ccName}>{CAT_LABEL[key]}</span>
