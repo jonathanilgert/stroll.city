@@ -384,16 +384,6 @@ type MutableStyle = Omit<StyleSpecification, "sources" | "layers"> & {
 };
 
 const OPENFREEMAP_POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
-const NINTH_AVE_DOOR_PATH: [number, number][] = [
-  [-114.0547, 51.04478],
-  [-114.0490, 51.04472],
-  [-114.0444, 51.04452],
-  [-114.0412, 51.04335],
-  [-114.0360, 51.04215],
-  [-114.0310, 51.04010],
-  [-114.0245, 51.03755],
-  [-114.0184, 51.03560],
-];
 const NINTH_AVE_STRIP_CENTER_PATH: [number, number][] = [
   [-114.05323, 51.04429],
   [-114.05084, 51.04427],
@@ -541,7 +531,10 @@ function nudgeToward(from: [number, number], to: [number, number], meters: numbe
 function doorCoordinateFor(data: StrollData, business: Business): [number, number] {
   const raw: [number, number] = [business.lon, business.lat];
   if (!/\b9\s+Av\b/i.test(business.address)) return raw;
-  const street = closestOnPolyline(raw, NINTH_AVE_DOOR_PATH);
+  // Use the actual 9 Ave roadway centerline for frontage math. The old hand-drawn
+  // storefront path made high-zoom pins read like a neat overlay list instead of
+  // points tied back to their true street/building relationship.
+  const street = closestOnPolyline(raw, NINTH_AVE_STRIP_CENTER_PATH);
   if (street.distance > 115) return raw;
 
   let closestRing: [number, number][] | null = null;
@@ -1371,16 +1364,21 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, mode: PinMode) => {
       if (mode === "dot") return 9;
-      if (mode === "logo") return 26;
+      if (mode === "logo") return mobileLayout ? 20 : 26;
       if (measureCanvas) measureCanvas.font = "500 10.5px Outfit, sans-serif";
       const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 6;
       return 43 + Math.min(100, w);
     };
-    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 26 : 30;
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? (mobileLayout ? 20 : 26) : 30;
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
-      if (mode === "dot") return 16;
-      if (mode === "logo") return 44;
+      if (mobileLayout) {
+        if (mode === "dot") return 8;
+        if (mode === "logo") return 12;
+        return 36;
+      }
+      if (mode === "dot") return 12;
+      if (mode === "logo") return 20;
       return 96;
     };
 

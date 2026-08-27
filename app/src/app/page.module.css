@@ -233,6 +233,10 @@
 .dotPin .glyph { width: 9px; height: 9px; flex-basis: 9px; border: 0; box-shadow: 0 0 0 1.5px rgba(255,255,255,.94), 0 2px 6px rgba(20,24,26,.2); }
 .dotPin:hover { transform: scale(1.28); }
 .compact:hover { transform: scale(1.12); }
+@media (max-width: 760px) {
+  .compact { width: 20px; height: 20px; }
+  .compact .glyph { width: 20px; height: 20px; flex-basis: 20px; }
+}
 .pinActive { background: var(--black); box-shadow: 0 0 0 8px rgba(220,242,60,.42), 0 10px 26px rgba(20,24,26,.3); transform: scale(1.06); }
 .pinActive .label { color: #fff; }
 .pinActive .glyph { background: var(--accent) !important; color: var(--black); }
