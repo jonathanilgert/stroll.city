@@ -659,6 +659,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showBeyond, setShowBeyond] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
   const [showOpenNow, setShowOpenNow] = useState(true);
+  const [showOnlyOpen, setShowOnlyOpen] = useState(false);
   const [showTrees, setShowTrees] = useState(true);
   const [neighbourhoodSaved, setNeighbourhoodSaved] = useState(true);
   const [welcome, setWelcome] = useState(false);
@@ -766,7 +767,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const visibleBusinesses = useMemo(() => {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
-    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)));
+    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)) && (!showOnlyOpen || isOpenNow(b.hours, nowMinutes) === true));
     /* While searching, keep the best semantic matches first; otherwise use the requested browse sort. */
     const rank = (b: Business) => (terms.length ? -businessSearchScore(b, terms) : 0);
     return [...list].sort((a, b) => {
@@ -779,7 +780,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [queryMatches, browseCategory, query, sortMode, activeCategories, showOpenNow, nowMinutes]);
+  }, [queryMatches, browseCategory, query, sortMode, activeCategories, showOpenNow, showOnlyOpen, nowMinutes]);
 
   /* Distinguishes "nothing matches your text" from "your chips are hiding the matches", which need different fixes. */
   const hiddenByCategories = queryMatches.length - visibleBusinesses.length;
@@ -1615,9 +1616,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
               <div className={styles.stripPrompt}>
                 <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
-                  The strip in Inglewood
+                  <span>The strip in Inglewood</span>
+                  <span className={styles.stripPromptHint}>zoom into the map to explore the doors on the street</span>
                 </button>
-                <p>zoom into the map to explore the doors on the street</p>
               </div>
 
               <div className={styles.catControls}>
@@ -1796,6 +1797,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             {showInfo && <div className={`${styles.cardUi} ${styles.infoNote}`}>Building footprints and business licences: City of Calgary open data. Basemap © OpenStreetMap contributors, © CARTO.</div>}
           </div>
 
+          <button
+            className={`${styles.cardUi} ${styles.openOnlyMap} ${showOnlyOpen ? styles.openOnlyMapOn : ""}`}
+            onClick={() => setShowOnlyOpen((v) => !v)}
+            aria-pressed={showOnlyOpen}
+          >
+            <span className={styles.openOnlyCheck}>{showOnlyOpen ? "✓" : ""}</span>
+            <span>show only businesses currently open</span>
+          </button>
+
           {hint && (
             <div className={`${styles.cardUi} ${styles.hint}`}>
               <span><b>Stroll hint</b>&nbsp;{hint}</span>
@@ -1813,9 +1823,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div ref={mobileTopRef} className={styles.mTop}>
               <div className={styles.mStripPrompt}>
                 <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
-                  The strip in Inglewood
+                  <span>The strip in Inglewood</span>
+                  <span className={styles.stripPromptHint}>zoom into the map to explore the doors on the street</span>
                 </button>
-                <p>zoom into the map to explore the doors on the street</p>
               </div>
               <label className={`${styles.mSearch} ${styles.glass}`}>
                 <Search size={16} color="var(--ink-3)" />
@@ -1857,12 +1867,20 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                         onClick={() => toggleActiveCategory(key)}
                         style={{ background: wash(color, on ? 108 : 52, on ? 46 : 20), borderColor: `${color}${on ? "bf" : "70"}`, color: categoryInk(city, key) }}
                       >
-                        {on ? <span className={styles.mChipCheck}>✓</span> : null}{MOBILE_CAT_LABEL[key]}
+                        {on ? <span className={styles.mChipCheck}>✓</span> : <span className={styles.mChipCheck} aria-hidden="true" />}{MOBILE_CAT_LABEL[key]}
                       </button>
                     );
                   })}
                 </div>
               )}
+              <button
+                className={`${styles.cardUi} ${styles.openOnlyMap} ${styles.mOpenOnlyMap} ${showOnlyOpen ? styles.openOnlyMapOn : ""}`}
+                onClick={() => setShowOnlyOpen((v) => !v)}
+                aria-pressed={showOnlyOpen}
+              >
+                <span className={styles.openOnlyCheck}>{showOnlyOpen ? "✓" : ""}</span>
+                <span>show only businesses currently open</span>
+              </button>
             </div>
           )}
 
@@ -1890,7 +1908,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         )}
       </div>
 
-      {mobileLayout && (
+      {mobileLayout && (selected || selectedAttraction || tab === "events") && (
         <div
           ref={sheetRef}
           className={styles.mSheet}
