@@ -521,19 +521,20 @@ function closestOnRingToTarget(ring: [number, number][], target: [number, number
 function ringDistanceToCoord(ring: [number, number][], coord: [number, number]) {
   return closestOnRingToTarget(ring, coord).distance;
 }
-function nudgeToward(from: [number, number], to: [number, number], meters: number): [number, number] {
+function nudgeAway(from: [number, number], awayFrom: [number, number], meters: number): [number, number] {
   const originLat = from[1];
-  const a = meterProject(from, originLat), b = meterProject(to, originLat);
-  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  const a = meterProject(from, originLat), b = meterProject(awayFrom, originLat);
+  const d = Math.hypot(a.x - b.x, a.y - b.y);
   if (!d) return from;
-  return meterUnproject({ x: a.x + ((b.x - a.x) / d) * meters, y: a.y + ((b.y - a.y) / d) * meters }, originLat);
+  return meterUnproject({ x: a.x + ((a.x - b.x) / d) * meters, y: a.y + ((a.y - b.y) / d) * meters }, originLat);
 }
 function doorCoordinateFor(data: StrollData, business: Business): [number, number] {
   const raw: [number, number] = [business.lon, business.lat];
   if (!/\b9\s+Av\b/i.test(business.address)) return raw;
-  // Use the actual 9 Ave roadway centerline for frontage math. The old hand-drawn
-  // storefront path made high-zoom pins read like a neat overlay list instead of
-  // points tied back to their true street/building relationship.
+  // Use the actual 9 Ave roadway centerline for frontage math, but keep the
+  // displayed marker on the storefront facade rather than in the street. On the
+  // desktop map the logo chip is wide enough that a sidewalk/road-centre nudge
+  // reads as a crowded row of labels sitting on 9 Ave instead of as door pins.
   const street = closestOnPolyline(raw, NINTH_AVE_STRIP_CENTER_PATH);
   if (street.distance > 115) return raw;
 
@@ -547,13 +548,13 @@ function doorCoordinateFor(data: StrollData, business: Business): [number, numbe
   });
   if (closestRing && closestRingDistance <= 28) {
     const facade = closestOnRingToTarget(closestRing, street.coord).coord;
-    return nudgeToward(facade, street.coord, 2.5);
+    return nudgeAway(facade, street.coord, 1.5);
   }
 
-  if (street.distance > 12) {
+  if (street.distance > 16) {
     const originLat = raw[1];
     const rawM = meterProject(raw, originLat), streetM = meterProject(street.coord, originLat);
-    const keepFromStreetM = 8;
+    const keepFromStreetM = 16;
     const ratio = Math.max(0, (street.distance - keepFromStreetM) / street.distance);
     return meterUnproject({ x: rawM.x + (streetM.x - rawM.x) * ratio, y: rawM.y + (streetM.y - rawM.y) * ratio }, originLat);
   }
