@@ -406,44 +406,9 @@ function strollMapSources(data: StrollData): Record<string, unknown> {
   };
 }
 
-function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
-  return [
-    {
-      id: "main-street-watercolour-wash",
-      type: "line",
-      source: "openmaptiles",
-      "source-layer": "transportation",
-      minzoom: 11,
-      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#D94848",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.06, 14, 0.095, 17, 0.15, 20, 0.18],
-        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 11, 14, 23, 17, 48, 20, 92],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 9, 20, 14],
-      },
-    },
-    {
-      id: "main-street-watercolour-core",
-      type: "line",
-      source: "openmaptiles",
-      "source-layer": "transportation",
-      minzoom: 12,
-      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#E45252",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.045, 15, 0.08, 18, 0.12, 20, 0.135],
-        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 6, 15, 16, 18, 35, 20, 60],
-        "line-blur": 5,
-      },
-    },
-  ];
-}
-
 function strollOverlayLayers(): Array<Record<string, unknown>> {
   return [
-    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
+    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#D94848", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 28, 16, 52, 18, 72, 20, 96], "line-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.14, 16, 0.2, 18, 0.24, 20, 0.27], "line-blur": ["interpolate", ["linear"], ["zoom"], 13, 7, 17, 12, 20, 16] } },
     { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
     { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
     { id: "walking-route-halo", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 18, 10], "line-opacity": 0.95 } },
@@ -465,7 +430,7 @@ async function buildCrispNoLabelMapStyle(data: StrollData): Promise<StyleSpecifi
   return {
     ...base,
     sources: { ...base.sources, ...strollMapSources(data) },
-    layers: [...baseMapLayers, ...strollMainStreetWatercolourLayers(), ...strollOverlayLayers(), ...streetNameLayers],
+    layers: [...baseMapLayers, ...strollOverlayLayers(), ...streetNameLayers],
   } as StyleSpecification;
 }
 
@@ -681,7 +646,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showInfo, setShowInfo] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [showNames, setShowNames] = useState(true);
-  const [showStrip, setShowStrip] = useState(false);
+  const [showStrip, setShowStrip] = useState(true);
   const [showBike, setShowBike] = useState(true);
   const [showPathways, setShowPathways] = useState(true);
   const [showBeyond, setShowBeyond] = useState(true);
