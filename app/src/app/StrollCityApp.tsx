@@ -548,13 +548,13 @@ function doorCoordinateFor(data: StrollData, business: Business): [number, numbe
   });
   if (closestRing && closestRingDistance <= 28) {
     const facade = closestOnRingToTarget(closestRing, street.coord).coord;
-    return nudgeAway(facade, street.coord, 1.5);
+    return nudgeAway(facade, street.coord, 7);
   }
 
-  if (street.distance > 16) {
+  if (street.distance > 20) {
     const originLat = raw[1];
     const rawM = meterProject(raw, originLat), streetM = meterProject(street.coord, originLat);
-    const keepFromStreetM = 16;
+    const keepFromStreetM = 20;
     const ratio = Math.max(0, (street.distance - keepFromStreetM) / street.distance);
     return meterUnproject({ x: rawM.x + (streetM.x - rawM.x) * ratio, y: rawM.y + (streetM.y - rawM.y) * ratio }, originLat);
   }
@@ -1363,6 +1363,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return offsets;
     };
+    const keepsMarkerOffStreet = (doorPoint: { x: number; y: number }, streetPoint: { x: number; y: number } | null, offset: [number, number]) => {
+      if (!streetPoint) return true;
+      const awayX = doorPoint.x - streetPoint.x;
+      const awayY = doorPoint.y - streetPoint.y;
+      const awayLen = Math.hypot(awayX, awayY);
+      if (awayLen < 1) return true;
+      const projectedAfterOffset = ((doorPoint.x + offset[0] - streetPoint.x) * awayX + (doorPoint.y + offset[1] - streetPoint.y) * awayY) / awayLen;
+      return projectedAfterOffset >= awayLen - 2;
+    };
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, mode: PinMode) => {
       if (mode === "dot") return 9;
@@ -1387,6 +1396,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     order.forEach((biz) => {
       const doorCoord = doorCoordinateFor(data, biz);
       const cp = map.project(doorCoord);
+      const rawCoord: [number, number] = [biz.lon, biz.lat];
+      const streetPoint = /\b9\s+Av\b/i.test(biz.address) ? map.project(closestOnPolyline(rawCoord, NINTH_AVE_STRIP_CENTER_PATH).coord) : null;
       const isSel = biz.id === selected?.id;
       const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
       const fallbackModes: PinMode[] = [desiredMode];
@@ -1395,7 +1406,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const w = chipWidth(biz.name, mode);
         const h = chipHeight(mode);
         const candidates = offsetCandidates(maxSkewFor(mode));
-        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate), mode));
+        const offset = candidates.find((candidate) => keepsMarkerOffStreet(cp, streetPoint, candidate) && remainsReadable(rectFor(cp, w, h, candidate), mode));
         if (offset) {
           placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
           break;
