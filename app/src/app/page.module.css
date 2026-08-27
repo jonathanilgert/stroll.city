@@ -291,29 +291,29 @@
 .mStage .mapWrap { border-radius: var(--r-xl); }
 
 .mTop { position: absolute; top: 10px; left: 10px; right: 10px; bottom: 70px; z-index: 520; min-height: 222px; pointer-events: none; }
-.mStripPrompt { pointer-events: auto; position: absolute; top: 0; left: 0; max-width: calc(100% - 142px); display: flex; flex-direction: column; align-items: stretch; gap: 0; }
-.mStripPrompt .stripPromptTab { min-height: 48px; padding: 7px 12px 8px; font-size: 14px; border-radius: 10px; }
+.mStripPrompt { pointer-events: auto; position: absolute; top: 0; right: 0; width: min(206px, calc(100% - 94px)); display: flex; flex-direction: column; align-items: stretch; gap: 0; }
+.mStripPrompt .stripPromptTab { min-height: 50px; padding: 8px 12px 8px; font-size: 14px; border-radius: 10px; }
 .mStripPrompt .stripPromptHint { font-size: 9.5px; }
 .mStripPrompt p { margin: 0; color: var(--ink-2); font-size: 10px; line-height: 1.18; max-width: 190px; text-shadow: 0 1px 0 rgba(255,255,255,.7); }
 .mStage .navigationHud { top: 10px; right: 10px; left: auto; width: auto; max-width: calc(100% - 20px); gap: 8px; align-items: flex-start; justify-content: flex-end; }
 .mStage .navigationStatus { font-size: 11.5px; }
 .mStage .navigationHudActions { flex: 0 0 auto; flex-direction: column; align-items: stretch; gap: 5px; padding: 0; }
 .mStage .navigationHudActions button { width: 112px; height: 28px; padding: 0 8px; font-size: 10.5px; border-radius: 8px; }
-.mSearch { pointer-events: auto; position: absolute; top: 0; right: 0; width: 126px; max-width: calc(100% - 84px); display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 4px 0 9px; color: var(--ink-2); transition: width .18s ease, box-shadow .18s ease; }
-.mSearch:focus-within { width: min(252px, calc(100% - 84px)); }
+.mSearch { pointer-events: auto; position: absolute; top: 58px; right: 0; width: 126px; max-width: calc(100% - 84px); display: flex; align-items: center; gap: 5px; height: 34px; padding: 0 4px 0 9px; color: var(--ink-2); transition: width .18s ease, box-shadow .18s ease; }
+.mSearch:focus-within { width: min(206px, calc(100% - 84px)); }
 /* 16px is load-bearing: iOS Safari zooms the whole page when you focus an input smaller than this. */
 .mSearch input { border: 0; outline: 0; background: none; font: inherit; font-size: 16px; color: var(--ink); width: 100%; min-width: 0; }
 .mSearch input::placeholder { color: var(--ink-3); font-size: 12.5px; }
 .mSearch input::-webkit-search-cancel-button { display: none; }
 .mSearchClear { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 999px; display: grid; place-items: center; color: var(--ink-3); }
 .mSearchClear:active { background: var(--paper); color: var(--ink); }
-.mChipRow { pointer-events: auto; position: absolute; top: 64px; left: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; overflow: visible; padding: 0; }
+.mChipRow { pointer-events: auto; position: absolute; top: 0; left: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; overflow: visible; padding: 0; }
 .mChipRow::-webkit-scrollbar { display: none; }
-.mChip { flex: 0 0 auto; min-width: 0; width: 108px; height: 28px; padding: 0 9px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px;
-  font-size: 11.5px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(18,22,28,.1); backdrop-filter: blur(10px);
+.mChip { flex: 0 0 auto; min-width: 0; width: auto; height: 26px; padding: 0 7px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 4px;
+  font-size: 11px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(18,22,28,.1); backdrop-filter: blur(10px);
   box-shadow: 0 8px 22px rgba(18,22,28,.08), inset 0 1px 0 rgba(255,255,255,.7); transition: background .16s, color .16s, opacity .16s, transform .16s; }
 .mChip:active { transform: translateY(1px); }
-.mChipCheck { width: 11px; flex: 0 0 11px; font-size: 11px; line-height: 1; }
+.mChipCheck { width: 9px; flex: 0 0 9px; font-size: 10px; line-height: 1; }
 .mChip[aria-pressed="false"] { opacity: .58; }
 .mOpenOnlyMap { left: 0; bottom: 0; max-width: min(282px, calc(100vw - 24px)); min-height: 36px; font-size: 11.5px; }
 
