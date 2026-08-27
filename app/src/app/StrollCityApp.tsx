@@ -381,6 +381,16 @@ type MutableStyle = Omit<StyleSpecification, "sources" | "layers"> & {
 };
 
 const OPENFREEMAP_POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+const NINTH_AVE_DOOR_PATH: [number, number][] = [
+  [-114.0547, 51.04478],
+  [-114.0490, 51.04472],
+  [-114.0444, 51.04452],
+  [-114.0412, 51.04335],
+  [-114.0360, 51.04215],
+  [-114.0310, 51.04010],
+  [-114.0245, 51.03755],
+  [-114.0184, 51.03560],
+];
 
 function strollMapSources(data: StrollData): Record<string, unknown> {
   return {
@@ -389,7 +399,7 @@ function strollMapSources(data: StrollData): Record<string, unknown> {
     bike: { type: "geojson", data: data.bike },
     pathways: { type: "geojson", data: data.pathways },
     walkingRoute: { type: "geojson", data: emptyRouteFeature() },
-    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[51.03755, -114.03430], [51.03720, -114.01560]] } } },
+    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: NINTH_AVE_DOOR_PATH } } },
   };
 }
 
@@ -470,6 +480,87 @@ function geometryLines(feature: GeoJSON.Feature): [number, number][][] {
   if (geom.type === "LineString") return [geom.coordinates as [number, number][]];
   if (geom.type === "MultiLineString") return geom.coordinates as [number, number][][];
   return [];
+}
+
+function geometryPolygonRings(feature: GeoJSON.Feature): [number, number][][] {
+  const geom = feature.geometry;
+  if (!geom) return [];
+  if (geom.type === "Polygon") return geom.coordinates as [number, number][][];
+  if (geom.type === "MultiPolygon") return (geom.coordinates as [number, number][][][]).flat();
+  return [];
+}
+
+type MeterPoint = { x: number; y: number };
+function meterProject(coord: [number, number], originLat: number): MeterPoint {
+  return { x: coord[0] * 111320 * Math.cos(originLat * Math.PI / 180), y: coord[1] * 110540 };
+}
+function meterUnproject(point: MeterPoint, originLat: number): [number, number] {
+  return [point.x / (111320 * Math.cos(originLat * Math.PI / 180)), point.y / 110540];
+}
+function closestOnSegment(point: MeterPoint, a: MeterPoint, b: MeterPoint) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 ? Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2)) : 0;
+  const x = a.x + dx * t, y = a.y + dy * t;
+  return { point: { x, y }, distance: Math.hypot(point.x - x, point.y - y) };
+}
+function closestOnPolyline(coord: [number, number], line: [number, number][]) {
+  const originLat = coord[1];
+  const point = meterProject(coord, originLat);
+  let best = { point, distance: Infinity };
+  for (let i = 1; i < line.length; i += 1) {
+    const next = closestOnSegment(point, meterProject(line[i - 1], originLat), meterProject(line[i], originLat));
+    if (next.distance < best.distance) best = next;
+  }
+  return { coord: meterUnproject(best.point, originLat), distance: best.distance };
+}
+function closestOnRingToTarget(ring: [number, number][], target: [number, number]) {
+  const originLat = target[1];
+  const point = meterProject(target, originLat);
+  let best = { point, distance: Infinity };
+  for (let i = 1; i < ring.length; i += 1) {
+    const next = closestOnSegment(point, meterProject(ring[i - 1], originLat), meterProject(ring[i], originLat));
+    if (next.distance < best.distance) best = next;
+  }
+  return { coord: meterUnproject(best.point, originLat), distance: best.distance };
+}
+function ringDistanceToCoord(ring: [number, number][], coord: [number, number]) {
+  return closestOnRingToTarget(ring, coord).distance;
+}
+function nudgeToward(from: [number, number], to: [number, number], meters: number): [number, number] {
+  const originLat = from[1];
+  const a = meterProject(from, originLat), b = meterProject(to, originLat);
+  const d = Math.hypot(b.x - a.x, b.y - a.y);
+  if (!d) return from;
+  return meterUnproject({ x: a.x + ((b.x - a.x) / d) * meters, y: a.y + ((b.y - a.y) / d) * meters }, originLat);
+}
+function doorCoordinateFor(data: StrollData, business: Business): [number, number] {
+  const raw: [number, number] = [business.lon, business.lat];
+  if (!/\b9\s+Av\b/i.test(business.address)) return raw;
+  const street = closestOnPolyline(raw, NINTH_AVE_DOOR_PATH);
+  if (street.distance > 115) return raw;
+
+  let closestRing: [number, number][] | null = null;
+  let closestRingDistance = Infinity;
+  data.businessBuildings.features.forEach((feature) => {
+    geometryPolygonRings(feature).forEach((ring) => {
+      const d = ringDistanceToCoord(ring, raw);
+      if (d < closestRingDistance) { closestRing = ring; closestRingDistance = d; }
+    });
+  });
+  if (closestRing && closestRingDistance <= 28) {
+    const facade = closestOnRingToTarget(closestRing, street.coord).coord;
+    return nudgeToward(facade, street.coord, 2.5);
+  }
+
+  if (street.distance > 12) {
+    const originLat = raw[1];
+    const rawM = meterProject(raw, originLat), streetM = meterProject(street.coord, originLat);
+    const keepFromStreetM = 8;
+    const ratio = Math.max(0, (street.distance - keepFromStreetM) / street.distance);
+    return meterUnproject({ x: rawM.x + (streetM.x - rawM.x) * ratio, y: rawM.y + (streetM.y - rawM.y) * ratio }, originLat);
+  }
+  return raw;
 }
 
 function buildWalkingRoute(data: StrollData, start: [number, number], finish: [number, number]): [number, number][] | null {
@@ -797,7 +888,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const drawWalkingRoute = (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
     const start: [number, number] = [location.lon, location.lat];
-    const finish: [number, number] = [target.lon, target.lat];
+    const finish: [number, number] = doorCoordinateFor(data, target);
     const networkCoords = buildWalkingRoute(data, start, finish);
     const coords = networkCoords ?? [start, finish];
     const distanceM = coords.reduce((total, coord, index) => index === 0 ? total : total + metersBetween(coords[index - 1], coord), 0);
@@ -938,7 +1029,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
-    if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
+    if (options.moveMap !== false && data) mapRef.current?.panTo(doorCoordinateFor(data, business), { duration: 500 });
     if (mobileLayout && sheetStop === "peek") snapSheet("half");
     if (camera && map) restoreCameraAfterLayout(camera);
   };
@@ -1276,7 +1367,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     };
 
     order.forEach((biz) => {
-      const cp = map.project([biz.lon, biz.lat]);
+      const doorCoord = doorCoordinateFor(data, biz);
+      const cp = map.project(doorCoord);
       const isSel = biz.id === selected?.id;
       const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
       const fallbackModes: PinMode[] = [desiredMode];
@@ -1323,7 +1415,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           if (el.dataset.wasCompact === "true") pinEl?.classList.add(styles.compact);
           if (biz.id !== selected?.id) rowElsRef.current.get(biz.id)?.classList.remove(styles.rowActive);
         });
-        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat([biz.lon, biz.lat]).addTo(map);
+        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat(doorCoordinateFor(data, biz)).addTo(map);
         pinMarkersRef.current.push(marker);
         pinElsRef.current.set(biz.id, el);
       }
