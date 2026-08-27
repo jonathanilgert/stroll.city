@@ -307,7 +307,7 @@
 .mSearchClear:active { background: var(--paper); color: var(--ink); }
 .mChipRow { pointer-events: auto; position: absolute; top: 64px; left: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; overflow: visible; padding: 0; }
 .mChipRow::-webkit-scrollbar { display: none; }
-.mChip { flex: 0 0 auto; min-width: 0; width: 142px; height: 28px; padding: 0 9px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px;
+.mChip { flex: 0 0 auto; min-width: 0; width: 108px; height: 28px; padding: 0 9px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: flex-start; gap: 5px;
   font-size: 11.5px; font-weight: 700; white-space: nowrap; border: 1px solid rgba(18,22,28,.1); backdrop-filter: blur(10px);
   box-shadow: 0 8px 22px rgba(18,22,28,.08), inset 0 1px 0 rgba(255,255,255,.7); transition: background .16s, color .16s, opacity .16s, transform .16s; }
 .mChip:active { transform: translateY(1px); }

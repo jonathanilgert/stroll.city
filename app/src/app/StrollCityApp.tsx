@@ -653,7 +653,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showInfo, setShowInfo] = useState(false);
   const [panelCollapsed, setPanelCollapsed] = useState(false);
   const [showNames, setShowNames] = useState(true);
-  const [showStrip, setShowStrip] = useState(true);
+  const [showStrip, setShowStrip] = useState(false);
   const [showBike, setShowBike] = useState(true);
   const [showPathways, setShowPathways] = useState(true);
   const [showBeyond, setShowBeyond] = useState(true);
