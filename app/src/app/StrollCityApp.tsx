@@ -892,9 +892,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const bounds = new LngLatBounds(data.stripBounds[0], data.stripBounds[1]);
     const cam = map.cameraForBounds(bounds, { padding: computePadding() });
     if (!cam || cam.center === undefined) return;
-    const zoom = Math.max(cam.zoom ?? MIN_STRIP_ZOOM, MIN_STRIP_ZOOM);
-    if (animate) map.easeTo({ center: cam.center, zoom, duration: 700 });
-    else map.jumpTo({ center: cam.center, zoom });
+    const zoom = Math.max(cam.zoom ?? MIN_STRIP_ZOOM, mobileLayout ? 16.28 : MIN_STRIP_ZOOM);
+    const center = mobileLayout ? data.center : cam.center;
+    if (animate) map.easeTo({ center, zoom, duration: 700 });
+    else map.jumpTo({ center, zoom });
   };
   const flyCity = () => mapRef.current?.flyTo({ center: city.center, zoom: 11.2, duration: 900 });
 
