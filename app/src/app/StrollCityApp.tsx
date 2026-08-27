@@ -394,6 +394,7 @@ const NINTH_AVE_DOOR_PATH: [number, number][] = [
   [-114.0245, 51.03755],
   [-114.0184, 51.03560],
 ];
+const NINTH_AVE_STRIP_CENTER_PATH: [number, number][] = NINTH_AVE_DOOR_PATH.map(([lon, lat]) => [lon, lat - 0.00015]);
 
 function strollMapSources(data: StrollData): Record<string, unknown> {
   return {
@@ -402,13 +403,13 @@ function strollMapSources(data: StrollData): Record<string, unknown> {
     bike: { type: "geojson", data: data.bike },
     pathways: { type: "geojson", data: data.pathways },
     walkingRoute: { type: "geojson", data: emptyRouteFeature() },
-    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: NINTH_AVE_DOOR_PATH } } },
+    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: NINTH_AVE_STRIP_CENTER_PATH } } },
   };
 }
 
 function strollOverlayLayers(): Array<Record<string, unknown>> {
   return [
-    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#D94848", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 40, 16, 76, 18, 104, 20, 132], "line-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.13, 16, 0.19, 18, 0.23, 20, 0.26], "line-blur": ["interpolate", ["linear"], ["zoom"], 13, 9, 17, 14, 20, 18], "line-offset": ["interpolate", ["linear"], ["zoom"], 13, 14, 16, 24, 18, 34, 20, 44] } },
+    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#D94848", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 40, 16, 76, 18, 104, 20, 132], "line-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.13, 16, 0.19, 18, 0.23, 20, 0.26], "line-blur": ["interpolate", ["linear"], ["zoom"], 13, 9, 17, 14, 20, 18] } },
     { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
     { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
     { id: "walking-route-halo", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 18, 10], "line-opacity": 0.95 } },
