@@ -1310,13 +1310,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const zoom = map.getZoom();
     const dotZoomMax = 16.2;
     const logoZoomMin = 15.95;
-    const labelZoomMin = mobileLayout ? 17.15 : 16.65;
-    const labelDensityLimit = mobileLayout ? 18 : 28;
+    const labelZoomMin = mobileLayout ? 17.55 : 16.95;
     // Keep the pin presentation stable while panning. Using the current map bounds here made
     // labels appear/disappear at the same zoom as businesses crossed the viewport edge, which
     // shuffled nearby logos even though the user had only dragged the map.
     const filteredBusinessCount = items.length;
-    const forceLabels = showNames && Boolean(walkingRoute || filteredBusinessCount <= labelDensityLimit || zoom >= labelZoomMin);
+    // Keep business names hidden until the user intentionally zooms into storefront depth.
+    // Density/search should not promote labels early; it made the default strip view read like a list.
+    const forceLabels = showNames && Boolean(walkingRoute || zoom >= labelZoomMin);
     const forceLogos = forceLabels || zoom >= logoZoomMin || filteredBusinessCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && filteredBusinessCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
