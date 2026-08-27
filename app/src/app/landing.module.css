@@ -205,8 +205,13 @@
   display: flex;
   gap: 8px;
   justify-content: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-bottom: 0;
+}
+.heroCta .btn { flex: 0 1 auto; }
+@media (max-width: 420px) {
+  .heroCta { gap: 6px; }
+  .heroCta .btn { min-width: 0; padding: 10px 12px; font-size: 12.5px; gap: 6px; }
 }
 
 /* ---------------- hero frame + live map ---------------- */
