@@ -117,6 +117,9 @@ type WalkingRoute = { target: Business; coords: [number, number][]; distanceM: n
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const MIN_STRIP_ZOOM = 15.5;
+const ROUTE_ACCESS_RADIUS_M = 90;
+const ROUTE_ACCESS_CANDIDATES = 18;
+const AVG_WALKING_STEP_M = 0.76;
 
 export const CAT_ICON: Record<Category, string> = {
   restaurant: "M7 3v8a3 3 0 0 0 6 0V3M10 11v10M17 3c-1.2 2-1.6 3.4-1.6 5.2 0 1.3.7 2 1.6 2s1.6-.7 1.6-2C18.6 6.4 18.2 5 17 3Zm0 7.2V21",
@@ -474,6 +477,19 @@ function metersBetween(a: [number, number], b: [number, number]) {
   return 12742000 * Math.asin(Math.sqrt(h));
 }
 
+function formatWalkDistance(distanceM: number) {
+  if (distanceM >= 950) return `${(distanceM / 1000).toFixed(distanceM >= 9500 ? 0 : 1)} km`;
+  return `${Math.max(10, Math.round(distanceM / 10) * 10)} m`;
+}
+function formatStepEstimate(distanceM: number) {
+  const steps = distanceM / AVG_WALKING_STEP_M;
+  if (steps >= 1000) return `${Math.round(steps / 100) * 100}`;
+  return `${Math.max(20, Math.round(steps / 10) * 10)}`;
+}
+function routeSummary(route: WalkingRoute) {
+  return `${route.network ? "Sidewalk route" : "Direct route"} · about ${formatWalkDistance(route.distanceM)} · ~${formatStepEstimate(route.distanceM)} steps`;
+}
+
 function geometryLines(feature: GeoJSON.Feature): [number, number][][] {
   const geom = feature.geometry;
   if (!geom) return [];
@@ -578,11 +594,13 @@ function buildWalkingRoute(data: StrollData, start: [number, number], finish: [n
     graph.push([]);
     return id;
   };
-  const addEdge = (a: [number, number], b: [number, number]) => {
-    const ai = addNode(a), bi = addNode(b);
-    const d = metersBetween(a, b);
+  const addEdgeIndexes = (ai: number, bi: number, d: number) => {
     graph[ai].push([bi, d]);
     graph[bi].push([ai, d]);
+  };
+  const addEdge = (a: [number, number], b: [number, number]) => {
+    const ai = addNode(a), bi = addNode(b);
+    addEdgeIndexes(ai, bi, metersBetween(a, b));
   };
 
   [data.streets, data.pathways, data.bike].forEach((collection) => {
@@ -593,38 +611,48 @@ function buildWalkingRoute(data: StrollData, start: [number, number], finish: [n
     });
   });
   if (!nodes.length) return null;
-  const nearest = (point: [number, number]) => {
-    let best = 0, bestD = Infinity;
-    nodes.forEach((node, index) => {
-      const d = metersBetween(point, node);
-      if (d < bestD) { best = index; bestD = d; }
-    });
-    return { index: best, distance: bestD };
-  };
-  const startNode = nearest(start), finishNode = nearest(finish);
-  if (startNode.distance > 220 || finishNode.distance > 220) return null;
+
+  const accessCandidates = (point: [number, number]) => nodes
+    .map((node, index) => ({ index, distance: metersBetween(point, node) }))
+    .filter((candidate) => candidate.distance <= ROUTE_ACCESS_RADIUS_M)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, ROUTE_ACCESS_CANDIDATES);
+
+  const startCandidates = accessCandidates(start);
+  const finishCandidates = accessCandidates(finish);
+  if (!startCandidates.length || !finishCandidates.length) return null;
+
+  const startIndex = nodes.length;
+  nodes.push(start);
+  graph.push([]);
+  startCandidates.forEach(({ index, distance }) => addEdgeIndexes(startIndex, index, distance));
+
+  const finishIndex = nodes.length;
+  nodes.push(finish);
+  graph.push([]);
+  finishCandidates.forEach(({ index, distance }) => addEdgeIndexes(finishIndex, index, distance));
 
   const dist = new Array(nodes.length).fill(Infinity);
   const prev = new Array<number>(nodes.length).fill(-1);
   const seen = new Set<number>();
-  dist[startNode.index] = 0;
+  dist[startIndex] = 0;
   while (seen.size < nodes.length) {
     let u = -1, best = Infinity;
     for (let i = 0; i < dist.length; i += 1) {
       if (!seen.has(i) && dist[i] < best) { best = dist[i]; u = i; }
     }
-    if (u === -1 || u === finishNode.index) break;
+    if (u === -1 || u === finishIndex) break;
     seen.add(u);
     graph[u].forEach(([v, weight]) => {
       const next = dist[u] + weight;
       if (next < dist[v]) { dist[v] = next; prev[v] = u; }
     });
   }
-  if (!Number.isFinite(dist[finishNode.index])) return null;
+  if (!Number.isFinite(dist[finishIndex])) return null;
   const path: [number, number][] = [];
-  for (let at = finishNode.index; at !== -1; at = prev[at]) path.push(nodes[at]);
+  for (let at = finishIndex; at !== -1; at = prev[at]) path.push(nodes[at]);
   path.reverse();
-  return [start, ...path, finish];
+  return path;
 }
 
 export default function StrollCityApp({ city }: { city: CityConfig }) {
@@ -1734,7 +1762,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div className={styles.navigationHud}>
               <div className={styles.navigationStatus} aria-label="Navigation mode is active">
                 <span className={styles.navigationStatusDot} />
-                <span>Navigation mode</span>
+                <span className={styles.navigationStatusText}>
+                  <span>Navigation mode</span>
+                  <span className={styles.navigationRouteMeta}>{routeSummary(walkingRoute)}</span>
+                </span>
               </div>
               <div className={styles.navigationHudActions}>
                 <button onClick={showFullRoute}>Show full route</button>
