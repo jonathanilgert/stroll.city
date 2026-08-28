@@ -29,15 +29,29 @@ export async function GET(request: Request, context: { params: Promise<{ city: s
   const title = session.status === "finished"
     ? `${session.team_name} walked ${session.hunt_name}.`
     : `Solve this stop and the next postcard mark fills in.`;
-  const slotWidth = 210;
+  /* Four across, wrapping to a second row. Laid out in a single row this ran to
+     x=1924 on a 1200-wide card for an eight-stop hunt, so half the stamps were
+     drawn off the edge and never seen. */
+  const gap = 20;
+  /* Clear of the spine at x=120 and the rotated INGLEWOOD label beside it. */
+  const left = 168;
+  const right = 1120;
+  const top = 200;
+  const bottom = 470;
+  const cols = Math.min(4, Math.max(1, session.stops.length));
+  const rows = Math.ceil(session.stops.length / cols);
+  const slotWidth = (right - left - gap * (cols - 1)) / cols;
+  const slotHeight = (bottom - top - gap * (rows - 1)) / rows;
   const slots = session.stops.map((stop, i) => {
-    const x = 90 + i * (slotWidth + 22);
+    const x = left + (i % cols) * (slotWidth + gap);
+    const y = top + Math.floor(i / cols) * (slotHeight + gap);
     const filled = Boolean(stop.photo_url);
+    const pillY = y + slotHeight - 38;
     return `<g>
-      <rect x="${x}" y="200" width="${slotWidth}" height="240" rx="10" fill="${filled ? "#E4EBFF" : "#FAFAFB"}" stroke="${filled ? "#0B47E8" : "#DDE0E5"}" stroke-width="${filled ? 2 : 2}" stroke-dasharray="${filled ? "0" : "7 7"}"/>
+      <rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${slotWidth.toFixed(1)}" height="${slotHeight.toFixed(1)}" rx="10" fill="${filled ? "#E4EBFF" : "#FAFAFB"}" stroke="${filled ? "#0B47E8" : "#DDE0E5"}" stroke-width="2" stroke-dasharray="${filled ? "0" : "7 7"}"/>
       ${filled
-        ? `<rect x="${x + 60}" y="392" width="90" height="28" rx="14" fill="#fff" stroke="#0B47E8" stroke-width="2"/><text x="${x + 105}" y="411" font-family="ui-monospace,monospace" font-size="14" fill="#0B47E8" text-anchor="middle">FOUND</text>`
-        : `<text x="${x + 105}" y="330" font-family="ui-monospace,monospace" font-size="30" fill="#C9CCD3" text-anchor="middle">${i + 1}</text>`}
+        ? `<rect x="${(x + slotWidth / 2 - 45).toFixed(1)}" y="${pillY.toFixed(1)}" width="90" height="28" rx="14" fill="#fff" stroke="#0B47E8" stroke-width="2"/><text x="${(x + slotWidth / 2).toFixed(1)}" y="${(pillY + 19).toFixed(1)}" font-family="ui-monospace,monospace" font-size="14" fill="#0B47E8" text-anchor="middle">FOUND</text>`
+        : `<text x="${(x + slotWidth / 2).toFixed(1)}" y="${(y + slotHeight / 2 + 10).toFixed(1)}" font-family="ui-monospace,monospace" font-size="30" fill="#C9CCD3" text-anchor="middle">${i + 1}</text>`}
     </g>`;
   }).join("");
 

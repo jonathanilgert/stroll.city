@@ -107,30 +107,38 @@ export default function PostcardScreen({ citySlug, postcard }: { citySlug: strin
     ctx.font = "600 54px Helvetica, Arial, sans-serif";
     ctx.fillText(`${postcard.team_name} walked ${postcard.hunt_name}.`, 220, 220);
 
-    const slots = postcard.stops.slice(0, 4);
+    /* Four across, wrapping. An eight-stop hunt used to lose half its photos here:
+       the row was drawn once and then sliced to four. */
+    const slots = postcard.stops;
     const gap = 26;
-    const slotW = (width - 220 - 90 - gap * (slots.length - 1)) / Math.max(1, slots.length);
-    const slotH = 430;
+    const cols = Math.min(4, Math.max(1, slots.length));
+    const rows = Math.ceil(slots.length / cols);
+    const left = 220;
+    const right = width - 90;
     const top = 280;
+    const bottom = height - 190;
+    const slotW = (right - left - gap * (cols - 1)) / cols;
+    const slotH = (bottom - top - gap * (rows - 1)) / rows;
 
     await Promise.all(slots.map((stop, i) => new Promise<void>((resolve) => {
-      const x = 220 + i * (slotW + gap);
+      const x = left + (i % cols) * (slotW + gap);
+      const rowTop = top + Math.floor(i / cols) * (slotH + gap);
       ctx.save();
-      roundedRect(ctx, x, top, slotW, slotH, 16);
+      roundedRect(ctx, x, rowTop, slotW, slotH, 16);
       ctx.clip();
       ctx.fillStyle = "#EFEDE5";
-      ctx.fillRect(x, top, slotW, slotH);
+      ctx.fillRect(x, rowTop, slotW, slotH);
       if (!stop.photo_url) { ctx.restore(); resolve(); return; }
       const image = new Image();
       image.crossOrigin = "anonymous";
       image.onload = () => {
-        drawCover(ctx, image, x, top, slotW, slotH);
+        drawCover(ctx, image, x, rowTop, slotW, slotH);
         ctx.restore();
         /* FOUND pill, drawn after the clip is released so it is never cut off. */
         const pillW = 132;
         const pillH = 44;
         const px = x + slotW / 2 - pillW / 2;
-        const py = top + slotH - pillH - 22;
+        const py = rowTop + slotH - pillH - 22;
         ctx.fillStyle = "rgba(255,255,255,0.95)";
         roundedRect(ctx, px, py, pillW, pillH, pillH / 2);
         ctx.fill();
@@ -155,11 +163,11 @@ export default function PostcardScreen({ citySlug, postcard }: { citySlug: strin
     ctx.fillText(
       `${photos.length} of ${postcard.total_stops} stops photographed · ${formatDuration(postcard.seconds)}`,
       220,
-      top + slotH + 70,
+      bottom + 56,
     );
     ctx.fillStyle = "#8A8E96";
     ctx.font = "400 24px ui-monospace, Menlo, monospace";
-    ctx.fillText("stroll.city · #StrollInglewood", 220, top + slotH + 118);
+    ctx.fillText("stroll.city · #StrollInglewood", 220, bottom + 104);
 
     return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png", 0.92));
   }, [photos.length, postcard, serial]);
