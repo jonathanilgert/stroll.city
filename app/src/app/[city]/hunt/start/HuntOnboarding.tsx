@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMemo, useRef, useState } from "react";
-import { Camera, Check, ChevronLeft, ChevronRight, Clock, MapPin, Minus, Plus, TrendingUp, User, Users, UsersRound } from "lucide-react";
+import {
+  Camera, Check, ChevronLeft, ChevronRight, Clock, Heart, MapPin, Minus, Palette,
+  Plus, ShoppingBag, Sparkles, TrendingUp, User, Users, UsersRound, Coffee,
+} from "lucide-react";
+import { HUNT_THEMES, getHuntTheme } from "../../../hunt-themes";
 import styles from "../hunt.module.css";
 
 export type OnboardingHunt = {
@@ -18,8 +22,17 @@ export type OnboardingHunt = {
   stop_count: number;
 };
 
-type Step = "preview" | "party" | "name" | "photo" | "details" | "ready";
-const STEPS: Step[] = ["party", "name", "photo", "details", "ready"];
+type Step = "preview" | "theme" | "party" | "name" | "photo" | "details" | "ready";
+const STEPS: Step[] = ["theme", "party", "name", "photo", "details", "ready"];
+
+const THEME_ICON = {
+  sparkles: Sparkles,
+  heart: Heart,
+  users: Users,
+  bag: ShoppingBag,
+  cup: Coffee,
+  palette: Palette,
+} as const;
 
 /* Dot positions for the route preview. Deliberately synthetic: the real stop
    coordinates are the answers, so the preview shows the shape of a walk, not
@@ -52,6 +65,7 @@ export default function HuntOnboarding({
   const [saved, setSaved] = useState(false);
   const [pickedDot, setPickedDot] = useState(0);
 
+  const [theme, setTheme] = useState<string | null>(null);
   const [partyType, setPartyType] = useState<"solo" | "team" | "group" | null>(null);
   const [partySize, setPartySize] = useState(2);
   const [teamCount, setTeamCount] = useState(3);
@@ -84,19 +98,20 @@ export default function HuntOnboarding({
 
   const stepIndex = STEPS.indexOf(step);
   const canContinue =
-    step === "party" ? partyType !== null
+    step === "theme" ? theme !== null
+      : step === "party" ? partyType !== null
       : step === "name" ? name.trim().length > 0
         : step === "details" ? (!needsAgeGate || ageConfirmed)
           : true;
 
   const goBack = () => {
     if (step === "preview") { router.push(`/${citySlug}`); return; }
-    if (step === "party") { setStep("preview"); return; }
+    if (step === "theme") { setStep("preview"); return; }
     setStep(STEPS[Math.max(0, stepIndex - 1)]);
   };
   const goNext = () => {
     if (!canContinue) return;
-    if (step === "preview") { setStep("party"); return; }
+    if (step === "preview") { setStep("theme"); return; }
     setStep(STEPS[Math.min(STEPS.length - 1, stepIndex + 1)]);
   };
 
@@ -124,6 +139,7 @@ export default function HuntOnboarding({
             group_name: name.trim(),
             team_names: Array.from({ length: teamCount }, (_, index) => teamNames[index]?.trim() || ""),
             party_size: groupSize,
+            theme: theme ?? undefined,
             email: email.trim() || undefined,
             photos_consented: photosConsented,
           }),
@@ -147,6 +163,7 @@ export default function HuntOnboarding({
           /* Groups returned above, so this is solo or a single team. */
           party_type: partyType ?? "team",
           party_size: partyType === "solo" ? 1 : partySize,
+          theme: theme ?? undefined,
           photos_consented: photosConsented,
         }),
       });
@@ -311,6 +328,39 @@ export default function HuntOnboarding({
 
             <div className={styles.scroll}>
               <div className={`${styles.sheet} ${styles.sheetPlain}`}>
+                {step === "theme" && (
+                  <>
+                    <h1 className={`${styles.title} ${styles.titleSm}`}>What kind of walk?</h1>
+                    <p className={styles.lede}>
+                      Same riddles, same rules — a different set of doors. Pick the one that sounds like your afternoon.
+                    </p>
+                    <div className={styles.choices}>
+                      {HUNT_THEMES.map((item) => {
+                        const Icon = THEME_ICON[item.icon];
+                        const on = theme === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            className={`${styles.choice} ${on ? styles.choiceOn : ""}`}
+                            onClick={() => setTheme(item.id)}
+                            aria-pressed={on}
+                          >
+                            <span className={styles.choiceIcon}><Icon size={21} /></span>
+                            <span className={styles.choiceBody}>
+                              <span className={styles.choiceName}>{item.name}</span>
+                              <span className={styles.choiceMeta}>{item.blurb}</span>
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <span className={styles.hintText}>
+                      Every walk is drawn fresh from Inglewood&rsquo;s {hunt.stop_count === 4 ? "four" : "eight"}-stop pool, so
+                      the same theme twice is not the same hunt twice.
+                    </span>
+                  </>
+                )}
+
                 {step === "party" && (
                   <>
                     <h1 className={`${styles.title} ${styles.titleSm}`}>Walking alone or with people?</h1>
@@ -523,6 +573,10 @@ export default function HuntOnboarding({
                       <div className={styles.summaryRow}>
                         <span className={styles.summaryKey}>Hunt</span>
                         <span className={styles.summaryVal}>{hunt.name} · {hunt.stop_count} stops</span>
+                      </div>
+                      <div className={styles.summaryRow}>
+                        <span className={styles.summaryKey}>Theme</span>
+                        <span className={styles.summaryVal}>{getHuntTheme(theme)?.name ?? "The classic"}</span>
                       </div>
                       <div className={styles.summaryRow}>
                         <span className={styles.summaryKey}>Walking</span>

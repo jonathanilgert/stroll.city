@@ -29,6 +29,7 @@ export default async function PostcardPage({ params }: { params: Promise<{ city:
     id: session.id,
     team_name: session.team_name,
     hunt_name: session.hunt_name,
+    theme: session.theme,
     mode: session.mode,
     group_id: session.group_id,
     total_stops: session.total_stops,

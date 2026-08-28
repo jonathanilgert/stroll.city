@@ -1,5 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
+import { getHuntTheme } from "../../../hunt-themes";
 
 export type Business = {
   id: string;
@@ -682,6 +683,8 @@ export type HuntSession = {
   /* Solo walkers, teams and large groups get the same hunt; the split shapes copy,
      the postcard byline, and later the leaderboard. A group splits into teams that
      start at different stops, which is why it books the rotated-start format. */
+  /* Which flavour of walk this is — see hunt-themes.ts. Null is the curated list. */
+  theme: string | null;
   party_type: "solo" | "team" | "group";
   party_size: number;
   team_count: number;
@@ -712,6 +715,41 @@ export type HuntSession = {
 export const CLUE_PENALTY_SECONDS = [0, 120, 300, 600];
 const SESSION_LIMIT = 500;
 const STOPS_FOR_MODE: Record<HuntSession["mode"], number> = { friendly: 4, full: 8, race: 8 };
+
+/* Build a stop list for a theme: the doors that match it, spread along the strip so
+   the walk moves in one direction instead of doubling back. Falls back to the hunt's
+   curated list when a theme cannot fill the card — a themed hunt that repeats the
+   same four doors is worse than the classic one. */
+export function stopsForTheme(data: StrollData, hunt: Hunt, themeId: string | null | undefined, count: number) {
+  const theme = getHuntTheme(themeId);
+  if (!theme || theme.categories.length === 0) return hunt.stop_ids.slice(0, count);
+
+  const businesses = new Map(data.businesses.map((business) => [business.id, business]));
+  const wanted = new Set<string>(theme.categories);
+  const pool = (data.huntStops ?? [])
+    .filter((stop) => stop.status !== "retired")
+    .filter((stop) => theme.allowAgeRestricted || !stop.age_restricted)
+    .map((stop) => ({ stop, business: businesses.get(stop.business_id) }))
+    .filter((row) => row.business && wanted.has(row.business.category))
+    .sort((a, b) => (a.business!.lon - b.business!.lon));
+
+  if (pool.length < count) return hunt.stop_ids.slice(0, count);
+
+  /* One pick per bucket, west to east, so the stops are spaced along the street. */
+  const bucket = pool.length / count;
+  const picks: string[] = [];
+  for (let i = 0; i < count; i += 1) {
+    const from = pool.slice(Math.floor(i * bucket), Math.max(Math.floor((i + 1) * bucket), Math.floor(i * bucket) + 1));
+    const choice = from[Math.floor(Math.random() * from.length)];
+    if (choice && !picks.includes(choice.stop.id)) picks.push(choice.stop.id);
+  }
+  /* Top up if a bucket collided, then give up gracefully rather than short-change. */
+  for (const row of pool) {
+    if (picks.length >= count) break;
+    if (!picks.includes(row.stop.id)) picks.push(row.stop.id);
+  }
+  return picks.length === count ? picks : hunt.stop_ids.slice(0, count);
+}
 
 function rotateStops<T>(rows: T[], offset: number) {
   if (!rows.length) return rows;
@@ -751,6 +789,7 @@ export async function getHuntSession(city: string, id: string) {
 export async function createHuntSession(
   city: string,
   hunt: Hunt,
+  data: StrollData,
   payload: {
     team_name?: string;
     email?: string;
@@ -758,6 +797,7 @@ export async function createHuntSession(
     party_type?: string;
     party_size?: number;
     team_count?: number;
+    theme?: string;
   },
 ) {
   const partyType = payload.party_type === "solo"
@@ -767,9 +807,10 @@ export async function createHuntSession(
     ? "Solo walker"
     : partyType === "group" ? "Anonymous group" : "Anonymous team";
   const teamName = sanitizeString(payload.team_name, 80) || fallbackName;
-  const startIndex = hunt.mode === "race" ? startOffsetFor(teamName) % Math.max(1, hunt.stop_ids.length) : 0;
-  const ordered = (hunt.mode === "race" ? rotateStops(hunt.stop_ids, startIndex) : hunt.stop_ids)
-    .slice(0, STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length);
+  const count = STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length;
+  const themed = stopsForTheme(data, hunt, payload.theme, count);
+  const startIndex = hunt.mode === "race" ? startOffsetFor(teamName) % Math.max(1, themed.length) : 0;
+  const ordered = hunt.mode === "race" ? rotateStops(themed, startIndex) : themed;
   const now = new Date().toISOString();
   const session: HuntSession = {
     id: newSessionId(),
@@ -780,6 +821,7 @@ export async function createHuntSession(
     mode: hunt.mode,
     team_name: teamName,
     email: payload.email ? sanitizeString(payload.email, 160) : null,
+    theme: payload.theme ? sanitizeString(payload.theme, 40) : null,
     party_type: partyType,
     group_id: null,
     group_name: null,
@@ -976,7 +1018,9 @@ export async function createHuntGroup(
     party_size?: number;
     email?: string;
     photos_consented?: boolean;
+    theme?: string;
   },
+  data: StrollData,
 ) {
   const groupName = sanitizeString(payload.group_name, 80) || "Anonymous group";
   const rawNames = Array.isArray(payload.team_names) ? payload.team_names : [];
@@ -985,14 +1029,17 @@ export async function createHuntGroup(
     .map((value, index) => sanitizeString(value, 80) || `Team ${index + 1}`);
   const teamNames = names.length >= 2 ? names : ["Team 1", "Team 2"];
   const stops = STOPS_FOR_MODE[hunt.mode] ?? hunt.stop_ids.length;
+  /* One themed list for the whole group: every team walks the same doors, just
+     starting at different ones. */
+  const themed = stopsForTheme(data, hunt, payload.theme, stops);
   const groupId = newGroupId();
   const now = new Date().toISOString();
 
   const sessions: HuntSession[] = teamNames.map((teamName, index) => {
     /* Even spacing rather than a name hash: with six teams you want them a stop
        or two apart on purpose, not wherever the letters happen to land. */
-    const startIndex = Math.floor((index * stops) / teamNames.length) % Math.max(1, hunt.stop_ids.length);
-    const ordered = rotateStops(hunt.stop_ids, startIndex).slice(0, stops);
+    const startIndex = Math.floor((index * stops) / teamNames.length) % Math.max(1, themed.length);
+    const ordered = rotateStops(themed, startIndex);
     return {
       id: `${newSessionId()}-t${index + 1}`,
       city,
@@ -1002,6 +1049,7 @@ export async function createHuntGroup(
       mode: hunt.mode,
       team_name: teamName,
       email: payload.email ? sanitizeString(payload.email, 160) : null,
+      theme: payload.theme ? sanitizeString(payload.theme, 40) : null,
       party_type: "group",
       party_size: Math.min(200, Math.max(6, Math.floor(Number(payload.party_size ?? 12)) || 12)),
       team_count: teamNames.length,

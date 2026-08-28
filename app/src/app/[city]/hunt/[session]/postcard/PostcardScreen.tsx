@@ -3,12 +3,14 @@
 import Link from "next/link";
 import { useCallback, useRef, useState } from "react";
 import { Check, Download, Map as MapIcon, Share2, Sparkles } from "lucide-react";
+import { getHuntTheme } from "../../../../hunt-themes";
 import styles from "../../hunt.module.css";
 
 export type PostcardData = {
   id: string;
   team_name: string;
   hunt_name: string;
+  theme: string | null;
   mode: "friendly" | "full" | "race";
   group_id: string | null;
   total_stops: number;
@@ -224,7 +226,9 @@ export default function PostcardScreen({ citySlug, postcard }: { citySlug: strin
         <div className={styles.scroll}>
           <div className={styles.finishBody}>
             <div className={styles.finishCrest}><Sparkles size={26} /></div>
-            <span className={`${styles.kicker} ${styles.mono}`}>Hunt complete</span>
+            <span className={`${styles.kicker} ${styles.mono}`}>
+              Hunt complete{getHuntTheme(postcard.theme) ? ` · ${getHuntTheme(postcard.theme)!.name}` : ""}
+            </span>
             <h1 className={`${styles.title} ${styles.titleSm}`}>
               Nice one, {postcard.team_name}.
             </h1>

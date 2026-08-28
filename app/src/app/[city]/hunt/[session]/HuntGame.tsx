@@ -4,6 +4,7 @@ import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Lightbulb, Sparkles } from "lucide-react";
+import { getHuntTheme } from "../../../hunt-themes";
 import styles from "../hunt.module.css";
 
 export type GameStop = {
@@ -24,6 +25,7 @@ export type GameSession = {
   hunt_name: string;
   mode: "friendly" | "full" | "race";
   team_name: string;
+  theme: string | null;
   group_id: string | null;
   status: "active" | "finished";
   started_at: string;
@@ -383,7 +385,9 @@ export default function HuntGame({
               <ChevronLeft size={15} />
             </Link>
             <span className={styles.gameHeadText}>
-              <span className={`${styles.gameKicker} ${styles.mono}`}>{MODE_LABEL[session.mode]}</span>
+              <span className={`${styles.gameKicker} ${styles.mono}`}>
+                {MODE_LABEL[session.mode]}{getHuntTheme(session.theme) ? ` · ${getHuntTheme(session.theme)!.name}` : ""}
+              </span>
               <strong className={styles.gameHeadline}>
                 {done ? "Hunt complete" : `Stop ${viewIndex + 1} of ${session.total_stops}`}
               </strong>

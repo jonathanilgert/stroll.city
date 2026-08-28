@@ -12,7 +12,8 @@ export async function POST(request: Request, context: { params: Promise<{ city: 
     party_size?: number;
     email?: string;
     photos_consented?: boolean;
+    theme?: string;
   };
-  const { group } = await createHuntGroup(city, hunt, payload);
+  const { group } = await createHuntGroup(city, hunt, payload, data);
   return envelope(city, await hydrateHuntGroup(city, group), "runtime-overlay");
 }
