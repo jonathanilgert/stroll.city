@@ -302,6 +302,12 @@ function formatDate(value: string) {
 function normalize(value: string) {
   return value.toLowerCase().trim();
 }
+function phoneHref(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 10) return `tel:+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `tel:+${digits}`;
+  return `tel:${digits}`;
+}
 /* Search folds accents so "cafe" finds "Café" — typing é on a phone keyboard is a long-press most people won't do. */
 function foldForSearch(value: string) {
   return value
@@ -765,7 +771,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           fetch(`${apiBase}/attractions`).then((r) => r.ok ? r.json() : null),
         ]).then(([businesses, apiEvents, apiAttractions]) => {
           const next = { ...json };
-          if (businesses.status === "fulfilled" && Array.isArray(businesses.value?.data)) next.businesses = businesses.value.data;
+          if (businesses.status === "fulfilled" && Array.isArray(businesses.value?.data)) {
+            const staticById = new Map(json.businesses.map((business) => [business.id, business]));
+            next.businesses = businesses.value.data.map((business: Business) => ({
+              ...business,
+              phone: business.phone ?? staticById.get(business.id)?.phone ?? null,
+            }));
+          }
           if (apiEvents.status === "fulfilled" && Array.isArray(apiEvents.value?.data)) next.events = apiEvents.value.data;
           if (apiAttractions.status === "fulfilled" && Array.isArray(apiAttractions.value?.data)) next.attractions = apiAttractions.value.data;
           return next;
@@ -1599,6 +1611,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           <div className={styles.kv}>
             <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
             <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
+            <div className={styles.kvRow}>
+              <span className={styles.k}>Phone</span>
+              <span className={styles.v}>{biz.phone ? <a className={styles.phoneLink} href={phoneHref(biz.phone)}>{biz.phone}</a> : "Not listed yet"}</span>
+            </div>
           </div>
         </div>
       </>

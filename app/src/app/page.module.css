@@ -285,6 +285,8 @@
 .kvRow + .kvRow { border-top: 1px solid var(--line); }
 .k { color: var(--ink-3); width: 72px; flex: 0 0 72px; }
 .v { color: var(--ink); flex: 1; }
+.phoneLink { color: var(--blue); font-weight: 750; text-decoration: none; }
+.phoneLink:hover { text-decoration: underline; }
 .profileBack { margin-bottom: -32px; }
 .menuBody { padding-top: 58px; }
 .menuSections { display: flex; flex-direction: column; gap: 18px; }
