@@ -19,6 +19,7 @@ import {
   Route,
   Search,
   ShieldCheck,
+  Utensils,
   Waves,
   X,
 } from "lucide-react";
@@ -98,6 +99,35 @@ type StrollData = {
   attractions?: Attraction[];
   hunts?: HuntSummary[];
   stats: { businesses: number; businessBuildings: number; trees: number; categories: Record<string, number> };
+};
+
+type MenuItem = {
+  section: string;
+  name: string;
+  description?: string;
+  price?: string;
+  sourceUrl?: string;
+  confidence?: string;
+  qaStatus?: string;
+};
+
+type BusinessMenu = {
+  businessId: string;
+  businessName: string;
+  sourceBusinessNames: string[];
+  status: string;
+  itemCount: number;
+  sourceUrls: string[];
+  needsHumanReview: boolean;
+  notes?: string;
+  sections: Array<{ name: string; items: MenuItem[] }>;
+};
+
+type StrollMenus = {
+  generatedAt: string;
+  source: string;
+  reviewNotice: string;
+  menus: BusinessMenu[];
 };
 
 type HuntSummary = {
@@ -653,6 +683,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const lastFitKeyRef = useRef("");
 
   const [data, setData] = useState<StrollData | null>(null);
+  const [menus, setMenus] = useState<Record<string, BusinessMenu>>({});
+  const [detailView, setDetailView] = useState<"profile" | "menu">("profile");
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<SidebarTab>("explore");
   const [browseCategory, setBrowseCategory] = useState<Category | null>(null);
@@ -744,6 +776,17 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     return () => window.clearTimeout(welcomeTimer);
   }, [city]);
 
+  useEffect(() => {
+    if (city.status !== "live" || !city.dataPath) return;
+    fetch(`${BASE_PATH}/data/stroll-menus.json`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((json: StrollMenus | null) => {
+        if (!json?.menus?.length) return;
+        setMenus(Object.fromEntries(json.menus.map((menu) => [menu.businessId, menu])));
+      })
+      .catch(() => setMenus({}));
+  }, [city]);
+
   const events = useMemo(() => (data ? data.events?.length ? data.events : fallbackEvents(data) : []), [data]);
   const attractions = useMemo(() => (data ? data.attractions?.length ? data.attractions : fallbackAttractions(data) : []), [data]);
 
@@ -805,7 +848,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
 
   const openCategory = (key: Category) => { setBrowseCategory(key); setQuery(""); };
-  const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setSelected(null); };
+  const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setDetailView("profile"); setSelected(null); };
   const setCategories = (next: Set<Category>) => {
     setActiveCategories(next);
     replaceCategoryUrl(next);
@@ -842,6 +885,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const closeSelected = () => {
     const camera = snapshotCamera();
     suppressStripRefitCountRef.current = 3;
+    setDetailView("profile");
     setSelected(null);
     setSelectedAttraction(null);
     clearWalkingRoute();
@@ -942,6 +986,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const showMeHowToGetHere = (business: Business) => {
     searchRef.current?.blur();
+    setDetailView("profile");
     setSelectedAttraction(null);
     setSelected(business);
     if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
@@ -1037,6 +1082,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     })() : null;
     if (preserveCamera) suppressStripRefitCountRef.current = 3;
     setSelectedAttraction(null);
+    setDetailView("profile");
     clearWalkingRoute();
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -1046,6 +1092,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (camera && map) restoreCameraAfterLayout(camera);
   };
   const goFeatured = (attraction: Attraction) => {
+    setDetailView("profile");
     setSelected(null);
     setSelectedAttraction(attraction);
     setHint(null);
@@ -1064,10 +1111,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null); };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") closeSelected(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  });
 
   /* ----------------
      On-screen keyboard: without this the keyboard covers the sheet, so you type a query and cannot see a single result.
@@ -1472,38 +1519,91 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const enabledNeighbourhood = data?.neighbourhoods.find((n) => n.enabled);
 
-  /* shared between the desktop drawer and the mobile bottom sheet's detail state */
-  const renderDetail = (biz: Business) => (
+  const renderMenuDetail = (biz: Business, menu: BusinessMenu) => (
     <>
-      <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
-      <div className={styles.hero}>
-        <img src={biz.photo} alt="" />
-        <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
-          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
+      <button className={`${styles.heroClose} ${styles.profileBack}`} onClick={() => setDetailView("profile")}>Back to {biz.name} profile</button>
+      <div className={`${styles.dBody} ${styles.menuBody}`}>
+        <div>
+          <div className={styles.dTitle}>{biz.name} menu</div>
+          <div className={styles.dSub}>
+            <span className={styles.pill}>{menu.itemCount ? `${menu.itemCount} menu items` : "Official menu source"}</span>
+            {menu.needsHumanReview && <span>Being confirmed with the business</span>}
+          </div>
         </div>
-      </div>
-      <div className={styles.dBody}>
-        <div className={styles.dActions}>
-          {walkingRoute?.target.id !== biz.id && (
-            <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
-              <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
-            </button>
-          )}
-          {biz.website && (
-            <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
-              <Globe size={16} />
-            </button>
-          )}
-        </div>
-        {geoError && <div className={styles.routeNote}>{geoError}</div>}
-        <p className={styles.blurb}>{biz.blurb}</p>
-        <div className={styles.kv}>
-          <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
-          <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
-        </div>
+        {menu.itemCount > 0 ? (
+          <div className={styles.menuSections}>
+            {menu.sections.map((section) => (
+              <section className={styles.menuSection} key={section.name}>
+                <h3>{section.name}</h3>
+                <div className={styles.menuItems}>
+                  {section.items.map((item, index) => (
+                    <div className={styles.menuItem} key={`${section.name}-${item.name}-${index}`}>
+                      <div className={styles.menuItemTop}>
+                        <strong>{item.name}</strong>
+                        {item.price && <span>{item.price}</span>}
+                      </div>
+                      {item.description && <p>{item.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.blurb}>Menu item details are not ready yet. Use the official menu/source link below for now.</p>
+        )}
+        {menu.sourceUrls.length > 0 && (
+          <div className={styles.menuSources}>
+            <span>Official menu/source</span>
+            <a href={menu.sourceUrls[0]} target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+        )}
       </div>
     </>
   );
+
+  /* shared between the desktop drawer and the mobile bottom sheet's detail state */
+  const renderDetail = (biz: Business) => {
+    const menu = menus[biz.id];
+    if (detailView === "menu" && menu) return renderMenuDetail(biz, menu);
+
+    return (
+      <>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
+        <div className={styles.hero}>
+          <img src={biz.photo} alt="" />
+          <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
+            {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
+          </div>
+        </div>
+        <div className={styles.dBody}>
+          <div className={styles.dActions}>
+            {walkingRoute?.target.id !== biz.id && (
+              <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
+                <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
+              </button>
+            )}
+            {menu && (
+              <button className={`${styles.btn} ${styles.btnGhost}`} title={`${biz.name} menu`} onClick={() => setDetailView("menu")}>
+                <Utensils size={16} /> Menu
+              </button>
+            )}
+            {biz.website && (
+              <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
+                <Globe size={16} />
+              </button>
+            )}
+          </div>
+          {geoError && <div className={styles.routeNote}>{geoError}</div>}
+          <p className={styles.blurb}>{biz.blurb}</p>
+          <div className={styles.kv}>
+            <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
+            <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
+          </div>
+        </div>
+      </>
+    );
+  };
 
   const renderAttractionDetail = (attraction: Attraction) => (
     <>

@@ -277,7 +277,7 @@
 .dSub { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); margin-top: 7px; flex-wrap: wrap; }
 .pill { display: inline-flex; align-items: center; gap: 6px; height: 25px; padding: 0 10px; border-radius: 999px; font-size: 11.5px; border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-2); }
 .pillClaimed { background: var(--accent-soft); border-color: var(--accent-line); color: var(--accent-ink); }
-.dActions { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.dActions { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; }
 .dActions .btn { height: 40px; }
 .blurb { font-size: 13px; line-height: 1.6; color: var(--ink-2); margin: 0; }
 .kv { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; }
@@ -285,6 +285,20 @@
 .kvRow + .kvRow { border-top: 1px solid var(--line); }
 .k { color: var(--ink-3); width: 72px; flex: 0 0 72px; }
 .v { color: var(--ink); flex: 1; }
+.profileBack { margin-bottom: -32px; }
+.menuBody { padding-top: 58px; }
+.menuSections { display: flex; flex-direction: column; gap: 18px; }
+.menuSection { display: flex; flex-direction: column; gap: 9px; }
+.menuSection h3 { margin: 0; font-size: 14px; font-weight: 750; letter-spacing: -.015em; color: var(--ink); }
+.menuItems { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: #fff; }
+.menuItem { padding: 11px 13px; }
+.menuItem + .menuItem { border-top: 1px solid var(--line); }
+.menuItemTop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.menuItemTop strong { min-width: 0; font-size: 13px; font-weight: 700; line-height: 1.35; color: var(--ink); }
+.menuItemTop span { flex: none; font-size: 12.5px; font-weight: 750; color: var(--ink); }
+.menuItem p { margin: 5px 0 0; font-size: 12px; line-height: 1.45; color: var(--ink-2); }
+.menuSources { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 13px; border: 1px solid var(--line); border-radius: var(--r-lg); font-size: 12.5px; color: var(--ink-2); background: var(--surface-2); }
+.menuSources a { color: var(--blue); font-weight: 750; }
 .claimcard { border: 1px solid var(--accent-line); border-radius: var(--r-lg); padding: 14px; display: flex; gap: 12px; align-items: center; background: var(--accent-soft); cursor: pointer; text-align: left; width: 100%; }
 .claimcard:hover { border-color: var(--accent); }
 .claimcard p { margin: 0; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
