@@ -1000,8 +1000,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     searchRef.current?.blur();
     setDetailView("profile");
     setSelectedAttraction(null);
-    setSelected(business);
-    if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
+    if (mobileLayout) {
+      // Navigation mode should give the map back immediately; the destination
+      // identity remains on the map via the route target logo/name marker.
+      setSelected(null);
+      if (sheetStop !== "peek") snapSheet("peek");
+    } else {
+      setSelected(business);
+    }
     if (userLocation) drawWalkingRoute(userLocation, business);
     else startLocationWatch((location) => drawWalkingRoute(location, business));
   };
