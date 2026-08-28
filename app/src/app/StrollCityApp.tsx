@@ -720,12 +720,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [pinLayoutTick, setPinLayoutTick] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => categoriesFromUrl());
-  const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
+  const [sheetStop, setSheetStop] = useState<"peek" | "half" | "profile" | "full">("peek");
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const mobileTopRef = useRef<HTMLDivElement | null>(null);
   const locateRef = useRef<HTMLButtonElement | null>(null);
-  const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
+  const sheetStopsRef = useRef({ peek: 132, half: 340, profile: 440, full: 560 });
   const sheetHeightRef = useRef(132);
   const suppressStripRefitCountRef = useRef(0);
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -1022,6 +1022,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     return {
       peek: Math.min(150, Math.round(avail * 0.26)),
       half: Math.round(avail * 0.56),
+      profile: Math.round(avail * 0.70),
       full: Math.round(avail - 56),
     };
   };
@@ -1042,7 +1043,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       setPinLayoutTick((t) => t + 1);
     }, animate ? 340 : 0);
   };
-  const snapSheet = (stop: "peek" | "half" | "full") => {
+  const snapSheet = (stop: "peek" | "half" | "profile" | "full") => {
     setSheetStop(stop);
     applySheetHeight(sheetStopsRef.current[stop], true);
   };
@@ -1069,7 +1070,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const drag = sheetDragRef.current;
     if (!drag) return;
     const stops = sheetStopsRef.current;
-    const order: Array<"peek" | "half" | "full"> = ["peek", "half", "full"];
+    const order: Array<"peek" | "half" | "profile" | "full"> = ["peek", "half", "profile", "full"];
     if (drag.moved < 6) {
       const i = order.indexOf(sheetStop);
       snapSheet(order[(i + 1) % order.length]);
@@ -1100,7 +1101,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
     if (options.moveMap !== false && data) mapRef.current?.panTo(doorCoordinateFor(data, business), { duration: 500 });
-    if (mobileLayout && sheetStop === "peek") snapSheet("half");
+    if (mobileLayout && (sheetStop === "peek" || sheetStop === "half")) snapSheet("profile");
     if (camera && map) restoreCameraAfterLayout(camera);
   };
   const goFeatured = (attraction: Attraction) => {
@@ -1158,18 +1159,28 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, mobileLayout]);
 
+  /* Business profiles should open tall enough to be useful immediately, including
+     deep links that may select the business before the mobile-layout effect settles. */
+  useEffect(() => {
+    if (!mobileLayout || !selected) return;
+    if (sheetStop === "peek" || sheetStop === "half") snapSheet("profile");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileLayout, selected]);
+
   /* ---------------- mobile sheet: (re)compute stops on layout changes, keep the sheet's real height in sync ---------------- */
   useEffect(() => {
     if (!mobileLayout) return;
     const sync = () => {
       sheetStopsRef.current = computeSheetStops();
-      applySheetHeight(sheetStopsRef.current[sheetStop], false);
+      const targetStop = selected && (sheetStop === "peek" || sheetStop === "half") ? "profile" : sheetStop;
+      if (targetStop !== sheetStop) setSheetStop(targetStop);
+      applySheetHeight(sheetStopsRef.current[targetStop], false);
     };
     sync();
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mobileLayout, data]);
+  }, [mobileLayout, data, selected]);
 
   /* ---------------- responsive stage sync (ResizeObserver, mirrors syncStage()) ---------------- */
   useEffect(() => {
