@@ -11,7 +11,8 @@
     "export:supabase-seed": "node scripts/export-supabase-seed.mjs",
     "enrich:business-media": "node scripts/enrich-business-media.mjs",
     "enrich:business-google": "node scripts/enrich-business-google-places.mjs",
-    "keys:create": "node scripts/create-api-key.mjs"
+    "keys:create": "node scripts/create-api-key.mjs",
+    "import:hunt-riddles": "node scripts/import-hunt-riddles.mjs"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.5.1",

@@ -155,9 +155,17 @@ export type BiaEvidence = {
 
 export type HuntStop = {
   id: string;
-  business_id: string;
-  business_slug: string;
+  /* Null for a door the licence register has not caught up with; such stops carry
+     their own coordinates instead. */
+  business_id: string | null;
+  business_slug: string | null;
   name: string;
+  /* Curated, and deliberately not the licence category — the register mislabels a
+     good part of the strip. Hunt themes select on this. */
+  category?: string;
+  lon?: number;
+  lat?: number;
+  address?: string | null;
   riddle: string;
   clue_1: string;
   clue_2: string;
@@ -729,26 +737,50 @@ export function stopsForTheme(data: StrollData, hunt: Hunt, themeId: string | nu
   const pool = (data.huntStops ?? [])
     .filter((stop) => stop.status !== "retired")
     .filter((stop) => theme.allowAgeRestricted || !stop.age_restricted)
-    .map((stop) => ({ stop, business: businesses.get(stop.business_id) }))
-    .filter((row) => row.business && wanted.has(row.business.category))
-    .sort((a, b) => (a.business!.lon - b.business!.lon));
+    .map((stop) => {
+      const business = stop.business_id ? businesses.get(stop.business_id) : undefined;
+      return {
+        stop,
+        /* Curated category wins; the business record is the fallback. */
+        category: stop.category ?? business?.category,
+        lon: business?.lon ?? stop.lon,
+      };
+    })
+    .filter((row) => row.category && wanted.has(row.category) && typeof row.lon === "number")
+    .sort((a, b) => (a.lon! - b.lon!));
 
   if (pool.length < count) return hunt.stop_ids.slice(0, count);
 
-  /* One pick per bucket, west to east, so the stops are spaced along the street. */
-  const bucket = pool.length / count;
-  const picks: string[] = [];
-  for (let i = 0; i < count; i += 1) {
-    const from = pool.slice(Math.floor(i * bucket), Math.max(Math.floor((i + 1) * bucket), Math.floor(i * bucket) + 1));
-    const choice = from[Math.floor(Math.random() * from.length)];
-    if (choice && !picks.includes(choice.stop.id)) picks.push(choice.stop.id);
-  }
-  /* Top up if a bucket collided, then give up gracefully rather than short-change. */
+  /* Take a turn from each of the theme's categories before repeating any. Straight
+     random picking follows the pool's shape, and the pool is lopsided — 27
+     restaurants to 8 bars — so "date night" would serve four restaurants and no
+     bar at all, which is not what the card promises. */
+  const byCategory = new Map<string, typeof pool>();
   for (const row of pool) {
-    if (picks.length >= count) break;
-    if (!picks.includes(row.stop.id)) picks.push(row.stop.id);
+    const list = byCategory.get(row.category!) ?? [];
+    list.push(row);
+    byCategory.set(row.category!, list);
   }
-  return picks.length === count ? picks : hunt.stop_ids.slice(0, count);
+  for (const list of byCategory.values()) list.sort(() => Math.random() - 0.5);
+
+  const order = theme.categories.filter((category) => byCategory.get(category)?.length);
+  const chosen: typeof pool = [];
+  for (let round = 0; chosen.length < count && round < count; round += 1) {
+    for (const category of order) {
+      if (chosen.length >= count) break;
+      const next = byCategory.get(category)!.pop();
+      if (next) chosen.push(next);
+    }
+  }
+  /* Top up from anywhere in the theme if a category ran dry. */
+  for (const row of pool) {
+    if (chosen.length >= count) break;
+    if (!chosen.includes(row)) chosen.push(row);
+  }
+  if (chosen.length < count) return hunt.stop_ids.slice(0, count);
+
+  /* Walk them west to east so the route runs in one direction. */
+  return chosen.sort((a, b) => a.lon! - b.lon!).map((row) => row.stop.id);
 }
 
 function rotateStops<T>(rows: T[], offset: number) {

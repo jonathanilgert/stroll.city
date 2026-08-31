@@ -36,16 +36,26 @@ export default async function HuntSessionPage({ params }: { params: Promise<{ ci
   const full = hydrateHuntSession(stored, data, { reveal: true });
   const byId = new Map(data.businesses.map((business) => [business.id, business]));
 
+  /* Some stops are real doors the licence register has not caught up with; they
+     carry their own coordinates, so fall back to those rather than dropping them
+     off the map. */
+  const stopById = new Map((data.huntStops ?? []).map((row) => [row.id, row]));
   const points: StopPoint[] = full.stops.map((stop) => {
+    const content = stopById.get(stop.stop_id);
     const business = stop.business_id ? byId.get(stop.business_id) : undefined;
-    if (!business) return { stop_id: stop.stop_id, exact: null, area: null, street: null };
+    const lon = business?.lon ?? content?.lon;
+    const lat = business?.lat ?? content?.lat;
+    const address = business?.address ?? content?.address ?? null;
+    if (typeof lon !== "number" || typeof lat !== "number") {
+      return { stop_id: stop.stop_id, exact: null, area: null, street: null };
+    }
     const solved = stop.state === "solved";
     return {
       stop_id: stop.stop_id,
-      exact: solved ? { lon: business.lon, lat: business.lat } : null,
+      exact: solved ? { lon, lat } : null,
       /* Before it is solved the map gets a search area, not a pin. */
-      area: solved ? null : { lon: coarsen(business.lon), lat: coarsen(business.lat), radius: AREA_RADIUS_M },
-      street: business.address ? business.address.replace(/^\s*(?:#|unit|suite|ste\.?|bay)\s*[\w-]+\s*,?\s*/i, "").replace(/^\s*\d+[A-Za-z]?\s+(?=\S)/, "").replace(/\bAv\b/gi, "Ave").replace(/\b(SE|SW|NE|NW)\b/gi, (m) => m.toUpperCase()) : null,
+      area: solved ? null : { lon: coarsen(lon), lat: coarsen(lat), radius: AREA_RADIUS_M },
+      street: address ? address.replace(/^\s*(?:#|unit|suite|ste\.?|bay)\s*[\w-]+\s*,?\s*/i, "").replace(/^\s*\d+[A-Za-z]?\s+(?=\S)/, "").replace(/\bAv\b/gi, "Ave").replace(/\b(SE|SW|NE|NW)\b/gi, (m) => m.toUpperCase()) : null,
     };
   });
 
