@@ -5,13 +5,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker, type StyleSpecification } from "maplibre-gl";
 import {
   Bike,
-  Briefcase,
   CalendarDays,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
   Compass,
-  ExternalLink,
   Globe,
   Landmark,
   Layers,
@@ -21,6 +19,7 @@ import {
   Route,
   Search,
   ShieldCheck,
+  Utensils,
   Waves,
   X,
 } from "lucide-react";
@@ -102,6 +101,35 @@ type StrollData = {
   stats: { businesses: number; businessBuildings: number; trees: number; categories: Record<string, number> };
 };
 
+type MenuItem = {
+  section: string;
+  name: string;
+  description?: string;
+  price?: string;
+  sourceUrl?: string;
+  confidence?: string;
+  qaStatus?: string;
+};
+
+type BusinessMenu = {
+  businessId: string;
+  businessName: string;
+  sourceBusinessNames: string[];
+  status: string;
+  itemCount: number;
+  sourceUrls: string[];
+  needsHumanReview: boolean;
+  notes?: string;
+  sections: Array<{ name: string; items: MenuItem[] }>;
+};
+
+type StrollMenus = {
+  generatedAt: string;
+  source: string;
+  reviewNotice: string;
+  menus: BusinessMenu[];
+};
+
 type HuntSummary = {
   id: string;
   slug: string;
@@ -119,6 +147,9 @@ type WalkingRoute = { target: Business; coords: [number, number][]; distanceM: n
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 const MIN_STRIP_ZOOM = 15.5;
+const ROUTE_ACCESS_RADIUS_M = 90;
+const ROUTE_ACCESS_CANDIDATES = 18;
+const AVG_WALKING_STEP_M = 0.76;
 
 export const CAT_ICON: Record<Category, string> = {
   restaurant: "M7 3v8a3 3 0 0 0 6 0V3M10 11v10M17 3c-1.2 2-1.6 3.4-1.6 5.2 0 1.3.7 2 1.6 2s1.6-.7 1.6-2C18.6 6.4 18.2 5 17 3Zm0 7.2V21",
@@ -271,6 +302,12 @@ function formatDate(value: string) {
 function normalize(value: string) {
   return value.toLowerCase().trim();
 }
+function phoneHref(value: string) {
+  const digits = value.replace(/\D/g, "");
+  if (digits.length === 10) return `tel:+1${digits}`;
+  if (digits.length === 11 && digits.startsWith("1")) return `tel:+${digits}`;
+  return `tel:${digits}`;
+}
 /* Search folds accents so "cafe" finds "Café" — typing é on a phone keyboard is a long-press most people won't do. */
 function foldForSearch(value: string) {
   return value
@@ -383,6 +420,29 @@ type MutableStyle = Omit<StyleSpecification, "sources" | "layers"> & {
 };
 
 const OPENFREEMAP_POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
+const NINTH_AVE_STRIP_CENTER_PATH: [number, number][] = [
+  [-114.05323, 51.04429],
+  [-114.05084, 51.04427],
+  [-114.04836, 51.04405],
+  [-114.04652, 51.04393],
+  [-114.04465, 51.04389],
+  [-114.04360, 51.04378],
+  [-114.04314, 51.04368],
+  [-114.04242, 51.04354],
+  [-114.04148, 51.04334],
+  [-114.03947, 51.04285],
+  [-114.03787, 51.04247],
+  [-114.03678, 51.04220],
+  [-114.03436, 51.04126],
+  [-114.03167, 51.04022],
+  [-114.02899, 51.03917],
+  [-114.02792, 51.03876],
+  [-114.02726, 51.03850],
+  [-114.02553, 51.03783],
+  [-114.02515, 51.03768],
+  [-114.02320, 51.03692],
+  [-114.02215, 51.03644],
+];
 
 function strollMapSources(data: StrollData): Record<string, unknown> {
   return {
@@ -391,48 +451,13 @@ function strollMapSources(data: StrollData): Record<string, unknown> {
     bike: { type: "geojson", data: data.bike },
     pathways: { type: "geojson", data: data.pathways },
     walkingRoute: { type: "geojson", data: emptyRouteFeature() },
-    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[51.03755, -114.03430], [51.03720, -114.01560]] } } },
+    stripband: { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: NINTH_AVE_STRIP_CENTER_PATH } } },
   };
-}
-
-function strollMainStreetWatercolourLayers(): Array<Record<string, unknown>> {
-  return [
-    {
-      id: "main-street-watercolour-wash",
-      type: "line",
-      source: "openmaptiles",
-      "source-layer": "transportation",
-      minzoom: 11,
-      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#D94848",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 11, 0.06, 14, 0.095, 17, 0.15, 20, 0.18],
-        "line-width": ["interpolate", ["exponential", 1.25], ["zoom"], 11, 11, 14, 23, 17, 48, 20, 92],
-        "line-blur": ["interpolate", ["linear"], ["zoom"], 11, 4, 16, 9, 20, 14],
-      },
-    },
-    {
-      id: "main-street-watercolour-core",
-      type: "line",
-      source: "openmaptiles",
-      "source-layer": "transportation",
-      minzoom: 12,
-      filter: ["all", ["match", ["geometry-type"], ["LineString", "MultiLineString"], true, false], ["match", ["get", "class"], ["primary", "secondary", "tertiary", "trunk"], true, false]],
-      layout: { "line-cap": "round", "line-join": "round" },
-      paint: {
-        "line-color": "#E45252",
-        "line-opacity": ["interpolate", ["linear"], ["zoom"], 12, 0.045, 15, 0.08, 18, 0.12, 20, 0.135],
-        "line-width": ["interpolate", ["exponential", 1.22], ["zoom"], 12, 6, 15, 16, 18, 35, 20, 60],
-        "line-blur": 5,
-      },
-    },
-  ];
 }
 
 function strollOverlayLayers(): Array<Record<string, unknown>> {
   return [
-    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round" }, paint: { "line-color": "#14161A", "line-width": 26, "line-opacity": 0.08 } },
+    { id: "stripband", type: "line", source: "stripband", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#D94848", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 40, 16, 76, 18, 104, 20, 132], "line-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0.13, 16, 0.19, 18, 0.23, 20, 0.26], "line-blur": ["interpolate", ["linear"], ["zoom"], 13, 9, 17, 14, 20, 18] } },
     { id: "pathways", type: "line", source: "pathways", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#8A8E96", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1.2, 15, 3, 18, 5], "line-opacity": 0.55 } },
     { id: "bike-line", type: "line", source: "bike", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#57C07A", "line-width": ["interpolate", ["linear"], ["zoom"], 11, 1, 15, 2.4, 18, 4], "line-dasharray": [2, 1.6], "line-opacity": 0.6 } },
     { id: "walking-route-halo", type: "line", source: "walkingRoute", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": ["interpolate", ["linear"], ["zoom"], 13, 5, 18, 10], "line-opacity": 0.95 } },
@@ -454,7 +479,7 @@ async function buildCrispNoLabelMapStyle(data: StrollData): Promise<StyleSpecifi
   return {
     ...base,
     sources: { ...base.sources, ...strollMapSources(data) },
-    layers: [...baseMapLayers, ...strollMainStreetWatercolourLayers(), ...strollOverlayLayers(), ...streetNameLayers],
+    layers: [...baseMapLayers, ...strollOverlayLayers(), ...streetNameLayers],
   } as StyleSpecification;
 }
 
@@ -466,12 +491,110 @@ function metersBetween(a: [number, number], b: [number, number]) {
   return 12742000 * Math.asin(Math.sqrt(h));
 }
 
+function formatWalkDistance(distanceM: number) {
+  if (distanceM >= 950) return `${(distanceM / 1000).toFixed(distanceM >= 9500 ? 0 : 1)} km`;
+  return `${Math.max(10, Math.round(distanceM / 10) * 10)} m`;
+}
+function formatStepEstimate(distanceM: number) {
+  const steps = distanceM / AVG_WALKING_STEP_M;
+  if (steps >= 1000) return `${Math.round(steps / 100) * 100}`;
+  return `${Math.max(20, Math.round(steps / 10) * 10)}`;
+}
+function routeSummary(route: WalkingRoute) {
+  return `${route.network ? "Sidewalk route" : "Direct route"} · about ${formatWalkDistance(route.distanceM)} · ~${formatStepEstimate(route.distanceM)} steps`;
+}
+
 function geometryLines(feature: GeoJSON.Feature): [number, number][][] {
   const geom = feature.geometry;
   if (!geom) return [];
   if (geom.type === "LineString") return [geom.coordinates as [number, number][]];
   if (geom.type === "MultiLineString") return geom.coordinates as [number, number][][];
   return [];
+}
+
+function geometryPolygonRings(feature: GeoJSON.Feature): [number, number][][] {
+  const geom = feature.geometry;
+  if (!geom) return [];
+  if (geom.type === "Polygon") return geom.coordinates as [number, number][][];
+  if (geom.type === "MultiPolygon") return (geom.coordinates as [number, number][][][]).flat();
+  return [];
+}
+
+type MeterPoint = { x: number; y: number };
+function meterProject(coord: [number, number], originLat: number): MeterPoint {
+  return { x: coord[0] * 111320 * Math.cos(originLat * Math.PI / 180), y: coord[1] * 110540 };
+}
+function meterUnproject(point: MeterPoint, originLat: number): [number, number] {
+  return [point.x / (111320 * Math.cos(originLat * Math.PI / 180)), point.y / 110540];
+}
+function closestOnSegment(point: MeterPoint, a: MeterPoint, b: MeterPoint) {
+  const dx = b.x - a.x, dy = b.y - a.y;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 ? Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2)) : 0;
+  const x = a.x + dx * t, y = a.y + dy * t;
+  return { point: { x, y }, distance: Math.hypot(point.x - x, point.y - y) };
+}
+function closestOnPolyline(coord: [number, number], line: [number, number][]) {
+  const originLat = coord[1];
+  const point = meterProject(coord, originLat);
+  let best = { point, distance: Infinity };
+  for (let i = 1; i < line.length; i += 1) {
+    const next = closestOnSegment(point, meterProject(line[i - 1], originLat), meterProject(line[i], originLat));
+    if (next.distance < best.distance) best = next;
+  }
+  return { coord: meterUnproject(best.point, originLat), distance: best.distance };
+}
+function closestOnRingToTarget(ring: [number, number][], target: [number, number]) {
+  const originLat = target[1];
+  const point = meterProject(target, originLat);
+  let best = { point, distance: Infinity };
+  for (let i = 1; i < ring.length; i += 1) {
+    const next = closestOnSegment(point, meterProject(ring[i - 1], originLat), meterProject(ring[i], originLat));
+    if (next.distance < best.distance) best = next;
+  }
+  return { coord: meterUnproject(best.point, originLat), distance: best.distance };
+}
+function ringDistanceToCoord(ring: [number, number][], coord: [number, number]) {
+  return closestOnRingToTarget(ring, coord).distance;
+}
+function nudgeAway(from: [number, number], awayFrom: [number, number], meters: number): [number, number] {
+  const originLat = from[1];
+  const a = meterProject(from, originLat), b = meterProject(awayFrom, originLat);
+  const d = Math.hypot(a.x - b.x, a.y - b.y);
+  if (!d) return from;
+  return meterUnproject({ x: a.x + ((a.x - b.x) / d) * meters, y: a.y + ((a.y - b.y) / d) * meters }, originLat);
+}
+function doorCoordinateFor(data: StrollData, business: Business): [number, number] {
+  const raw: [number, number] = [business.lon, business.lat];
+  if (!/\b9\s+Av\b/i.test(business.address)) return raw;
+  // Use the actual 9 Ave roadway centerline for frontage math, but keep the
+  // displayed marker on the storefront facade rather than in the street. On the
+  // desktop map the logo chip is wide enough that a sidewalk/road-centre nudge
+  // reads as a crowded row of labels sitting on 9 Ave instead of as door pins.
+  const street = closestOnPolyline(raw, NINTH_AVE_STRIP_CENTER_PATH);
+  if (street.distance > 115) return raw;
+
+  let closestRing: [number, number][] | null = null;
+  let closestRingDistance = Infinity;
+  data.businessBuildings.features.forEach((feature) => {
+    geometryPolygonRings(feature).forEach((ring) => {
+      const d = ringDistanceToCoord(ring, raw);
+      if (d < closestRingDistance) { closestRing = ring; closestRingDistance = d; }
+    });
+  });
+  if (closestRing && closestRingDistance <= 28) {
+    const facade = closestOnRingToTarget(closestRing, street.coord).coord;
+    return nudgeAway(facade, street.coord, 7);
+  }
+
+  if (street.distance > 20) {
+    const originLat = raw[1];
+    const rawM = meterProject(raw, originLat), streetM = meterProject(street.coord, originLat);
+    const keepFromStreetM = 20;
+    const ratio = Math.max(0, (street.distance - keepFromStreetM) / street.distance);
+    return meterUnproject({ x: rawM.x + (streetM.x - rawM.x) * ratio, y: rawM.y + (streetM.y - rawM.y) * ratio }, originLat);
+  }
+  return raw;
 }
 
 function buildWalkingRoute(data: StrollData, start: [number, number], finish: [number, number]): [number, number][] | null {
@@ -489,11 +612,13 @@ function buildWalkingRoute(data: StrollData, start: [number, number], finish: [n
     graph.push([]);
     return id;
   };
-  const addEdge = (a: [number, number], b: [number, number]) => {
-    const ai = addNode(a), bi = addNode(b);
-    const d = metersBetween(a, b);
+  const addEdgeIndexes = (ai: number, bi: number, d: number) => {
     graph[ai].push([bi, d]);
     graph[bi].push([ai, d]);
+  };
+  const addEdge = (a: [number, number], b: [number, number]) => {
+    const ai = addNode(a), bi = addNode(b);
+    addEdgeIndexes(ai, bi, metersBetween(a, b));
   };
 
   [data.streets, data.pathways, data.bike].forEach((collection) => {
@@ -504,38 +629,48 @@ function buildWalkingRoute(data: StrollData, start: [number, number], finish: [n
     });
   });
   if (!nodes.length) return null;
-  const nearest = (point: [number, number]) => {
-    let best = 0, bestD = Infinity;
-    nodes.forEach((node, index) => {
-      const d = metersBetween(point, node);
-      if (d < bestD) { best = index; bestD = d; }
-    });
-    return { index: best, distance: bestD };
-  };
-  const startNode = nearest(start), finishNode = nearest(finish);
-  if (startNode.distance > 220 || finishNode.distance > 220) return null;
+
+  const accessCandidates = (point: [number, number]) => nodes
+    .map((node, index) => ({ index, distance: metersBetween(point, node) }))
+    .filter((candidate) => candidate.distance <= ROUTE_ACCESS_RADIUS_M)
+    .sort((a, b) => a.distance - b.distance)
+    .slice(0, ROUTE_ACCESS_CANDIDATES);
+
+  const startCandidates = accessCandidates(start);
+  const finishCandidates = accessCandidates(finish);
+  if (!startCandidates.length || !finishCandidates.length) return null;
+
+  const startIndex = nodes.length;
+  nodes.push(start);
+  graph.push([]);
+  startCandidates.forEach(({ index, distance }) => addEdgeIndexes(startIndex, index, distance));
+
+  const finishIndex = nodes.length;
+  nodes.push(finish);
+  graph.push([]);
+  finishCandidates.forEach(({ index, distance }) => addEdgeIndexes(finishIndex, index, distance));
 
   const dist = new Array(nodes.length).fill(Infinity);
   const prev = new Array<number>(nodes.length).fill(-1);
   const seen = new Set<number>();
-  dist[startNode.index] = 0;
+  dist[startIndex] = 0;
   while (seen.size < nodes.length) {
     let u = -1, best = Infinity;
     for (let i = 0; i < dist.length; i += 1) {
       if (!seen.has(i) && dist[i] < best) { best = dist[i]; u = i; }
     }
-    if (u === -1 || u === finishNode.index) break;
+    if (u === -1 || u === finishIndex) break;
     seen.add(u);
     graph[u].forEach(([v, weight]) => {
       const next = dist[u] + weight;
       if (next < dist[v]) { dist[v] = next; prev[v] = u; }
     });
   }
-  if (!Number.isFinite(dist[finishNode.index])) return null;
+  if (!Number.isFinite(dist[finishIndex])) return null;
   const path: [number, number][] = [];
-  for (let at = finishNode.index; at !== -1; at = prev[at]) path.push(nodes[at]);
+  for (let at = finishIndex; at !== -1; at = prev[at]) path.push(nodes[at]);
   path.reverse();
-  return [start, ...path, finish];
+  return path;
 }
 
 export default function StrollCityApp({ city }: { city: CityConfig }) {
@@ -554,6 +689,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const lastFitKeyRef = useRef("");
 
   const [data, setData] = useState<StrollData | null>(null);
+  const [menus, setMenus] = useState<Record<string, BusinessMenu>>({});
+  const [detailView, setDetailView] = useState<"profile" | "menu">("profile");
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<SidebarTab>("explore");
   const [browseCategory, setBrowseCategory] = useState<Category | null>(null);
@@ -570,6 +707,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [showBeyond, setShowBeyond] = useState(true);
   const [showEvents, setShowEvents] = useState(true);
   const [showOpenNow, setShowOpenNow] = useState(true);
+  const [showOnlyOpen, setShowOnlyOpen] = useState(false);
   const [showTrees, setShowTrees] = useState(true);
   const [neighbourhoodSaved, setNeighbourhoodSaved] = useState(true);
   const [welcome, setWelcome] = useState(false);
@@ -582,12 +720,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [pinLayoutTick, setPinLayoutTick] = useState(0);
   const [mobileLayout, setMobileLayout] = useState(false);
   const [activeCategories, setActiveCategories] = useState<Set<Category>>(() => categoriesFromUrl());
-  const [sheetStop, setSheetStop] = useState<"peek" | "half" | "full">("peek");
+  const [sheetStop, setSheetStop] = useState<"peek" | "half" | "profile" | "full">("peek");
   const sheetRef = useRef<HTMLDivElement | null>(null);
   const tabsRef = useRef<HTMLDivElement | null>(null);
   const mobileTopRef = useRef<HTMLDivElement | null>(null);
   const locateRef = useRef<HTMLButtonElement | null>(null);
-  const sheetStopsRef = useRef({ peek: 132, half: 340, full: 560 });
+  const sheetStopsRef = useRef({ peek: 132, half: 340, profile: 440, full: 560 });
   const sheetHeightRef = useRef(132);
   const suppressStripRefitCountRef = useRef(0);
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -633,7 +771,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           fetch(`${apiBase}/attractions`).then((r) => r.ok ? r.json() : null),
         ]).then(([businesses, apiEvents, apiAttractions]) => {
           const next = { ...json };
-          if (businesses.status === "fulfilled" && Array.isArray(businesses.value?.data)) next.businesses = businesses.value.data;
+          if (businesses.status === "fulfilled" && Array.isArray(businesses.value?.data)) {
+            const staticById = new Map(json.businesses.map((business) => [business.id, business]));
+            next.businesses = businesses.value.data.map((business: Business) => ({
+              ...business,
+              phone: business.phone ?? staticById.get(business.id)?.phone ?? null,
+            }));
+          }
           if (apiEvents.status === "fulfilled" && Array.isArray(apiEvents.value?.data)) next.events = apiEvents.value.data;
           if (apiAttractions.status === "fulfilled" && Array.isArray(apiAttractions.value?.data)) next.attractions = apiAttractions.value.data;
           return next;
@@ -642,6 +786,17 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       .then((json: StrollData) => setData(json))
       .catch((fetchError) => setError(fetchError instanceof Error ? fetchError.message : "Could not load map data"));
     return () => window.clearTimeout(welcomeTimer);
+  }, [city]);
+
+  useEffect(() => {
+    if (city.status !== "live" || !city.dataPath) return;
+    fetch(`${BASE_PATH}/data/stroll-menus.json`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((json: StrollMenus | null) => {
+        if (!json?.menus?.length) return;
+        setMenus(Object.fromEntries(json.menus.map((menu) => [menu.businessId, menu])));
+      })
+      .catch(() => setMenus({}));
   }, [city]);
 
   const events = useMemo(() => (data ? data.events?.length ? data.events : fallbackEvents(data) : []), [data]);
@@ -677,7 +832,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const visibleBusinesses = useMemo(() => {
     const terms = searchTerms(query);
     /* mobile browses via multi-select chips; desktop drills into one category at a time */
-    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)));
+    const list = queryMatches.filter((b) => activeCategories.has(b.category) && (browseCategory ? b.category === browseCategory : true) && (showOpenNow || !isOpenNow(b.hours, nowMinutes)) && (!showOnlyOpen || isOpenNow(b.hours, nowMinutes) === true));
     /* While searching, keep the best semantic matches first; otherwise use the requested browse sort. */
     const rank = (b: Business) => (terms.length ? -businessSearchScore(b, terms) : 0);
     return [...list].sort((a, b) => {
@@ -690,7 +845,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return a.name.localeCompare(b.name);
     });
-  }, [queryMatches, browseCategory, query, sortMode, activeCategories, showOpenNow, nowMinutes]);
+  }, [queryMatches, browseCategory, query, sortMode, activeCategories, showOpenNow, showOnlyOpen, nowMinutes]);
 
   /* Distinguishes "nothing matches your text" from "your chips are hiding the matches", which need different fixes. */
   const hiddenByCategories = queryMatches.length - visibleBusinesses.length;
@@ -705,7 +860,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
 
   const openCategory = (key: Category) => { setBrowseCategory(key); setQuery(""); };
-  const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setSelected(null); };
+  const backToBrowse = () => { setBrowseCategory(null); setQuery(""); setDetailView("profile"); setSelected(null); };
   const setCategories = (next: Set<Category>) => {
     setActiveCategories(next);
     replaceCategoryUrl(next);
@@ -742,6 +897,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const closeSelected = () => {
     const camera = snapshotCamera();
     suppressStripRefitCountRef.current = 3;
+    setDetailView("profile");
     setSelected(null);
     setSelectedAttraction(null);
     clearWalkingRoute();
@@ -774,9 +930,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const bounds = new LngLatBounds(data.stripBounds[0], data.stripBounds[1]);
     const cam = map.cameraForBounds(bounds, { padding: computePadding() });
     if (!cam || cam.center === undefined) return;
-    const zoom = Math.max(cam.zoom ?? MIN_STRIP_ZOOM, MIN_STRIP_ZOOM);
-    if (animate) map.easeTo({ center: cam.center, zoom, duration: 700 });
-    else map.jumpTo({ center: cam.center, zoom });
+    const zoom = Math.max(cam.zoom ?? MIN_STRIP_ZOOM, mobileLayout ? 16.28 : MIN_STRIP_ZOOM);
+    const center = mobileLayout ? data.center : cam.center;
+    if (animate) map.easeTo({ center, zoom, duration: 700 });
+    else map.jumpTo({ center, zoom });
   };
   const flyCity = () => mapRef.current?.flyTo({ center: city.center, zoom: 11.2, duration: 900 });
 
@@ -799,7 +956,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const drawWalkingRoute = (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
     const start: [number, number] = [location.lon, location.lat];
-    const finish: [number, number] = [target.lon, target.lat];
+    const finish: [number, number] = doorCoordinateFor(data, target);
     const networkCoords = buildWalkingRoute(data, start, finish);
     const coords = networkCoords ?? [start, finish];
     const distanceM = coords.reduce((total, coord, index) => index === 0 ? total : total + metersBetween(coords[index - 1], coord), 0);
@@ -841,9 +998,16 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   };
   const showMeHowToGetHere = (business: Business) => {
     searchRef.current?.blur();
+    setDetailView("profile");
     setSelectedAttraction(null);
-    setSelected(business);
-    if (mobileLayout && sheetStop !== "peek") snapSheet("peek");
+    if (mobileLayout) {
+      // Navigation mode should give the map back immediately; the destination
+      // identity remains on the map via the route target logo/name marker.
+      setSelected(null);
+      if (sheetStop !== "peek") snapSheet("peek");
+    } else {
+      setSelected(business);
+    }
     if (userLocation) drawWalkingRoute(userLocation, business);
     else startLocationWatch((location) => drawWalkingRoute(location, business));
   };
@@ -864,6 +1028,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     return {
       peek: Math.min(150, Math.round(avail * 0.26)),
       half: Math.round(avail * 0.56),
+      profile: Math.round(avail * 0.70),
       full: Math.round(avail - 56),
     };
   };
@@ -884,7 +1049,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       setPinLayoutTick((t) => t + 1);
     }, animate ? 340 : 0);
   };
-  const snapSheet = (stop: "peek" | "half" | "full") => {
+  const snapSheet = (stop: "peek" | "half" | "profile" | "full") => {
     setSheetStop(stop);
     applySheetHeight(sheetStopsRef.current[stop], true);
   };
@@ -911,7 +1076,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const drag = sheetDragRef.current;
     if (!drag) return;
     const stops = sheetStopsRef.current;
-    const order: Array<"peek" | "half" | "full"> = ["peek", "half", "full"];
+    const order: Array<"peek" | "half" | "profile" | "full"> = ["peek", "half", "profile", "full"];
     if (drag.moved < 6) {
       const i = order.indexOf(sheetStop);
       snapSheet(order[(i + 1) % order.length]);
@@ -936,15 +1101,17 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     })() : null;
     if (preserveCamera) suppressStripRefitCountRef.current = 3;
     setSelectedAttraction(null);
+    setDetailView("profile");
     clearWalkingRoute();
     setSelected(business);
     const slug = normalize(business.name).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
     window.history.replaceState(null, "", `?biz=${slug}`);
-    if (options.moveMap !== false) mapRef.current?.panTo([business.lon, business.lat], { duration: 500 });
-    if (mobileLayout && sheetStop === "peek") snapSheet("half");
+    if (options.moveMap !== false && data) mapRef.current?.panTo(doorCoordinateFor(data, business), { duration: 500 });
+    if (mobileLayout && (sheetStop === "peek" || sheetStop === "half")) snapSheet("profile");
     if (camera && map) restoreCameraAfterLayout(camera);
   };
   const goFeatured = (attraction: Attraction) => {
+    setDetailView("profile");
     setSelected(null);
     setSelectedAttraction(attraction);
     setHint(null);
@@ -961,13 +1128,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       setHint(`${n.name} will be added to stroll.city after Inglewood.`);
     }
   };
-  const openPortal = (business: Business) => { window.location.href = `/portal?business=${encodeURIComponent(business.id)}`; };
 
   useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") setSelected(null); };
+    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") closeSelected(); };
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, []);
+  });
 
   /* ----------------
      On-screen keyboard: without this the keyboard covers the sheet, so you type a query and cannot see a single result.
@@ -999,18 +1165,28 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, mobileLayout]);
 
+  /* Business profiles should open tall enough to be useful immediately, including
+     deep links that may select the business before the mobile-layout effect settles. */
+  useEffect(() => {
+    if (!mobileLayout || !selected) return;
+    if (sheetStop === "peek" || sheetStop === "half") snapSheet("profile");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mobileLayout, selected]);
+
   /* ---------------- mobile sheet: (re)compute stops on layout changes, keep the sheet's real height in sync ---------------- */
   useEffect(() => {
     if (!mobileLayout) return;
     const sync = () => {
       sheetStopsRef.current = computeSheetStops();
-      applySheetHeight(sheetStopsRef.current[sheetStop], false);
+      const targetStop = selected && (sheetStop === "peek" || sheetStop === "half") ? "profile" : sheetStop;
+      if (targetStop !== sheetStop) setSheetStop(targetStop);
+      applySheetHeight(sheetStopsRef.current[targetStop], false);
     };
     sync();
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mobileLayout, data]);
+  }, [mobileLayout, data, selected]);
 
   /* ---------------- responsive stage sync (ResizeObserver, mirrors syncStage()) ---------------- */
   useEffect(() => {
@@ -1211,13 +1387,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const zoom = map.getZoom();
     const dotZoomMax = 16.2;
     const logoZoomMin = 15.95;
-    const labelZoomMin = mobileLayout ? 17.15 : 16.65;
-    const labelDensityLimit = mobileLayout ? 18 : 28;
+    const labelZoomMin = mobileLayout ? 17.55 : 16.95;
     // Keep the pin presentation stable while panning. Using the current map bounds here made
     // labels appear/disappear at the same zoom as businesses crossed the viewport edge, which
     // shuffled nearby logos even though the user had only dragged the map.
     const filteredBusinessCount = items.length;
-    const forceLabels = showNames && Boolean(walkingRoute || filteredBusinessCount <= labelDensityLimit || zoom >= labelZoomMin);
+    // Keep business names hidden until the user intentionally zooms into storefront depth.
+    // Density/search should not promote labels early; it made the default strip view read like a list.
+    const forceLabels = showNames && Boolean(walkingRoute || zoom >= labelZoomMin);
     const forceLogos = forceLabels || zoom >= logoZoomMin || filteredBusinessCount <= 64;
     const birdseyeDotsOnly = !forceLogos || (zoom < dotZoomMax && filteredBusinessCount > 64 && !walkingRoute && !selected);
     const order = [...items].sort((a, b) => (b.id === selected?.id ? 1 : 0) - (a.id === selected?.id ? 1 : 0));
@@ -1262,24 +1439,41 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       }
       return offsets;
     };
+    const keepsMarkerOffStreet = (doorPoint: { x: number; y: number }, streetPoint: { x: number; y: number } | null, offset: [number, number]) => {
+      if (!streetPoint) return true;
+      const awayX = doorPoint.x - streetPoint.x;
+      const awayY = doorPoint.y - streetPoint.y;
+      const awayLen = Math.hypot(awayX, awayY);
+      if (awayLen < 1) return true;
+      const projectedAfterOffset = ((doorPoint.x + offset[0] - streetPoint.x) * awayX + (doorPoint.y + offset[1] - streetPoint.y) * awayY) / awayLen;
+      return projectedAfterOffset >= awayLen - 2;
+    };
     const measureCanvas = document.createElement("canvas").getContext("2d");
     const chipWidth = (name: string, mode: PinMode) => {
       if (mode === "dot") return 9;
-      if (mode === "logo") return 32;
-      if (measureCanvas) measureCanvas.font = "400 12.5px Outfit, sans-serif";
-      const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 7;
-      return 66 + Math.min(140, w);
+      if (mode === "logo") return mobileLayout ? 20 : 26;
+      if (measureCanvas) measureCanvas.font = "500 10.5px Outfit, sans-serif";
+      const w = measureCanvas ? measureCanvas.measureText(name).width : name.length * 6;
+      return 43 + Math.min(100, w);
     };
-    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? 32 : 38;
+    const chipHeight = (mode: PinMode) => mode === "dot" ? 9 : mode === "logo" ? (mobileLayout ? 20 : 26) : 30;
     const maxSkewFor = (mode: PinMode) => {
       if (walkingRoute) return 0;
-      if (mode === "dot") return 16;
-      if (mode === "logo") return 44;
+      if (mobileLayout) {
+        if (mode === "dot") return 8;
+        if (mode === "logo") return 12;
+        return 36;
+      }
+      if (mode === "dot") return 12;
+      if (mode === "logo") return 20;
       return 96;
     };
 
     order.forEach((biz) => {
-      const cp = map.project([biz.lon, biz.lat]);
+      const doorCoord = doorCoordinateFor(data, biz);
+      const cp = map.project(doorCoord);
+      const rawCoord: [number, number] = [biz.lon, biz.lat];
+      const streetPoint = /\b9\s+Av\b/i.test(biz.address) ? map.project(closestOnPolyline(rawCoord, NINTH_AVE_STRIP_CENTER_PATH).coord) : null;
       const isSel = biz.id === selected?.id;
       const desiredMode: PinMode = isSel || forceLabels ? "label" : birdseyeDotsOnly ? "dot" : "logo";
       const fallbackModes: PinMode[] = [desiredMode];
@@ -1288,7 +1482,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const w = chipWidth(biz.name, mode);
         const h = chipHeight(mode);
         const candidates = offsetCandidates(maxSkewFor(mode));
-        const offset = candidates.find((candidate) => remainsReadable(rectFor(cp, w, h, candidate), mode));
+        const offset = candidates.find((candidate) => keepsMarkerOffStreet(cp, streetPoint, candidate) && remainsReadable(rectFor(cp, w, h, candidate), mode));
         if (offset) {
           placed = { mode, offset, rect: rectFor(cp, w, h, offset) };
           break;
@@ -1326,7 +1520,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           if (el.dataset.wasCompact === "true") pinEl?.classList.add(styles.compact);
           if (biz.id !== selected?.id) rowElsRef.current.get(biz.id)?.classList.remove(styles.rowActive);
         });
-        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat([biz.lon, biz.lat]).addTo(map);
+        const marker = new maplibregl.Marker({ element: el, anchor: "center", offset: s.offset ?? [0, 0] }).setLngLat(doorCoordinateFor(data, biz)).addTo(map);
         pinMarkersRef.current.push(marker);
         pinElsRef.current.set(biz.id, el);
       }
@@ -1354,60 +1548,95 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
   const enabledNeighbourhood = data?.neighbourhoods.find((n) => n.enabled);
 
-  /* shared between the desktop drawer and the mobile bottom sheet's detail state */
-  const renderDetail = (biz: Business) => (
+  const renderMenuDetail = (biz: Business, menu: BusinessMenu) => (
     <>
-      <div className={styles.hero}>
-        <img src={biz.photo} alt="" />
-        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
-        <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
-          {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
-        </div>
-      </div>
-      <div className={styles.dBody}>
+      <button className={`${styles.heroClose} ${styles.profileBack}`} onClick={() => setDetailView("profile")}>Back to {biz.name} profile</button>
+      <div className={`${styles.dBody} ${styles.menuBody}`}>
         <div>
-          <div className={styles.dTitle}>{biz.name}</div>
+          <div className={styles.dTitle}>{biz.name} menu</div>
           <div className={styles.dSub}>
-            <span className={styles.pill} style={{ color: categoryInk(city, biz.category), borderColor: `${categoryInk(city, biz.category)}33`, background: `${categoryColor(city, biz.category)}1A` }}>
-              <CatIcon d={CAT_ICON[biz.category]} size={12} color={categoryInk(city, biz.category)} /> {CAT_LABEL[biz.category]}
-            </span>
-            {(() => { const open = isOpenNow(biz.hours, nowMinutes); return open === true ? <span className={styles.openBadge}>Open now</span> : open === false ? <span className={styles.closedBadge}>Closed</span> : null; })()}
-            {biz.claim_status === "claimed" && <span className={`${styles.pill} ${styles.pillClaimed}`}>✓ Claimed</span>}
+            <span className={styles.pill}>{menu.itemCount ? `${menu.itemCount} menu items` : "Official menu source"}</span>
+            {menu.needsHumanReview && <span>Being confirmed with the business</span>}
           </div>
         </div>
-        <div className={styles.dActions}>
-          {walkingRoute?.target.id !== biz.id && (
-            <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
-              <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
-            </button>
-          )}
-          {biz.website && (
-            <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
-              <Globe size={16} />
-            </button>
-          )}
-          <button className={`${styles.btn} ${styles.btnGhost}`} title="Save" onClick={() => setHint("Save places to a walking list from the profile panel.")}>
-            <ExternalLink size={16} />
-          </button>
-        </div>
-        {geoError && <div className={styles.routeNote}>{geoError}</div>}
-        <p className={styles.blurb}>{biz.blurb}</p>
-        <div className={styles.kv}>
-          <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
-          <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
-          <div className={styles.kvRow}><span className={styles.k}>Source</span><span className={`${styles.v} ${styles.mono}`} style={{ fontSize: 11.5, color: "var(--ink-2)" }}>{biz.source}</span></div>
-        </div>
-        <div>
-          <div className={styles.lbl} style={{ marginBottom: 8 }}>Good for</div>
-          <div className={styles.rowTags}>{biz.highlights.map(([icon, text]) => <span key={text} className={styles.tag}>{icon} {text}</span>)}</div>
-        </div>
-        <button className={styles.claimcard} onClick={() => openPortal(biz)}>
-          <Briefcase size={20} color="var(--accent-ink)" style={{ flex: "0 0 auto" }} />
-          <p><b>Is this your business?</b>Claim the listing to edit hours, add photos and publish events.</p>
-        </button>
+        {menu.itemCount > 0 ? (
+          <div className={styles.menuSections}>
+            {menu.sections.map((section) => (
+              <section className={styles.menuSection} key={section.name}>
+                <h3>{section.name}</h3>
+                <div className={styles.menuItems}>
+                  {section.items.map((item, index) => (
+                    <div className={styles.menuItem} key={`${section.name}-${item.name}-${index}`}>
+                      <div className={styles.menuItemTop}>
+                        <strong>{item.name}</strong>
+                        {item.price && <span>{item.price}</span>}
+                      </div>
+                      {item.description && <p>{item.description}</p>}
+                    </div>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.blurb}>Menu item details are not ready yet. Use the official menu/source link below for now.</p>
+        )}
+        {menu.sourceUrls.length > 0 && (
+          <div className={styles.menuSources}>
+            <span>Official menu/source</span>
+            <a href={menu.sourceUrls[0]} target="_blank" rel="noopener noreferrer">Open source</a>
+          </div>
+        )}
       </div>
     </>
   );
+
+  /* shared between the desktop drawer and the mobile bottom sheet's detail state */
+  const renderDetail = (biz: Business) => {
+    const menu = menus[biz.id];
+    if (detailView === "menu" && menu) return renderMenuDetail(biz, menu);
+
+    return (
+      <>
+        <button className={styles.heroClose} onClick={closeSelected}>Back to the street</button>
+        <div className={styles.hero}>
+          <img src={biz.photo} alt="" />
+          <div className={styles.glyphLg} style={{ background: categoryColor(city, biz.category), color: onCategory(city, biz.category) }}>
+            {biz.logo_url ? <img src={biz.logo_url} alt="" /> : biz.mono}
+          </div>
+        </div>
+        <div className={styles.dBody}>
+          <div className={styles.dActions}>
+            {walkingRoute?.target.id !== biz.id && (
+              <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
+                <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
+              </button>
+            )}
+            {menu && (
+              <button className={`${styles.btn} ${styles.btnGhost}`} title={`${biz.name} menu`} onClick={() => setDetailView("menu")}>
+                <Utensils size={16} /> Menu
+              </button>
+            )}
+            {biz.website && (
+              <button className={`${styles.btn} ${styles.btnGhost}`} title="Website" onClick={() => window.open(biz.website!, "_blank", "noopener,noreferrer")}>
+                <Globe size={16} />
+              </button>
+            )}
+          </div>
+          {geoError && <div className={styles.routeNote}>{geoError}</div>}
+          <p className={styles.blurb}>{biz.blurb}</p>
+          <div className={styles.kv}>
+            <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
+            <div className={styles.kvRow}><span className={styles.k}>Hours</span><span className={styles.v}>{biz.hours}</span></div>
+            <div className={styles.kvRow}>
+              <span className={styles.k}>Phone</span>
+              <span className={styles.v}>{biz.phone ? <a className={styles.phoneLink} href={phoneHref(biz.phone)}>{biz.phone}</a> : "Not listed yet"}</span>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  };
 
   const renderAttractionDetail = (attraction: Attraction) => (
     <>
@@ -1546,6 +1775,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                 </Link>
               </div>
 
+              <div className={styles.stripPrompt}>
+                <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
+                  <span>The strip in Inglewood</span>
+                  <span className={styles.stripPromptHint}>zoom into the map to explore the doors on the street</span>
+                </button>
+              </div>
+
               <div className={styles.catControls}>
                 <button className={styles.catControl} onClick={() => setCategories(new Set(allCategories))}>All</button>
                 <button className={styles.catControl} onClick={() => setCategories(new Set())}>None</button>
@@ -1553,11 +1789,19 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               <div className={styles.catlist}>
                 {allCategories.map((key) => {
                   const on = activeCategories.has(key);
+                  const color = categoryColor(city, key);
+                  const ink = categoryInk(city, key);
                   return (
-                  <button key={key} className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`} onClick={() => toggleActiveCategory(key)} aria-pressed={on}>
-                    <span className={styles.catCheck} style={on ? { background: categoryColor(city, key) } : undefined}>{on ? "✓" : ""}</span>
-                    <span className={styles.ccTile} style={{ background: wash(categoryColor(city, key), 38, 16), color: categoryInk(city, key) }}>
-                      <CatIcon d={CAT_ICON[key]} size={20} color={categoryInk(city, key)} />
+                  <button
+                    key={key}
+                    className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`}
+                    onClick={() => toggleActiveCategory(key)}
+                    aria-pressed={on}
+                    style={{ background: wash(color, on ? 96 : 48, on ? 38 : 18), borderColor: `${color}${on ? "b0" : "65"}` }}
+                  >
+                    <span className={styles.catCheck} style={on ? { background: color } : undefined}>{on ? "✓" : ""}</span>
+                    <span className={styles.ccTile} style={{ color: ink }}>
+                      <CatIcon d={CAT_ICON[key]} size={20} color={ink} />
                     </span>
                     <span className={styles.ccBody}>
                       <span className={styles.ccName}>{CAT_LABEL[key]}</span>
@@ -1651,7 +1895,10 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             <div className={styles.navigationHud}>
               <div className={styles.navigationStatus} aria-label="Navigation mode is active">
                 <span className={styles.navigationStatusDot} />
-                <span>Navigation mode</span>
+                <span className={styles.navigationStatusText}>
+                  <span>Navigation mode</span>
+                  <span className={styles.navigationRouteMeta}>{routeSummary(walkingRoute)}</span>
+                </span>
               </div>
               <div className={styles.navigationHudActions}>
                 <button onClick={showFullRoute}>Show full route</button>
@@ -1714,6 +1961,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
             {showInfo && <div className={`${styles.cardUi} ${styles.infoNote}`}>Building footprints and business licences: City of Calgary open data. Basemap © OpenStreetMap contributors, © CARTO.</div>}
           </div>
 
+          <button
+            className={`${styles.cardUi} ${styles.openOnlyMap} ${showOnlyOpen ? styles.openOnlyMapOn : ""}`}
+            onClick={() => setShowOnlyOpen((v) => !v)}
+            aria-pressed={showOnlyOpen}
+          >
+            <span className={styles.openOnlyCheck}>{showOnlyOpen ? "✓" : ""}</span>
+            <span>show only businesses currently open</span>
+          </button>
+
           {hint && (
             <div className={`${styles.cardUi} ${styles.hint}`}>
               <span><b>Stroll hint</b>&nbsp;{hint}</span>
@@ -1729,6 +1985,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
 
           {mobileLayout && tab === "explore" && !walkingRoute && (
             <div ref={mobileTopRef} className={styles.mTop}>
+              <div className={styles.mStripPrompt}>
+                <button type="button" className={styles.stripPromptTab} onClick={() => { setExtent("strip"); fitStrip(true); }}>
+                  <span>The strip in Inglewood</span>
+                  <span className={styles.stripPromptHint}>zoom into the map to explore the doors on the street</span>
+                </button>
+              </div>
               <label className={`${styles.mSearch} ${styles.glass}`}>
                 <Search size={16} color="var(--ink-3)" />
                 <input
@@ -1758,13 +2020,31 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               {/* The chip row is noise once you are typing, and it costs the results list a row of height. */}
               {!query.trim() && (
                 <div className={styles.mChipRow}>
-                  {allCategories.map((key) => (
-                    <button key={key} className={styles.mChip} aria-pressed={activeCategories.has(key)} onClick={() => toggleActiveCategory(key)}>
-                      <i style={{ background: categoryColor(city, key) }} />{MOBILE_CAT_LABEL[key]}
-                    </button>
-                  ))}
+                  {allCategories.map((key) => {
+                    const on = activeCategories.has(key);
+                    const color = categoryColor(city, key);
+                    return (
+                      <button
+                        key={key}
+                        className={styles.mChip}
+                        aria-pressed={on}
+                        onClick={() => toggleActiveCategory(key)}
+                        style={{ background: wash(color, on ? 108 : 52, on ? 46 : 20), borderColor: `${color}${on ? "bf" : "70"}`, color: categoryInk(city, key) }}
+                      >
+                        {on ? <span className={styles.mChipCheck}>✓</span> : <span className={styles.mChipCheck} aria-hidden="true" />}{MOBILE_CAT_LABEL[key]}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
+              <button
+                className={`${styles.cardUi} ${styles.openOnlyMap} ${styles.mOpenOnlyMap} ${showOnlyOpen ? styles.openOnlyMapOn : ""}`}
+                onClick={() => setShowOnlyOpen((v) => !v)}
+                aria-pressed={showOnlyOpen}
+              >
+                <span className={styles.openOnlyCheck}>{showOnlyOpen ? "✓" : ""}</span>
+                <span>show only businesses currently open</span>
+              </button>
             </div>
           )}
 
@@ -1792,7 +2072,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         )}
       </div>
 
-      {mobileLayout && (
+      {mobileLayout && (selected || selectedAttraction || tab === "events") && (
         <div
           ref={sheetRef}
           className={styles.mSheet}
@@ -1809,24 +2089,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
           >
             <i />
           </button>
-
-          <div className={styles.mSheetHead}>
-            {selected ? (
-              <>
-                <button className={styles.backToStreet} onClick={closeSelected} title="Back to the street">Back to the street</button>
-                <span className={styles.mSheetTitle}>Profile</span>
-              </>
-            ) : tab === "events" ? (
-              <span className={styles.mSheetTitle}>{events.length} event{events.length === 1 ? "" : "s"}</span>
-            ) : (
-              <>
-                <span className={styles.mSheetTitle}>{visibleBusinesses.length} place{visibleBusinesses.length === 1 ? "" : "s"}</span>
-                <button className={styles.mSort} onClick={() => setSortMode((m) => (m === "az" ? "claimed" : "az"))}>
-                  {sortMode === "az" ? "A–Z" : "Claimed first"} <ChevronDown size={11} />
-                </button>
-              </>
-            )}
-          </div>
 
           <div className={styles.mSheetBody}>
             {selected ? (
