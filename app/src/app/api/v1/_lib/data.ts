@@ -267,6 +267,63 @@ async function writeOverlay<T extends { id: string }>(city: string, kind: Overla
   await fs.writeFile(path.join(dir, `${kind}.json`), `${JSON.stringify(rows, null, 2)}\n`);
 }
 
+
+/* ---------------------------------------------------------------------------
+   Business search
+
+   The map app carries a richer scorer of its own (synonyms, typo tolerance,
+   ranking) because it has to rank as you type. This is the server's plainer
+   cousin, for the documented ?q= endpoint and the admin tool. It only has to
+   agree with the map on what *matches* — not on the order.
+
+   It was a substring test over name, address and category, which meant every
+   plural missed: "record" found Recordland and "records" found nothing. And
+   because it never looked at the blurb, "brewery" and "guitar" matched nothing
+   at all despite both being on the street.
+--------------------------------------------------------------------------- */
+
+/* Fold accents so "cafe" reaches "Café" — typing é on a phone is a long-press
+   most people will not do. */
+function foldSearch(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function searchTokens(value: string) {
+  return foldSearch(value).split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+/* Crude, deliberately: enough that a plural finds its singular and the other way
+   round, without dragging in a stemmer. */
+function stem(token: string) {
+  if (token.length > 4 && token.endsWith("ies")) return `${token.slice(0, -3)}y`;
+  if (token.length > 3 && token.endsWith("es")) return token.slice(0, -2);
+  if (token.length > 3 && token.endsWith("s")) return token.slice(0, -1);
+  return token;
+}
+
+function searchHaystack(business: Business) {
+  const highlights = Array.isArray(business.highlights)
+    ? business.highlights.map((entry) => (Array.isArray(entry) ? entry.join(" ") : String(entry ?? ""))).join(" ")
+    : "";
+  return searchTokens([
+    business.name,
+    business.address,
+    business.category,
+    business.blurb ?? "",
+    highlights,
+  ].join(" "));
+}
+
+function matchesAllTerms(business: Business, terms: string[]) {
+  const tokens = searchHaystack(business);
+  const stems = tokens.map(stem);
+  return terms.every((term) => {
+    const root = stem(term);
+    return tokens.some((token) => token.includes(term))
+      || stems.some((token) => token === root || token.includes(root));
+  });
+}
+
 export async function listBusinesses(city: string, data: StrollData, category?: string | null, query?: string | null) {
   const overlay = await readOverlay<Partial<Business> & { id: string }>(city, "businesses");
   const byId = new Map(data.businesses.map((business) => [business.id, { claim_status: "unclaimed" as const, plan_tier: "free" as const, ...business }]));
@@ -277,8 +334,8 @@ export async function listBusinesses(city: string, data: StrollData, category?: 
   let businesses = [...byId.values()];
   if (category) businesses = businesses.filter((business) => business.category === category);
   if (query) {
-    const needle = query.toLowerCase().trim();
-    businesses = businesses.filter((business) => `${business.name} ${business.address} ${business.category}`.toLowerCase().includes(needle));
+    const terms = searchTokens(query);
+    if (terms.length) businesses = businesses.filter((business) => matchesAllTerms(business, terms));
   }
   return { businesses, source: overlay.length ? "runtime-overlay" as const : "static-json" as const };
 }
