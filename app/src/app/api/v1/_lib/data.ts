@@ -504,6 +504,11 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
 
   const claimantEmail = sanitizeString(payload.claimant_email, 180).toLowerCase();
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(claimantEmail)) throw new Error("A valid claimant_email is required");
+  /* A claim with no name cannot be reviewed — there is nobody to check against the
+     business. The email was already required; the name was not, so claims could
+     arrive anonymous. */
+  const claimantName = sanitizeString(payload.claimant_name, 120);
+  if (claimantName.length < 2) throw new Error("A claimant_name is required");
 
   const tier = payload.plan_tier === "stroll_plus" || payload.plan_tier === "stroll" ? payload.plan_tier : "free";
   const logo = typeof payload.logo_data_url === "string" && payload.logo_data_url.startsWith("data:image/") ? payload.logo_data_url.slice(0, 350_000) : undefined;
@@ -518,7 +523,7 @@ export async function createBusinessClaim(city: string, data: StrollData, payloa
   const claim: BusinessClaim = {
     id,
     business_id: businessId,
-    claimant_name: sanitizeString(payload.claimant_name, 120),
+    claimant_name: claimantName,
     claimant_email: claimantEmail,
     claimant_phone: sanitizeString(payload.claimant_phone, 40),
     business_role: sanitizeString(payload.business_role, 80),
@@ -1074,6 +1079,9 @@ export async function setHuntSessionAvatar(city: string, sessionId: string, avat
 
 export type HuntGroup = {
   id: string;
+  /* Short, shoutable join code. A race is a group people arrive at separately, so
+     it needs something you can read out across a room. */
+  code: string;
   city: string;
   hunt_id: string;
   hunt_slug: string;
@@ -1091,6 +1099,25 @@ const GROUP_LIMIT = 200;
 
 function newGroupId() {
   return `grp-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+/* No vowels, no 0/O/1/I — nobody has to spell out which one it was. */
+const CODE_ALPHABET = "BCDFGHJKLMNPQRSTVWXYZ23456789";
+async function newGroupCode(city: string) {
+  const groups = await readOverlay<HuntGroup>(city, "hunt_groups");
+  const taken = new Set(groups.map((row) => row.code));
+  for (let attempt = 0; attempt < 40; attempt += 1) {
+    const code = Array.from({ length: 5 }, () => CODE_ALPHABET[Math.floor(Math.random() * CODE_ALPHABET.length)]).join("");
+    if (!taken.has(code)) return code;
+  }
+  /* Ludicrously unlikely; fall back to something certainly unique. */
+  return `R${Date.now().toString(36).toUpperCase().slice(-5)}`;
+}
+
+export async function getHuntGroupByCode(city: string, code: string) {
+  const groups = await readOverlay<HuntGroup>(city, "hunt_groups");
+  const wanted = String(code ?? "").trim().toUpperCase();
+  return groups.find((row) => row.code === wanted) ?? null;
 }
 
 export async function getHuntGroup(city: string, id: string) {
@@ -1122,6 +1149,7 @@ export async function createHuntGroup(
      starting at different ones. */
   const themed = stopsForTheme(data, hunt, payload.theme, stops);
   const groupId = newGroupId();
+  const groupCode = await newGroupCode(city);
   const now = new Date().toISOString();
 
   const sessions: HuntSession[] = teamNames.map((teamName, index) => {
@@ -1174,6 +1202,7 @@ export async function createHuntGroup(
 
   const group: HuntGroup = {
     id: groupId,
+    code: groupCode,
     city,
     hunt_id: hunt.id,
     hunt_slug: hunt.slug,
@@ -1303,4 +1332,57 @@ export async function checkHuntAnswer(city: string, sessionId: string, stopId: s
   ));
   const saved = await saveSession(city, recomputeSession({ ...session, stops }));
   return { correct: true, session: saved };
+}
+
+/* A race is a group whose teams turn up separately: the host creates the slots,
+   each team claims one with the code. Standings come from the same session rows
+   the punch cards write to, so the board cannot drift from the walk. */
+export async function claimRaceTeam(city: string, code: string, teamName: string) {
+  const group = await getHuntGroupByCode(city, code);
+  if (!group) return null;
+  const sessions = await readSessions(city);
+  const byId = new Map(sessions.map((session) => [session.id, session]));
+  const teams = group.session_ids.map((id) => byId.get(id)).filter(Boolean) as HuntSession[];
+  const wanted = sanitizeString(teamName, 80);
+
+  /* Rejoining is the common case — a phone dies, someone opens the link again. */
+  const existing = wanted
+    ? teams.find((team) => team.team_name.toLowerCase() === wanted.toLowerCase())
+    : undefined;
+  if (existing) return { group, session: existing, rejoined: true };
+
+  /* Otherwise take the first slot nobody has named yet. */
+  const open = teams.find((team) => /^Team \d+$/.test(team.team_name));
+  if (!open) return { group, session: null, rejoined: false };
+  const named = { ...open, team_name: wanted || open.team_name, updated_at: new Date().toISOString() };
+  await saveSession(city, named);
+  return { group, session: named, rejoined: false };
+}
+
+export async function raceLeaderboard(city: string, code: string) {
+  const group = await getHuntGroupByCode(city, code);
+  if (!group) return null;
+  const board = await hydrateHuntGroup(city, group);
+  const ranked = [...board.teams].sort((a, b) => {
+    /* Finished teams first, fastest to slowest; then whoever has found most. */
+    if (a.status !== b.status) return a.status === "finished" ? -1 : 1;
+    if (a.status === "finished") return a.stroll_seconds - b.stroll_seconds;
+    if (b.solved_count !== a.solved_count) return b.solved_count - a.solved_count;
+    return a.stroll_seconds - b.stroll_seconds;
+  });
+  return {
+    code: group.code,
+    group_id: group.id,
+    hunt_name: group.hunt_name,
+    team_count: board.team_count,
+    standings: ranked.map((team, index) => ({
+      rank: index + 1,
+      team_name: team.team_name,
+      solved_count: team.solved_count,
+      total_stops: team.total_stops,
+      status: team.status,
+      stroll_seconds: team.stroll_seconds,
+      finished_at: team.finished_at,
+    })),
+  };
 }
