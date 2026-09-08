@@ -12,7 +12,8 @@
     "enrich:business-media": "node scripts/enrich-business-media.mjs",
     "enrich:business-google": "node scripts/enrich-business-google-places.mjs",
     "keys:create": "node scripts/create-api-key.mjs",
-    "import:hunt-riddles": "node scripts/import-hunt-riddles.mjs"
+    "import:hunt-riddles": "node scripts/import-hunt-riddles.mjs",
+    "test:app": "node scripts/test-app.mjs"
   },
   "dependencies": {
     "@mapbox/mapbox-gl-draw": "^1.5.1",

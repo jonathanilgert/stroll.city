@@ -108,7 +108,6 @@ export default function HuntGame({
 }) {
   const [session, setSession] = useState(initial);
   const [viewing, setViewing] = useState<number | null>(null);
-  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [here, setHere] = useState<{ lon: number; lat: number } | null>(null);
   const [locationDenied, setLocationDenied] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -137,7 +136,10 @@ export default function HuntGame({
      through finished stops must not offer the camera again as if it were live. */
   const isCurrent = viewIndex >= cursor && !done;
   const hasPhoto = Boolean(stop?.photo_url);
-  const isRevealed = Boolean(stop && (revealed[stop.stop_id] || stop.state === "solved"));
+  /* Clue three names the place, so the reveal is simply "you have all three".
+     There is no free shortcut: a button that handed over the answer for nothing
+     would make the third clue — ten minutes in a race — never worth taking. */
+  const isRevealed = Boolean(stop && (stop.clues.length >= 3 || stop.state === "solved"));
 
   useEffect(() => {
     if (done) return;
@@ -494,16 +496,20 @@ export default function HuntGame({
                     <strong className={styles.solveStepTitle}>Need a clue?</strong>
                     {stop.clues_used >= 3 ? (
                       <span className={styles.solveStepNote}>
-                        All three clues are open. Still stuck? Use <em>Stuck?</em> below to see the answer — the stop still counts.
+                        <Lightbulb size={12} />
+                        That was the last clue — it names the place. Head over and take the photo; the stop still counts.
                       </span>
                     ) : (
                       <>
                         <button className={styles.clueBtn} onClick={() => void takeClue()} disabled={busy}>
-                          Give me a clue <ArrowRight size={15} />
+                          {stop.clues_used === 2 ? "Show me the answer" : "Give me a clue"} <ArrowRight size={15} />
                         </button>
                         <span className={styles.solveStepNote}>
                           <Lightbulb size={12} />
-                          {3 - stop.clues_used} left{session.mode === "race" ? ` · adds ${[2, 5, 10][stop.clues_used]} min` : ""}
+                          {stop.clues_used === 2
+                            ? "The third clue names the place"
+                            : `${3 - stop.clues_used} left`}
+                          {session.mode === "race" ? ` · adds ${[2, 5, 10][stop.clues_used]} min` : ""}
                         </span>
                       </>
                     )}
@@ -540,13 +546,6 @@ export default function HuntGame({
                   <Camera size={15} />{hasPhoto ? "Retake photo" : "Take photo"}
                   {(isCurrent || hasPhoto) && <input type="file" accept="image/*" capture="environment" onChange={(event) => void uploadPhoto(event.target.files?.[0])} disabled={busy} />}
                 </label>
-                <button
-                  className={`${styles.photoBtn} ${styles.stuckBtn} ${isRevealed && !hasPhoto ? styles.stuckOn : ""}`}
-                  onClick={() => setRevealed((rows) => ({ ...rows, [stop.stop_id]: !rows[stop.stop_id] }))}
-                  disabled={stop.state === "solved"}
-                >
-                  {isRevealed ? "Hide" : "Stuck?"}
-                </button>
               </div>
             </div>
           </div>

@@ -14,6 +14,11 @@
   doors. Stops with no matching business record are kept with their own
   coordinates rather than dropped — a real door the licence data has not caught up
   with is still a real door.
+
+  The third clue is the way out: it names the place. Clue one nudges, clue two
+  narrows the block, clue three tells you. The curated file writes three hints, so
+  the answer is appended to the last one here rather than hand-edited into the
+  source — that way a re-import cannot quietly drop it.
 */
 import fs from "node:fs";
 import path from "node:path";
@@ -32,6 +37,26 @@ const stops = Array.isArray(incoming) ? incoming : incoming.stops;
 if (!Array.isArray(stops) || !stops.length) {
   console.error("No stops found in the riddle file.");
   process.exit(1);
+}
+
+/* "1226A 9 Av Se" → "1226A 9 Ave SE" */
+function tidyAddress(value) {
+  return String(value ?? "")
+    .replace(/\bAv\b/gi, "Ave")
+    .replace(/\b(SE|SW|NE|NW)\b/gi, (m) => m.toUpperCase())
+    .trim();
+}
+
+/* Clue three has to leave you knowing the answer. Keep the curated hint, then say
+   it outright — and do not repeat the name if the hint already used it. */
+function revealingClue(hint, name, address) {
+  const tail = address ? `${name} — ${tidyAddress(address)}.` : `${name}.`;
+  const text = String(hint ?? "").trim();
+  if (text.toLowerCase().includes(String(name).toLowerCase())) {
+    return text.endsWith(".") ? text : `${text}.`;
+  }
+  const stem = text ? (text.endsWith(".") ? text : `${text}.`) : "";
+  return stem ? `${stem} The answer is ${tail}` : `The answer is ${tail}`;
 }
 
 const slugify = (value) => String(value).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -68,7 +93,7 @@ const huntStops = stops.map((stop) => {
     riddle: stop.riddle,
     clue_1: clues[0] ?? "",
     clue_2: clues[1] ?? "",
-    clue_3: clues[2] ?? "",
+    clue_3: revealingClue(clues[2], stop.name, stop.address),
     challenge: stop.challenge ?? "Take a proof photo at the stop.",
     difficulty: stop.difficulty ?? "medium",
     age_restricted: Boolean(stop.age_restricted),
@@ -96,14 +121,18 @@ data.huntStops = huntStops;
 data.hunts = hunts;
 fs.writeFileSync(dataPath, `${JSON.stringify(data, null, 2)}\n`);
 
-const spoilers = huntStops.filter((stop) => {
+/* Clue three is meant to name the answer; the first two are not. */
+const early = huntStops.filter((stop) => {
   const name = stop.name.toLowerCase();
-  return [stop.clue_1, stop.clue_2, stop.clue_3].some((clue) => clue.toLowerCase().includes(name));
+  return [stop.clue_1, stop.clue_2].some((clue) => clue.toLowerCase().includes(name));
 });
+const unrevealed = huntStops.filter((stop) => !stop.clue_3.toLowerCase().includes(stop.name.toLowerCase()));
 
 console.log(`Imported ${huntStops.length} stops into public/data/stroll-data.json`);
 console.log(`  matched to a business record: ${matched}`);
 console.log(`  kept with their own coordinates: ${orphans}`);
 console.log(`  by category: ${Object.entries(categories).sort((a, b) => b[1] - a[1]).map(([k, v]) => `${k} ${v}`).join(", ")}`);
-console.log(`  clues that name their own answer: ${spoilers.length}`);
-if (spoilers.length) console.log(`    ${spoilers.slice(0, 5).map((s) => s.id).join(", ")}`);
+console.log(`  clue 3 names the answer: ${huntStops.length - unrevealed.length}/${huntStops.length}`);
+if (unrevealed.length) console.log(`    ! not revealed: ${unrevealed.slice(0, 5).map((s) => s.id).join(", ")}`);
+console.log(`  clue 1 or 2 giving it away early: ${early.length}`);
+if (early.length) console.log(`    ! ${early.slice(0, 5).map((s) => s.id).join(", ")}`);

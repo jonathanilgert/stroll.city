@@ -299,9 +299,6 @@
 .photoBtn:hover { background: var(--paper); }
 .photoBtn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .photoBtnMuted { color: var(--ink-3); cursor: default; }
-.stuckBtn { flex: 0 0 auto; padding: 12px 16px; color: var(--ink-3); }
-.stuckBtn:disabled { opacity: .5; }
-.stuckOn { background: #FDF6E4; border-color: #F5E7C0; color: #8A6410; }
 
 /* the two numbered steps under the riddle: answer, then clue */
 .solveSteps { display: flex; flex-direction: column; gap: 10px; }
