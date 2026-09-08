@@ -245,6 +245,33 @@ await section("RACES", async () => {
   console.log(`  code ${code}: join, rejoin, full-race 409, leaderboard of ${lb?.data?.standings?.length}`);
 });
 
+await section("STOP ORDER", async () => {
+  /* Taking the photo before answering is the natural order standing at a door. It
+     once flipped the button to "Unlock next riddle" and let advance() mark the stop
+     solved, skipping the riddle entirely. */
+  const { json: s } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Order" } });
+  const id = s.data.id, first = s.data.stop_ids[0];
+  await uploadPhoto(id, first);
+  const { text } = await call(`/calgary/hunt/${id}`, { raw: true });
+  const view = screen(text);
+  if (view.stop !== 1) fail("order", `a photo alone moved the screen to stop ${view.stop}`);
+  if (view.cta !== "Answer the riddle to continue") fail("order", `a photo alone changed the cta to "${view.cta}"`);
+  const { json: after } = await call(`/api/v1/calgary/sessions/${id}`);
+  const row = after.data.stops.find((r) => r.stop_id === first);
+  if (row.state === "solved") fail("order", "a photo alone solved the stop");
+  if (row.name) fail("order", "a photo alone revealed the answer");
+
+  /* And the other way round: answering first must still ask for the photo. */
+  const { json: s2 } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Order 2" } });
+  const id2 = s2.data.id, first2 = s2.data.stop_ids[0];
+  await call(`/api/v1/calgary/sessions/${id2}/answer`, { method: "POST", body: { stop_id: first2, guess: STOP.get(first2).name } });
+  const { text: t2 } = await call(`/calgary/hunt/${id2}`, { raw: true });
+  const v2 = screen(t2);
+  if (v2.stop !== 1) fail("order", `answering moved the screen to stop ${v2.stop}`);
+  if (v2.cta !== "Photo at the door to continue") fail("order", `after answering the cta is "${v2.cta}"`);
+  console.log("  neither half alone advances the stop, in either order");
+});
+
 await section("VALIDATION", async () => {
   const { json: sess } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Edge" } });
   const id = sess.data.id, first = sess.data.stop_ids[0];

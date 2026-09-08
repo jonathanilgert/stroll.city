@@ -188,12 +188,15 @@ export default function HuntGame({
         return;
       }
       setSession(payload.data);
+      /* Pin the view: without this a progress post can hand the screen back to
+         "first incomplete" and move you off the stop you are standing at. */
+      setViewing(viewIndex);
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
-  }, [citySlug, elapsed, session.id, stop]);
+  }, [citySlug, elapsed, session.id, stop, viewIndex]);
 
   const uploadPhoto = async (file: File | undefined) => {
     if (!stop || !file) return;
@@ -264,10 +267,13 @@ export default function HuntGame({
 
   const takeClue = () => post({ action: "clue_revealed", clues_used: (stop?.clues_used ?? 0) + 1 });
 
-  /* The photo is the proof, so it is also what marks the stop solved. */
-  const advance = async () => {
-    if (done || !stop || !hasPhoto) return;
-    if (stop.state !== "solved") await post({ action: "stop_solved" });
+  /* Both halves or nothing. This used to post stop_solved itself when the riddle
+     was unanswered, which meant taking the photo first — the natural thing to do
+     standing at the door — turned the button into "Unlock next riddle" and skipped
+     the riddle entirely. Solving is the answer box's job now. */
+  const stopComplete = Boolean(stop && stop.state === "solved" && hasPhoto);
+  const advance = () => {
+    if (done || !stopComplete) return;
     /* Step forward by one. Handing the view back to "first incomplete" used to throw
        you backwards onto a stop you had already walked past. */
     setViewing(Math.min(viewIndex + 1, session.total_stops - 1));
@@ -557,10 +563,10 @@ export default function HuntGame({
               See your postcard <ChevronRight size={15} />
             </Link>
           ) : (
-            <button className={styles.cta} onClick={() => void advance()} disabled={!hasPhoto || busy}>
-              {hasPhoto
+            <button className={styles.cta} onClick={advance} disabled={!stopComplete || busy}>
+              {stopComplete
                 ? viewIndex === session.total_stops - 1 ? "Finish the hunt" : "Unlock next riddle"
-                : stop.state === "solved" ? "Photo at the door to continue" : "Answer the riddle to continue"}
+                : stop.state !== "solved" ? "Answer the riddle to continue" : "Photo at the door to continue"}
               <ChevronRight size={15} />
             </button>
           )}
