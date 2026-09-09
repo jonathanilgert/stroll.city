@@ -272,6 +272,41 @@ await section("STOP ORDER", async () => {
   console.log("  neither half alone advances the stop, in either order");
 });
 
+await section("CONCURRENCY", async () => {
+  /* Answering and uploading land together whenever someone taps both in the same
+     second. Both are read-modify-write on one overlay file, and without a queue the
+     second write was built on a snapshot taken before the first — the answer would
+     vanish and the stop would ask to be solved again. */
+  let lost = 0;
+  for (let trial = 0; trial < 5; trial += 1) {
+    const { json: s } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: `Race ${trial}` } });
+    const id = s.data.id, first = s.data.stop_ids[0];
+    await Promise.all([
+      call(`/api/v1/calgary/sessions/${id}/progress`, { method: "POST", body: { stop_id: first, action: "clue_revealed", clues_used: 1 } }),
+      call(`/api/v1/calgary/sessions/${id}/answer`, { method: "POST", body: { stop_id: first, guess: STOP.get(first).name } }),
+      uploadPhoto(id, first),
+    ]);
+    const { json } = await call(`/api/v1/calgary/sessions/${id}`);
+    const row = json.data.stops[0];
+    if (row.state !== "solved" || !row.photo_url) {
+      lost += 1;
+      fail("concurrency", `simultaneous writes lost one: state=${row.state} photo=${row.photo_url ? "yes" : "no"}`);
+    }
+  }
+  if (!lost) console.log("  simultaneous clue, answer and photo all survive");
+
+  /* Two phones reaching for the same race slot must not both get it. */
+  const { json: race } = await call("/api/v1/calgary/races", { method: "POST", body: { team_count: 2 } });
+  const code = race.data.code;
+  const [a, b] = await Promise.all([
+    call(`/api/v1/races/${code}/join`, { method: "POST", body: { team_name: "First" } }),
+    call(`/api/v1/races/${code}/join`, { method: "POST", body: { team_name: "Second" } }),
+  ]);
+  const ids = [a.json?.data?.session_id, b.json?.data?.session_id].filter(Boolean);
+  if (new Set(ids).size !== ids.length) fail("concurrency", "two teams were given the same punch card");
+  else console.log("  simultaneous race joins get different punch cards");
+});
+
 await section("VALIDATION", async () => {
   const { json: sess } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Edge" } });
   const id = sess.data.id, first = sess.data.stop_ids[0];

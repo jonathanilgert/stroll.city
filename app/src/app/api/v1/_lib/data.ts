@@ -251,6 +251,27 @@ type OverlayKind =
   | "hunt_sessions"
   | "hunt_groups";
 
+/* Overlay writes are read-modify-write on a single JSON file. Two requests landing
+   together — answering a riddle while the proof photo uploads, which is exactly what
+   happens when someone taps both in the same second — each read the same snapshot
+   and the second write erased the first. The answer would vanish and the stop would
+   ask to be solved again.
+
+   So every mutation of a given file queues behind the last one. Keyed per file, so
+   a photo for one city cannot hold up a claim for another. This is a single-process
+   guard: it is the right shape for the runtime overlay, and the Postgres tables in
+   supabase/schema.sql are where real concurrency will be handled. */
+const overlayQueues = new Map<string, Promise<unknown>>();
+
+async function withOverlayLock<T>(city: string, kind: OverlayKind, run: () => Promise<T>): Promise<T> {
+  const key = `${city}:${kind}`;
+  const previous = overlayQueues.get(key) ?? Promise.resolve();
+  /* Chain off the previous turn but never inherit its rejection. */
+  const next = previous.catch(() => undefined).then(run);
+  overlayQueues.set(key, next.catch(() => undefined));
+  return next;
+}
+
 async function readOverlay<T>(city: string, kind: OverlayKind): Promise<T[]> {
   try {
     const raw = await fs.readFile(path.join(runtimeRoot, city, `${kind}.json`), "utf8");
@@ -869,15 +890,32 @@ async function readSessions(city: string) {
 }
 
 async function saveSession(city: string, session: HuntSession) {
-  const rows = await readSessions(city);
-  const next = [session, ...rows.filter((row) => row.id !== session.id)].slice(0, SESSION_LIMIT);
-  await writeOverlay(city, "hunt_sessions", next);
-  return session;
+  return withOverlayLock(city, "hunt_sessions", async () => {
+    const rows = await readSessions(city);
+    const next = [session, ...rows.filter((row) => row.id !== session.id)].slice(0, SESSION_LIMIT);
+    await writeOverlay(city, "hunt_sessions", next);
+    return session;
+  });
 }
 
 export async function getHuntSession(city: string, id: string) {
   const rows = await readSessions(city);
   return rows.find((row) => row.id === id) ?? null;
+}
+
+/* Read, change, write — with the file held for the whole turn, so a concurrent
+   write cannot be built on a snapshot this one is about to replace. */
+async function updateSession(city: string, id: string, change: (session: HuntSession) => HuntSession | null) {
+  return withOverlayLock(city, "hunt_sessions", async () => {
+    const rows = await readSessions(city);
+    const current = rows.find((row) => row.id === id);
+    if (!current) return null;
+    const next = change(current);
+    if (!next) return null;
+    const merged = [next, ...rows.filter((row) => row.id !== id)].slice(0, SESSION_LIMIT);
+    await writeOverlay(city, "hunt_sessions", merged);
+    return next;
+  });
 }
 
 export async function createHuntSession(
@@ -982,10 +1020,9 @@ export async function recordHuntProgress(
   sessionId: string,
   payload: { stop_id?: string; action?: string; clues_used?: number; seconds?: number; elapsed_seconds?: number },
 ) {
-  const session = await getHuntSession(city, sessionId);
-  if (!session) return null;
   const stopId = sanitizeString(payload.stop_id, 120);
   const action = (payload.action ?? "stop_solved") as HuntProgressAction;
+  return updateSession(city, sessionId, (session) => {
   const index = session.stops.findIndex((stop) => stop.stop_id === stopId);
   if (index === -1) return null;
 
@@ -1003,7 +1040,8 @@ export async function recordHuntProgress(
   });
 
   const elapsed = Math.max(0, Math.floor(Number(payload.elapsed_seconds ?? session.elapsed_seconds) || 0));
-  return saveSession(city, recomputeSession({ ...session, stops, elapsed_seconds: elapsed }));
+  return recomputeSession({ ...session, stops, elapsed_seconds: elapsed });
+  });
 }
 
 /* Called by the photo upload once the file is on disk, so the session — not the
@@ -1013,14 +1051,14 @@ export async function attachHuntPhoto(
   sessionId: string,
   payload: { stop_id: string; photo_id: string; photo_url: string },
 ) {
-  const session = await getHuntSession(city, sessionId);
-  if (!session) return null;
-  const index = session.stops.findIndex((stop) => stop.stop_id === payload.stop_id);
-  if (index === -1) return null;
-  const stops = session.stops.map((stop, i) => (
-    i === index ? { ...stop, photo_url: payload.photo_url, photo_id: payload.photo_id } : stop
-  ));
-  return saveSession(city, recomputeSession({ ...session, stops }));
+  return updateSession(city, sessionId, (session) => {
+    const index = session.stops.findIndex((stop) => stop.stop_id === payload.stop_id);
+    if (index === -1) return null;
+    const stops = session.stops.map((stop, i) => (
+      i === index ? { ...stop, photo_url: payload.photo_url, photo_id: payload.photo_id } : stop
+    ));
+    return recomputeSession({ ...session, stops });
+  });
 }
 
 /* The session plus the stop content it points at — what the dashboard renders.
@@ -1063,9 +1101,9 @@ export function hydrateHuntSession(session: HuntSession, data: StrollData, optio
 
 /* The team photo, uploaded during onboarding once the session exists. */
 export async function setHuntSessionAvatar(city: string, sessionId: string, avatarUrl: string) {
-  const session = await getHuntSession(city, sessionId);
-  if (!session) return null;
-  return saveSession(city, { ...session, avatar_url: avatarUrl, updated_at: new Date().toISOString() });
+  return updateSession(city, sessionId, (session) => (
+    { ...session, avatar_url: avatarUrl, updated_at: new Date().toISOString() }
+  ));
 }
 
 /* ---------------------------------------------------------------------------
@@ -1197,8 +1235,10 @@ export async function createHuntGroup(
     };
   });
 
-  const existing = await readSessions(city);
-  await writeOverlay(city, "hunt_sessions", [...sessions, ...existing].slice(0, SESSION_LIMIT));
+  await withOverlayLock(city, "hunt_sessions", async () => {
+    const existing = await readSessions(city);
+    await writeOverlay(city, "hunt_sessions", [...sessions, ...existing].slice(0, SESSION_LIMIT));
+  });
 
   const group: HuntGroup = {
     id: groupId,
@@ -1215,8 +1255,10 @@ export async function createHuntGroup(
     created_at: now,
     updated_at: now,
   };
-  const groups = await readOverlay<HuntGroup>(city, "hunt_groups");
-  await writeOverlay(city, "hunt_groups", [group, ...groups.filter((row) => row.id !== group.id)].slice(0, GROUP_LIMIT));
+  await withOverlayLock(city, "hunt_groups", async () => {
+    const groups = await readOverlay<HuntGroup>(city, "hunt_groups");
+    await writeOverlay(city, "hunt_groups", [group, ...groups.filter((row) => row.id !== group.id)].slice(0, GROUP_LIMIT));
+  });
   return { group, sessions };
 }
 
@@ -1318,20 +1360,21 @@ export function guessMatchesName(guess: string, name: string) {
 }
 
 export async function checkHuntAnswer(city: string, sessionId: string, stopId: string, guess: string, data: StrollData) {
-  const session = await getHuntSession(city, sessionId);
-  if (!session) return null;
-  const entry = session.stops.find((stop) => stop.stop_id === stopId);
-  if (!entry) return null;
   const content = (data.huntStops ?? []).find((stop) => stop.id === stopId);
   const correct = Boolean(content && guessMatchesName(guess, content.name));
-  if (!correct) return { correct: false, session };
-  const stops = session.stops.map((stop) => (
-    stop.stop_id === stopId
-      ? { ...stop, state: "solved" as const, solved_at: stop.solved_at ?? new Date().toISOString() }
-      : stop
-  ));
-  const saved = await saveSession(city, recomputeSession({ ...session, stops }));
-  return { correct: true, session: saved };
+  const saved = await updateSession(city, sessionId, (session) => {
+    const entry = session.stops.find((stop) => stop.stop_id === stopId);
+    if (!entry) return null;
+    if (!correct) return session;
+    const stops = session.stops.map((stop) => (
+      stop.stop_id === stopId
+        ? { ...stop, state: "solved" as const, solved_at: stop.solved_at ?? new Date().toISOString() }
+        : stop
+    ));
+    return recomputeSession({ ...session, stops });
+  });
+  if (!saved) return null;
+  return { correct, session: saved };
 }
 
 /* A race is a group whose teams turn up separately: the host creates the slots,
@@ -1340,23 +1383,30 @@ export async function checkHuntAnswer(city: string, sessionId: string, stopId: s
 export async function claimRaceTeam(city: string, code: string, teamName: string) {
   const group = await getHuntGroupByCode(city, code);
   if (!group) return null;
-  const sessions = await readSessions(city);
-  const byId = new Map(sessions.map((session) => [session.id, session]));
-  const teams = group.session_ids.map((id) => byId.get(id)).filter(Boolean) as HuntSession[];
   const wanted = sanitizeString(teamName, 80);
 
-  /* Rejoining is the common case — a phone dies, someone opens the link again. */
-  const existing = wanted
-    ? teams.find((team) => team.team_name.toLowerCase() === wanted.toLowerCase())
-    : undefined;
-  if (existing) return { group, session: existing, rejoined: true };
+  /* Finding the free slot and taking it has to be one turn. Done separately, two
+     phones joining at the same moment both saw the same slot open and both were
+     handed the same punch card. */
+  return withOverlayLock(city, "hunt_sessions", async () => {
+    const rows = await readSessions(city);
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    const teams = group.session_ids.map((id) => byId.get(id)).filter(Boolean) as HuntSession[];
 
-  /* Otherwise take the first slot nobody has named yet. */
-  const open = teams.find((team) => /^Team \d+$/.test(team.team_name));
-  if (!open) return { group, session: null, rejoined: false };
-  const named = { ...open, team_name: wanted || open.team_name, updated_at: new Date().toISOString() };
-  await saveSession(city, named);
-  return { group, session: named, rejoined: false };
+    /* Rejoining is the common case — a phone dies, someone opens the link again. */
+    const existing = wanted
+      ? teams.find((team) => team.team_name.toLowerCase() === wanted.toLowerCase())
+      : undefined;
+    if (existing) return { group, session: existing, rejoined: true };
+
+    /* Otherwise take the first slot nobody has named yet. */
+    const open = teams.find((team) => /^Team \d+$/.test(team.team_name));
+    if (!open) return { group, session: null, rejoined: false };
+    const named: HuntSession = { ...open, team_name: wanted || open.team_name, updated_at: new Date().toISOString() };
+    const merged = [named, ...rows.filter((row) => row.id !== named.id)].slice(0, SESSION_LIMIT);
+    await writeOverlay(city, "hunt_sessions", merged);
+    return { group, session: named, rejoined: false };
+  });
 }
 
 export async function raceLeaderboard(city: string, code: string) {
