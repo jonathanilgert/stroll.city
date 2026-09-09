@@ -9,7 +9,7 @@ export async function GET(_request: Request, context: Context) {
   if (!data) return error(404, "City not found");
 
   const result = await listAttractions(city, data);
-  return envelope(city, result.attractions, result.source, result.attractions.length);
+  return envelope(city, result.attractions, result.source, result.attractions.length, "public");
 }
 
 export async function POST(request: Request, context: Context) {

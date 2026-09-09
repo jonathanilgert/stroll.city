@@ -36,7 +36,7 @@ export default function GroupBoard({ citySlug, group: initial }: { citySlug: str
   /* The organiser leaves this open on a phone while everyone walks, so it refreshes
      itself rather than asking them to pull down. */
   const refresh = useCallback(async () => {
-    const payload = await fetch(`/api/v1/${citySlug}/groups/${group.id}`)
+    const payload = await fetch(`/api/v1/${citySlug}/groups/${group.id}`, { cache: "no-store" })
       .then((response) => response.json())
       .catch(() => null) as { ok?: boolean; data?: BoardGroup } | null;
     if (payload?.ok && payload.data) setGroup(payload.data);

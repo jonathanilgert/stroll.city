@@ -307,6 +307,32 @@ await section("CONCURRENCY", async () => {
   else console.log("  simultaneous race joins get different punch cards");
 });
 
+await section("CACHING", async () => {
+  /* Live session state must never be cacheable. It used to go out as
+     "public, max-age=60", so after uploading a photo the client re-read its session
+     and the browser answered from a copy taken before the riddle was answered — the
+     photo vanished and the stop asked to be solved again. "public" also meant a
+     shared cache could serve one team's session, name and email included, to
+     someone else. */
+  const { json: s } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Cache" } });
+  const live = [
+    `/api/v1/calgary/sessions/${s.data.id}`,
+    `/api/v1/calgary/sessions/${s.data.id}/postcard`,
+  ];
+  for (const p of live) {
+    const res = await fetch(BASE + p);
+    const cc = res.headers.get("cache-control") ?? "";
+    if (!cc.includes("no-store")) fail("caching", `${p} is cacheable: "${cc}"`);
+    if (cc.includes("public")) fail("caching", `${p} is marked public — private session data`);
+  }
+  /* Reference data is still allowed to cache. */
+  const ref = await fetch(`${BASE}/api/v1/calgary/businesses`);
+  if (!(ref.headers.get("cache-control") ?? "").includes("public")) {
+    fail("caching", "reference data lost its caching");
+  }
+  console.log("  session state is no-store; reference data still caches");
+});
+
 await section("VALIDATION", async () => {
   const { json: sess } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Edge" } });
   const id = sess.data.id, first = sess.data.stop_ids[0];

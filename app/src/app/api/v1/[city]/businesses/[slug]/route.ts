@@ -10,7 +10,7 @@ export async function GET(_request: Request, context: Context) {
 
   const business = await getBusiness(city, data, slug);
   if (!business) return error(404, "Business not found");
-  return envelope(city, publicBusiness(business), business.logo_url || business.claim_status === "pending" ? "runtime-overlay" : "static-json");
+  return envelope(city, publicBusiness(business), business.logo_url || business.claim_status === "pending" ? "runtime-overlay" : "static-json", undefined, "public");
 }
 
 export async function PATCH(request: Request, context: Context) {
@@ -38,5 +38,5 @@ export async function PATCH(request: Request, context: Context) {
 
   const updatedData = await loadCityData(city);
   const updated = updatedData ? await getBusiness(city, updatedData, business.id) : null;
-  return envelope(city, updated ?? { ...business, ...patch }, "runtime-overlay");
+  return envelope(city, updated ?? { ...business, ...patch }, "runtime-overlay", undefined, "public");
 }

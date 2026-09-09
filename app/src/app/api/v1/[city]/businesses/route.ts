@@ -9,5 +9,5 @@ export async function GET(request: Request, context: Context) {
 
   const url = new URL(request.url);
   const result = await listBusinesses(city, data, url.searchParams.get("cat"), url.searchParams.get("q"));
-  return envelope(city, result.businesses.map(publicBusiness), result.source, result.businesses.length);
+  return envelope(city, result.businesses.map(publicBusiness), result.source, result.businesses.length, "public");
 }

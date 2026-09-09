@@ -7,9 +7,9 @@ export async function GET(_request: Request, context: Context) {
   const data = await loadCityData(city);
   if (!data) return error(404, "City not found");
 
-  if (kind === "bike") return envelope(city, data.bike, "static-json");
-  if (kind === "pathway" || kind === "pathways") return envelope(city, data.pathways, "static-json");
-  if (kind === "trees") return envelope(city, data.trees, "static-json", data.trees.length);
-  if (kind === "streets") return envelope(city, data.streets, "static-json");
+  if (kind === "bike") return envelope(city, data.bike, "static-json", undefined, "public");
+  if (kind === "pathway" || kind === "pathways") return envelope(city, data.pathways, "static-json", undefined, "public");
+  if (kind === "trees") return envelope(city, data.trees, "static-json", data.trees.length, "public");
+  if (kind === "streets") return envelope(city, data.streets, "static-json", undefined, "public");
   return error(404, "Layer kind must be bike, pathway, pathways, trees, or streets");
 }

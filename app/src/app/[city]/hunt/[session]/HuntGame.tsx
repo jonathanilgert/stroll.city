@@ -215,7 +215,7 @@ export default function HuntGame({
         setError(payload?.error ?? "Photo upload did not finish. Please try again.");
         return;
       }
-      const fresh = await fetch(`/api/v1/${citySlug}/sessions/${session.id}`).then((r) => r.json()).catch(() => null);
+      const fresh = await fetch(`/api/v1/${citySlug}/sessions/${session.id}`, { cache: "no-store" }).then((r) => r.json()).catch(() => null);
       if (fresh?.ok && fresh.data) {
         setSession(fresh.data);
         /* The stop is complete now, but moving on is the player's call — that is what
@@ -573,9 +573,13 @@ export default function HuntGame({
           <span className={styles.ctaNote}>
             {done
               ? `${session.total_stops} stops punched · postcard ready`
-              : hasPhoto
-                ? `${stop.name || `Stop ${viewIndex + 1}`} · photo added`
-                : `Take a photo at the door to unlock stop ${Math.min(cursor + 2, session.total_stops)}`}
+              : stopComplete
+                ? `${stop.name || `Stop ${viewIndex + 1}`} · answered and photographed`
+                : stop.state !== "solved"
+                  ? hasPhoto
+                    ? "Photo saved — now name the place to carry on"
+                    : "Answer the riddle, then take a photo at the door"
+                  : `Take a photo at the door to unlock stop ${Math.min(viewIndex + 2, session.total_stops)}`}
           </span>
         </div>
       </div>

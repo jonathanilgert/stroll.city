@@ -730,8 +730,28 @@ export async function patchAttraction(city: string, data: StrollData, id: string
   return updated;
 }
 
-export function envelope<T>(city: string, data: T, source: ApiEnvelope<T>["source"] = "static-json", count?: number): Response {
-  return Response.json({ ok: true, city, source, count, data }, { headers: { "cache-control": "public, max-age=60, stale-while-revalidate=300" } });
+/* Nothing is cached by default. This used to send "public, max-age=60" on every
+   response, live hunt sessions included: after uploading a proof photo the client
+   re-read its session and the browser answered from a copy taken up to a minute
+   earlier — before the riddle was answered — so the photo vanished from the screen
+   and the stop asked to be solved again. "public" was worse than stale, too: a
+   shared cache could have handed one team's session, with its name and email, to
+   somebody else.
+
+   Reference data that genuinely does not change per request opts in instead. */
+type CacheHint = "no-store" | "public";
+
+export function envelope<T>(
+  city: string,
+  data: T,
+  source: ApiEnvelope<T>["source"] = "static-json",
+  count?: number,
+  cache: CacheHint = "no-store",
+): Response {
+  const headers = cache === "public"
+    ? { "cache-control": "public, max-age=60, stale-while-revalidate=300" }
+    : { "cache-control": "no-store, must-revalidate" };
+  return Response.json({ ok: true, city, source, count, data }, { headers });
 }
 
 export function error(status: number, message: string): Response {

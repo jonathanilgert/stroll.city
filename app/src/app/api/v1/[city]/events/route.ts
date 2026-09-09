@@ -10,7 +10,7 @@ export async function GET(request: Request, context: Context) {
 
   const url = new URL(request.url);
   const result = await listEvents(city, data, url.searchParams.get("from"), url.searchParams.get("to"));
-  return envelope(city, result.events, result.source, result.events.length);
+  return envelope(city, result.events, result.source, result.events.length, "public");
 }
 
 export async function POST(request: Request, context: Context) {
