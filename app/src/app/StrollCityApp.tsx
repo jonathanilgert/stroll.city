@@ -644,6 +644,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const sheetStopsRef = useRef({ peek: 132, half: 340, profile: 440, full: 560 });
   const sheetHeightRef = useRef(132);
   const suppressStripRefitCountRef = useRef(0);
+  const walkingRouteRef = useRef<WalkingRoute | null>(null);
+  const routeFitModeRef = useRef<"fit" | "preserve" | null>(null);
+  const cameraRestoreTimersRef = useRef<number[]>([]);
+  const cameraRestoreFramesRef = useRef<number[]>([]);
+  const sheetSettleTimerRef = useRef<number | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [viewportHeight, setViewportHeight] = useState(0);
@@ -792,16 +797,26 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       return next;
     });
   };
+  const cancelScheduledCameraRestore = () => {
+    cameraRestoreTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+    cameraRestoreFramesRef.current.forEach((frame) => window.cancelAnimationFrame(frame));
+    cameraRestoreTimersRef.current = [];
+    cameraRestoreFramesRef.current = [];
+  };
   const restoreCameraAfterLayout = (camera: { center: [number, number]; zoom: number; bearing: number; pitch: number } | null) => {
     const map = mapRef.current;
     if (!camera || !map) return;
+    cancelScheduledCameraRestore();
     const restoreCamera = () => {
       map.jumpTo(camera);
       setPinLayoutTick((t) => t + 1);
     };
-    window.requestAnimationFrame(() => window.requestAnimationFrame(restoreCamera));
-    window.setTimeout(restoreCamera, 350);
-    window.setTimeout(restoreCamera, 900);
+    const firstFrame = window.requestAnimationFrame(() => {
+      const secondFrame = window.requestAnimationFrame(restoreCamera);
+      cameraRestoreFramesRef.current.push(secondFrame);
+    });
+    cameraRestoreFramesRef.current.push(firstFrame);
+    cameraRestoreTimersRef.current = [window.setTimeout(restoreCamera, 350), window.setTimeout(restoreCamera, 900)];
   };
 
   const snapshotCamera = () => {
@@ -810,6 +825,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     const center = map.getCenter();
     return { center: [center.lng, center.lat] as [number, number], zoom: map.getZoom(), bearing: map.getBearing(), pitch: map.getPitch() };
   };
+
+  useEffect(() => () => {
+    cancelScheduledCameraRestore();
+    if (sheetSettleTimerRef.current !== null) window.clearTimeout(sheetSettleTimerRef.current);
+  }, []);
 
   const closeSelected = () => {
     const camera = snapshotCamera();
@@ -870,11 +890,15 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     routeRequestRef.current?.abort();
     routeRequestRef.current = null;
     setRouting(false);
+    walkingRouteRef.current = null;
+    routeFitModeRef.current = null;
     setWalkingRoute(null);
     setRouteSource([]);
   };
   const drawWalkingRoute = async (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
+    cancelScheduledCameraRestore();
+    if (options.fitMap === false) routeFitModeRef.current = "preserve";
     const start: [number, number] = [location.lon, location.lat];
     const finish: [number, number] = doorCoordinateFor(data, target);
     routeRequestRef.current?.abort();
@@ -895,9 +919,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         throw new Error(body.error || "No pedestrian route was found");
       }
       const distanceM = body.data!.distance_m!;
-      setWalkingRoute({ target, coords, distanceM });
+      const shouldFitMap = options.fitMap !== false;
+      const nextRoute = { target, coords, distanceM };
+      walkingRouteRef.current = nextRoute;
+      routeFitModeRef.current = shouldFitMap ? "fit" : "preserve";
+      setWalkingRoute(nextRoute);
       setRouteSource(coords);
-      if (options.fitMap !== false) fitRoute(coords);
+      if (shouldFitMap) fitRoute(coords);
       if (mobileLayout) {
         setSelected(null);
         if (sheetStop !== "peek") snapSheet("peek");
@@ -908,6 +936,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     } catch (caught) {
       if (controller.signal.aborted) return;
       const message = caught instanceof Error ? caught.message : "Pedestrian directions are temporarily unavailable";
+      walkingRouteRef.current = null;
+      routeFitModeRef.current = null;
       setWalkingRoute(null);
       setRouteSource([]);
       setGeoError(message);
@@ -920,7 +950,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     }
   };
   const showFullRoute = () => {
-    if (walkingRoute?.coords.length) fitRoute(walkingRoute.coords);
+    if (walkingRoute?.coords.length) {
+      cancelScheduledCameraRestore();
+      routeFitModeRef.current = "fit";
+      fitRoute(walkingRoute.coords);
+    }
   };
   const startLocationWatch = (onLocated?: (location: UserLocation) => void) => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -985,7 +1019,14 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     el.style.height = `${px}px`;
     sheetHeightRef.current = px;
     if (locateRef.current) locateRef.current.style.bottom = `${px + 14}px`;
-    window.setTimeout(() => {
+    if (sheetSettleTimerRef.current !== null) window.clearTimeout(sheetSettleTimerRef.current);
+    sheetSettleTimerRef.current = window.setTimeout(() => {
+      sheetSettleTimerRef.current = null;
+      if (walkingRouteRef.current) {
+        if (routeFitModeRef.current === "fit") fitRoute(walkingRouteRef.current.coords);
+        setPinLayoutTick((t) => t + 1);
+        return;
+      }
       if (suppressStripRefitCountRef.current > 0) {
         suppressStripRefitCountRef.current -= 1;
         setPinLayoutTick((t) => t + 1);
@@ -1180,16 +1221,25 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       map.on("load", () => {
         map.addSource("trees", { type: "geojson", data: { type: "FeatureCollection", features: data.trees.map((c, i) => ({ type: "Feature", properties: { i }, geometry: { type: "Point", coordinates: c } })) } });
         map.addLayer({ id: "trees", type: "circle", source: "trees", minzoom: 14.5, paint: { "circle-color": "#57C07A", "circle-radius": ["interpolate", ["linear"], ["zoom"], 12, 0.6, 16, 2.2, 18, 4], "circle-opacity": 0.4, "circle-blur": 0.35 } });
-        fitStrip(false);
+        if (walkingRouteRef.current) {
+          setRouteSource(walkingRouteRef.current.coords);
+          if (routeFitModeRef.current === "fit") fitRoute(walkingRouteRef.current.coords);
+        } else {
+          fitStrip(false);
+        }
       });
 
       map.on("moveend", () => setPinLayoutTick((t) => t + 1));
       map.on("zoomend", () => setPinLayoutTick((t) => t + 1));
+      map.on("dragstart", cancelScheduledCameraRestore);
+      map.on("zoomstart", cancelScheduledCameraRestore);
       const onResize = () => { map.resize(); setPinLayoutTick((t) => t + 1); };
       window.addEventListener("resize", onResize);
 
       cleanup = () => {
         window.removeEventListener("resize", onResize);
+        cancelScheduledCameraRestore();
+        if (sheetSettleTimerRef.current !== null) window.clearTimeout(sheetSettleTimerRef.current);
         pinMarkersRef.current.forEach((m) => m.remove());
         eventMarkersRef.current.forEach((m) => m.remove());
         featMarkersRef.current.forEach(({ marker }) => marker.remove());
@@ -1224,7 +1274,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
       const key = `${wrap.clientWidth}x${wrap.clientHeight}`;
       if (key === lastFitKeyRef.current) return;
       lastFitKeyRef.current = key;
-      if (extent === "strip" && !selected) {
+      if (!selected && walkingRouteRef.current) {
+        if (routeFitModeRef.current === "fit") fitRoute(walkingRouteRef.current.coords);
+      } else if (extent === "strip" && !selected) {
         if (suppressStripRefitCountRef.current > 0) {
           suppressStripRefitCountRef.current -= 1;
         } else {
