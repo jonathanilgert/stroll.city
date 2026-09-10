@@ -333,6 +333,33 @@ await section("CACHING", async () => {
   console.log("  session state is no-store; reference data still caches");
 });
 
+await section("MAP DIRECTIONS", async () => {
+  /* Coordinates have to arrive with the answer. They used to be computed once at
+     page load, so solving a stop never moved the map until a full reload — the
+     screen said "it's Kent Of Inglewood" while still showing a search circle. */
+  const { json: s } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Directions" } });
+  const id = s.data.id, first = s.data.stop_ids[0];
+  const { json: before } = await call(`/api/v1/calgary/sessions/${id}`);
+  const hidden = before.data.stops[0];
+  if (hidden.lon !== null || hidden.lat !== null) fail("map", "an unsolved stop shipped its coordinates");
+  if (hidden.address) fail("map", "an unsolved stop shipped its address");
+
+  await call(`/api/v1/calgary/sessions/${id}/answer`, { method: "POST", body: { stop_id: first, guess: STOP.get(first).name } });
+  const { json: after } = await call(`/api/v1/calgary/sessions/${id}`);
+  const found = after.data.stops[0];
+  if (typeof found.lon !== "number" || typeof found.lat !== "number") fail("map", "a solved stop has no coordinates to point at");
+  if (!found.address) fail("map", "a solved stop has no address");
+
+  /* And the walk there follows streets rather than cutting through buildings. */
+  const { json: route } = await call(`/api/v1/calgary/route?from=-114.0455,51.0455&to=${found.lon},${found.lat}`);
+  if (!route?.data?.on_network) fail("map", "route did not follow the street network");
+  if (route.data.coordinates.length < 3) fail("map", `route is ${route.data.coordinates.length} points — a straight line`);
+  if (!route.data.heading) fail("map", "route has no heading to announce");
+  const { status: bad } = await call("/api/v1/calgary/route?from=nonsense");
+  if (bad !== 400) fail("map", `bad route input returned ${bad}, expected 400`);
+  console.log(`  coordinates arrive on solving; route is ${route.data.coordinates.length} points over streets`);
+});
+
 await section("VALIDATION", async () => {
   const { json: sess } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Edge" } });
   const id = sess.data.id, first = sess.data.stop_ids[0];

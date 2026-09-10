@@ -1089,6 +1089,7 @@ export async function attachHuntPhoto(
    Pass { reveal: true } from server-side callers that legitimately need the lot. */
 export function hydrateHuntSession(session: HuntSession, data: StrollData, options: { reveal?: boolean } = {}) {
   const stopsById = new Map((data.huntStops ?? []).map((stop) => [stop.id, stop]));
+  const businesses = new Map(data.businesses.map((business) => [business.id, business]));
   const solved = session.stops.filter((stop) => stop.state === "solved").length;
   return {
     ...session,
@@ -1099,12 +1100,21 @@ export function hydrateHuntSession(session: HuntSession, data: StrollData, optio
     stops: session.stops.map((stop, index) => {
       const content = stopsById.get(stop.stop_id);
       const earned = options.reveal || stop.state === "solved";
+      const business = content?.business_id ? businesses.get(content.business_id) : undefined;
+      const lon = business?.lon ?? content?.lon ?? null;
+      const lat = business?.lat ?? content?.lat ?? null;
       return {
         ...stop,
         index,
         name: earned ? content?.name ?? "Unknown stop" : "",
         business_id: earned ? content?.business_id ?? null : null,
         business_slug: earned ? content?.business_slug ?? null : null,
+        address: earned ? business?.address ?? content?.address ?? null : null,
+        /* Where it is, but only once it has been found. Before that the map gets a
+           search area instead — see the game screen. Sending this only at page load
+           meant solving a stop never moved the map until a reload. */
+        lon: earned ? lon : null,
+        lat: earned ? lat : null,
         riddle: content?.riddle ?? "",
         /* Clues are handed out one at a time; an unsolved stop never ships the
            clues the team has not yet paid the time for. */

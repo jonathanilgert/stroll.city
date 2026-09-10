@@ -367,3 +367,9 @@
 .pcardFound { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); padding: 3px 9px; border-radius: 999px;
   background: rgba(255, 255, 255, .96); border: 1.2px solid var(--brand); color: var(--brand); font-size: 8.5px; letter-spacing: .1em; }
 .pcardFoot { margin: 12px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); }
+
+/* a found stop: numbered pin with the name beside it */
+.stopPinWrap { display: inline-flex; align-items: center; gap: 6px; }
+.stopPinLabel { padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .96);
+  border: 1px solid var(--line-2); box-shadow: 0 2px 8px rgba(20, 22, 26, .18);
+  font-size: 12px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); white-space: nowrap; }

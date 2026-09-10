@@ -18,6 +18,10 @@ export type GameStop = {
   challenge: string;
   difficulty: string;
   photo_url: string | null;
+  /* Present only once the stop is solved — see hydrateHuntSession. */
+  address: string | null;
+  lon: number | null;
+  lat: number | null;
 };
 
 export type GameSession = {
@@ -168,9 +172,48 @@ export default function HuntGame({
     return () => navigator.geolocation.clearWatch(watch);
   }, []);
 
-  const target = point?.exact ?? point?.area ?? null;
-  const distance = here && target ? metresBetween(here, target) : null;
-  const heading = here && target ? compassFrom(here, target) : null;
+  /* The exact position arrives in the session the moment the stop is solved. The
+     page's own copy is only the coarse search area, fixed at load, so relying on it
+     meant the door never appeared until a reload. */
+  const exact = stop && typeof stop.lon === "number" && typeof stop.lat === "number"
+    ? { lon: stop.lon, lat: stop.lat }
+    : point?.exact ?? null;
+  const area = exact ? null : point?.area ?? null;
+  const target = exact ?? area;
+
+  /* Once the stop is found, say where you are going. Before that the street is all
+     you get — naming it would answer the riddle. */
+  const solvedName = stop?.state === "solved" ? stop.name : "";
+  const [route, setRoute] = useState<{ coordinates: [number, number][]; distance_m: number; minutes: number; heading: string | null } | null>(null);
+  const routedFrom = useRef<{ lon: number; lat: number; key: string } | null>(null);
+
+
+
+  /* Route along the streets rather than drawing a line through the buildings. Only
+     re-asked when the target changes or you have walked far enough for the answer to
+     differ, so a GPS tick every second does not hammer the endpoint. */
+  useEffect(() => {
+    if (!here || !target) {
+      /* Deferred: a synchronous setState in an effect body cascades a second render
+         before the first has painted. */
+      const clear = window.setTimeout(() => setRoute(null), 0);
+      return () => window.clearTimeout(clear);
+    }
+    const key = `${target.lon},${target.lat}`;
+    const last = routedFrom.current;
+    if (last && last.key === key && metresBetween(last, here) < 25) return;
+    routedFrom.current = { ...here, key };
+    const controller = new AbortController();
+    fetch(`/api/v1/${citySlug}/route?from=${here.lon},${here.lat}&to=${target.lon},${target.lat}`,
+      { signal: controller.signal, cache: "no-store" })
+      .then((response) => response.json())
+      .then((payload) => { if (payload?.ok) setRoute(payload.data); })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [citySlug, here, target]);
+
+  const distance = route?.distance_m ?? (here && target ? metresBetween(here, target) : null);
+  const heading = route?.heading ?? (here && target ? compassFrom(here, target) : null);
 
   const post = useCallback(async (body: Record<string, unknown>) => {
     if (!stop) return;
@@ -330,19 +373,26 @@ export default function HuntGame({
     const map = mapRef.current;
     if (!map) return;
     const paint = () => {
-      const area = map.getSource("area") as maplibregl.GeoJSONSource | undefined;
-      const route = map.getSource("route") as maplibregl.GeoJSONSource | undefined;
-      if (!area || !route) return;
-      area.setData({
+      const areaSource = map.getSource("area") as maplibregl.GeoJSONSource | undefined;
+      const routeSource = map.getSource("route") as maplibregl.GeoJSONSource | undefined;
+      if (!areaSource || !routeSource) return;
+      const searchArea = area;
+      /* The routed path when we have one, a straight hop while it loads. */
+      const line: [number, number][] = route?.coordinates?.length
+        ? route.coordinates
+        : here && target
+          ? [[here.lon, here.lat], [target.lon, target.lat]]
+          : [];
+      areaSource.setData({
         type: "FeatureCollection",
-        features: point?.area
-          ? [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [circlePolygon(point.area, point.area.radius)] } }]
+        features: searchArea
+          ? [{ type: "Feature", properties: {}, geometry: { type: "Polygon", coordinates: [circlePolygon(searchArea, searchArea.radius)] } }]
           : [],
       });
-      route.setData({
+      routeSource.setData({
         type: "FeatureCollection",
-        features: here && target
-          ? [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: [[here.lon, here.lat], [target.lon, target.lat]] } }]
+        features: line.length > 1
+          ? [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: line } }]
           : [],
       });
 
@@ -356,31 +406,45 @@ export default function HuntGame({
 
       stopMarker.current?.remove();
       stopMarker.current = null;
-      /* Only a solved stop gets a pin; an unsolved one is the dashed circle. */
-      if (point?.exact) {
-        const el = document.createElement("span");
-        el.className = styles.stopPin;
-        el.style.background = tint.pin;
-        el.textContent = String(viewIndex + 1);
-        stopMarker.current = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([point.exact.lon, point.exact.lat]).addTo(map);
+      /* Only a found stop gets a pin; an unsolved one is the dashed circle. */
+      const found = exact;
+      if (found) {
+        const wrap = document.createElement("span");
+        wrap.className = styles.stopPinWrap;
+        const dot = document.createElement("span");
+        dot.className = styles.stopPin;
+        dot.style.background = tint.pin;
+        dot.textContent = String(viewIndex + 1);
+        wrap.appendChild(dot);
+        const label = solvedName || null;
+        if (label) {
+          const tag = document.createElement("span");
+          tag.className = styles.stopPinLabel;
+          tag.textContent = label;
+          wrap.appendChild(tag);
+        }
+        stopMarker.current = new maplibregl.Marker({ element: wrap, anchor: "center" }).setLngLat([found.lon, found.lat]).addTo(map);
       }
     };
     if (map.isStyleLoaded()) paint(); else map.once("idle", paint);
-  }, [here, point, target, tint.pin, viewIndex]);
+  }, [here, route, exact, area, tint.pin, viewIndex, stop?.name, stop?.state]);
 
   useEffect(() => { fitView(); }, [viewIndex, fitView]);
 
   const walkNote = distance === null
     ? locationDenied ? "Turn on location for distance" : "Finding you…"
-    : `${distance < 1000 ? `${Math.round(distance / 10) * 10} m` : `${(distance / 1000).toFixed(1)} km`} · ${Math.max(1, Math.round(distance / 80))} min walk`;
+    : `${distance < 1000 ? `${Math.round(distance / 10) * 10} m` : `${(distance / 1000).toFixed(1)} km`} · ${route?.minutes ?? Math.max(1, Math.round(distance / 80))} min walk`
+      + (solvedName && stop?.address ? ` · ${stop.address}` : "");
 
   const direction = done
     ? "Back where you started"
-    : heading
-      ? `Head ${heading}${point?.street ? ` on ${point.street}` : ""}`
-      : point?.street
-        ? `Somewhere on ${point.street}`
-        : "Somewhere on the strip";
+    : solvedName
+      ? heading ? `${solvedName} — head ${heading}` : solvedName
+      : heading
+        ? `Head ${heading}${point?.street ? ` on ${point.street}` : ""}`
+        : point?.street
+          ? `Somewhere on ${point.street}`
+          : "Somewhere on the strip";
 
   if (!stop) return null;
 
