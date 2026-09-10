@@ -373,3 +373,6 @@
 .stopPinLabel { padding: 4px 9px; border-radius: 999px; background: rgba(255, 255, 255, .96);
   border: 1px solid var(--line-2); box-shadow: 0 2px 8px rgba(20, 22, 26, .18);
   font-size: 12px; font-weight: 600; letter-spacing: -.01em; color: var(--ink); white-space: nowrap; }
+
+/* a fix too vague to trust: a hollow ring, not a confident dot */
+.hereDotVague { background: transparent; border: 3px solid var(--brand); opacity: .55; animation: none; }

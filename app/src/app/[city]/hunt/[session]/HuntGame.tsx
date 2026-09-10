@@ -112,8 +112,10 @@ export default function HuntGame({
 }) {
   const [session, setSession] = useState(initial);
   const [viewing, setViewing] = useState<number | null>(null);
-  const [here, setHere] = useState<{ lon: number; lat: number } | null>(null);
-  const [locationDenied, setLocationDenied] = useState(false);
+  const [here, setHere] = useState<{ lon: number; lat: number; accuracy: number } | null>(null);
+  /* "off" covers denied, unsupported and unavailable; "searching" is the honest state
+     before the first fix, which used to read as denied. */
+  const [locationState, setLocationState] = useState<"searching" | "on" | "off">("searching");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [guess, setGuess] = useState("");
@@ -152,22 +154,39 @@ export default function HuntGame({
   }, [done]);
   const elapsed = Math.floor((now - new Date(session.started_at).getTime()) / 1000);
 
-  /* Live location. Denied is a normal answer, not an error state: the hunt works
-     without it, you just lose the arrow and the distance. */
+  /* Live location.
+
+     A browser fix carries an accuracy radius, and on a laptop that radius is often
+     kilometres — the position is derived from wifi or the IP address and wanders on
+     every update. Taking each fix at face value made the distance jump around and
+     the arrow point at nothing. So: keep the accuracy, ignore a new fix that is far
+     worse than the one we already trust unless the old one has gone stale, and never
+     quote a distance the fix cannot support.
+
+     Not having location is a normal answer, not an error. The hunt works without it. */
   useEffect(() => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
-      /* Deferred rather than set inline: a synchronous setState in an effect body
-         cascades a second render before the first has painted. */
-      const timer = window.setTimeout(() => setLocationDenied(true), 0);
+      const timer = window.setTimeout(() => setLocationState("off"), 0);
       return () => window.clearTimeout(timer);
     }
+    let best: { accuracy: number; at: number } | null = null;
     const watch = navigator.geolocation.watchPosition(
       (position) => {
-        setHere({ lon: position.coords.longitude, lat: position.coords.latitude });
-        setLocationDenied(false);
+        const accuracy = Number.isFinite(position.coords.accuracy) ? position.coords.accuracy : 9999;
+        const now = Date.now();
+        const stale = best ? now - best.at > 30000 : true;
+        /* A much vaguer fix is noise unless what we have is old. */
+        if (best && !stale && accuracy > best.accuracy * 2.5) return;
+        best = { accuracy, at: now };
+        setHere({ lon: position.coords.longitude, lat: position.coords.latitude, accuracy });
+        setLocationState("on");
       },
-      () => setLocationDenied(true),
-      { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 },
+      (err) => {
+        /* A timeout is not a refusal — keep whatever fix we have and keep watching. */
+        if (err.code === err.TIMEOUT) return;
+        setLocationState("off");
+      },
+      { enableHighAccuracy: true, maximumAge: 10000, timeout: 25000 },
     );
     return () => navigator.geolocation.clearWatch(watch);
   }, []);
@@ -193,7 +212,7 @@ export default function HuntGame({
      re-asked when the target changes or you have walked far enough for the answer to
      differ, so a GPS tick every second does not hammer the endpoint. */
   useEffect(() => {
-    if (!here || !target) {
+    if (!here || !target || here.accuracy > 400) {
       /* Deferred: a synchronous setState in an effect body cascades a second render
          before the first has painted. */
       const clear = window.setTimeout(() => setRoute(null), 0);
@@ -212,8 +231,12 @@ export default function HuntGame({
     return () => controller.abort();
   }, [citySlug, here, target]);
 
-  const distance = route?.distance_m ?? (here && target ? metresBetween(here, target) : null);
-  const heading = route?.heading ?? (here && target ? compassFrom(here, target) : null);
+  /* Past this the fix says little more than "in Calgary" — quoting a walking time
+     off it would be invention. */
+  const COARSE_FIX_M = 400;
+  const fixIsUseful = Boolean(here && here.accuracy <= COARSE_FIX_M);
+  const distance = fixIsUseful ? route?.distance_m ?? (here && target ? metresBetween(here, target) : null) : null;
+  const heading = fixIsUseful ? route?.heading ?? (here && target ? compassFrom(here, target) : null) : null;
 
   const post = useCallback(async (body: Record<string, unknown>) => {
     if (!stop) return;
@@ -329,21 +352,10 @@ export default function HuntGame({
     if (!mapNode.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: mapNode.current,
-      style: {
-        version: 8,
-        sources: {
-          carto: {
-            type: "raster",
-            tiles: ["a", "b", "c", "d"].map((s) => `https://${s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png`),
-            tileSize: 256,
-            /* CARTO serves "API key required" placeholders above z17. Cap the source so
-               MapLibre overzooms clean z17 tiles instead of asking for branded ones. */
-            maxzoom: 17,
-            attribution: "© OpenStreetMap © CARTO",
-          },
-        },
-        layers: [{ id: "carto", type: "raster", source: "carto" }],
-      },
+      /* OpenFreeMap, the same basemap the map app moved to. CARTO's free tiles now
+         answer "API KEY REQUIRED" at every zoom, so the watermark was showing through
+         the whole hunt. */
+      style: "https://tiles.openfreemap.org/styles/positron",
       center,
       zoom: 15.4,
       attributionControl: false,
@@ -400,7 +412,10 @@ export default function HuntGame({
       hereMarker.current = null;
       if (here) {
         const el = document.createElement("span");
-        el.className = styles.hereDot;
+        /* A vague fix gets a hollow ring: it is a guess, and should not look like a
+           confident dot sitting on a doorstep. */
+        el.className = here.accuracy > 400 ? `${styles.hereDot} ${styles.hereDotVague}` : styles.hereDot;
+        el.title = `Accurate to about ${Math.round(here.accuracy)} m`;
         hereMarker.current = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([here.lon, here.lat]).addTo(map);
       }
 
@@ -432,7 +447,11 @@ export default function HuntGame({
   useEffect(() => { fitView(); }, [viewIndex, fitView]);
 
   const walkNote = distance === null
-    ? locationDenied ? "Turn on location for distance" : "Finding you…"
+    ? locationState === "off"
+      ? "Turn on location for distance"
+      : here && !fixIsUseful
+        ? `Location is only accurate to ${here.accuracy < 1000 ? `${Math.round(here.accuracy / 10) * 10} m` : `${(here.accuracy / 1000).toFixed(1)} km`}`
+        : "Finding you…"
     : `${distance < 1000 ? `${Math.round(distance / 10) * 10} m` : `${(distance / 1000).toFixed(1)} km`} · ${route?.minutes ?? Math.max(1, Math.round(distance / 80))} min walk`
       + (solvedName && stop?.address ? ` · ${stop.address}` : "");
 
