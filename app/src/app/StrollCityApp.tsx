@@ -143,12 +143,11 @@ type HuntSummary = {
 };
 
 type UserLocation = { lon: number; lat: number; accuracy?: number };
-type WalkingRoute = { target: Business; coords: [number, number][]; distanceM: number; network: boolean };
+type WalkingRoute = { target: Business; coords: [number, number][]; distanceM: number };
 
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const STATIC_EXPORT = process.env.NEXT_PUBLIC_STROLL_STATIC_EXPORT === "1";
 const MIN_STRIP_ZOOM = 15.5;
-const ROUTE_ACCESS_RADIUS_M = 90;
-const ROUTE_ACCESS_CANDIDATES = 18;
 const AVG_WALKING_STEP_M = 0.76;
 
 export const CAT_ICON: Record<Category, string> = {
@@ -501,15 +500,7 @@ function formatStepEstimate(distanceM: number) {
   return `${Math.max(20, Math.round(steps / 10) * 10)}`;
 }
 function routeSummary(route: WalkingRoute) {
-  return `${route.network ? "Sidewalk route" : "Direct route"} · about ${formatWalkDistance(route.distanceM)} · ~${formatStepEstimate(route.distanceM)} steps`;
-}
-
-function geometryLines(feature: GeoJSON.Feature): [number, number][][] {
-  const geom = feature.geometry;
-  if (!geom) return [];
-  if (geom.type === "LineString") return [geom.coordinates as [number, number][]];
-  if (geom.type === "MultiLineString") return geom.coordinates as [number, number][][];
-  return [];
+  return `Pedestrian route · about ${formatWalkDistance(route.distanceM)} · ~${formatStepEstimate(route.distanceM)} steps`;
 }
 
 function geometryPolygonRings(feature: GeoJSON.Feature): [number, number][][] {
@@ -597,82 +588,6 @@ function doorCoordinateFor(data: StrollData, business: Business): [number, numbe
   return raw;
 }
 
-function buildWalkingRoute(data: StrollData, start: [number, number], finish: [number, number]): [number, number][] | null {
-  const nodeIds = new Map<string, number>();
-  const nodes: [number, number][] = [];
-  const graph: Array<Array<[number, number]>> = [];
-  const keyFor = (coord: [number, number]) => `${coord[0].toFixed(5)},${coord[1].toFixed(5)}`;
-  const addNode = (coord: [number, number]) => {
-    const key = keyFor(coord);
-    const existing = nodeIds.get(key);
-    if (existing !== undefined) return existing;
-    const id = nodes.length;
-    nodeIds.set(key, id);
-    nodes.push(coord);
-    graph.push([]);
-    return id;
-  };
-  const addEdgeIndexes = (ai: number, bi: number, d: number) => {
-    graph[ai].push([bi, d]);
-    graph[bi].push([ai, d]);
-  };
-  const addEdge = (a: [number, number], b: [number, number]) => {
-    const ai = addNode(a), bi = addNode(b);
-    addEdgeIndexes(ai, bi, metersBetween(a, b));
-  };
-
-  [data.streets, data.pathways, data.bike].forEach((collection) => {
-    collection.features.forEach((feature) => {
-      geometryLines(feature).forEach((line) => {
-        for (let i = 1; i < line.length; i += 1) addEdge(line[i - 1], line[i]);
-      });
-    });
-  });
-  if (!nodes.length) return null;
-
-  const accessCandidates = (point: [number, number]) => nodes
-    .map((node, index) => ({ index, distance: metersBetween(point, node) }))
-    .filter((candidate) => candidate.distance <= ROUTE_ACCESS_RADIUS_M)
-    .sort((a, b) => a.distance - b.distance)
-    .slice(0, ROUTE_ACCESS_CANDIDATES);
-
-  const startCandidates = accessCandidates(start);
-  const finishCandidates = accessCandidates(finish);
-  if (!startCandidates.length || !finishCandidates.length) return null;
-
-  const startIndex = nodes.length;
-  nodes.push(start);
-  graph.push([]);
-  startCandidates.forEach(({ index, distance }) => addEdgeIndexes(startIndex, index, distance));
-
-  const finishIndex = nodes.length;
-  nodes.push(finish);
-  graph.push([]);
-  finishCandidates.forEach(({ index, distance }) => addEdgeIndexes(finishIndex, index, distance));
-
-  const dist = new Array(nodes.length).fill(Infinity);
-  const prev = new Array<number>(nodes.length).fill(-1);
-  const seen = new Set<number>();
-  dist[startIndex] = 0;
-  while (seen.size < nodes.length) {
-    let u = -1, best = Infinity;
-    for (let i = 0; i < dist.length; i += 1) {
-      if (!seen.has(i) && dist[i] < best) { best = dist[i]; u = i; }
-    }
-    if (u === -1 || u === finishIndex) break;
-    seen.add(u);
-    graph[u].forEach(([v, weight]) => {
-      const next = dist[u] + weight;
-      if (next < dist[v]) { dist[v] = next; prev[v] = u; }
-    });
-  }
-  if (!Number.isFinite(dist[finishIndex])) return null;
-  const path: [number, number][] = [];
-  for (let at = finishIndex; at !== -1; at = prev[at]) path.push(nodes[at]);
-  path.reverse();
-  return path;
-}
-
 export default function StrollCityApp({ city }: { city: CityConfig }) {
   const mapNode = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MapLibreMap | null>(null);
@@ -684,6 +599,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const featMarkersRef = useRef<{ marker: Marker; attraction: Attraction }[]>([]);
   const userMarkerRef = useRef<Marker | null>(null);
   const geoWatchRef = useRef<number | null>(null);
+  const routeRequestRef = useRef<AbortController | null>(null);
   const rowElsRef = useRef<Map<string, HTMLElement>>(new Map());
   const pinElsRef = useRef<Map<string, HTMLElement>>(new Map());
   const lastFitKeyRef = useRef("");
@@ -733,6 +649,7 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   const [viewportHeight, setViewportHeight] = useState(0);
   const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
   const [locating, setLocating] = useState(false);
+  const [routing, setRouting] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
   const [walkingRoute, setWalkingRoute] = useState<WalkingRoute | null>(null);
 
@@ -950,20 +867,57 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     map.fitBounds(bounds, { padding: computePadding(), duration: 850, maxZoom: 18.8 });
   };
   const clearWalkingRoute = () => {
+    routeRequestRef.current?.abort();
+    routeRequestRef.current = null;
+    setRouting(false);
     setWalkingRoute(null);
     setRouteSource([]);
   };
-  const drawWalkingRoute = (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
+  const drawWalkingRoute = async (location: UserLocation, target: Business, options: { fitMap?: boolean } = {}) => {
     if (!data) return;
     const start: [number, number] = [location.lon, location.lat];
     const finish: [number, number] = doorCoordinateFor(data, target);
-    const networkCoords = buildWalkingRoute(data, start, finish);
-    const coords = networkCoords ?? [start, finish];
-    const distanceM = coords.reduce((total, coord, index) => index === 0 ? total : total + metersBetween(coords[index - 1], coord), 0);
-    setWalkingRoute({ target, coords, distanceM, network: Boolean(networkCoords) });
-    setRouteSource(coords);
-    if (options.fitMap !== false) fitRoute(coords);
-    setHint(`${target.name} route is highlighted. Only your blue location dot and the destination logo stay on the map.`);
+    routeRequestRef.current?.abort();
+    const controller = new AbortController();
+    routeRequestRef.current = controller;
+    setRouting(true);
+    setGeoError(null);
+    try {
+      const response = await fetch(`${BASE_PATH}/api/v1/${city.slug}/directions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start, finish }),
+        signal: controller.signal,
+      });
+      const body = await response.json() as { data?: { coordinates?: [number, number][]; distance_m?: number }; error?: string };
+      const coords = body.data?.coordinates;
+      if (!response.ok || !Array.isArray(coords) || coords.length < 2 || !Number.isFinite(body.data?.distance_m)) {
+        throw new Error(body.error || "No pedestrian route was found");
+      }
+      const distanceM = body.data!.distance_m!;
+      setWalkingRoute({ target, coords, distanceM });
+      setRouteSource(coords);
+      if (options.fitMap !== false) fitRoute(coords);
+      if (mobileLayout) {
+        setSelected(null);
+        if (sheetStop !== "peek") snapSheet("peek");
+      } else {
+        setSelected(target);
+      }
+      setHint(`${target.name} route follows the mapped pedestrian network. Only your blue location dot and the destination logo stay on the map.`);
+    } catch (caught) {
+      if (controller.signal.aborted) return;
+      const message = caught instanceof Error ? caught.message : "Pedestrian directions are temporarily unavailable";
+      setWalkingRoute(null);
+      setRouteSource([]);
+      setGeoError(message);
+      setHint(`${message}. No unsafe straight-line fallback will be shown.`);
+    } finally {
+      if (routeRequestRef.current === controller) {
+        routeRequestRef.current = null;
+        setRouting(false);
+      }
+    }
   };
   const showFullRoute = () => {
     if (walkingRoute?.coords.length) fitRoute(walkingRoute.coords);
@@ -1000,14 +954,6 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     searchRef.current?.blur();
     setDetailView("profile");
     setSelectedAttraction(null);
-    if (mobileLayout) {
-      // Navigation mode should give the map back immediately; the destination
-      // identity remains on the map via the route target logo/name marker.
-      setSelected(null);
-      if (sheetStop !== "peek") snapSheet("peek");
-    } else {
-      setSelected(business);
-    }
     if (userLocation) drawWalkingRoute(userLocation, business);
     else startLocationWatch((location) => drawWalkingRoute(location, business));
   };
@@ -1318,10 +1264,13 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   }, [userLocation]);
 
   useEffect(() => {
-    if (!userLocation || !walkingRoute?.target || !data) return;
+    if (!userLocation || !walkingRoute?.target || !data || routing || !walkingRoute.coords.length) return;
     const start: [number, number] = [userLocation.lon, userLocation.lat];
-    const finish: [number, number] = [walkingRoute.target.lon, walkingRoute.target.lat];
-    setRouteSource(buildWalkingRoute(data, start, finish) ?? [start, finish]);
+    if (metersBetween(start, walkingRoute.coords[0]) < 25) return;
+    const timer = window.setTimeout(() => {
+      void drawWalkingRoute(userLocation, walkingRoute.target, { fitMap: false });
+    }, 0);
+    return () => window.clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userLocation?.lon, userLocation?.lat]);
 
@@ -1607,9 +1556,9 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         </div>
         <div className={styles.dBody}>
           <div className={styles.dActions}>
-            {walkingRoute?.target.id !== biz.id && (
+            {!STATIC_EXPORT && walkingRoute?.target.id !== biz.id && (
               <button className={`${styles.btn} ${styles.btnPrimary}`} style={{ width: "100%", justifyContent: "center" }} onClick={() => showMeHowToGetHere(biz)}>
-                <Navigation size={15} /> {locating ? "Finding you…" : "Show me how to get here"}
+                <Navigation size={15} /> {routing ? "Finding walking route…" : locating ? "Finding you…" : "Show me how to get here"}
               </button>
             )}
             {menu && (

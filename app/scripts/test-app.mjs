@@ -98,6 +98,22 @@ await section("API", async () => {
   }
   console.log(`  ${cases.length} endpoints return the expected status`);
 
+  /* This location-to-Wymbin route previously crossed the railway where there is
+     no crossing. The pedestrian router must take the 8 St underpass to the west. */
+  const directions = await call("/api/v1/calgary/directions", {
+    method: "POST",
+    body: { start: [-114.0405, 51.0330], finish: [-114.040195, 51.042799] },
+  });
+  if (directions.status !== 200) fail("directions", `reported Wymbin route → ${directions.status}`);
+  const route = directions.json?.data?.coordinates;
+  let underpassRoute = Array.isArray(route) && route.length >= 3;
+  if (!underpassRoute) fail("directions", "pedestrian route geometry is missing");
+  else if (!route.some(([lon, lat]) => lon < -114.0414 && lat > 51.0395 && lat < 51.0436)) {
+    underpassRoute = false;
+    fail("directions", "Wymbin route did not use the west-side 8 St underpass corridor");
+  }
+  if (underpassRoute) console.log("  reported Wymbin route uses the mapped pedestrian underpass");
+
   /* The search regressed once by only matching substrings of the name. */
   for (const q of ["records", "books", "cafes", "brewery", "coffee"]) {
     const { json } = await call(`/api/v1/calgary/businesses?q=${q}`);
