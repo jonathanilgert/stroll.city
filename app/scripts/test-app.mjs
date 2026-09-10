@@ -14,6 +14,7 @@ import path from "node:path";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const DATA = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public", "data", "stroll-data.json"), "utf8"));
+const MAP_SOURCE = fs.readFileSync(path.join(process.cwd(), "src", "app", "StrollCityApp.tsx"), "utf8");
 const STOP = new Map(DATA.huntStops.map((s) => [s.id, s]));
 const fails = [];
 const fail = (area, msg) => { fails.push(`[${area}] ${msg}`); console.log(`      FAIL [${area}] ${msg}`); };
@@ -84,6 +85,23 @@ await section("PAGES", async () => {
   const sticker = await call("/s", { raw: true });
   if (sticker.status !== 307) fail("page", `/s → ${sticker.status}, expected a 307 redirect`);
   console.log("  sticker link redirects to the map");
+});
+
+await section("IOS ROUTE STARTUP", async () => {
+  const canaries = [
+    ["tolerant location options", "{ enableHighAccuracy: false, maximumAge: 60_000, timeout: 30_000 }"],
+    ["permission-specific recovery copy", "Allow location access for Safari and try again"],
+    ["unavailable-specific recovery copy", "Your location is temporarily unavailable"],
+    ["timeout-specific recovery copy", "Finding your location took too long"],
+    ["successful recovery clears stale errors", "setGeoError(null);"],
+    ["external walking-directions fallback", "https://www.google.com/maps/dir/?api=1&destination="],
+    ["route camera respects constrained mobile space", "map.cameraForBounds(bounds, { padding, maxZoom: 18.8 })"],
+    ["camera layout failures do not cancel navigation", "A transient iOS layout/resize must not turn valid route geometry into a route failure"],
+  ];
+  for (const [label, expected] of canaries) {
+    if (!MAP_SOURCE.includes(expected)) fail("ios-route", `missing ${label}`);
+  }
+  console.log("  mobile route startup accepts a recent fix, allows a longer cold start, and offers a Maps fallback");
 });
 
 await section("API", async () => {

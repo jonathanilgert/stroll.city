@@ -884,7 +884,28 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
     if (!map || coords.length < 2) return;
     const bounds = new LngLatBounds(coords[0], coords[0]);
     coords.forEach((coord) => bounds.extend(coord));
-    map.fitBounds(bounds, { padding: computePadding(), duration: 850, maxZoom: 18.8 });
+    const rawPadding = computePadding();
+    const wrap = mapWrapRef.current;
+    const width = Math.max(1, wrap?.clientWidth ?? 800);
+    const height = Math.max(1, wrap?.clientHeight ?? 600);
+    const horizontalScale = Math.min(1, Math.max(0, width - 96) / Math.max(1, rawPadding.left + rawPadding.right));
+    const verticalScale = Math.min(1, Math.max(0, height - 120) / Math.max(1, rawPadding.top + rawPadding.bottom));
+    const padding = {
+      top: Math.floor(rawPadding.top * verticalScale),
+      bottom: Math.floor(rawPadding.bottom * verticalScale),
+      left: Math.floor(rawPadding.left * horizontalScale),
+      right: Math.floor(rawPadding.right * horizontalScale),
+    };
+    try {
+      const camera = map.cameraForBounds(bounds, { padding, maxZoom: 18.8 });
+      const center = camera?.center;
+      if (!camera || !center || !Number.isFinite(camera.zoom)) return;
+      const normalizedCenter = maplibregl.LngLat.convert(center);
+      if (!Number.isFinite(normalizedCenter.lng) || !Number.isFinite(normalizedCenter.lat)) return;
+      map.easeTo({ center: normalizedCenter, zoom: camera.zoom, duration: 850 });
+    } catch {
+      // A transient iOS layout/resize must not turn valid route geometry into a route failure.
+    }
   };
   const clearWalkingRoute = () => {
     routeRequestRef.current?.abort();
@@ -971,21 +992,32 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
         const next = { lon: position.coords.longitude, lat: position.coords.latitude, accuracy: position.coords.accuracy };
         setUserLocation(next);
         setLocating(false);
+        setGeoError(null);
         if (onLocated && !handledInitialLocation) {
           handledInitialLocation = true;
           onLocated(next);
         }
       },
-      () => {
+      (error) => {
         setLocating(false);
-        setGeoError("Location permission was denied or unavailable.");
-        setHint("Location permission is needed to show the blue ‘you are here’ dot and in-map route.");
+        if (error.code === 1) {
+          setGeoError("Location permission was denied. Allow location access for Safari and try again, or open the route in Google Maps.");
+          setHint("Location permission is needed for the blue ‘you are here’ dot and in-map route.");
+        } else if (error.code === 3) {
+          setGeoError("Finding your location took too long. Try again outdoors, or open the route in Google Maps.");
+          setHint("The location request timed out before the route could start.");
+        } else {
+          setGeoError("Your location is temporarily unavailable. Try again, or open the route in Google Maps.");
+          setHint("Your phone could not provide a location for the in-map route.");
+        }
       },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 12000 }
+      // Prefer a prompt usable fix for route startup. iOS can take longer to return a
+      // fresh high-accuracy GPS position after Safari resumes or while indoors; the
+      // continuing watch will still replace this with newer positions as they arrive.
+      { enableHighAccuracy: false, maximumAge: 60_000, timeout: 30_000 }
     );
   };
   const showMeHowToGetHere = (business: Business) => {
-    searchRef.current?.blur();
     setDetailView("profile");
     setSelectedAttraction(null);
     if (userLocation) drawWalkingRoute(userLocation, business);
@@ -1595,6 +1627,8 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
   /* shared between the desktop drawer and the mobile bottom sheet's detail state */
   const renderDetail = (biz: Business) => {
     const menu = menus[biz.id];
+    const [directionsLon, directionsLat] = data ? doorCoordinateFor(data, biz) : [biz.lon, biz.lat];
+    const directionsUrl = `https://www.google.com/maps/dir/?api=1&destination=${directionsLat},${directionsLon}&travelmode=walking`;
     if (detailView === "menu" && menu) return renderMenuDetail(biz, menu);
 
     return (
@@ -1624,7 +1658,12 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
               </button>
             )}
           </div>
-          {geoError && <div className={styles.routeNote}>{geoError}</div>}
+          {geoError && (
+            <div className={styles.routeNote}>
+              <span>{geoError}</span>{" "}
+              <a href={directionsUrl} target="_blank" rel="noopener noreferrer">Open walking directions</a>
+            </div>
+          )}
           <p className={styles.blurb}>{biz.blurb}</p>
           <div className={styles.kv}>
             <div className={styles.kvRow}><span className={styles.k}>Address</span><span className={styles.v}>{biz.address}, Calgary AB</span></div>
