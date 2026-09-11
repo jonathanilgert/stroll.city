@@ -373,6 +373,36 @@ await section("MAP DIRECTIONS", async () => {
   }
   console.log(`  coordinates arrive on solving; route is ${route.data.coordinates.length} points over streets`);
   console.log(`  ${doors} doors drawn unlabelled, 3 landmarks named`);
+
+  /* Tapping a door is how you check a place you are standing at without knowing its
+     name. It has to count exactly as a typed guess does — right, wrong, or nothing. */
+  const { json: tap } = await call("/api/v1/calgary/hunts/friendly-mode/sessions", { method: "POST", body: { team_name: "Tap" } });
+  const tapId = tap.data.id, tapStop = tap.data.stop_ids[0];
+  const biz = new Map(DATA.businesses.map((b) => [b.id, b]));
+  const answer = biz.get(STOP.get(tapStop).business_id);
+  if (!answer) return fail("map", "stop 1 has no business to tap");
+  const elsewhere = DATA.businesses.find((b) => b.id !== answer.id);
+
+  const { json: wrongDoor } = await call(`/api/v1/calgary/sessions/${tapId}/answer`, {
+    method: "POST", body: { stop_id: tapStop, door: [elsewhere.lon, elsewhere.lat] },
+  });
+  if (wrongDoor?.data?.correct !== false) fail("map", "tapping the wrong door was accepted");
+
+  const { json: nowhere } = await call(`/api/v1/calgary/sessions/${tapId}/answer`, {
+    method: "POST", body: { stop_id: tapStop, door: [-114.09, 51.09] },
+  });
+  if (nowhere?.data?.correct !== false) fail("map", "tapping empty ground was accepted");
+
+  const { status: neither } = await call(`/api/v1/calgary/sessions/${tapId}/answer`, {
+    method: "POST", body: { stop_id: tapStop },
+  });
+  if (neither !== 400) fail("map", `an empty check returned ${neither}, expected 400`);
+
+  const { json: rightDoor } = await call(`/api/v1/calgary/sessions/${tapId}/answer`, {
+    method: "POST", body: { stop_id: tapStop, door: [answer.lon, answer.lat] },
+  });
+  if (!rightDoor?.data?.correct) fail("map", "tapping the right door did not solve the stop");
+  console.log("  tapping a door checks it: right solves, wrong and empty do not");
 });
 
 await section("VALIDATION", async () => {

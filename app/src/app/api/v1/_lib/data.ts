@@ -1389,9 +1389,44 @@ export function guessMatchesName(guess: string, name: string) {
   return editDistance(gs, cs) <= Math.max(1, Math.floor(cs.length * 0.15));
 }
 
-export async function checkHuntAnswer(city: string, sessionId: string, stopId: string, guess: string, data: StrollData) {
+/* Which business a tapped point belongs to. The map draws a dot per door, so a tap
+   identifies a place by where it is rather than by its name — which is the whole
+   point: standing at a door and checking it should not require knowing what it is
+   called. Tight radius, so a tap has to land on the door and not near it. */
+function businessAtPoint(data: StrollData, point: [number, number]) {
+  let best: { id: string; distance: number } | null = null;
+  for (const business of data.businesses) {
+    if (typeof business.lon !== "number" || typeof business.lat !== "number") continue;
+    const distance = metresBetweenPoints(point, [business.lon, business.lat]);
+    if (distance <= 45 && (!best || distance < best.distance)) best = { id: business.id, distance };
+  }
+  return best?.id ?? null;
+}
+
+function metresBetweenPoints(a: [number, number], b: [number, number]) {
+  const toRad = Math.PI / 180;
+  const lat1 = a[1] * toRad, lat2 = b[1] * toRad;
+  const dLat = (b[1] - a[1]) * toRad, dLon = (b[0] - a[0]) * toRad;
+  const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+  return 12742000 * Math.asin(Math.sqrt(h));
+}
+
+export async function checkHuntAnswer(
+  city: string,
+  sessionId: string,
+  stopId: string,
+  guess: string,
+  data: StrollData,
+  door?: [number, number] | null,
+) {
   const content = (data.huntStops ?? []).find((stop) => stop.id === stopId);
-  const correct = Boolean(content && guessMatchesName(guess, content.name));
+  /* A tapped door counts the same as a typed name — it is the same claim, made by
+     pointing instead of spelling. */
+  const tapped = door ? businessAtPoint(data, door) : null;
+  const correct = Boolean(content && (
+    (door ? tapped !== null && tapped === content.business_id : false)
+    || (!door && guessMatchesName(guess, content.name))
+  ));
   const saved = await updateSession(city, sessionId, (session) => {
     const entry = session.stops.find((stop) => stop.stop_id === stopId);
     if (!entry) return null;

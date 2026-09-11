@@ -127,6 +127,8 @@ export default function HuntGame({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [guess, setGuess] = useState("");
+  /* A door the player has tapped on the map, waiting on "this is it". */
+  const [pickedDoor, setPickedDoor] = useState<[number, number] | null>(null);
   const [verdict, setVerdict] = useState<"idle" | "wrong" | "right">("idle");
   const [now, setNow] = useState(() => Date.now());
 
@@ -309,6 +311,33 @@ export default function HuntGame({
     setVerdict("idle");
   };
 
+  const checkDoor = async (door: [number, number]) => {
+    if (!stop || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const response = await fetch(`/api/v1/${citySlug}/sessions/${session.id}/answer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ stop_id: stop.stop_id, door }),
+      });
+      const payload = await response.json().catch(() => null) as
+        { ok?: boolean; data?: { correct?: boolean; session?: GameSession }; error?: string } | null;
+      if (!response.ok || !payload?.ok || !payload.data?.session) {
+        setError(payload?.error ?? "Could not check that door. Please try again.");
+        return;
+      }
+      setSession(payload.data.session);
+      setVerdict(payload.data.correct ? "right" : "wrong");
+      setPickedDoor(null);
+      if (payload.data.correct) { setGuess(""); setViewing(viewIndex); }
+    } catch {
+      setError("Could not reach the server. Check your connection and try again.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const submitGuess = async () => {
     if (!stop || !guess.trim() || busy) return;
     setBusy(true);
@@ -384,6 +413,7 @@ export default function HuntGame({
           })),
         },
       });
+      map.addSource("picked", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({
         id: "doors",
         type: "circle",
@@ -395,6 +425,33 @@ export default function HuntGame({
           "circle-stroke-width": 1,
           "circle-stroke-color": "#fff",
           "circle-stroke-opacity": 0.7,
+        },
+      });
+      /* Tapping a door is how you check a place you are standing at, without having
+         to know its name. The cursor change tells you they are live. */
+      map.on("click", "doors", (event) => {
+        const feature = event.features?.[0];
+        if (!feature || feature.geometry.type !== "Point") return;
+        event.originalEvent.stopPropagation();
+        const [lon, lat] = feature.geometry.coordinates as [number, number];
+        setPickedDoor([lon, lat]);
+      });
+      map.on("click", (event) => {
+        const hits = map.queryRenderedFeatures(event.point, { layers: ["doors"] });
+        if (!hits.length) setPickedDoor(null);
+      });
+      map.on("mouseenter", "doors", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "doors", () => { map.getCanvas().style.cursor = ""; });
+      map.addLayer({
+        id: "picked",
+        type: "circle",
+        source: "picked",
+        paint: {
+          "circle-radius": 9,
+          "circle-color": "#0B47E8",
+          "circle-opacity": 0.18,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": "#0B47E8",
         },
       });
       map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
@@ -439,6 +496,13 @@ export default function HuntGame({
       const areaSource = map.getSource("area") as maplibregl.GeoJSONSource | undefined;
       const routeSource = map.getSource("route") as maplibregl.GeoJSONSource | undefined;
       if (!areaSource || !routeSource) return;
+      const picked = map.getSource("picked") as maplibregl.GeoJSONSource | undefined;
+      picked?.setData({
+        type: "FeatureCollection",
+        features: pickedDoor
+          ? [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: pickedDoor } }]
+          : [],
+      });
       const searchArea = area;
       /* The routed path when we have one, a straight hop while it loads. */
       const line: [number, number][] = route?.coordinates?.length
@@ -493,7 +557,7 @@ export default function HuntGame({
       }
     };
     if (map.isStyleLoaded()) paint(); else map.once("idle", paint);
-  }, [here, route, exact, area, tint.pin, viewIndex, stop?.name, stop?.state]);
+  }, [here, route, exact, area, tint.pin, viewIndex, stop?.name, stop?.state, pickedDoor]);
 
   useEffect(() => { fitView(); }, [viewIndex, fitView]);
 
@@ -556,6 +620,19 @@ export default function HuntGame({
             </span>
             <button className={styles.gameRecentre} onClick={fitView}>Recentre</button>
           </div>
+
+          {pickedDoor && isCurrent && stop.state !== "solved" && (
+            <div className={styles.doorCheck}>
+              <span className={styles.doorCheckText}>
+                <strong>Check this door?</strong>
+                <span>Counts the same as typing the name.</span>
+              </span>
+              <button className={styles.doorCheckNo} onClick={() => setPickedDoor(null)}>Cancel</button>
+              <button className={styles.doorCheckYes} onClick={() => void checkDoor(pickedDoor)} disabled={busy}>
+                This is it
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.scroll}>
