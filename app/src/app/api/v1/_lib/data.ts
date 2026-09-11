@@ -1389,18 +1389,23 @@ export function guessMatchesName(guess: string, name: string) {
   return editDistance(gs, cs) <= Math.max(1, Math.floor(cs.length * 0.15));
 }
 
-/* Which business a tapped point belongs to. The map draws a dot per door, so a tap
-   identifies a place by where it is rather than by its name — which is the whole
-   point: standing at a door and checking it should not require knowing what it is
-   called. Tight radius, so a tap has to land on the door and not near it. */
-function businessAtPoint(data: StrollData, point: [number, number]) {
-  let best: { id: string; distance: number } | null = null;
+/* Which businesses a tapped point could mean. The map draws a dot per door, so a
+   tap identifies a place by where it is rather than by its name — standing at a door
+   and checking it should not require knowing what it is called.
+
+   Every candidate is returned, not just the closest, because doors on this strip sit
+   a median five metres apart and some share a coordinate exactly: several units in
+   one building. Taking the nearest would have made a shared address a coin toss. Ten
+   metres covers the units behind one door without reaching the neighbours. */
+const DOOR_TAP_RADIUS_M = 10;
+
+function businessesAtPoint(data: StrollData, point: [number, number]) {
+  const ids: string[] = [];
   for (const business of data.businesses) {
     if (typeof business.lon !== "number" || typeof business.lat !== "number") continue;
-    const distance = metresBetweenPoints(point, [business.lon, business.lat]);
-    if (distance <= 45 && (!best || distance < best.distance)) best = { id: business.id, distance };
+    if (metresBetweenPoints(point, [business.lon, business.lat]) <= DOOR_TAP_RADIUS_M) ids.push(business.id);
   }
-  return best?.id ?? null;
+  return ids;
 }
 
 function metresBetweenPoints(a: [number, number], b: [number, number]) {
@@ -1422,9 +1427,9 @@ export async function checkHuntAnswer(
   const content = (data.huntStops ?? []).find((stop) => stop.id === stopId);
   /* A tapped door counts the same as a typed name — it is the same claim, made by
      pointing instead of spelling. */
-  const tapped = door ? businessAtPoint(data, door) : null;
+  const tapped = door ? businessesAtPoint(data, door) : [];
   const correct = Boolean(content && (
-    (door ? tapped !== null && tapped === content.business_id : false)
+    (door ? Boolean(content.business_id) && tapped.includes(content.business_id as string) : false)
     || (!door && guessMatchesName(guess, content.name))
   ));
   const saved = await updateSession(city, sessionId, (session) => {

@@ -419,29 +419,36 @@ export default function HuntGame({
         type: "circle",
         source: "doors",
         paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 1.6, 16, 3.2, 18, 4.6],
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.5, 18, 6],
           "circle-color": "#55585F",
-          "circle-opacity": 0.4,
-          "circle-stroke-width": 1,
+          "circle-opacity": 0.45,
+          "circle-stroke-width": 1.5,
           "circle-stroke-color": "#fff",
-          "circle-stroke-opacity": 0.7,
+          "circle-stroke-opacity": 0.8,
         },
       });
-      /* Tapping a door is how you check a place you are standing at, without having
-         to know its name. The cursor change tells you they are live. */
-      map.on("click", "doors", (event) => {
-        const feature = event.features?.[0];
-        if (!feature || feature.geometry.type !== "Point") return;
-        event.originalEvent.stopPropagation();
-        const [lon, lat] = feature.geometry.coordinates as [number, number];
-        setPickedDoor([lon, lat]);
-      });
+      /* One handler, and it does the arithmetic itself rather than relying on hit
+         testing a five-pixel dot: project every door to the screen, take the nearest
+         to the tap, accept it if it is within a finger's width. Tapping away from
+         them all clears the choice. */
       map.on("click", (event) => {
-        const hits = map.queryRenderedFeatures(event.point, { layers: ["doors"] });
-        if (!hits.length) setPickedDoor(null);
+        const doors = landmarks?.doors ?? [];
+        let nearest: { coord: [number, number]; distance: number } | null = null;
+        for (const coord of doors) {
+          const at = map.project(coord);
+          const distance = Math.hypot(at.x - event.point.x, at.y - event.point.y);
+          if (distance <= 22 && (!nearest || distance < nearest.distance)) nearest = { coord, distance };
+        }
+        setPickedDoor(nearest ? nearest.coord : null);
       });
-      map.on("mouseenter", "doors", () => { map.getCanvas().style.cursor = "pointer"; });
-      map.on("mouseleave", "doors", () => { map.getCanvas().style.cursor = ""; });
+      map.on("mousemove", (event) => {
+        const doors = landmarks?.doors ?? [];
+        const over = doors.some((coord) => {
+          const at = map.project(coord);
+          return Math.hypot(at.x - event.point.x, at.y - event.point.y) <= 22;
+        });
+        map.getCanvas().style.cursor = over ? "pointer" : "";
+      });
       map.addLayer({
         id: "picked",
         type: "circle",
