@@ -168,7 +168,16 @@ export default function HuntMapSheet({
   const pickedLabel = picked ? CAT_LABEL[picked.category as Category] ?? "A place on this street" : "";
 
   return (
-    <div className={styles.mapSheet} role="dialog" aria-modal="true" aria-label="Map of the street">
+    /* A layer over the hunt, not a new page: the screen behind stays visible at the
+       edges, and tapping it closes. */
+    <div className={styles.mapScrim} onClick={onClose}>
+    <div
+      className={styles.mapSheet}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Map of the street"
+      onClick={(event) => event.stopPropagation()}
+    >
       <div ref={node} className={styles.mapSheetCanvas} />
 
       <button className={styles.mapSheetClose} onClick={onClose} aria-label="Close the map">
@@ -206,6 +215,7 @@ export default function HuntMapSheet({
           {!canAnswer && <span className={styles.mapSheetNote}>This stop is already solved.</span>}
         </div>
       )}
+    </div>
     </div>
   );
 }
