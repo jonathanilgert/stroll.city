@@ -66,7 +66,8 @@ export default async function HuntSessionPage({ params }: { params: Promise<{ ci
   const landmarks: Landmarks = {
     doors: data.businesses
       .filter((business) => typeof business.lon === "number" && typeof business.lat === "number")
-      .map((business) => [business.lon, business.lat] as [number, number]),
+      /* Position and category only. The name is the answer, so it stays behind. */
+      .map((business) => ({ lon: business.lon, lat: business.lat, category: business.category })),
     places: fallbackAttractions(data)
       .filter((attraction) => typeof attraction.lon === "number" && typeof attraction.lat === "number")
       .map((attraction) => ({ name: attraction.name, lon: attraction.lon, lat: attraction.lat })),

@@ -398,3 +398,53 @@
   color: #fff; font: inherit; font-size: 13px; font-weight: 500; }
 .doorCheckYes:hover { background: var(--brand-dark); }
 .doorCheckYes:disabled { background: var(--line-strong); color: var(--ink-3); }
+
+/* ---------------------------------------------------------------------------
+   The full map. The strip at the top of the hunt is for glancing at; this is the
+   one you search on — the whole street, doors in their category colours, and a
+   tap offering directions or an answer.
+--------------------------------------------------------------------------- */
+.gameMapExpand { position: absolute; right: 12px; bottom: 12px; z-index: 6; display: inline-flex; align-items: center;
+  gap: 7px; padding: 8px 13px; border-radius: 999px; background: rgba(255, 255, 255, .94); backdrop-filter: blur(10px);
+  border: 1px solid var(--line-2); box-shadow: 0 4px 14px rgba(12, 14, 18, .14);
+  font-size: 12.5px; font-weight: 500; color: var(--ink); }
+.gameMapExpand:hover { background: #fff; }
+
+.mapSheet { position: fixed; inset: 0; z-index: 1400; background: var(--paper); }
+@media (min-width: 520px) {
+  /* Matches the phone-width card the rest of the hunt lives in. */
+  .mapSheet { inset: 24px; max-width: 460px; margin: 0 auto; border-radius: 28px; overflow: hidden;
+    box-shadow: 0 30px 80px rgba(20, 22, 26, .3); }
+}
+.mapSheetCanvas { position: absolute; inset: 0; }
+
+.mapSheetClose, .mapSheetRecentre { position: absolute; z-index: 3; width: 42px; height: 42px; border-radius: 999px;
+  background: rgba(255, 255, 255, .96); backdrop-filter: blur(12px); border: 1px solid var(--line-2);
+  box-shadow: 0 4px 16px rgba(12, 14, 18, .18); display: grid; place-items: center; color: var(--ink); }
+.mapSheetClose { top: calc(14px + env(safe-area-inset-top)); right: 14px; }
+.mapSheetRecentre { top: calc(14px + env(safe-area-inset-top)); left: 14px; color: var(--ink-2); }
+.mapSheetClose:hover, .mapSheetRecentre:hover { background: #fff; color: var(--ink); }
+
+/* a door in the full map: its category colour, big enough to hit */
+.sheetDoor { width: 18px; height: 18px; border-radius: 999px; border: 2px solid #fff; padding: 0;
+  box-shadow: 0 2px 8px rgba(12, 14, 18, .28); cursor: pointer; transition: transform .14s; }
+.sheetDoor:hover { transform: scale(1.18); }
+.sheetDoorOn { transform: scale(1.35); box-shadow: 0 0 0 4px rgba(11, 71, 232, .28), 0 4px 12px rgba(12, 14, 18, .3); }
+
+.mapSheetCard { position: absolute; left: 14px; right: 14px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 4;
+  background: #fff; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 14px 40px rgba(12, 14, 18, .24);
+  padding: 16px; display: flex; flex-direction: column; gap: 13px; }
+.mapSheetCardTop { display: flex; align-items: center; gap: 11px; }
+.mapSheetSwatch { width: 14px; height: 14px; flex: none; border-radius: 999px; box-shadow: 0 0 0 2px #fff, 0 0 0 3px var(--line-2); }
+.mapSheetCardText { display: flex; flex-direction: column; min-width: 0; }
+.mapSheetCardText strong { font-size: 16px; font-weight: 600; letter-spacing: -.02em; }
+.mapSheetCardText span { font-size: 12.5px; color: var(--ink-3); }
+.mapSheetActions { display: flex; gap: 9px; }
+.mapSheetGhost, .mapSheetPrimary { flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 46px; border-radius: 999px; font: inherit; font-size: 14px; font-weight: 500; cursor: pointer; }
+.mapSheetGhost { background: #fff; border: 1.5px solid var(--line-strong); color: var(--ink); }
+.mapSheetGhost:hover:not(:disabled) { background: var(--paper); }
+.mapSheetPrimary { background: var(--brand); border: 0; color: #fff; }
+.mapSheetPrimary:hover:not(:disabled) { background: var(--brand-dark); }
+.mapSheetGhost:disabled, .mapSheetPrimary:disabled { opacity: .45; cursor: default; }
+.mapSheetNote { font-size: 12px; color: var(--ink-3); text-align: center; }

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Lightbulb, Sparkles } from "lucide-react";
+import { ArrowRight, Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Lightbulb, Maximize2, Sparkles } from "lucide-react";
 import { getHuntTheme } from "../../../hunt-themes";
+import HuntMapSheet from "./HuntMapSheet";
 import styles from "../hunt.module.css";
 
 export type GameStop = {
@@ -43,8 +44,10 @@ export type GameSession = {
 
 /* What else is on the street. Doors carry no names on purpose — most of them are
    hunt stops, and a labelled map would answer the riddle by being read. */
+export type Door = { lon: number; lat: number; category: string };
+
 export type Landmarks = {
-  doors: [number, number][];
+  doors: Door[];
   places: { name: string; lon: number; lat: number }[];
 };
 
@@ -129,6 +132,7 @@ export default function HuntGame({
   const [guess, setGuess] = useState("");
   /* A door the player has tapped on the map, waiting on "this is it". */
   const [pickedDoor, setPickedDoor] = useState<[number, number] | null>(null);
+  const [mapOpen, setMapOpen] = useState(false);
   const [verdict, setVerdict] = useState<"idle" | "wrong" | "right">("idle");
   const [now, setNow] = useState(() => Date.now());
 
@@ -408,8 +412,8 @@ export default function HuntGame({
         type: "geojson",
         data: {
           type: "FeatureCollection",
-          features: (landmarks?.doors ?? []).map((coord) => ({
-            type: "Feature", properties: {}, geometry: { type: "Point", coordinates: coord },
+          features: (landmarks?.doors ?? []).map((door) => ({
+            type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [door.lon, door.lat] },
           })),
         },
       });
@@ -434,7 +438,8 @@ export default function HuntGame({
       map.on("click", (event) => {
         const doors = landmarks?.doors ?? [];
         let nearest: { coord: [number, number]; distance: number } | null = null;
-        for (const coord of doors) {
+        for (const door of doors) {
+          const coord: [number, number] = [door.lon, door.lat];
           const at = map.project(coord);
           const distance = Math.hypot(at.x - event.point.x, at.y - event.point.y);
           if (distance <= 22 && (!nearest || distance < nearest.distance)) nearest = { coord, distance };
@@ -443,8 +448,8 @@ export default function HuntGame({
       });
       map.on("mousemove", (event) => {
         const doors = landmarks?.doors ?? [];
-        const over = doors.some((coord) => {
-          const at = map.project(coord);
+        const over = doors.some((door) => {
+          const at = map.project([door.lon, door.lat]);
           return Math.hypot(at.x - event.point.x, at.y - event.point.y) <= 22;
         });
         map.getCanvas().style.cursor = over ? "pointer" : "";
@@ -619,6 +624,11 @@ export default function HuntGame({
 
         <div className={styles.gameMap}>
           <div ref={mapNode} className={styles.gameMapCanvas} />
+          {/* The small map is for glancing at; tapping it opens the one you can
+              actually search on. Sits above the canvas but below the cards. */}
+          <button className={styles.gameMapExpand} onClick={() => setMapOpen(true)} aria-label="Open the full map">
+            <Maximize2 size={15} /> Open map
+          </button>
           <div className={styles.gameDirection}>
             <span className={styles.gameDirectionIcon}><ChevronRight size={16} /></span>
             <span className={styles.gameDirectionText}>
@@ -774,6 +784,22 @@ export default function HuntGame({
             </div>
           </div>
         </div>
+
+        {mapOpen && (
+          <HuntMapSheet
+            citySlug={citySlug}
+            center={center}
+            landmarks={landmarks}
+            here={here}
+            target={target}
+            exact={exact}
+            solvedName={solvedName}
+            canAnswer={Boolean(isCurrent && stop.state !== "solved")}
+            busy={busy}
+            onAnswer={(door) => { void checkDoor(door); setMapOpen(false); }}
+            onClose={() => setMapOpen(false)}
+          />
+        )}
 
         <div className={styles.footer}>
           {done ? (

@@ -362,7 +362,7 @@ await section("MAP DIRECTIONS", async () => {
      102 of the 162 businesses are hunt stops, so a labelled map would answer the
      riddle by being read. Landmarks are named because they are never stops. */
   const { text: game } = await call(`/calgary/hunt/${id}`, { raw: true });
-  const doors = (game.match(/\[-114\.\d+,5[01]\.\d+\]/g) ?? []).length;
+  const doors = (game.match(/\\"lon\\":-114\.\d+/g) ?? []).length;
   if (doors < 100) fail("map", `only ${doors} doors drawn — the street has no context`);
   const named = [...STOP.values()].filter((stop) => game.includes(stop.name));
   /* The solved stop may name itself; nothing else may. */
@@ -403,6 +403,19 @@ await section("MAP DIRECTIONS", async () => {
   });
   if (!rightDoor?.data?.correct) fail("map", "tapping the right door did not solve the stop");
   console.log("  tapping a door checks it: right solves, wrong and empty do not");
+
+  /* The full map colours doors by category, so the payload carries that — but never
+     a name, which is the answer. */
+  const { text: withDoors } = await call(`/calgary/hunt/${tapId}`, { raw: true });
+  if (!withDoors.includes("Open map")) fail("map", "no way to open the full map");
+  const cats = (withDoors.match(/category/g) ?? []).length;
+  if (cats < 100) fail("map", `only ${cats} doors carry a category to colour by`);
+  const { json: tapState } = await call(`/api/v1/calgary/sessions/${tapId}`);
+  const solvedIds = new Set(tapState.data.stops.filter((s) => s.state === "solved").map((s) => s.stop_id));
+  const namedInPayload = [...STOP.values()]
+    .filter((stop) => !solvedIds.has(stop.id) && withDoors.includes(stop.name));
+  if (namedInPayload.length) fail("map", `the full map payload names ${namedInPayload.length} unsolved stop(s)`);
+  console.log(`  full map: ${cats} doors carry a category, none carry a name`);
 });
 
 await section("VALIDATION", async () => {
