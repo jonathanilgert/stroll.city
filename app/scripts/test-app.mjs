@@ -14,6 +14,7 @@ import path from "node:path";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const DATA = JSON.parse(fs.readFileSync(path.join(process.cwd(), "public", "data", "stroll-data.json"), "utf8"));
+const MAP_SOURCE = fs.readFileSync(path.join(process.cwd(), "src", "app", "StrollCityApp.tsx"), "utf8");
 const STOP = new Map(DATA.huntStops.map((s) => [s.id, s]));
 const fails = [];
 const fail = (area, msg) => { fails.push(`[${area}] ${msg}`); console.log(`      FAIL [${area}] ${msg}`); };
@@ -86,6 +87,23 @@ await section("PAGES", async () => {
   console.log("  sticker link redirects to the map");
 });
 
+await section("IOS ROUTE STARTUP", async () => {
+  const canaries = [
+    ["tolerant location options", "{ enableHighAccuracy: false, maximumAge: 60_000, timeout: 30_000 }"],
+    ["permission-specific recovery copy", "Allow location access for Safari and try again"],
+    ["unavailable-specific recovery copy", "Your location is temporarily unavailable"],
+    ["timeout-specific recovery copy", "Finding your location took too long"],
+    ["successful recovery clears stale errors", "setGeoError(null);"],
+    ["external walking-directions fallback", "https://www.google.com/maps/dir/?api=1&destination="],
+    ["route camera respects constrained mobile space", "map.cameraForBounds(bounds, { padding, maxZoom: 18.8 })"],
+    ["camera layout failures do not cancel navigation", "A transient iOS layout/resize must not turn valid route geometry into a route failure"],
+  ];
+  for (const [label, expected] of canaries) {
+    if (!MAP_SOURCE.includes(expected)) fail("ios-route", `missing ${label}`);
+  }
+  console.log("  mobile route startup accepts a recent fix, allows a longer cold start, and offers a Maps fallback");
+});
+
 await section("API", async () => {
   const cases = [["/api/v1/calgary/businesses", 200], ["/api/v1/calgary/businesses?cat=cafe", 200],
                  ["/api/v1/calgary/businesses?q=records", 200], ["/api/v1/calgary/events", 200],
@@ -97,6 +115,22 @@ await section("API", async () => {
     if (status !== want) fail("api", `${p} → ${status}, expected ${want}`);
   }
   console.log(`  ${cases.length} endpoints return the expected status`);
+
+  /* This location-to-Wymbin route previously crossed the railway where there is
+     no crossing. The pedestrian router must take the 8 St underpass to the west. */
+  const directions = await call("/api/v1/calgary/directions", {
+    method: "POST",
+    body: { start: [-114.0405, 51.0330], finish: [-114.040195, 51.042799] },
+  });
+  if (directions.status !== 200) fail("directions", `reported Wymbin route → ${directions.status}`);
+  const route = directions.json?.data?.coordinates;
+  let underpassRoute = Array.isArray(route) && route.length >= 3;
+  if (!underpassRoute) fail("directions", "pedestrian route geometry is missing");
+  else if (!route.some(([lon, lat]) => lon < -114.0414 && lat > 51.0395 && lat < 51.0436)) {
+    underpassRoute = false;
+    fail("directions", "Wymbin route did not use the west-side 8 St underpass corridor");
+  }
+  if (underpassRoute) console.log("  reported Wymbin route uses the mapped pedestrian underpass");
 
   /* The search regressed once by only matching substrings of the name. */
   for (const q of ["records", "books", "cafes", "brewery", "coffee"]) {

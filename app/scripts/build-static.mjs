@@ -16,7 +16,7 @@ try {
   }
   const result = spawnSync(process.platform === 'win32' ? 'npx.cmd' : 'npx', ['next', 'build'], {
     stdio: 'inherit',
-    env: { ...process.env, STROLL_STATIC_EXPORT: '1' },
+    env: { ...process.env, STROLL_STATIC_EXPORT: '1', NEXT_PUBLIC_STROLL_STATIC_EXPORT: '1' },
   });
   process.exitCode = result.status ?? 1;
 } finally {
