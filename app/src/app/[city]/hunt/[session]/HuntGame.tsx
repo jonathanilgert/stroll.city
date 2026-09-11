@@ -4,6 +4,8 @@ import Link from "next/link";
 import maplibregl from "maplibre-gl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowRight, Camera, Check, ChevronLeft, ChevronRight, Clock, Info, Lightbulb, Maximize2, Sparkles } from "lucide-react";
+import { getCity } from "../../../cities";
+import { categoryColor, type Category } from "../../../StrollCityApp";
 import { getHuntTheme } from "../../../hunt-themes";
 import HuntMapSheet from "./HuntMapSheet";
 import styles from "../hunt.module.css";
@@ -130,8 +132,6 @@ export default function HuntGame({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [guess, setGuess] = useState("");
-  /* A door the player has tapped on the map, waiting on "this is it". */
-  const [pickedDoor, setPickedDoor] = useState<[number, number] | null>(null);
   const [mapOpen, setMapOpen] = useState(false);
   const [verdict, setVerdict] = useState<"idle" | "wrong" | "right">("idle");
   const [now, setNow] = useState(() => Date.now());
@@ -142,6 +142,16 @@ export default function HuntGame({
   const stopMarker = useRef<maplibregl.Marker | null>(null);
 
   const pointsById = useMemo(() => new Map(points.map((point) => [point.stop_id, point])), [points]);
+  /* Category → colour, as a MapLibre expression so 162 dots stay one layer. */
+  const doorColours = useMemo(() => {
+    const city = getCity(citySlug);
+    const cats: Category[] = ["restaurant", "cafe", "bar", "shop", "services", "gallery"];
+    return [
+      "match", ["get", "category"],
+      ...cats.flatMap((cat) => [cat, city ? categoryColor(city, cat) : "#55585F"]),
+      "#55585F",
+    ] as unknown as maplibregl.ExpressionSpecification;
+  }, [citySlug]);
   const done = session.status === "finished";
   /* A stop is done when it is both answered and photographed. Tracking "not solved"
      here would move the cursor the moment the riddle was answered, skipping straight
@@ -333,7 +343,6 @@ export default function HuntGame({
       }
       setSession(payload.data.session);
       setVerdict(payload.data.correct ? "right" : "wrong");
-      setPickedDoor(null);
       if (payload.data.correct) { setGuess(""); setViewing(viewIndex); }
     } catch {
       setError("Could not reach the server. Check your connection and try again.");
@@ -413,64 +422,32 @@ export default function HuntGame({
         data: {
           type: "FeatureCollection",
           features: (landmarks?.doors ?? []).map((door) => ({
-            type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [door.lon, door.lat] },
+            type: "Feature",
+            properties: { category: door.category },
+            geometry: { type: "Point", coordinates: [door.lon, door.lat] },
           })),
         },
       });
-      map.addSource("picked", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({
         id: "doors",
         type: "circle",
         source: "doors",
         paint: {
-          "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.4, 16, 4.5, 18, 6],
-          "circle-color": "#55585F",
-          "circle-opacity": 0.45,
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 2.6, 16, 5, 18, 6.5],
+          /* The same six mood colours the map app uses, so the street reads the same
+             wherever you meet it. */
+          "circle-color": doorColours,
+          "circle-opacity": 0.95,
           "circle-stroke-width": 1.5,
           "circle-stroke-color": "#fff",
-          "circle-stroke-opacity": 0.8,
-        },
-      });
-      /* One handler, and it does the arithmetic itself rather than relying on hit
-         testing a five-pixel dot: project every door to the screen, take the nearest
-         to the tap, accept it if it is within a finger's width. Tapping away from
-         them all clears the choice. */
-      map.on("click", (event) => {
-        const doors = landmarks?.doors ?? [];
-        let nearest: { coord: [number, number]; distance: number } | null = null;
-        for (const door of doors) {
-          const coord: [number, number] = [door.lon, door.lat];
-          const at = map.project(coord);
-          const distance = Math.hypot(at.x - event.point.x, at.y - event.point.y);
-          if (distance <= 22 && (!nearest || distance < nearest.distance)) nearest = { coord, distance };
-        }
-        setPickedDoor(nearest ? nearest.coord : null);
-      });
-      map.on("mousemove", (event) => {
-        const doors = landmarks?.doors ?? [];
-        const over = doors.some((door) => {
-          const at = map.project([door.lon, door.lat]);
-          return Math.hypot(at.x - event.point.x, at.y - event.point.y) <= 22;
-        });
-        map.getCanvas().style.cursor = over ? "pointer" : "";
-      });
-      map.addLayer({
-        id: "picked",
-        type: "circle",
-        source: "picked",
-        paint: {
-          "circle-radius": 9,
-          "circle-color": "#0B47E8",
-          "circle-opacity": 0.18,
-          "circle-stroke-width": 2,
-          "circle-stroke-color": "#0B47E8",
+          "circle-stroke-opacity": 0.95,
         },
       });
       map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "route-line", type: "line", source: "route", layout: { "line-cap": "round" }, paint: { "line-color": "#0B47E8", "line-width": 4, "line-dasharray": [1.6, 1.6], "line-opacity": 0.85 } });
     });
     return () => { map.remove(); mapRef.current = null; };
-  }, [center, landmarks]);
+  }, [center, landmarks, doorColours]);
 
   /* Named landmarks: the zoo, the Confluence, the RiverWalk. Never hunt stops, so
      they can carry their names — and they are what people actually navigate by. */
@@ -508,13 +485,6 @@ export default function HuntGame({
       const areaSource = map.getSource("area") as maplibregl.GeoJSONSource | undefined;
       const routeSource = map.getSource("route") as maplibregl.GeoJSONSource | undefined;
       if (!areaSource || !routeSource) return;
-      const picked = map.getSource("picked") as maplibregl.GeoJSONSource | undefined;
-      picked?.setData({
-        type: "FeatureCollection",
-        features: pickedDoor
-          ? [{ type: "Feature", properties: {}, geometry: { type: "Point", coordinates: pickedDoor } }]
-          : [],
-      });
       const searchArea = area;
       /* The routed path when we have one, a straight hop while it loads. */
       const line: [number, number][] = route?.coordinates?.length
@@ -569,7 +539,7 @@ export default function HuntGame({
       }
     };
     if (map.isStyleLoaded()) paint(); else map.once("idle", paint);
-  }, [here, route, exact, area, tint.pin, viewIndex, stop?.name, stop?.state, pickedDoor]);
+  }, [here, route, exact, area, tint.pin, viewIndex, stop?.name, stop?.state]);
 
   useEffect(() => { fitView(); }, [viewIndex, fitView]);
 
@@ -638,18 +608,6 @@ export default function HuntGame({
             <button className={styles.gameRecentre} onClick={fitView}>Recentre</button>
           </div>
 
-          {pickedDoor && isCurrent && stop.state !== "solved" && (
-            <div className={styles.doorCheck}>
-              <span className={styles.doorCheckText}>
-                <strong>Check this door?</strong>
-                <span>Counts the same as typing the name.</span>
-              </span>
-              <button className={styles.doorCheckNo} onClick={() => setPickedDoor(null)}>Cancel</button>
-              <button className={styles.doorCheckYes} onClick={() => void checkDoor(pickedDoor)} disabled={busy}>
-                This is it
-              </button>
-            </div>
-          )}
         </div>
 
         <div className={styles.scroll}>
