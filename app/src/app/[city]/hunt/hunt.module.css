@@ -376,3 +376,10 @@
 
 /* a fix too vague to trust: a hollow ring, not a confident dot */
 .hereDotVague { background: transparent; border: 3px solid var(--brand); opacity: .55; animation: none; }
+
+/* named landmarks — orientation anchors, never hunt stops */
+.landmark { display: inline-flex; align-items: center; gap: 5px; pointer-events: none; }
+.landmarkDot { width: 8px; height: 8px; flex: none; border-radius: 999px; background: #2E7D50;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, .9); }
+.landmarkName { font-size: 10.5px; font-weight: 600; letter-spacing: -.01em; color: var(--ink-2);
+  background: rgba(255, 255, 255, .82); border-radius: 5px; padding: 1px 5px; white-space: nowrap; }

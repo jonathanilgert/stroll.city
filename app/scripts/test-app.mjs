@@ -357,7 +357,22 @@ await section("MAP DIRECTIONS", async () => {
   if (!route.data.heading) fail("map", "route has no heading to announce");
   const { status: bad } = await call("/api/v1/calgary/route?from=nonsense");
   if (bad !== 400) fail("map", `bad route input returned ${bad}, expected 400`);
+
+  /* The street is drawn for context — every door as a dot — but never labelled:
+     102 of the 162 businesses are hunt stops, so a labelled map would answer the
+     riddle by being read. Landmarks are named because they are never stops. */
+  const { text: game } = await call(`/calgary/hunt/${id}`, { raw: true });
+  const doors = (game.match(/\[-114\.\d+,5[01]\.\d+\]/g) ?? []).length;
+  if (doors < 100) fail("map", `only ${doors} doors drawn — the street has no context`);
+  const named = [...STOP.values()].filter((stop) => game.includes(stop.name));
+  /* The solved stop may name itself; nothing else may. */
+  const unsolvedNamed = named.filter((stop) => stop.id !== first);
+  if (unsolvedNamed.length) fail("map", `unsolved stop names on the map page: ${unsolvedNamed.slice(0, 3).map((s) => s.name)}`);
+  for (const place of ["Calgary Zoo", "The Confluence", "RiverWalk"]) {
+    if (!game.includes(place)) fail("map", `landmark ${place} missing from the map`);
+  }
   console.log(`  coordinates arrive on solving; route is ${route.data.coordinates.length} points over streets`);
+  console.log(`  ${doors} doors drawn unlabelled, 3 landmarks named`);
 });
 
 await section("VALIDATION", async () => {

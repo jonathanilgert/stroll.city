@@ -41,6 +41,13 @@ export type GameSession = {
   stops: GameStop[];
 };
 
+/* What else is on the street. Doors carry no names on purpose — most of them are
+   hunt stops, and a labelled map would answer the riddle by being read. */
+export type Landmarks = {
+  doors: [number, number][];
+  places: { name: string; lon: number; lat: number }[];
+};
+
 export type StopPoint = {
   stop_id: string;
   exact: { lon: number; lat: number } | null;
@@ -103,12 +110,13 @@ function circlePolygon(centre: { lon: number; lat: number }, radiusM: number) {
 }
 
 export default function HuntGame({
-  citySlug, center, session: initial, points,
+  citySlug, center, session: initial, points, landmarks,
 }: {
   citySlug: string;
   center: [number, number];
   session: GameSession;
   points: StopPoint[];
+  landmarks?: Landmarks;
 }) {
   const [session, setSession] = useState(initial);
   const [viewing, setViewing] = useState<number | null>(null);
@@ -365,11 +373,54 @@ export default function HuntGame({
       map.addSource("area", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "area-fill", type: "fill", source: "area", paint: { "fill-color": "#0B47E8", "fill-opacity": 0.1 } });
       map.addLayer({ id: "area-line", type: "line", source: "area", paint: { "line-color": "#0B47E8", "line-width": 2, "line-dasharray": [2, 2], "line-opacity": 0.7 } });
+      /* The street itself: every door as a small dot, no labels. Drawn as a layer
+         rather than markers so 162 of them cost nothing to pan. */
+      map.addSource("doors", {
+        type: "geojson",
+        data: {
+          type: "FeatureCollection",
+          features: (landmarks?.doors ?? []).map((coord) => ({
+            type: "Feature", properties: {}, geometry: { type: "Point", coordinates: coord },
+          })),
+        },
+      });
+      map.addLayer({
+        id: "doors",
+        type: "circle",
+        source: "doors",
+        paint: {
+          "circle-radius": ["interpolate", ["linear"], ["zoom"], 13, 1.6, 16, 3.2, 18, 4.6],
+          "circle-color": "#55585F",
+          "circle-opacity": 0.4,
+          "circle-stroke-width": 1,
+          "circle-stroke-color": "#fff",
+          "circle-stroke-opacity": 0.7,
+        },
+      });
       map.addSource("route", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
       map.addLayer({ id: "route-line", type: "line", source: "route", layout: { "line-cap": "round" }, paint: { "line-color": "#0B47E8", "line-width": 4, "line-dasharray": [1.6, 1.6], "line-opacity": 0.85 } });
     });
     return () => { map.remove(); mapRef.current = null; };
-  }, [center]);
+  }, [center, landmarks]);
+
+  /* Named landmarks: the zoo, the Confluence, the RiverWalk. Never hunt stops, so
+     they can carry their names — and they are what people actually navigate by. */
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !landmarks?.places?.length) return;
+    const markers = landmarks.places.map((place) => {
+      const el = document.createElement("span");
+      el.className = styles.landmark;
+      const dot = document.createElement("span");
+      dot.className = styles.landmarkDot;
+      const label = document.createElement("span");
+      label.className = styles.landmarkName;
+      label.textContent = place.name;
+      el.append(dot, label);
+      return new maplibregl.Marker({ element: el, anchor: "left" }).setLngLat([place.lon, place.lat]).addTo(map);
+    });
+    return () => markers.forEach((marker) => marker.remove());
+  }, [landmarks]);
 
   const fitView = useCallback(() => {
     const map = mapRef.current;

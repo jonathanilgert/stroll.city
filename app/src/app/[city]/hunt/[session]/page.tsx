@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
-import { getHuntSession, hydrateHuntSession, loadCityData } from "../../../api/v1/_lib/data";
+import { fallbackAttractions, getHuntSession, hydrateHuntSession, loadCityData } from "../../../api/v1/_lib/data";
 import { getCity } from "../../../cities";
-import HuntGame, { type GameSession, type StopPoint } from "./HuntGame";
+import HuntGame, { type GameSession, type Landmarks, type StopPoint } from "./HuntGame";
 
 export const dynamic = "force-dynamic";
 
@@ -59,5 +59,18 @@ export default async function HuntSessionPage({ params }: { params: Promise<{ ci
     };
   });
 
-  return <HuntGame citySlug={slug} center={data.center} session={session} points={points} />;
+  /* Context for the walk. Every door on the strip is drawn, but only as a dot: 102
+     of the 162 businesses are hunt stops, so a labelled map would answer the riddle
+     by being read. Names belong to the landmarks — the zoo, the Confluence, the
+     RiverWalk — which are never stops and are what people actually navigate by. */
+  const landmarks: Landmarks = {
+    doors: data.businesses
+      .filter((business) => typeof business.lon === "number" && typeof business.lat === "number")
+      .map((business) => [business.lon, business.lat] as [number, number]),
+    places: fallbackAttractions(data)
+      .filter((attraction) => typeof attraction.lon === "number" && typeof attraction.lat === "number")
+      .map((attraction) => ({ name: attraction.name, lon: attraction.lon, lat: attraction.lat })),
+  };
+
+  return <HuntGame citySlug={slug} center={data.center} session={session} points={points} landmarks={landmarks} />;
 }
