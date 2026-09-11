@@ -136,17 +136,22 @@ export default function HuntMapSheet({
     if (!here) { setLeg(null); return; }
     setRouting(true);
     try {
-      const payload = await fetch(
-        `/api/v1/${citySlug}/route?from=${here.lon},${here.lat}&to=${picked.lon},${picked.lat}`,
-        { cache: "no-store" },
-      ).then((response) => response.json()).catch(() => null);
-      if (!payload?.ok) return;
+      const payload = await fetch(`/api/v1/${citySlug}/directions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ start: [here.lon, here.lat], finish: [picked.lon, picked.lat] }),
+        cache: "no-store",
+      }).then((response) => response.json()).catch(() => null);
+      if (!payload?.ok || !payload.data?.coordinates?.length) return;
       const source = map.getSource("sheet-route") as maplibregl.GeoJSONSource | undefined;
       source?.setData({
         type: "FeatureCollection",
         features: [{ type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: payload.data.coordinates } }],
       });
-      setLeg({ distance_m: payload.data.distance_m, minutes: payload.data.minutes });
+      setLeg({
+        distance_m: payload.data.distance_m,
+        minutes: Math.max(1, Math.round((payload.data.duration_s ?? payload.data.distance_m / 1.33) / 60)),
+      });
       const bounds = new maplibregl.LngLatBounds();
       payload.data.coordinates.forEach((coord: [number, number]) => bounds.extend(coord));
       map.fitBounds(bounds, { padding: { top: 80, bottom: 200, left: 50, right: 50 }, maxZoom: 17, duration: 600 });

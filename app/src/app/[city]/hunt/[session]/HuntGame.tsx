@@ -247,10 +247,27 @@ export default function HuntGame({
     if (last && last.key === key && metresBetween(last, here) < 25) return;
     routedFrom.current = { ...here, key };
     const controller = new AbortController();
-    fetch(`/api/v1/${citySlug}/route?from=${here.lon},${here.lat}&to=${target.lon},${target.lat}`,
-      { signal: controller.signal, cache: "no-store" })
+    /* The city's pedestrian router — the same one the map app walks people with, so
+       the hunt does not route by its own rules. */
+    fetch(`/api/v1/${citySlug}/directions`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ start: [here.lon, here.lat], finish: [target.lon, target.lat] }),
+      signal: controller.signal,
+      cache: "no-store",
+    })
       .then((response) => response.json())
-      .then((payload) => { if (payload?.ok) setRoute(payload.data); })
+      .then((payload) => {
+        if (!payload?.ok || !payload.data?.coordinates?.length) return;
+        const coordinates = payload.data.coordinates as [number, number][];
+        setRoute({
+          coordinates,
+          distance_m: payload.data.distance_m,
+          /* Prefer the router's own estimate; fall back to an unhurried 80 m a minute. */
+          minutes: Math.max(1, Math.round((payload.data.duration_s ?? payload.data.distance_m / 1.33) / 60)),
+          heading: compassFrom(here, { lon: coordinates[coordinates.length - 1][0], lat: coordinates[coordinates.length - 1][1] }),
+        });
+      })
       .catch(() => undefined);
     return () => controller.abort();
   }, [citySlug, here, target]);

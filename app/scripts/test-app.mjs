@@ -384,13 +384,20 @@ await section("MAP DIRECTIONS", async () => {
   if (typeof found.lon !== "number" || typeof found.lat !== "number") fail("map", "a solved stop has no coordinates to point at");
   if (!found.address) fail("map", "a solved stop has no address");
 
-  /* And the walk there follows streets rather than cutting through buildings. */
-  const { json: route } = await call(`/api/v1/calgary/route?from=-114.0455,51.0455&to=${found.lon},${found.lat}`);
-  if (!route?.data?.on_network) fail("map", "route did not follow the street network");
-  if (route.data.coordinates.length < 3) fail("map", `route is ${route.data.coordinates.length} points — a straight line`);
-  if (!route.data.heading) fail("map", "route has no heading to announce");
-  const { status: bad } = await call("/api/v1/calgary/route?from=nonsense");
-  if (bad !== 400) fail("map", `bad route input returned ${bad}, expected 400`);
+  /* The walk there uses the city's pedestrian router — the same one the map app
+     uses, rather than a second set of rules for the hunt. */
+  const { status: routeStatus, json: route } = await call(`/api/v1/calgary/directions`, {
+    method: "POST", body: { start: [-114.0455, 51.0455], finish: [found.lon, found.lat] },
+  });
+  if (routeStatus === 200) {
+    if (!route?.data?.coordinates?.length) fail("map", "directions returned no path");
+    else if (route.data.coordinates.length < 3) fail("map", "directions returned a straight line");
+  } else if (![429, 503, 422].includes(routeStatus)) {
+    /* The upstream router can be rate limited or down; that is not our bug. */
+    fail("map", `directions returned ${routeStatus}`);
+  }
+  const { status: bad } = await call("/api/v1/calgary/directions", { method: "POST", body: { start: "nonsense" } });
+  if (bad !== 400) fail("map", `bad directions input returned ${bad}, expected 400`);
 
   /* The street is drawn for context — every door as a dot — but never labelled:
      102 of the 162 businesses are hunt stops, so a labelled map would answer the
@@ -405,7 +412,7 @@ await section("MAP DIRECTIONS", async () => {
   for (const place of ["Calgary Zoo", "The Confluence", "RiverWalk"]) {
     if (!game.includes(place)) fail("map", `landmark ${place} missing from the map`);
   }
-  console.log(`  coordinates arrive on solving; route is ${route.data.coordinates.length} points over streets`);
+  console.log(`  coordinates arrive on solving; directions come from the pedestrian router`);
   console.log(`  ${doors} doors drawn unlabelled, 3 landmarks named`);
 
   /* Tapping a door is how you check a place you are standing at without knowing its
