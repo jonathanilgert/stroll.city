@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { notFound } from "next/navigation";
 import data from "../../../../../public/data/stroll-data.json";
 import { getCity } from "../../../cities";
@@ -15,6 +17,18 @@ export async function generateMetadata({ params }: { params: Promise<{ city: str
     title: `Start a hunt in ${city.name} — stroll.city`,
     description: `Pick a hunt, name your team, and walk ${city.name}.`,
   };
+}
+
+/* A photograph wins if one is there. Drop a wide shot of the strip at
+   public/brand/inglewood-hero.jpg (or .webp) and the cover uses it; otherwise the
+   drawn streetscape stands in. No business photo is used — every one of them is a
+   hunt stop, and the cover would be handing out answers. */
+function findHeroPhoto() {
+  const dir = path.join(process.cwd(), "public", "brand");
+  for (const name of ["inglewood-hero.jpg", "inglewood-hero.jpeg", "inglewood-hero.webp", "inglewood-hero.png"]) {
+    if (fs.existsSync(path.join(dir, name))) return `/brand/${name}`;
+  }
+  return null;
 }
 
 export default async function HuntStartPage({
@@ -45,5 +59,5 @@ export default async function HuntStartPage({
       stop_count: Array.isArray(hunt.stop_ids) ? hunt.stop_ids.length : 0,
     }));
 
-  return <HuntOnboarding citySlug={slug} hunts={hunts} initialType={type ?? null} />;
+  return <HuntOnboarding citySlug={slug} hunts={hunts} initialType={type ?? null} heroPhoto={findHeroPhoto()} />;
 }

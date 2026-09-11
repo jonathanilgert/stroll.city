@@ -8,6 +8,7 @@ import {
   Plus, ShoppingBag, Sparkles, TrendingUp, User, Users, UsersRound, Coffee,
 } from "lucide-react";
 import { HUNT_THEMES, getHuntTheme } from "../../../hunt-themes";
+import InglewoodHero from "./InglewoodHero";
 import styles from "../hunt.module.css";
 
 export type OnboardingHunt = {
@@ -52,11 +53,12 @@ function durationLabel(minutes: number) {
 }
 
 export default function HuntOnboarding({
-  citySlug, hunts, initialType,
+  citySlug, hunts, initialType, heroPhoto,
 }: {
   citySlug: string;
   hunts: OnboardingHunt[];
   initialType: string | null;
+  heroPhoto?: string | null;
 }) {
   const router = useRouter();
   const initialHunt = hunts.find((hunt) => hunt.mode === initialType) ?? hunts[0] ?? null;
@@ -208,11 +210,11 @@ export default function HuntOnboarding({
       <div className={styles.screen}>
         {step === "preview" ? (
           <div className={styles.previewLayout}>
-            {/* No photo here yet: the only street images we hold are hunt stops, and
-                putting one on the cover would answer a riddle. stroll-main-map.jpg is
-                a screenshot of the map app itself, which read as a broken duplicate.
-                The brand gradient carries it until there is a neutral photo. */}
             <div className={styles.heroPane}>
+                {heroPhoto
+                  /* eslint-disable-next-line @next/next/no-img-element -- static asset, as elsewhere here */
+                  ? <img src={heroPhoto} alt="Inglewood's shopfronts along 9 Avenue SE" />
+                  : <InglewoodHero />}
                 <span className={styles.heroShade} aria-hidden />
                 <div className={styles.heroBar}>
                   <button className={styles.circleBtn} onClick={goBack} aria-label="Back to the map">
