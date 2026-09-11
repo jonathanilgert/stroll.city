@@ -410,15 +410,19 @@
   font-size: 12.5px; font-weight: 500; color: var(--ink); }
 .gameMapExpand:hover { background: #fff; }
 
-/* Dimmed, so the hunt is plainly still there behind it. Tapping the margin closes. */
-.mapScrim { position: fixed; inset: 0; z-index: 1400; background: rgba(20, 22, 26, .45);
-  backdrop-filter: blur(2px); display: flex; align-items: center; justify-content: center;
-  padding: calc(18px + env(safe-area-inset-top)) 14px calc(18px + env(safe-area-inset-bottom)); }
+/* Dimmed, so the hunt is plainly still there behind it. Tapping the margin closes.
+   No blur on the backdrop: the header carries the stop counter and the clock, and
+   those have to stay readable while the map is open — which is the whole reason the
+   panel starts below them. */
+.mapScrim { position: fixed; inset: 0; z-index: 1400; background: rgba(20, 22, 26, .32);
+  display: flex; align-items: flex-end; justify-content: center;
+  padding: calc(92px + env(safe-area-inset-top)) 14px calc(16px + env(safe-area-inset-bottom)); }
 .mapSheet { position: relative; width: 100%; height: 100%; max-width: 432px; background: var(--paper);
   border-radius: 26px; overflow: hidden; box-shadow: 0 24px 70px rgba(12, 14, 18, .38); }
 @media (min-width: 520px) {
-  .mapScrim { padding: 32px; }
-  .mapSheet { max-width: 432px; max-height: 760px; }
+  /* The card the hunt lives in is centred, so the header sits further down. */
+  .mapScrim { padding: 132px 32px 40px; }
+  .mapSheet { max-width: 432px; max-height: 700px; }
 }
 .mapSheetCanvas { position: absolute; inset: 0; }
 
