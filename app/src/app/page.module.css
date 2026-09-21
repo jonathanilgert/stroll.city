@@ -38,21 +38,42 @@
 .browse::-webkit-scrollbar, .list::-webkit-scrollbar { width: 10px; }
 .browse::-webkit-scrollbar-thumb, .list::-webkit-scrollbar-thumb { background: var(--paper-2); border: 3px solid var(--surface); border-radius: 99px; }
 
-.catcard { flex: 0 0 auto; position: relative; overflow: hidden; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 66px; padding: 11px 14px;
-  text-align: left; border-radius: 12px; border: 1px solid var(--line);
-  background: linear-gradient(112deg, var(--surface-2) 0%, #fff 70%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.58);
-  transition: box-shadow .18s, transform .18s, border-color .18s, filter .18s; }
-.catcard::before { content: ""; position: absolute; inset: -28% -18%; pointer-events: none;
-  background: radial-gradient(circle at 18% 20%, rgba(255,255,255,.64), transparent 34%), radial-gradient(circle at 92% 74%, rgba(255,255,255,.38), transparent 30%);
-  opacity: .72; }
+/* Category cards.
+
+   These used to paint the whole card in its category colour: a tinted gradient,
+   a tinted border, a white radial glare over the top, a second white panel behind
+   the text and a text-shadow on the count. Six of them stacked read as six
+   competing blocks, and the text contrast changed from row to row.
+
+   Same six colours, used as an accent instead of a surface — a rail down the
+   edge, the tick, and a wash behind the icon. The card itself stays white, so the
+   list reads as a list and the colour means something. The hue arrives as --cat
+   so the design lives here rather than in a style attribute. */
+.catcard { --cat: var(--line-strong); --cat-ink: var(--ink-2); --cat-on: #fff;
+  flex: 0 0 auto; position: relative; overflow: hidden; display: flex; align-items: center; gap: 13px;
+  width: 100%; min-height: 68px; padding: 13px 15px; text-align: left;
+  border-radius: 14px; border: 1px solid var(--line); background: var(--surface);
+  box-shadow: 0 1px 2px rgba(20, 22, 26, .04);
+  transition: border-color .18s, box-shadow .18s, transform .18s, background .18s; }
+/* the accent rail, only once the row is on */
+.catcard::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--cat); opacity: 0; transition: opacity .18s; }
 .catcard > * { position: relative; z-index: 1; }
-.catcard:hover { box-shadow: var(--sh-2), inset 0 1px 0 rgba(255,255,255,.68); transform: translateY(-1px); filter: saturate(1.06); }
-.ccTile { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 10px; display: grid; place-items: center; background: rgba(255,255,255,.62); color: var(--ink-2); border: 1px solid rgba(255,255,255,.58); box-shadow: 0 8px 20px rgba(18,22,28,.06); }
-.ccBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; padding: 3px 7px; border-radius: 8px; background: rgba(255,255,255,.36); }
-.ccName { font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
-.ccMeta { font-size: 12px; color: var(--ink-2); line-height: 1.4; }
-.ccN { font-size: 22px; line-height: 1; color: var(--ink); padding-right: 2px; text-shadow: 0 1px 0 rgba(255,255,255,.5); }
+.catcard:hover { border-color: color-mix(in srgb, var(--cat) 42%, var(--line)); box-shadow: var(--sh-2); transform: translateY(-1px); }
+.catcardOn { border-color: color-mix(in srgb, var(--cat) 38%, var(--line));
+  background: color-mix(in srgb, var(--cat) 5%, var(--surface)); }
+.catcardOn::before { opacity: 1; }
+.catcardOff { opacity: .62; }
+.catcardOff:hover { opacity: .85; }
+
+.ccTile { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 11px; display: grid; place-items: center;
+  background: var(--paper); color: var(--ink-3); transition: background .18s, color .18s; }
+.catcardOn .ccTile { background: color-mix(in srgb, var(--cat) 16%, #fff); color: var(--cat-ink); }
+.ccBody { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.ccName { font-size: 15px; font-weight: 600; letter-spacing: -.015em; }
+.ccMeta { font-size: 12.5px; color: var(--ink-2); line-height: 1.4; }
+.ccN { font-size: 21px; line-height: 1; color: var(--ink-3); padding-right: 2px; font-variant-numeric: tabular-nums; }
+.catcardOn .ccN { color: var(--ink); }
 .ccChev { color: var(--ink-3); flex: 0 0 auto; }
 .catcard:hover .ccChev { color: var(--ink); }
 
@@ -768,8 +789,10 @@ textarea.ctl { height: auto; min-height: 92px; padding: 12px 14px; resize: verti
 .catControl { height: 28px; padding: 0 12px; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 12px; color: var(--ink-2); background: var(--surface); }
 .catControl:hover { color: var(--ink); background: var(--paper); }
 .catcardOff { opacity: .42; }
-.catCheck { width: 18px; height: 18px; flex: 0 0 18px; border: 1.5px solid var(--line-strong); border-radius: 6px; display: grid; place-items: center; background: var(--surface); }
-.catcardOn .catCheck { border-color: transparent; }
+.catCheck { width: 20px; height: 20px; flex: 0 0 20px; border: 1.5px solid var(--line-strong); border-radius: 7px;
+  display: grid; place-items: center; background: var(--surface); font-size: 12px; line-height: 1;
+  transition: background .18s, border-color .18s, color .18s; }
+.catcardOn .catCheck { border-color: transparent; background: var(--cat); color: var(--cat-on); }
 .infoButton { position: absolute; left: 16px; bottom: 62px; z-index: 505; width: 34px; height: 34px; border-radius: 999px; display: grid; place-items: center; font-family: var(--font-mono); font-size: 14px; }
 .infoNote { position: absolute; left: 16px; bottom: 104px; z-index: 506; max-width: 320px; padding: 12px 14px; font-size: 12px; color: var(--ink-2); line-height: 1.45; }
 .raceCalc { display: flex; flex-direction: column; gap: 12px; }

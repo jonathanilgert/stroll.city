@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import maplibregl, { LngLatBounds, Map as MapLibreMap, Marker, type StyleSpecification } from "maplibre-gl";
 import {
   Bike,
@@ -1837,11 +1837,11 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                     className={`${styles.catcard} ${on ? styles.catcardOn : styles.catcardOff}`}
                     onClick={() => toggleActiveCategory(key)}
                     aria-pressed={on}
-                    style={{ background: wash(color, on ? 96 : 48, on ? 38 : 18), borderColor: `${color}${on ? "b0" : "65"}` }}
+                    style={{ "--cat": color, "--cat-ink": ink, "--cat-on": onCategory(city, key) } as CSSProperties}
                   >
-                    <span className={styles.catCheck} style={on ? { background: color } : undefined}>{on ? "✓" : ""}</span>
-                    <span className={styles.ccTile} style={{ color: ink }}>
-                      <CatIcon d={CAT_ICON[key]} size={20} color={ink} />
+                    <span className={styles.catCheck}>{on ? "✓" : ""}</span>
+                    <span className={styles.ccTile}>
+                      <CatIcon d={CAT_ICON[key]} size={20} color={on ? ink : "currentColor"} />
                     </span>
                     <span className={styles.ccBody}>
                       <span className={styles.ccName}>{CAT_LABEL[key]}</span>
@@ -1851,20 +1851,20 @@ export default function StrollCityApp({ city }: { city: CityConfig }) {
                   </button>
                 );})}
                 <div className={styles.catSep}><span className={styles.lbl}>Map layers</span><span className={styles.catSepRule} /></div>
-                <button className={`${styles.catcard} ${showEvents ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowEvents((v) => !v)} aria-pressed={showEvents}>
-                  <span className={styles.catCheck} style={showEvents ? { background: city.theme.primary } : undefined}>{showEvents ? "✓" : ""}</span>
+                <button className={`${styles.catcard} ${showEvents ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowEvents((v) => !v)} aria-pressed={showEvents} style={{ "--cat": city.theme.primary, "--cat-ink": city.theme.primary, "--cat-on": inkOn(city.theme.primary) } as CSSProperties}>
+                  <span className={styles.catCheck}>{showEvents ? "✓" : ""}</span>
                   <span className={styles.ccTile}><CalendarDays size={20} /></span>
                   <span className={styles.ccBody}><span className={styles.ccName}>Events</span><span className={styles.ccMeta}>Show event markers on the map</span></span>
                   <span className={`${styles.ccN} ${styles.num}`}>{events.length}</span>
                 </button>
-                <button className={`${styles.catcard} ${showOpenNow ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowOpenNow((v) => !v)} aria-pressed={showOpenNow}>
-                  <span className={styles.catCheck} style={showOpenNow ? { background: city.theme.green } : undefined}>{showOpenNow ? "✓" : ""}</span>
+                <button className={`${styles.catcard} ${showOpenNow ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowOpenNow((v) => !v)} aria-pressed={showOpenNow} style={{ "--cat": city.theme.green, "--cat-ink": city.theme.green, "--cat-on": inkOn(city.theme.green) } as CSSProperties}>
+                  <span className={styles.catCheck}>{showOpenNow ? "✓" : ""}</span>
                   <span className={styles.ccTile}><CatIcon d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 7.5V12l3 2" size={20} /></span>
                   <span className={styles.ccBody}><span className={styles.ccName}>Open now</span><span className={styles.ccMeta}>Include places currently marked open</span></span>
                   <span className={`${styles.ccN} ${styles.num}`}>{openNowCount}</span>
                 </button>
-                <button className={`${styles.catcard} ${showTrees ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowTrees((v) => !v)} aria-pressed={showTrees}>
-                  <span className={styles.catCheck} style={showTrees ? { background: "#2E7D50" } : undefined}>{showTrees ? "✓" : ""}</span>
+                <button className={`${styles.catcard} ${showTrees ? styles.catcardOn : styles.catcardOff}`} onClick={() => setShowTrees((v) => !v)} aria-pressed={showTrees} style={{ "--cat": "#2E7D50", "--cat-ink": "#2E7D50", "--cat-on": inkOn("#2E7D50") } as CSSProperties}>
+                  <span className={styles.catCheck}>{showTrees ? "✓" : ""}</span>
                   <span className={styles.ccTile}><CatIcon d="M12 2c-4 4-4 10 0 20 4-10 4-16 0-20Z" size={20} /></span>
                   <span className={styles.ccBody}><span className={styles.ccName}>Trees</span><span className={styles.ccMeta}>Show the street canopy layer</span></span>
                   <span className={`${styles.ccN} ${styles.num}`}>{data?.trees.length ?? 0}</span>
