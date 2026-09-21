@@ -896,47 +896,29 @@ export default function LandingPage() {
             </div>
 
             <div className={styles.huntSide}>
-              {/* The finish postcard, drawn exactly as the hunt prints it at
-                  /[city]/hunt/[session]/postcard — mat, spine, vertical
-                  INGLEWOOD, serial, four 3:4 slots, FOUND pills. */}
+              {/* The card the hunt hands you after the last step, shown finished:
+                  same mat, spine, vertical INGLEWOOD, serial, four 3:4 slots with
+                  FOUND on each and the doors named along the foot. Markup mirrors
+                  PostcardScreen so the preview and the real thing stay one design. */}
               <figure className={styles.pcard}>
                 <div className={styles.pcardInner}>
                   <span className={styles.pcardSpine} aria-hidden />
                   <span className={`${styles.pcardVert} ${styles.mono}`}>INGLEWOOD</span>
                   <div className={`${styles.pcardTop} ${styles.mono}`}>
-                    <span>{huntDone ? "Postcard complete" : "Postcard in progress"}</span>
+                    <span>Postcard complete</span>
                     <span className={styles.pcardSerial}>No. 004</span>
                   </div>
-                  <h3 className={styles.pcardTitle}>
-                    {huntDone
-                      ? "You walked Friendly Mode in Inglewood."
-                      : stop < 3
-                        ? "Solve this stop and the third slot fills in."
-                        : "One last stop finishes it."}
-                  </h3>
-                  <div className={styles.pcardSlots} aria-label="Postcard photos earned so far">
-                    {POSTCARD_STAMPS.map((mark, i) => {
-                      const found = i < 2 || i < stop;
-                      return (
-                        <figure className={`${styles.pcardSlot} ${found ? styles.pcardSlotFilled : ""}`} key={mark.src}>
-                          {found ? (
-                            <>
-                              {/* eslint-disable-next-line @next/next/no-img-element -- static demo asset, same as the map app's rail logo */}
-                              <img src={mark.src} alt={mark.alt} />
-                              <figcaption className={`${styles.pcardFound} ${styles.mono}`}>FOUND</figcaption>
-                            </>
-                          ) : (
-                            <span className={styles.pcardSlotN}>{i + 1}</span>
-                          )}
-                        </figure>
-                      );
-                    })}
+                  <h3 className={styles.pcardTitle}>Team Sidewalk walked Friendly Mode.</h3>
+                  <div className={styles.pcardSlots}>
+                    {POSTCARD_STAMPS.map((mark) => (
+                      <figure className={`${styles.pcardSlot} ${styles.pcardSlotFilled}`} key={mark.src}>
+                        {/* eslint-disable-next-line @next/next/no-img-element -- static demo asset, same as the map app's rail logo */}
+                        <img src={mark.src} alt={mark.alt} />
+                        <figcaption className={`${styles.pcardFound} ${styles.mono}`}>FOUND</figcaption>
+                      </figure>
+                    ))}
                   </div>
-                  <p className={styles.pcardFoot}>
-                    {huntDone
-                      ? "Ironwood Stage and Grill · Kent of Inglewood · Fair's Fair Books · Doughnut Party"
-                      : "Ironwood Stage and Grill · Kent of Inglewood"}
-                  </p>
+                  <p className={styles.pcardFoot}>Ironwood Stage and Grill · Kent of Inglewood · Fair&apos;s Fair Books · Doughnut Party</p>
                 </div>
               </figure>
 
