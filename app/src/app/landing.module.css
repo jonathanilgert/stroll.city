@@ -559,7 +559,7 @@
 
 /* The postcard the hunt hands you after the last step. Copied rule for rule from
    [city]/hunt/hunt.module.css (.pcard*), which is what PostcardScreen renders. */
-.pcard { width: 100%; background: #F3F1E9; border-radius: 22px; padding: 12px; box-shadow: 0 10px 30px rgba(20, 22, 26, .1); }
+.pcard { width: 100%; margin: 0; background: #F3F1E9; border-radius: 22px; padding: 12px; box-shadow: 0 10px 30px rgba(20, 22, 26, .1); }
 .pcardInner { position: relative; background: #FAF9F4; border: 1px solid #E4E2D8; border-radius: 18px; padding: 18px 18px 20px 54px; }
 .pcardSpine { position: absolute; left: 38px; top: 16px; bottom: 16px; border-left: 1px dashed #DFDDD2; }
 .pcardVert { position: absolute; left: 10px; bottom: 22px; font-size: 9.5px; letter-spacing: .3em; color: var(--ink-5);
@@ -577,6 +577,55 @@
 .pcardFound { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); padding: 3px 9px; border-radius: 999px;
   background: rgba(255, 255, 255, .96); border: 1.2px solid var(--blue); color: var(--blue); font-size: 8.5px; letter-spacing: .1em; }
 .pcardFoot { margin: 12px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); }
+
+/* ---- the finish screen ----
+   What the hunt shows after the last step, not just the card it contains: the
+   lime crest, the kicker, "Nice one, …", the run's three numbers, the postcard,
+   then Save / Send it. Rules follow hunt.module.css (.finishBody, .finishCrest,
+   .kicker, .title/.titleSm, .lede, .finishStat*, .cta*, .finishBack). */
+.finishCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  box-shadow: 0 24px 60px -40px rgba(20, 24, 26, .5);
+  padding: 26px 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  align-items: flex-start;
+}
+.finishCrest {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--lime);
+  color: var(--ink);
+  box-shadow: 0 8px 22px rgba(220, 242, 60, .5);
+  margin-bottom: 2px;
+}
+.finishKicker { display: block; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+.finishTitle { margin: 0; font-size: 24px; font-weight: 500; letter-spacing: -.038em; line-height: 1.06; }
+.finishLede { margin: 0; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); }
+.finishStats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; margin: 4px 0 0; }
+.finishStat { background: var(--paper); border: 1px solid var(--line); border-radius: 16px; padding: 14px 12px;
+  display: flex; flex-direction: column; gap: 4px; }
+.finishStatV { font-size: 21px; font-weight: 600; letter-spacing: -.03em; }
+.finishStatK { font-size: 11.5px; line-height: 1.3; color: var(--ink-3); }
+.finishCta {
+  width: 100%; padding: 15px; border: 0; border-radius: 999px; background: var(--blue); color: #fff;
+  font: inherit; font-weight: 500; font-size: 15.5px; display: inline-flex; align-items: center; justify-content: center;
+  gap: 9px; cursor: pointer; box-shadow: 0 8px 22px rgba(11, 71, 232, .28); transition: background .16s;
+}
+.finishCta:hover { background: var(--blue-dark); color: #fff; }
+.finishCtaGhost { background: #fff; color: var(--ink); border: 1.5px solid #D7DAE0; box-shadow: none; }
+.finishCtaGhost:hover { background: var(--paper); color: var(--ink); }
+.finishCtaRow { display: flex; gap: 10px; width: 100%; margin-top: 4px; }
+.finishCtaRow .finishCta { flex: 1; }
+.finishBack { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+  font-size: 14px; font-weight: 500; color: var(--ink-2); }
+.finishBack:hover { color: var(--ink); }
 .huntSteps {
   display: grid;
   gap: 9px;
@@ -704,7 +753,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: min(100%, 408px);
+  width: min(100%, 460px);
   margin: 0 auto;
   z-index: 1;
 }

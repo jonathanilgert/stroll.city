@@ -9,6 +9,7 @@ import styles from "./landing.module.css";
 
 const city = getCity("calgary")!;
 const BASE_PATH = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
+const OPENFREEMAP_POSITRON_STYLE_URL = "https://tiles.openfreemap.org/styles/positron";
 
 type Business = {
   id: string;
@@ -348,26 +349,10 @@ export default function LandingPage() {
     if (!mapNode.current || mapRef.current) return;
     const map = new maplibregl.Map({
       container: mapNode.current,
-      style: {
-        version: 8,
-        sources: {
-          carto: {
-            type: "raster",
-            tiles: ["a", "b", "c", "d"].map((s) => `https://${s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png`),
-            tileSize: 256,
-            attribution: "© OpenStreetMap © CARTO",
-          },
-          cartoLabels: {
-            type: "raster",
-            tiles: ["a", "b", "c", "d"].map((s) => `https://${s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}.png`),
-            tileSize: 256,
-          },
-        },
-        layers: [
-          { id: "carto", type: "raster", source: "carto" },
-          { id: "cartoLabels", type: "raster", source: "cartoLabels", paint: { "raster-opacity": 0.7 } },
-        ],
-      },
+      /* CARTO's free raster tiles now stamp "API KEY REQUIRED" across every zoom,
+         so the hero map was serving a watermarked basemap. The map app already
+         moved to OpenFreeMap's Positron; the landing follows it. */
+      style: OPENFREEMAP_POSITRON_STYLE_URL,
       center: city.center,
       zoom: 14.8,
       attributionControl: false,
@@ -896,37 +881,73 @@ export default function LandingPage() {
             </div>
 
             <div className={styles.huntSide}>
-              {/* The card the hunt hands you after the last step, shown finished:
-                  same mat, spine, vertical INGLEWOOD, serial, four 3:4 slots with
-                  FOUND on each and the doors named along the foot. Markup mirrors
-                  PostcardScreen so the preview and the real thing stay one design. */}
-              <figure className={styles.pcard}>
-                <div className={styles.pcardInner}>
-                  <span className={styles.pcardSpine} aria-hidden />
-                  <span className={`${styles.pcardVert} ${styles.mono}`}>INGLEWOOD</span>
-                  <div className={`${styles.pcardTop} ${styles.mono}`}>
-                    <span>Postcard complete</span>
-                    <span className={styles.pcardSerial}>No. 004</span>
-                  </div>
-                  <h3 className={styles.pcardTitle}>Team Sidewalk walked Friendly Mode.</h3>
-                  <div className={styles.pcardSlots}>
-                    {POSTCARD_STAMPS.map((mark) => (
-                      <figure className={`${styles.pcardSlot} ${styles.pcardSlotFilled}`} key={mark.src}>
-                        {/* eslint-disable-next-line @next/next/no-img-element -- static demo asset, same as the map app's rail logo */}
-                        <img src={mark.src} alt={mark.alt} />
-                        <figcaption className={`${styles.pcardFound} ${styles.mono}`}>FOUND</figcaption>
-                      </figure>
-                    ))}
-                  </div>
-                  <p className={styles.pcardFoot}>Ironwood Stage and Grill · Kent of Inglewood · Fair&apos;s Fair Books · Doughnut Party</p>
-                </div>
-              </figure>
+              {/* The screen the hunt shows after the last step, whole: crest,
+                  kicker, "Nice one, …", the run's three numbers, the postcard and
+                  Save / Send it. Ported from PostcardScreen so the landing shows
+                  the finish people actually get, not a card lifted out of it. */}
+              <div className={styles.finishCard}>
+                <span className={styles.finishCrest} aria-hidden>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+                    <path d="M20 2v4" /><path d="M22 4h-4" /><circle cx="4" cy="20" r="2" />
+                  </svg>
+                </span>
+                <span className={`${styles.finishKicker} ${styles.mono}`}>Hunt complete · Shop crawl</span>
+                <h3 className={styles.finishTitle}>Nice one, Team Sidewalk.</h3>
+                <p className={styles.finishLede}>You walked Friendly Mode end to end — 4 riddles, 4 photos, and a postcard with your name on it.</p>
 
-              {huntDone && (
-                <button type="button" className={`${styles.btn} ${styles.btnMd} ${styles.btnBlue} ${styles.downloadPostcard}`} onClick={() => { void downloadDemoPostcard(); }}>
-                  Download postcard<Arrow size={13} />
-                </button>
-              )}
+                <div className={styles.finishStats}>
+                  <div className={styles.finishStat}>
+                    <span className={styles.finishStatV}>4</span>
+                    <span className={styles.finishStatK}>Stops found</span>
+                  </div>
+                  <div className={styles.finishStat}>
+                    <span className={styles.finishStatV}>58 min</span>
+                    <span className={styles.finishStatK}>On the street</span>
+                  </div>
+                  <div className={styles.finishStat}>
+                    <span className={styles.finishStatV}>2</span>
+                    <span className={styles.finishStatK}>Clues used</span>
+                  </div>
+                </div>
+
+                <figure className={styles.pcard}>
+                  <div className={styles.pcardInner}>
+                    <span className={styles.pcardSpine} aria-hidden />
+                    <span className={`${styles.pcardVert} ${styles.mono}`}>INGLEWOOD</span>
+                    <div className={`${styles.pcardTop} ${styles.mono}`}>
+                      <span>Postcard complete</span>
+                      <span className={styles.pcardSerial}>No. 004</span>
+                    </div>
+                    <h4 className={styles.pcardTitle}>Team Sidewalk walked Friendly Mode.</h4>
+                    <div className={styles.pcardSlots}>
+                      {POSTCARD_STAMPS.map((mark) => (
+                        <figure className={`${styles.pcardSlot} ${styles.pcardSlotFilled}`} key={mark.src}>
+                          {/* eslint-disable-next-line @next/next/no-img-element -- static demo asset, same as the map app's rail logo */}
+                          <img src={mark.src} alt={mark.alt} />
+                          <figcaption className={`${styles.pcardFound} ${styles.mono}`}>FOUND</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                    <p className={styles.pcardFoot}>Ironwood Stage and Grill · Kent of Inglewood · Fair&apos;s Fair Books · Doughnut Party</p>
+                  </div>
+                </figure>
+
+                <div className={styles.finishCtaRow}>
+                  <button type="button" className={`${styles.finishCta} ${styles.finishCtaGhost}`} onClick={() => { void downloadDemoPostcard(); }}>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="M7 10l5 5 5-5" /><path d="M12 15V3" /></svg>
+                    Save
+                  </button>
+                  <Link className={styles.finishCta} href="/calgary/hunt/start?type=friendly">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path d="M8.59 13.51l6.83 3.98" /><path d="M15.41 6.51L8.59 10.49" /></svg>
+                    Earn yours
+                  </Link>
+                </div>
+                <Link className={styles.finishBack} href="/calgary">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z" /><path d="M15 5.764v15" /><path d="M9 3.236v15" /></svg>
+                  Back to the map
+                </Link>
+              </div>
 
               {huntDone && (
                 <div className={styles.shareCard}>
@@ -1099,7 +1120,7 @@ export default function LandingPage() {
             <Link href="/business">For businesses</Link>
           </span>
           <p className={styles.footNote}>
-            Geometry and licences come from City of Calgary open data. Basemap © OpenStreetMap contributors © CARTO.
+            Geometry and licences come from City of Calgary open data. Basemap © OpenStreetMap contributors, served by OpenFreeMap.
           </p>
         </div>
       </footer>
