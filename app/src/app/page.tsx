@@ -362,28 +362,47 @@ export default function LandingPage() {
   const downloadDemoPostcard = async () => {
     if (!huntDone || typeof window === "undefined") return;
     const images = await Promise.all(POSTCARD_STAMPS.map((stamp) => imageToDataUrl(stamp.src)));
-    const slots = [
-      { x: 146, y: 156, rotate: -4 },
-      { x: 326, y: 146, rotate: 3 },
-      { x: 138, y: 332, rotate: -3.5 },
-      { x: 330, y: 326, rotate: 4 },
-    ];
+
+    /* The same card players are handed at the end of a real hunt — dashed spine,
+       vertical postmark, serial, a slot per stop with its FOUND stamp. The front
+       page used to offer a different souvenir entirely: a "Greetings from
+       Inglewood" card in the pre-rebrand browns, with all four photos piled into
+       one corner on top of the wordmark. */
+    const left = 168;
+    const right = 1120;
+    const top = 268;
+    const bottom = 604;
+    const gap = 20;
+    const slotW = (right - left - gap * 3) / 4;
+    const slotH = bottom - top;
+
+    const slots = images.map((src, index) => {
+      const x = left + index * (slotW + gap);
+      const pillW = 96;
+      const pillX = x + slotW / 2 - pillW / 2;
+      const pillY = bottom - 46;
+      return `<g>
+        <clipPath id="slot${index}"><rect x="${x.toFixed(1)}" y="${top}" width="${slotW.toFixed(1)}" height="${slotH}" rx="12"/></clipPath>
+        <image href="${src}" x="${x.toFixed(1)}" y="${top}" width="${slotW.toFixed(1)}" height="${slotH}" preserveAspectRatio="xMidYMid slice" clip-path="url(#slot${index})"/>
+        <rect x="${x.toFixed(1)}" y="${top}" width="${slotW.toFixed(1)}" height="${slotH}" rx="12" fill="none" stroke="#0B47E8" stroke-width="2"/>
+        <rect x="${pillX.toFixed(1)}" y="${pillY}" width="${pillW}" height="30" rx="15" fill="#ffffff" fill-opacity=".95" stroke="#0B47E8" stroke-width="2"/>
+        <text x="${(x + slotW / 2).toFixed(1)}" y="${pillY + 20}" font-family="ui-monospace, Menlo, monospace" font-size="13" letter-spacing="2.5" fill="#0B47E8" text-anchor="middle">FOUND</text>
+      </g>`;
+    }).join("");
+
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
-      <defs><filter id="paper"><feDropShadow dx="0" dy="16" stdDeviation="22" flood-color="#14181a" flood-opacity=".18"/></filter><clipPath id="stamp"><rect width="150" height="180" rx="12"/></clipPath></defs>
-      <rect width="1200" height="800" fill="#f7f1e6"/>
-      <rect x="88" y="70" width="1024" height="660" rx="38" fill="#f4f1e7" stroke="#d9dccf" filter="url(#paper)"/>
-      <rect x="88" y="70" width="1024" height="660" rx="38" fill="none" stroke="#fff" stroke-opacity=".65"/>
-      <text x="160" y="142" font-family="Georgia, serif" font-size="22" fill="#5c6350" letter-spacing="4">GREETINGS FROM</text>
-      <text x="160" y="220" font-family="Georgia, serif" font-size="86" fill="#392d1d">Inglewood</text>
-      <rect x="914" y="106" width="116" height="142" fill="#f8fbf8" stroke="#8f7653" stroke-opacity=".45"/>
-      <text x="950" y="188" font-family="Courier New, monospace" font-size="30" fill="#15558f">YYC</text>
-      ${images.map((src, index) => {
-        const slot = slots[index];
-        return `<g transform="translate(${slot.x} ${slot.y}) rotate(${slot.rotate} 75 90)"><rect x="-8" y="-8" width="166" height="196" fill="#fff" stroke="#d4c8b4"/><image href="${src}" x="0" y="0" width="150" height="180" preserveAspectRatio="xMidYMid slice" clip-path="url(#stamp)"/><text x="118" y="165" font-family="Courier New, monospace" font-size="18" fill="#fff" fill-opacity=".9">${String(index + 1).padStart(2, "0")}</text></g>`;
-      }).join("")}
-      <text x="748" y="604" text-anchor="middle" font-family="Courier New, monospace" font-size="30" fill="#392d1d">FOUR STOPS</text>
-      <text x="748" y="646" text-anchor="middle" font-family="Courier New, monospace" font-size="22" fill="#5c6350">@stroll_city · #StrollInglewood</text>
+      <rect width="1200" height="800" fill="#F3F1E9"/>
+      <rect x="40" y="40" width="1120" height="720" rx="44" fill="#FAF9F4" stroke="#E4E2D8" stroke-width="3"/>
+      <line x1="120" y1="96" x2="120" y2="704" stroke="#DFDDD2" stroke-width="2" stroke-dasharray="6 10"/>
+      <text transform="translate(96 640) rotate(-90)" font-family="ui-monospace, Menlo, monospace" font-size="20" letter-spacing="7" fill="#8A8E96">INGLEWOOD</text>
+      <text x="${left}" y="140" font-family="ui-monospace, Menlo, monospace" font-size="21" letter-spacing="6" fill="#767A82">POSTCARD COMPLETE</text>
+      <text x="1112" y="140" font-family="ui-monospace, Menlo, monospace" font-size="21" fill="#767A82" text-anchor="end">No. 004</text>
+      <text x="${left}" y="214" font-family="Helvetica, Arial, sans-serif" font-size="50" font-weight="600" fill="#14161A">Four doors, four photos.</text>
+      ${slots}
+      <text x="${left}" y="668" font-family="Helvetica, Arial, sans-serif" font-size="26" fill="#6B6F77">4 of 4 stops photographed in Inglewood</text>
+      <text x="${left}" y="712" font-family="ui-monospace, Menlo, monospace" font-size="22" fill="#8A8E96">stroll.city · #StrollInglewood</text>
     </svg>`;
+
     const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
     const link = document.createElement("a");
     link.href = url;
