@@ -478,135 +478,104 @@
 .huntStep { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--pink-ink); }
 .punches { margin-left: auto; display: flex; gap: 5px; }
 .punch { width: 26px; height: 5px; border-radius: 99px; background: #F1DCE5; transition: background .3s; display: block; }
+/* ---- riddle card + postcard, lifted from the hunt ----
+   These two are the same objects the real game screen and finish screen draw
+   (see [city]/hunt/hunt.module.css: .riddleCard* and .pcard*). The landing demo
+   is a preview of the app, so the geometry, tints and type here are copied from
+   there rather than invented — if the app's card changes, this is the twin to
+   change with it. */
 .riddleCard {
   position: relative;
-  isolation: isolate;
   width: 100%;
-  min-height: clamp(510px, 44vw, 560px);
-  background: url("/brand/stroll-riddle-postcard-backdrop.png") center / 100% 100% no-repeat;
-  border: 0;
-  border-radius: 20px;
-  padding: clamp(52px, 5.8vw, 76px) clamp(42px, 5.4vw, 70px) clamp(44px, 5vw, 64px);
-  display: flex;
-  flex-direction: column;
-  gap: clamp(12px, 1.4vw, 18px);
+  border-radius: 18px;
+  border: 1px solid;
+  transition: background .3s, border-color .3s;
   flex: 0 0 auto;
-  filter: drop-shadow(0 14px 18px rgba(64, 45, 25, .16));
-  transform: rotate(-1.4deg) translateX(clamp(0px, 1vw, 10px));
-  transform-origin: center;
 }
-.riddleCard > * {
-  position: relative;
-  z-index: 1;
-  transform: rotate(1.4deg);
-}
-.riddleTag {
-  display: inline-flex;
-  align-self: flex-start;
+.riddleCardHead {
+  display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px 5px;
-  border: 1.5px solid rgba(122, 54, 39, .72);
-  border-radius: 4px;
-  background:
-    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, .48), transparent 26%),
-    linear-gradient(145deg, rgba(249, 225, 180, .94), rgba(224, 185, 124, .9));
-  color: #7A3627;
-  box-shadow: 0 4px 0 rgba(95, 54, 28, .08), inset 0 0 0 1px rgba(255, 246, 218, .45);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
+  gap: 8px;
+  padding: 13px 15px;
+  border-bottom: 1px dashed;
+  border-color: inherit;
 }
+.riddleNav {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid;
+  background: rgba(255, 255, 255, .8);
+  display: grid;
+  place-items: center;
+  color: var(--ink-2);
+}
+.riddleNav:disabled { opacity: .4; }
+.riddleKicker { flex: 1; text-align: center; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; }
+.riddleCardBody { padding: 18px 18px 20px; display: flex; flex-direction: column; gap: 12px; }
 .riddleText {
   margin: 0;
-  color: #2D271F;
-  font-size: clamp(17px, 1.75vw, 23px);
-  font-weight: 700;
-  font-family: var(--font-treasure), Georgia, "Times New Roman", serif;
-  letter-spacing: .01em;
-  line-height: 1.3;
-  max-width: 34ch;
-  text-wrap: balance;
-  text-shadow: 0 1px 0 rgba(255, 248, 226, .65);
+  font-size: clamp(17px, 1.5vw, 21px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.34;
+  color: var(--ink);
 }
-.riddleHint { margin: 0; max-width: 44ch; font-size: 11.5px; line-height: 1.32; color: #6D5942; }
-.riddleChallenge {
-  margin: 0;
-  padding: 6px 9px;
-  border: 1px solid rgba(122, 54, 39, .28);
-  border-radius: 10px;
-  background: rgba(255, 247, 222, .72);
-  font-size: 11.5px;
-  line-height: 1.3;
-  color: #5B4732;
-}
-.riddleChallenge b { color: #7A3627; }
-.locked {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  align-items: flex-start;
-  margin-top: auto;
-  padding-top: 6px;
-}
+.riddleVerse { white-space: pre-line; }
+.riddleHint { margin: 0; font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+/* Clues arrive as chips in the app, not as stamps. */
+.locked { display: flex; flex-direction: column; gap: 9px; }
 .clueStamp {
-  position: relative;
-  display: grid;
-  flex: 0 0 calc((100% - 24px) / 3);
-  width: calc((100% - 24px) / 3);
-  max-width: calc((100% - 24px) / 3);
-  min-width: 0;
-  gap: 5px;
-  min-height: 118px;
-  padding: 13px 12px 12px;
-  color: #573723;
-  background:
-    linear-gradient(135deg, rgba(255, 246, 219, .96), rgba(228, 196, 143, .94)),
-    radial-gradient(circle at 22% 16%, rgba(255, 255, 255, .55), transparent 28%);
-  border: 2px solid rgba(126, 76, 43, .68);
-  border-radius: 14px;
-  box-shadow: 0 12px 24px rgba(66, 43, 22, .14), inset 0 0 0 1px rgba(255, 250, 231, .55);
-  clip-path: polygon(0 8px, 8px 8px, 8px 0, calc(100% - 8px) 0, calc(100% - 8px) 8px, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 8px calc(100% - 8px), 0 calc(100% - 8px));
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  max-width: 100%;
+  padding: 9px 14px;
+  border-radius: 16px;
+  border: 1px solid;
+  border-color: inherit;
+  background: rgba(255, 255, 255, .72);
+  color: var(--ink-2);
+  font-size: 13px;
+  line-height: 1.45;
+  animation: stampIn .22s ease-out;
 }
-.clueStamp:nth-child(2) { transform: rotate(1.5deg); }
-.clueStamp:nth-child(3) { transform: rotate(-1deg); }
-.clueStamp::before {
-  content: "";
+.clueStampNo { flex: none; font-weight: 600; color: var(--ink); }
+.clueStampCopy { min-width: 0; }
+.riddleNotch {
   position: absolute;
-  inset: 8px;
-  border: 1px dashed rgba(122, 69, 38, .5);
-  border-radius: 10px;
-  pointer-events: none;
-}
-.clueStamp::after {
-  content: "";
-  position: absolute;
-  right: 14px;
-  top: 12px;
-  width: 54px;
-  height: 54px;
-  border: 2px solid rgba(47, 82, 105, .34);
+  top: -9px;
+  right: -9px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
-  opacity: .8;
-  pointer-events: none;
+  background: #fff;
+  border: 1px solid;
+  border-color: inherit;
 }
-.clueStampNo {
-  position: relative;
-  z-index: 1;
-  color: #9C3342;
-  font-size: 9.8px;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-}
-.clueStampCopy {
-  position: relative;
-  z-index: 1;
-  font-size: 11.5px;
-  line-height: 1.28;
-  font-weight: 650;
-}
+@keyframes stampIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+/* The finish postcard, exactly as the hunt prints it. */
+.pcard { width: 100%; background: #F3F1E9; border-radius: 22px; padding: 12px; box-shadow: 0 10px 30px rgba(20, 22, 26, .1); }
+.pcardInner { position: relative; background: #FAF9F4; border: 1px solid #E4E2D8; border-radius: 18px; padding: 18px 18px 20px 54px; }
+.pcardSpine { position: absolute; left: 38px; top: 16px; bottom: 16px; border-left: 1px dashed #DFDDD2; }
+.pcardVert { position: absolute; left: 10px; bottom: 22px; font-size: 9.5px; letter-spacing: .3em; color: var(--ink-5);
+  writing-mode: vertical-rl; transform: rotate(180deg); }
+.pcardTop { display: flex; align-items: baseline; gap: 10px; font-size: 10px; letter-spacing: .24em;
+  text-transform: uppercase; color: var(--ink-4); }
+.pcardSerial { margin-left: auto; letter-spacing: .1em; }
+.pcardTitle { margin: 10px 0 14px; font-size: 19px; font-weight: 600; letter-spacing: -.03em; line-height: 1.24; color: var(--ink); }
+.pcardSlots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px; }
+.pcardSlot { position: relative; margin: 0; aspect-ratio: 3 / 4; border-radius: 8px; overflow: hidden; background: #EFEDE5;
+  border: 1.5px dashed #DDDACD; display: grid; place-items: center; }
+.pcardSlotFilled { border: 0; box-shadow: 0 4px 12px rgba(20, 22, 26, .16); animation: stampIn .24s ease-out; }
+.pcardSlot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcardSlotN { font-size: 13px; color: #C9CCD3; }
+.pcardFound { position: absolute; left: 50%; bottom: 7px; transform: translateX(-50%); padding: 3px 9px; border-radius: 999px;
+  background: rgba(255, 255, 255, .96); border: 1.2px solid var(--blue); color: var(--blue); font-size: 8.5px; letter-spacing: .1em; }
+.pcardFoot { margin: 12px 0 0; font-size: 11.5px; line-height: 1.45; color: var(--ink-3); }
 .huntSteps {
   display: grid;
   gap: 9px;
@@ -725,181 +694,21 @@
 .btnHuntGhost:hover { border-color: #D99CB6; color: var(--ink); background: #fff; }
 .huntNote { display: none; }
 
+/* The postcard is a physical object, not a banner. Held at roughly the width it
+   has in the hunt (~360px of card inside a phone screen) so the photo slots come
+   out the same size players see; stretched to 680px it read as a wide, squat
+   placeholder rather than the card they get. The button and share card below
+   follow the same column so the stack stays aligned. */
 .huntSide {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  width: min(100%, 680px);
-  margin: 0;
+  width: min(100%, 408px);
+  margin: 0 auto;
   z-index: 1;
 }
-.huntMemento {
-  position: relative;
-  margin: 0;
-  border-radius: 20px;
-  flex: 0 0 auto;
-  min-height: clamp(190px, 15vw, 220px);
-  background:
-    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, .72) 0 9%, transparent 10%),
-    linear-gradient(158deg, #F4F1E7 0%, #ECE8DA 100%);
-  border: 1px solid #DDE2D5;
-  padding: clamp(9px, 1.2vw, 13px);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  overflow: hidden;
-  box-shadow: 0 12px 30px -22px rgba(20, 24, 26, .34);
-  transform: rotate(-1.4deg) translateX(clamp(0px, 1vw, 10px));
-  transform-origin: center;
-}
-.huntMemento::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  opacity: .16;
-  background-image: radial-gradient(rgba(92, 99, 80, .18) .7px, transparent .7px);
-  background-size: 7px 7px;
-  mix-blend-mode: multiply;
-}
-.miniPunch {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  min-height: 100%;
-  background: rgba(255, 255, 255, .34);
-  border: 1px solid rgba(92, 99, 80, .18);
-  border-radius: 16px;
-  overflow: hidden;
-  transform: rotate(1.4deg);
-}
-.miniStub {
-  border-right: 1.5px dashed #DDE2D5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  padding: 9px 0;
-  color: #5C6350;
-}
-.miniWalk {
-  width: 19px;
-  height: 19px;
-  border: 1.3px solid #5C6350;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-size: 10px;
-  line-height: 1;
-}
-.miniStubText {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 8px;
-  letter-spacing: .2em;
-}
-.miniPunchBody { padding: clamp(10px, 1.2vw, 13px); }
-.miniPunchTop { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 6px; }
-.mementoKicker,
-.mementoCaptionK {
-  display: block;
-  font-size: 9px;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: #5C6350;
-}
-.miniCode { font-size: 9px; color: var(--ink-3); letter-spacing: .06em; white-space: nowrap; }
-.miniPunch strong {
-  display: block;
-  font-size: clamp(15px, 1.35vw, 18px);
-  line-height: 1.05;
-  letter-spacing: -.04em;
-  font-weight: 500;
-  max-width: 18ch;
-}
-.miniPunch p {
-  margin: 8px 0 0;
-  color: var(--ink-3);
-  font-size: 12px;
-  line-height: 1.35;
-  max-width: 34ch;
-}
-.mementoGrid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 7px;
-  margin-top: 10px;
-}
-.mementoGrid span {
-  position: relative;
-  overflow: hidden;
-  aspect-ratio: 6 / 5;
-  border-radius: 7px;
-  background: rgba(255, 255, 255, .5);
-  border: 1.4px dashed #DDE2D5;
-  box-shadow: 0 3px 7px rgba(20, 24, 26, .08);
-  transform: rotate(var(--mini-rot, -2deg));
-  display: grid;
-  place-items: center;
-}
-.mementoGrid span i {
-  font-style: normal;
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
-  color: rgba(69, 74, 70, .38);
-  letter-spacing: .08em;
-}
-.mementoGrid img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  object-fit: cover;
-}
-.stampFilled {
-  border-style: solid !important;
-  border-color: rgba(20, 24, 26, .18) !important;
-  background: #fff !important;
-  animation: stampIn .24s ease-out;
-}
-.stampFilled::after {
-  content: "FOUND";
-  position: absolute;
-  left: 50%;
-  bottom: 7px;
-  transform: translateX(-50%) rotate(-8deg);
-  border: 1.5px solid rgba(11, 71, 232, .72);
-  border-radius: 999px;
-  color: rgba(11, 71, 232, .82);
-  background: rgba(255, 255, 255, .72);
-  padding: 2px 5px;
-  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 7px;
-  letter-spacing: .08em;
-}
-@keyframes stampIn {
-  from { opacity: .35; transform: rotate(var(--mini-rot, -2deg)) scale(.92); }
-  to { opacity: 1; transform: rotate(var(--mini-rot, -2deg)) scale(1); }
-}
-.mementoGrid span:nth-child(1) { --mini-rot: -4deg; }
-.mementoGrid span:nth-child(2) { --mini-rot: 3deg; }
-.mementoGrid span:nth-child(3) { --mini-rot: -3.5deg; }
-.mementoGrid span:nth-child(4) { --mini-rot: 4deg; }
-.mementoCaption {
-  position: relative;
-  z-index: 1;
-  color: var(--ink-2);
-  background: rgba(255, 255, 255, .5);
-  border: 1px solid rgba(221, 226, 213, .9);
-  border-radius: 16px;
-  padding: 14px;
-  backdrop-filter: blur(10px);
-}
-.mementoCaptionK { margin-bottom: 5px; }
-.mementoCaption span:last-child { display: block; font-size: 14.5px; font-weight: 500; letter-spacing: -.025em; line-height: 1.35; }
-.locked { display: flex; flex-direction: row; flex-wrap: wrap; gap: 12px; }
+/* The one survivor of the old memento card: the share card still uses this kicker. */
+.mementoKicker { display: block; font-size: 9px; letter-spacing: .13em; text-transform: uppercase; color: #5C6350; }
 .callout {
   border: 1px solid #F0D2DE;
   border-radius: 12px;
@@ -910,12 +719,6 @@
   line-height: 1.45;
 }
 .callout b { color: var(--pink-ink); margin-right: 5px; }
-.huntMementoDone {
-  background:
-    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, .78) 0 9%, transparent 10%),
-    linear-gradient(150deg, #F4F1E7 0%, #FFF5D6 54%, #ECE8DA 100%);
-}
-.huntMementoDone .miniPunch { transform: rotate(-1.2deg); box-shadow: 0 16px 36px -26px rgba(20, 24, 26, .55); }
 .downloadPostcard {
   width: 100%;
   justify-content: center;
@@ -1196,15 +999,171 @@
 .footNote { margin: 0; flex-basis: 100%; font-size: 12px; color: var(--ink-5); line-height: 1.55; }
 
 @media (max-width: 620px) {
-  .riddleCard {
-    min-height: 520px;
-    padding: 74px 44px 70px;
-    background-size: 115% 100%;
-  }
-  .riddleText { font-size: clamp(17px, 5.2vw, 21px); max-width: 27ch; }
-  .locked { gap: 9px; }
-  .clueStamp { width: 100%; min-height: 108px; padding: 16px; }
+  .riddleCardBody { padding: 15px 15px 17px; }
+  .riddleText { font-size: clamp(17px, 5.2vw, 20px); }
+  .pcardInner { padding: 16px 14px 18px 46px; }
+  .pcardSpine { left: 32px; }
+  .pcardSlots { gap: 6px; }
 }
 
-/* Riddles arrive as authored verse — keep the line breaks the writer put in. */
-.riddleVerse { white-space: pre-line; }
+/* ---------------- proof strip ----------------
+   Sits directly under the hero CTA. Every figure here is counted from the
+   shipped dataset (public/data/stroll-data.json) rather than written by hand —
+   if the data shrinks, the claim has to shrink with it. */
+.proofStrip {
+  max-width: 1120px;
+  margin: clamp(28px, 4vw, 48px) auto 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  background: var(--line-3);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  overflow: hidden;
+}
+.proofCell {
+  background: #fff;
+  padding: 18px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+}
+.proofN {
+  font-size: clamp(22px, 2.6vw, 30px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.proofLabel { font-size: 12px; color: var(--ink-3); line-height: 1.4; }
+@media (max-width: 720px) { .proofStrip { grid-template-columns: repeat(2, 1fr); } }
+
+/* ---------------- how it works ----------------
+   Four steps, numbered, with the practical facts underneath — the questions
+   people ask before they commit an afternoon (how long, how far, what it costs,
+   what they need to install). */
+/* The only tinted band before the closing one. `.section` sets padding on all four
+   sides via its shorthand, so the bottom is re-stated here and the top is re-stated
+   at higher specificity — otherwise the paper would sit flush against the copy. */
+.howSection { background: var(--paper); margin-top: clamp(44px, 6vw, 96px); padding-bottom: clamp(44px, 5.5vw, 84px); }
+.howSection.section { padding-top: clamp(44px, 5.5vw, 84px); }
+.howGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.howCard {
+  position: relative;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.howNum {
+  width: 30px;
+  height: 30px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: var(--ink);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.howCard:nth-child(2) .howNum { background: var(--blue); }
+.howCard:nth-child(3) .howNum { background: var(--pink-ink-2); }
+.howCard:nth-child(4) .howNum { background: var(--lime); color: var(--ink); }
+.howTitle { font-size: 16.5px; font-weight: 600; letter-spacing: -.025em; }
+.howCopy { margin: 0; font-size: 14px; line-height: 1.58; color: var(--ink-3); }
+.howCard .howCopy b { font-weight: 600; color: var(--ink-2); }
+
+.factRow {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+}
+.factCell {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 15px 16px;
+  border: 1px solid var(--line-2);
+  border-radius: 14px;
+  background: #fff;
+}
+.factIcon { flex: none; margin-top: 1px; color: var(--ink-4); }
+.factK { display: block; font-size: 13.5px; font-weight: 600; letter-spacing: -.015em; }
+.factV { display: block; font-size: 12.5px; color: var(--ink-3); line-height: 1.45; }
+
+/* ---------------- occasions ---------------- */
+.occGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(228px, 1fr)); gap: 12px; }
+.occCard {
+  --occ: var(--line-2);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: #fff;
+  text-align: left;
+  transition: border-color .16s, transform .16s, box-shadow .16s;
+}
+.occCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: var(--occ);
+}
+.occCard:hover { border-color: color-mix(in srgb, var(--occ) 40%, var(--line)); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(20, 22, 26, .06); }
+.occWho { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-4); }
+.occTitle { font-size: 17px; font-weight: 600; letter-spacing: -.025em; }
+.occCopy { margin: 0; font-size: 14px; line-height: 1.55; color: var(--ink-3); }
+.occGo { margin-top: auto; padding-top: 10px; display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--blue); }
+
+/* ---------------- faq ---------------- */
+.faqGrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 860px) { .faqGrid { grid-template-columns: 1fr; } }
+.faqItem {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  padding: 0 18px;
+  transition: border-color .16s;
+}
+.faqItem[open] { border-color: var(--line-2); background: #FCFCFD; }
+.faqItem:hover { border-color: #D5D8DE; }
+.faqQ {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 0;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -.015em;
+  list-style: none;
+}
+.faqQ::-webkit-details-marker { display: none; }
+.faqQ span { flex: none; width: 22px; height: 22px; border-radius: 999px; display: grid; place-items: center; background: var(--paper); color: var(--ink-3); transition: transform .18s, background .18s; }
+.faqItem[open] .faqQ span { transform: rotate(45deg); background: var(--ink); color: #fff; }
+.faqA { margin: 0; padding: 0 0 18px; font-size: 14px; line-height: 1.62; color: var(--ink-3); max-width: 60ch; }
+.faqA a { color: var(--blue); text-decoration: underline; text-underline-offset: 2px; }
+
+.faqFoot {
+  margin-top: 14px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  font-size: 13.5px;
+  color: var(--ink-3);
+}
+.faqFoot a { color: var(--blue); font-weight: 500; }

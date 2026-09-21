@@ -53,11 +53,12 @@ function durationLabel(minutes: number) {
 }
 
 export default function HuntOnboarding({
-  citySlug, hunts, initialType, heroPhoto,
+  citySlug, hunts, initialType, initialTheme, heroPhoto,
 }: {
   citySlug: string;
   hunts: OnboardingHunt[];
   initialType: string | null;
+  initialTheme: string | null;
   heroPhoto?: string | null;
 }) {
   const router = useRouter();
@@ -67,7 +68,8 @@ export default function HuntOnboarding({
   const [saved, setSaved] = useState(false);
   const [pickedDot, setPickedDot] = useState(0);
 
-  const [theme, setTheme] = useState<string | null>(null);
+  /* Pre-picked when the link carried a mood; the step still shows so it can be changed. */
+  const [theme, setTheme] = useState<string | null>(initialTheme);
   const [partyType, setPartyType] = useState<"solo" | "team" | "group" | null>(null);
   const [partySize, setPartySize] = useState(2);
   const [teamCount, setTeamCount] = useState(3);

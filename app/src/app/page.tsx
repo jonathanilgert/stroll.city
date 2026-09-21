@@ -63,6 +63,14 @@ const MOOD_LABEL = Object.fromEntries(MOODS.map((m) => [m.id, m.label])) as Reco
 /* The punch dots keep one tint per stop; the front-page postcard marks use
    the four numbered proof-photo examples Jonathan supplied. */
 const STOP_TINTS = ["#0B47E8", "#F9BFD0", "#DCF23C", "#FBE08A"];
+/* Copied from [city]/hunt/[session]/HuntGame.tsx so the demo card tints exactly
+   like the real stop it is standing in for. */
+const HUNT_TINTS = [
+  { bg: "#E9EFFF", border: "#CBD9FF", ink: "#0B47E8" },
+  { bg: "#FDEDF3", border: "#F7DBE5", ink: "#A3376A" },
+  { bg: "#EDF5E9", border: "#D8E8D0", ink: "#3D6B2A" },
+  { bg: "#FDF6E4", border: "#F5E7C0", ink: "#8A6410" },
+];
 const POSTCARD_STAMPS = [
   { src: "/brand/hunt-postcard/02-ironwood-stage-and-grill.jpg", alt: "Ironwood Stage and Grill postcard photo", static: true },
   { src: "/brand/hunt-postcard/03-kent-of-inglewood.jpeg", alt: "Kent of Inglewood postcard photo", static: true },
@@ -127,7 +135,7 @@ const PLANS = [
     hot: false,
     feats: ["4 stops, always", "No account, no card", "Postcard finish"],
     cta: "Start now",
-    href: "/calgary/hunt?type=friendly",
+    href: "/calgary/hunt/start?type=friendly",
   },
   {
     id: "full",
@@ -139,7 +147,7 @@ const PLANS = [
     hot: true,
     feats: ["8 stops", "Something waiting at the last one", "Postcard finish"],
     cta: "Start a hunt",
-    href: "/calgary/hunt?type=full",
+    href: "/calgary/hunt/start?type=full",
   },
   {
     id: "loop",
@@ -154,6 +162,101 @@ const PLANS = [
     href: "/calgary/hunt/race/new",
   },
 ];
+
+/* The four steps of a real hunt, in the order they happen. Written from the
+   flow in /[city]/hunt — onboarding, riddle, photo gate, postcard — so the page
+   cannot drift away from what the app does. */
+const HOW_STEPS = [
+  {
+    title: "Pick your walk",
+    copy: "Solo, one team or a big group split into teams. Choose a mood — date night, shop crawl, eat your way down — and we pull the stops that fit it.",
+  },
+  {
+    title: "Read the riddle",
+    copy: "Each stop is a verse about a real Inglewood doorway. Stuck? Open a clue. The third clue names the shop outright, so nobody ends up stranded on the sidewalk.",
+  },
+  {
+    title: "Find it, snap it",
+    copy: "Walk over, type the answer, then take a photo at the door. The photo is the proof — a stop is not done until both are in.",
+  },
+  {
+    title: "Finish with a postcard",
+    copy: "Your photos land on one Inglewood postcard, postmarked and numbered. Save it, send it, or post it to enter the monthly basket draw.",
+  },
+];
+
+const HUNT_FACTS = [
+  { k: "60–90 minutes", v: "Four stops in about an hour, eight in an afternoon.", icon: "clock" },
+  { k: "About 2 km, flat", v: "One walkable loop along 9th Avenue SE. Stroller and wheelchair friendly sidewalks.", icon: "route" },
+  { k: "Nothing to install", v: "It runs in the browser on any phone. No account, no download.", icon: "phone" },
+  { k: "Go at your own pace", v: "Stop for a coffee mid-hunt. Your punch card waits — close the tab and come back to the same link.", icon: "pause" },
+];
+
+/* Occasion → the hunt theme it maps to in hunt-themes.ts, so a click lands on a
+   pre-picked mood rather than the generic start screen. */
+const OCCASIONS = [
+  { who: "Two of you", title: "Date night", copy: "Wine bars, small plates and a gallery to argue about on the way home.", theme: "date-night", tone: "var(--pink-ink-2)" },
+  { who: "Friends in town", title: "Showing someone Calgary", copy: "Better than a restaurant list. They meet the street instead of reading about it.", theme: "with-friends", tone: "var(--blue)" },
+  { who: "Weekend, kids welcome", title: "Family afternoon", copy: "Shops, bakeries and makers only — the age-restricted doors are left out.", theme: "shop-crawl", tone: "var(--lime-ink)" },
+  { who: "Hungry", title: "Eat your way down", copy: "Bakeries, counters and coffee, roughly in that order. Bring an appetite.", theme: "eat-drink", tone: "var(--amber-ink)" },
+  { who: "8 to 60 people", title: "Team offsite", copy: "Split into teams, rotated starts so nobody queues, one live leaderboard.", theme: "classic", tone: "var(--ink)", href: "/events" },
+  { who: "Birthdays, stags, hens", title: "The group thing", copy: "Name every team, each gets its own punch card, all of them finish on one postcard.", theme: "with-friends", tone: "var(--pink-ink)", href: "/events" },
+];
+
+const FAQS = [
+  {
+    q: "Do I need to download an app?",
+    a: "No. The whole hunt runs in your phone's browser. There is no account to make and nothing to install — open the link and start walking.",
+  },
+  {
+    q: "How long does it take?",
+    a: "The free Friendly Mode is four stops, about 45–60 minutes at a stroll. The Full Hunt is eight stops and usually fills an afternoon. There is no timer forcing you along.",
+  },
+  {
+    q: "What if we cannot solve a riddle?",
+    a: "Every stop has three clues you can open whenever you like. The third one names the place outright, so you can always move on. Using clues does not lock you out of anything.",
+  },
+  {
+    q: "Is it really free?",
+    a: "Browsing the map is always free, and so is Friendly Mode. Your first Full Hunt is on us too. After that it is $20 a team — not per person.",
+  },
+  {
+    q: "How does it work for a big group?",
+    a: "Pick the large-group option, name each team, and every team gets its own link and punch card. Loop Race rotates where each team starts so twelve people are not standing at the same door.",
+  },
+  {
+    q: "Do I have to give you my location?",
+    a: "It helps — the map shows where you are on the street — but it is optional. You can play the whole hunt by reading the riddles and looking around. Answers are typed, not GPS-checked.",
+  },
+  {
+    q: "What happens to my photos?",
+    a: "They go on your postcard. We do not post anything for you and we do not sell them. Sharing on Instagram is your call, and only matters if you want to enter the basket draw.",
+  },
+  {
+    q: "Where does the map data come from?",
+    a: "Building footprints, streets and business licences come from City of Calgary open data, with the basemap from OpenStreetMap. The riddles are written by us, door by door.",
+  },
+  {
+    q: "What if it rains, or a shop is closed?",
+    a: "The stops are doorways, not appointments — you can photograph a closed shopfront just fine. Your punch card keeps its place if you want to finish another day.",
+  },
+  {
+    q: "Which neighbourhoods can I play?",
+    a: "Inglewood is live now, along 9th Avenue SE. More of Calgary is being drawn — one street at a time, properly, rather than all at once badly.",
+  },
+];
+
+function FactIcon({ name }: { name: string }) {
+  const common = { fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+  return (
+    <svg width="17" height="17" viewBox="0 0 20 20" aria-hidden className={styles.factIcon}>
+      {name === "clock" && <><circle cx="10" cy="10" r="7" {...common} /><path d="M10 5.8V10l2.8 1.8" {...common} /></>}
+      {name === "route" && <><circle cx="5.4" cy="5.4" r="2.2" {...common} /><circle cx="14.6" cy="14.6" r="2.2" {...common} /><path d="M7.6 5.4h4.2a2.8 2.8 0 0 1 0 5.6H8.2a2.8 2.8 0 0 0 0 5.6h.3" {...common} /></>}
+      {name === "phone" && <><rect x="6" y="2.6" width="8" height="14.8" rx="2" {...common} /><path d="M9 4.8h2" {...common} /></>}
+      {name === "pause" && <><circle cx="10" cy="10" r="7" {...common} /><path d="M8.4 7.6v4.8M11.6 7.6v4.8" {...common} /></>}
+    </svg>
+  );
+}
 
 function Arrow({ size = 14 }: { size?: number }) {
   return (
@@ -232,6 +335,7 @@ export default function LandingPage() {
   const huntDone = homepageRiddles.length > 0 && stop >= homepageRiddles.length;
   const currentStop = homepageRiddles[Math.min(stop, Math.max(homepageRiddles.length - 1, 0))] ?? null;
   const clueLadder = cluesForStop(currentStop);
+  const tint = HUNT_TINTS[stop % HUNT_TINTS.length];
 
   useEffect(() => {
     if (!showConfetti) return;
@@ -427,9 +531,10 @@ export default function LandingPage() {
           stroll.city
         </a>
         <span className={styles.navLinks}>
-          <a className={styles.navLink} href="#value">Why stroll</a>
+          <a className={styles.navLink} href="#how">How it works</a>
           <a className={styles.navLink} href="#hunt">The hunt</a>
           <a className={styles.navLink} href="#pricing">Pricing</a>
+          <a className={styles.navLink} href="#faq">FAQ</a>
         </span>
         <span className={styles.navRight}>
           <Link className={`${styles.navLink} ${styles.navGhost}`} href="/business">For businesses</Link>
@@ -450,6 +555,26 @@ export default function LandingPage() {
           <div className={styles.heroCta} data-rise>
             <a className={`${styles.btn} ${styles.btnBlue}`} href="#hunt">Start a riddle hunt<Arrow /></a>
             <Link className={`${styles.btn} ${styles.btnOutline}`} href="/calgary">Explore the map</Link>
+          </div>
+
+          {/* Counted from the shipped dataset, not rounded up for effect. */}
+          <div className={styles.proofStrip} data-rise>
+            <div className={styles.proofCell}>
+              <b className={styles.proofN}>162</b>
+              <span className={styles.proofLabel}>doors drawn on their real buildings</span>
+            </div>
+            <div className={styles.proofCell}>
+              <b className={styles.proofN}>112</b>
+              <span className={styles.proofLabel}>riddles written, one per doorway</span>
+            </div>
+            <div className={styles.proofCell}>
+              <b className={styles.proofN}>6</b>
+              <span className={styles.proofLabel}>moods, from date night to shop crawl</span>
+            </div>
+            <div className={styles.proofCell}>
+              <b className={styles.proofN}>$0</b>
+              <span className={styles.proofLabel}>to browse the map and play your first hunt</span>
+            </div>
           </div>
         </div>
 
@@ -554,6 +679,42 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* How it works — the questions people ask before committing an afternoon,
+          answered before they reach the demo rather than after it. */}
+      <section className={`${styles.section} ${styles.howSection}`} id="how">
+        <div className={styles.sectionIn}>
+          <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
+            <span className={`${styles.eyebrow} ${styles.mono}`}>How it works</span>
+            <h2 className={styles.h2}>A walk with something to solve.</h2>
+            <p className={styles.lead}>
+              stroll.city is a map of one shopping street and a riddle hunt that sends you down it. No tour guide, no timer, no route telling you where to turn — just four or eight doorways to work out, and a postcard at the end with your own photos on it.
+            </p>
+          </div>
+
+          <div className={styles.howGrid} data-rise>
+            {HOW_STEPS.map((step, i) => (
+              <div className={styles.howCard} key={step.title}>
+                <span className={styles.howNum}>{i + 1}</span>
+                <strong className={styles.howTitle}>{step.title}</strong>
+                <p className={styles.howCopy}>{step.copy}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.factRow} data-rise>
+            {HUNT_FACTS.map((fact) => (
+              <div className={styles.factCell} key={fact.k}>
+                <FactIcon name={fact.icon} />
+                <span>
+                  <b className={styles.factK}>{fact.k}</b>
+                  <span className={styles.factV}>{fact.v}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section className={`${styles.section} ${styles.huntSection}`} id="hunt">
         <div className={`${styles.sectionIn} ${styles.huntSectionIn}`}>
           <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
@@ -576,27 +737,61 @@ export default function LandingPage() {
                 </span>
               </div>
 
-              <div className={styles.riddleCard}>
-                <span className={styles.riddleTag}>
-                  {huntDone ? "Postcard complete" : `Stop ${stop + 1} · ${currentStop?.difficulty ?? "easy"}`}
-                </span>
-                <p className={`${styles.riddleText} ${styles.riddleVerse}`}>
-                  {huntDone
-                    ? "Four neighbourhood moments, one finished Inglewood postcard."
-                    : currentStop?.riddle ?? "Loading the first riddle…"}
-                </p>
-                {huntDone ? (
-                  <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
-                ) : (
-                  <div className={styles.locked} aria-live="polite">
-                    {clueLadder.slice(0, cluesOpen).map((clue, index) => (
-                      <div className={styles.clueStamp} key={`${currentStop.id}-clue-${index}`}>
-                        <span className={`${styles.clueStampNo} ${styles.mono}`}>Clue {index + 1}</span>
-                        <span className={styles.clueStampCopy}>{clue}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+              {/* Lifted from the game screen: same tinted card, same dashed head,
+                  same notch, same clue chips. The demo should look like the thing
+                  it is demonstrating. */}
+              <div className={styles.riddleCard} style={{ background: tint.bg, borderColor: tint.border }}>
+                <div className={styles.riddleCardHead} style={{ borderColor: tint.border }}>
+                  <button
+                    type="button"
+                    className={styles.riddleNav}
+                    style={{ borderColor: tint.border }}
+                    onClick={() => { setStop((n) => Math.max(HOMEPAGE_HUNT_START_INDEX, n - 1)); setCluesOpen(0); setAnswerText(""); setAnswerStatus("idle"); setPhotoStepDone(false); }}
+                    disabled={huntDone || stop <= HOMEPAGE_HUNT_START_INDEX}
+                    aria-label="Previous stop"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden><path d="M10 3.5 5.5 8 10 12.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                  <span className={`${styles.riddleKicker} ${styles.mono}`} style={{ color: tint.ink }}>
+                    {huntDone ? "Postcard complete" : `Stop ${stop + 1} · ${answerStatus === "correct" ? "Solved" : "Riddle"}`}
+                  </span>
+                  <button
+                    type="button"
+                    className={styles.riddleNav}
+                    style={{ borderColor: tint.border }}
+                    disabled
+                    aria-label="Next stop, locked until this one is solved"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden><path d="M6 3.5 10.5 8 6 12.5" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </button>
+                </div>
+
+                <div className={styles.riddleCardBody}>
+                  <p className={`${styles.riddleText} ${styles.riddleVerse}`}>
+                    {huntDone
+                      ? "Four neighbourhood moments, one finished Inglewood postcard."
+                      : currentStop?.riddle ?? "Loading the first riddle…"}
+                  </p>
+
+                  {huntDone ? (
+                    <p className={styles.riddleHint}>Nice. The postcard is ready to share — and sharing is what enters the monthly Inglewood Basket draw.</p>
+                  ) : (
+                    <div className={styles.locked} aria-live="polite">
+                      {clueLadder.slice(0, cluesOpen).map((clue, index) => (
+                        <span className={styles.clueStamp} style={{ borderColor: tint.border }} key={`${currentStop.id}-clue-${index}`}>
+                          <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden style={{ flex: "none", marginTop: 2, color: "var(--ink-3)" }}>
+                            <circle cx="8" cy="8" r="6.4" fill="none" stroke="currentColor" strokeWidth="1.4" />
+                            <path d="M8 7.2v4M8 4.9v.1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                          </svg>
+                          <span className={styles.clueStampCopy}>
+                            <b className={styles.clueStampNo}>Clue {index + 1}.</b> {clue}
+                          </span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <span className={styles.riddleNotch} style={{ borderColor: tint.border }} aria-hidden />
               </div>
 
               <div className={styles.huntSteps} aria-label="How this riddle stop works">
@@ -701,30 +896,47 @@ export default function LandingPage() {
             </div>
 
             <div className={styles.huntSide}>
-              <figure className={`${styles.huntMemento} ${huntDone ? styles.huntMementoDone : ""}`}>
-                <div className={styles.miniPunch}>
-                  <div className={styles.miniStub}>
-                    <span className={styles.miniWalk}>↟</span>
-                    <span className={`${styles.miniStubText} ${styles.mono}`}>INGLEWOOD</span>
+              {/* The finish postcard, drawn exactly as the hunt prints it at
+                  /[city]/hunt/[session]/postcard — mat, spine, vertical
+                  INGLEWOOD, serial, four 3:4 slots, FOUND pills. */}
+              <figure className={styles.pcard}>
+                <div className={styles.pcardInner}>
+                  <span className={styles.pcardSpine} aria-hidden />
+                  <span className={`${styles.pcardVert} ${styles.mono}`}>INGLEWOOD</span>
+                  <div className={`${styles.pcardTop} ${styles.mono}`}>
+                    <span>{huntDone ? "Postcard complete" : "Postcard in progress"}</span>
+                    <span className={styles.pcardSerial}>No. 004</span>
                   </div>
-                  <div className={styles.miniPunchBody}>
-                    <div className={styles.miniPunchTop}>
-                      <span className={`${styles.mementoKicker} ${styles.mono}`}>{huntDone ? "Postcard ready" : "Postcard in progress"}</span>
-                      <span className={`${styles.miniCode} ${styles.mono}`}>No. 004</span>
-                    </div>
-                    <strong>{huntDone ? "Your Inglewood postcard is complete." : stop < 3 ? "Solve this stop and the third postcard mark fills in." : "One last stop finishes it."}</strong>
-                    <div className={styles.mementoGrid} aria-label="Postcard photos earned so far">
-                      {POSTCARD_STAMPS.map((mark, i) => {
-                        const found = i < 2 || i < stop;
-                        return (
-                          <span key={mark.src} className={found ? styles.stampFilled : undefined}>
-                            {found ? <img src={mark.src} alt={mark.alt} /> : <i>{i + 1}</i>}
-                          </span>
-                        );
-                      })}
-                    </div>
-                    <p>{huntDone ? "Four photos from your stroll, postmarked Inglewood and ready to save or share." : stop < 3 ? "The next postcard photo slot fills in after this riddle is completed." : "The final postcard photo slot fills in after this riddle is completed."}</p>
+                  <h3 className={styles.pcardTitle}>
+                    {huntDone
+                      ? "You walked Friendly Mode in Inglewood."
+                      : stop < 3
+                        ? "Solve this stop and the third slot fills in."
+                        : "One last stop finishes it."}
+                  </h3>
+                  <div className={styles.pcardSlots} aria-label="Postcard photos earned so far">
+                    {POSTCARD_STAMPS.map((mark, i) => {
+                      const found = i < 2 || i < stop;
+                      return (
+                        <figure className={`${styles.pcardSlot} ${found ? styles.pcardSlotFilled : ""}`} key={mark.src}>
+                          {found ? (
+                            <>
+                              {/* eslint-disable-next-line @next/next/no-img-element -- static demo asset, same as the map app's rail logo */}
+                              <img src={mark.src} alt={mark.alt} />
+                              <figcaption className={`${styles.pcardFound} ${styles.mono}`}>FOUND</figcaption>
+                            </>
+                          ) : (
+                            <span className={styles.pcardSlotN}>{i + 1}</span>
+                          )}
+                        </figure>
+                      );
+                    })}
                   </div>
+                  <p className={styles.pcardFoot}>
+                    {huntDone
+                      ? "Ironwood Stage and Grill · Kent of Inglewood · Fair's Fair Books · Doughnut Party"
+                      : "Ironwood Stage and Grill · Kent of Inglewood"}
+                  </p>
                 </div>
               </figure>
 
@@ -761,6 +973,34 @@ export default function LandingPage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who it is for. Each card lands on the start screen with that mood already
+          picked, so the promise on the card is the hunt they get. */}
+      <section className={styles.section} id="occasions">
+        <div className={styles.sectionIn}>
+          <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
+            <span className={`${styles.eyebrow} ${styles.eyebrowLime} ${styles.mono}`}>Who it&apos;s for</span>
+            <h2 className={styles.h2}>Same street, six different afternoons.</h2>
+            <p className={styles.lead}>Pick the reason you&apos;re out and the stops change with it. Every card below starts a real hunt with that mood already chosen.</p>
+          </div>
+
+          <div className={styles.occGrid} data-rise>
+            {OCCASIONS.map((occasion) => (
+              <Link
+                className={styles.occCard}
+                key={occasion.title}
+                href={occasion.href ?? `/calgary/hunt/start?theme=${occasion.theme}`}
+                style={{ "--occ": occasion.tone } as CSSProperties}
+              >
+                <span className={`${styles.occWho} ${styles.mono}`}>{occasion.who}</span>
+                <strong className={styles.occTitle}>{occasion.title}</strong>
+                <p className={styles.occCopy}>{occasion.copy}</p>
+                <span className={styles.occGo}>{occasion.href ? "See group options" : "Start this hunt"}<Arrow size={12} /></span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -808,6 +1048,38 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* Straight answers, no JavaScript — <details> so the list still works if the
+          bundle never loads and so a browser find-in-page can reach the answers. */}
+      <section className={styles.section} id="faq">
+        <div className={styles.sectionIn}>
+          <div className={`${styles.head} ${styles.headNarrow}`} data-rise>
+            <span className={`${styles.eyebrow} ${styles.eyebrowMuted} ${styles.mono}`}>Straight answers</span>
+            <h2 className={styles.h2}>Before you head out.</h2>
+            <p className={styles.lead}>Everything people ask us on the sidewalk, answered plainly.</p>
+          </div>
+
+          <div className={styles.faqGrid} data-rise>
+            {FAQS.map((item) => (
+              <details className={styles.faqItem} key={item.q}>
+                <summary className={styles.faqQ}>
+                  {item.q}
+                  <span aria-hidden>
+                    <svg width="11" height="11" viewBox="0 0 16 16"><path d="M8 3v10M3 8h10" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" /></svg>
+                  </span>
+                </summary>
+                <p className={styles.faqA}>{item.a}</p>
+              </details>
+            ))}
+          </div>
+
+          <p className={styles.faqFoot} data-rise>
+            Still wondering something? <a href="mailto:hello@stroll.city">hello@stroll.city</a>
+            <Link href="/rules">Basket draw rules<Arrow size={12} /></Link>
+            <Link href="/business">Own a shop on the strip?<Arrow size={12} /></Link>
+          </p>
+        </div>
+      </section>
+
       <section className={styles.closeSection}>
         <div className={styles.closeBand} data-rise>
           <span className={styles.closeDeco} aria-hidden>
@@ -822,7 +1094,7 @@ export default function LandingPage() {
             <p className={styles.closeLead}>Open the Calgary map, pick a mood, or start the free hunt right now. No account, no app.</p>
             <div className={styles.closeActions}>
               <Link className={`${styles.btn} ${styles.btnLime}`} href="/calgary">Explore the map<Arrow /></Link>
-              <a className={`${styles.btn} ${styles.btnOnBlue}`} href="#hunt">Start a free hunt</a>
+              <Link className={`${styles.btn} ${styles.btnOnBlue}`} href="/calgary/hunt/start?type=friendly">Start a free hunt</Link>
             </div>
           </div>
         </div>
@@ -837,7 +1109,9 @@ export default function LandingPage() {
           </span>
           <span>Calgary · Inglewood first</span>
           <span className={styles.footLinks}>
+            <a href="#how">How it works</a>
             <a href="#hunt">The hunt</a>
+            <a href="#faq">FAQ</a>
             <Link href="/rules">Rules</Link>
             <Link href="/events">Events</Link>
             <Link href="/business">For businesses</Link>

@@ -3,6 +3,7 @@ import path from "node:path";
 import { notFound } from "next/navigation";
 import data from "../../../../../public/data/stroll-data.json";
 import { getCity } from "../../../cities";
+import { HUNT_THEMES } from "../../../hunt-themes";
 import HuntOnboarding, { type OnboardingHunt } from "./HuntOnboarding";
 
 export function generateStaticParams() {
@@ -35,10 +36,10 @@ export default async function HuntStartPage({
   params, searchParams,
 }: {
   params: Promise<{ city: string }>;
-  searchParams: Promise<{ type?: string }>;
+  searchParams: Promise<{ type?: string; theme?: string }>;
 }) {
   const { city: slug } = await params;
-  const { type } = await searchParams;
+  const { type, theme } = await searchParams;
   const city = getCity(slug);
   if (!city || slug !== "calgary") notFound();
 
@@ -59,5 +60,9 @@ export default async function HuntStartPage({
       stop_count: Array.isArray(hunt.stop_ids) ? hunt.stop_ids.length : 0,
     }));
 
-  return <HuntOnboarding citySlug={slug} hunts={hunts} initialType={type ?? null} heroPhoto={findHeroPhoto()} />;
+  /* A mood can arrive in the link (the landing page's occasion cards do this).
+     Validate it here — an unknown id should open the picker, not preselect junk. */
+  const initialTheme = HUNT_THEMES.some((item) => item.id === theme) ? theme! : null;
+
+  return <HuntOnboarding citySlug={slug} hunts={hunts} initialType={type ?? null} initialTheme={initialTheme} heroPhoto={findHeroPhoto()} />;
 }
